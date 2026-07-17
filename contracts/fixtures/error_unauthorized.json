@@ -1,0 +1,8 @@
+{
+  "error": {
+    "code": "UNAUTHORIZED",
+    "message": "Oturum doğrulanamadı.",
+    "request_id": "7aef4e30-d772-487e-bc2b-c93662f08623",
+    "details": null
+  }
+}

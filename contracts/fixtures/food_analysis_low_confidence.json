@@ -1,0 +1,20 @@
+{
+  "log_id": "7d64bffd-1804-49a8-a9ee-4d276a38132d",
+  "food_name": "dish",
+  "food_name_tr": "Yemek",
+  "confidence": 0.42,
+  "portion_grams": 100.0,
+  "calories_per_100g": 0.0,
+  "total_calories": 0.0,
+  "nutrients": {
+    "protein": 0.0,
+    "carbs": 0.0,
+    "fat": 0.0,
+    "fiber": 0.0
+  },
+  "meal_type": "atistirmalik",
+  "recognition_source": "google_vision",
+  "nutrition_source": "not_found",
+  "needs_confirmation": true,
+  "tts_text": "Yemek kesin olarak tanınamadı. Lütfen sonucu onaylayın."
+}

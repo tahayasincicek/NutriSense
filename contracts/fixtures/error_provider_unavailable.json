@@ -1,0 +1,8 @@
+{
+  "error": {
+    "code": "PROVIDER_UNAVAILABLE",
+    "message": "Görüntü analiz servisi şu an kullanılamıyor.",
+    "request_id": "aaef4e30-d772-487e-bc2b-c93662f08626",
+    "details": null
+  }
+}

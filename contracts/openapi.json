@@ -1,0 +1,1995 @@
+{
+  "components": {
+    "schemas": {
+      "AccountDeletionRequest": {
+        "properties": {
+          "confirmation": {
+            "const": "HESABIMI SIL",
+            "title": "Confirmation",
+            "type": "string"
+          },
+          "password": {
+            "title": "Password",
+            "type": "string"
+          }
+        },
+        "required": [
+          "password",
+          "confirmation"
+        ],
+        "title": "AccountDeletionRequest",
+        "type": "object"
+      },
+      "Body_analyze_food_api_v1_analyze_food_post": {
+        "properties": {
+          "image": {
+            "contentMediaType": "application/octet-stream",
+            "description": "JPEG, PNG veya WebP; en fazla 5 MB",
+            "title": "Image",
+            "type": "string"
+          },
+          "meal_type": {
+            "default": "atistirmalik",
+            "pattern": "^(kahvalti|ogle|aksam|atistirmalik)$",
+            "title": "Meal Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "image"
+        ],
+        "title": "Body_analyze_food_api_v1_analyze_food_post",
+        "type": "object"
+      },
+      "DailyLogResponse": {
+        "description": "Günlük besin özeti.",
+        "properties": {
+          "calorie_target": {
+            "title": "Calorie Target",
+            "type": "number"
+          },
+          "date": {
+            "format": "date",
+            "title": "Date",
+            "type": "string"
+          },
+          "foods": {
+            "items": {
+              "$ref": "#/components/schemas/FoodLogItem"
+            },
+            "title": "Foods",
+            "type": "array"
+          },
+          "meal_count": {
+            "title": "Meal Count",
+            "type": "integer"
+          },
+          "meals": {
+            "items": {
+              "$ref": "#/components/schemas/MealSummary"
+            },
+            "title": "Meals",
+            "type": "array"
+          },
+          "remaining_calories": {
+            "title": "Remaining Calories",
+            "type": "number"
+          },
+          "total_calories": {
+            "title": "Total Calories",
+            "type": "number"
+          },
+          "total_carbs": {
+            "title": "Total Carbs",
+            "type": "number"
+          },
+          "total_fat": {
+            "title": "Total Fat",
+            "type": "number"
+          },
+          "total_protein": {
+            "title": "Total Protein",
+            "type": "number"
+          }
+        },
+        "required": [
+          "date",
+          "total_calories",
+          "calorie_target",
+          "remaining_calories",
+          "total_protein",
+          "total_carbs",
+          "total_fat",
+          "meal_count",
+          "meals",
+          "foods"
+        ],
+        "title": "DailyLogResponse",
+        "type": "object"
+      },
+      "DietitianAssignmentRequest": {
+        "properties": {
+          "dietitian_email": {
+            "format": "email",
+            "title": "Dietitian Email",
+            "type": "string"
+          }
+        },
+        "required": [
+          "dietitian_email"
+        ],
+        "title": "DietitianAssignmentRequest",
+        "type": "object"
+      },
+      "DietitianAssignmentResponse": {
+        "properties": {
+          "assignment_id": {
+            "format": "uuid",
+            "title": "Assignment Id",
+            "type": "string"
+          },
+          "dietitian_id": {
+            "format": "uuid",
+            "title": "Dietitian Id",
+            "type": "string"
+          },
+          "dietitian_name": {
+            "title": "Dietitian Name",
+            "type": "string"
+          },
+          "email_verified": {
+            "title": "Email Verified",
+            "type": "boolean"
+          },
+          "phone_verified": {
+            "title": "Phone Verified",
+            "type": "boolean"
+          },
+          "status": {
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "assignment_id",
+          "status",
+          "dietitian_id",
+          "dietitian_name",
+          "email_verified",
+          "phone_verified"
+        ],
+        "title": "DietitianAssignmentResponse",
+        "type": "object"
+      },
+      "ErrorDetail": {
+        "properties": {
+          "code": {
+            "default": "UNKNOWN_ERROR",
+            "title": "Code",
+            "type": "string"
+          },
+          "details": {
+            "title": "Details"
+          },
+          "message": {
+            "title": "Message",
+            "type": "string"
+          },
+          "request_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Request Id"
+          }
+        },
+        "required": [
+          "message"
+        ],
+        "title": "ErrorDetail",
+        "type": "object"
+      },
+      "ErrorResponse": {
+        "description": "Tüm başarısız yanıtlar için kanonik, TTS'den bağımsız hata gövdesi.",
+        "properties": {
+          "error": {
+            "$ref": "#/components/schemas/ErrorDetail"
+          }
+        },
+        "required": [
+          "error"
+        ],
+        "title": "ErrorResponse",
+        "type": "object"
+      },
+      "FoodAnalysisResponse": {
+        "description": "Multipart POST /api/v1/analyze-food yanıt gövdesi.",
+        "example": {
+          "calories_per_100g": 52.0,
+          "confidence": 0.93,
+          "food_name": "elma",
+          "food_name_tr": "Elma",
+          "log_id": "550e8400-e29b-41d4-a716-446655440000",
+          "meal_type": "atistirmalik",
+          "needs_confirmation": false,
+          "nutrients": {
+            "carbs": 20.7,
+            "fat": 0.3,
+            "fiber": 3.6,
+            "protein": 0.4
+          },
+          "nutrition_source": "nutritionix",
+          "portion_grams": 150.0,
+          "recognition_source": "google_vision",
+          "total_calories": 78.0,
+          "tts_text": "Elma tanındı. 150 gram, 78 kalori."
+        },
+        "properties": {
+          "calories_per_100g": {
+            "minimum": 0.0,
+            "title": "Calories Per 100G",
+            "type": "number"
+          },
+          "confidence": {
+            "maximum": 1.0,
+            "minimum": 0.0,
+            "title": "Confidence",
+            "type": "number"
+          },
+          "food_name": {
+            "description": "Dil bağımsız kanonik besin anahtarı",
+            "title": "Food Name",
+            "type": "string"
+          },
+          "food_name_tr": {
+            "description": "Besin adı (Türkçe)",
+            "title": "Food Name Tr",
+            "type": "string"
+          },
+          "log_id": {
+            "description": "Kayıt UUID",
+            "format": "uuid",
+            "title": "Log Id",
+            "type": "string"
+          },
+          "meal_type": {
+            "title": "Meal Type",
+            "type": "string"
+          },
+          "needs_confirmation": {
+            "title": "Needs Confirmation",
+            "type": "boolean"
+          },
+          "nutrients": {
+            "$ref": "#/components/schemas/NutrientData"
+          },
+          "nutrition_source": {
+            "title": "Nutrition Source",
+            "type": "string"
+          },
+          "portion_grams": {
+            "minimum": 0.0,
+            "title": "Portion Grams",
+            "type": "number"
+          },
+          "recognition_source": {
+            "title": "Recognition Source",
+            "type": "string"
+          },
+          "total_calories": {
+            "minimum": 0.0,
+            "title": "Total Calories",
+            "type": "number"
+          },
+          "tts_text": {
+            "description": "TTS ile okunacak metin",
+            "title": "Tts Text",
+            "type": "string"
+          }
+        },
+        "required": [
+          "log_id",
+          "food_name",
+          "food_name_tr",
+          "confidence",
+          "portion_grams",
+          "calories_per_100g",
+          "total_calories",
+          "nutrients",
+          "meal_type",
+          "recognition_source",
+          "nutrition_source",
+          "needs_confirmation",
+          "tts_text"
+        ],
+        "title": "FoodAnalysisResponse",
+        "type": "object"
+      },
+      "FoodHistoryResponse": {
+        "description": "GET /api/v1/food-history/{user_id} yanıt gövdesi.",
+        "properties": {
+          "average_daily_calories": {
+            "title": "Average Daily Calories",
+            "type": "number"
+          },
+          "daily_logs": {
+            "items": {
+              "$ref": "#/components/schemas/DailyLogResponse"
+            },
+            "title": "Daily Logs",
+            "type": "array"
+          },
+          "from_date": {
+            "format": "date",
+            "title": "From Date",
+            "type": "string"
+          },
+          "to_date": {
+            "format": "date",
+            "title": "To Date",
+            "type": "string"
+          },
+          "total_calories": {
+            "title": "Total Calories",
+            "type": "number"
+          },
+          "total_days": {
+            "title": "Total Days",
+            "type": "integer"
+          },
+          "user_id": {
+            "format": "uuid",
+            "title": "User Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "user_id",
+          "from_date",
+          "to_date",
+          "total_days",
+          "average_daily_calories",
+          "total_calories",
+          "daily_logs"
+        ],
+        "title": "FoodHistoryResponse",
+        "type": "object"
+      },
+      "FoodLogItem": {
+        "description": "Tek besin kaydı.",
+        "properties": {
+          "calories": {
+            "title": "Calories",
+            "type": "number"
+          },
+          "confidence": {
+            "title": "Confidence",
+            "type": "number"
+          },
+          "food_name": {
+            "title": "Food Name",
+            "type": "string"
+          },
+          "food_name_tr": {
+            "title": "Food Name Tr",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "logged_at": {
+            "format": "date-time",
+            "title": "Logged At",
+            "type": "string"
+          },
+          "meal_type": {
+            "title": "Meal Type",
+            "type": "string"
+          },
+          "nutrients": {
+            "$ref": "#/components/schemas/NutrientData"
+          },
+          "portion_g": {
+            "title": "Portion G",
+            "type": "number"
+          }
+        },
+        "required": [
+          "id",
+          "food_name",
+          "food_name_tr",
+          "calories",
+          "portion_g",
+          "meal_type",
+          "confidence",
+          "nutrients",
+          "logged_at"
+        ],
+        "title": "FoodLogItem",
+        "type": "object"
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "title": "Detail",
+            "type": "array"
+          }
+        },
+        "title": "HTTPValidationError",
+        "type": "object"
+      },
+      "LogoutRequest": {
+        "description": "Mevcut refresh token ailesindeki aktif token'ı revoke eder.",
+        "properties": {
+          "refresh_token": {
+            "minLength": 20,
+            "title": "Refresh Token",
+            "type": "string"
+          }
+        },
+        "required": [
+          "refresh_token"
+        ],
+        "title": "LogoutRequest",
+        "type": "object"
+      },
+      "MealSummary": {
+        "description": "Öğün bazlı özet.",
+        "properties": {
+          "food_count": {
+            "title": "Food Count",
+            "type": "integer"
+          },
+          "meal_type": {
+            "title": "Meal Type",
+            "type": "string"
+          },
+          "meal_type_tr": {
+            "title": "Meal Type Tr",
+            "type": "string"
+          },
+          "total_calories": {
+            "title": "Total Calories",
+            "type": "number"
+          }
+        },
+        "required": [
+          "meal_type",
+          "meal_type_tr",
+          "total_calories",
+          "food_count"
+        ],
+        "title": "MealSummary",
+        "type": "object"
+      },
+      "NutrientData": {
+        "description": "Besin değerleri.",
+        "properties": {
+          "carbs": {
+            "default": 0.0,
+            "description": "Karbonhidrat (g)",
+            "minimum": 0.0,
+            "title": "Carbs",
+            "type": "number"
+          },
+          "fat": {
+            "default": 0.0,
+            "description": "Yağ (g)",
+            "minimum": 0.0,
+            "title": "Fat",
+            "type": "number"
+          },
+          "fiber": {
+            "default": 0.0,
+            "description": "Lif (g)",
+            "minimum": 0.0,
+            "title": "Fiber",
+            "type": "number"
+          },
+          "protein": {
+            "default": 0.0,
+            "description": "Protein (g)",
+            "minimum": 0.0,
+            "title": "Protein",
+            "type": "number"
+          }
+        },
+        "title": "NutrientData",
+        "type": "object"
+      },
+      "RefreshTokenRequest": {
+        "description": "Tek kullanımlık, rotation uygulanan refresh token isteği.",
+        "properties": {
+          "refresh_token": {
+            "minLength": 20,
+            "title": "Refresh Token",
+            "type": "string"
+          }
+        },
+        "required": [
+          "refresh_token"
+        ],
+        "title": "RefreshTokenRequest",
+        "type": "object"
+      },
+      "SendToDietitianRequest": {
+        "description": "POST /api/v1/send-to-dietitian istek gövdesi.",
+        "properties": {
+          "consent": {
+            "const": true,
+            "description": "Kullanıcının bu rapor gönderimine verdiği açık onay",
+            "title": "Consent",
+            "type": "boolean"
+          },
+          "from_date": {
+            "anyOf": [
+              {
+                "format": "date",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "From Date"
+          },
+          "message": {
+            "anyOf": [
+              {
+                "maxLength": 500,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Message"
+          },
+          "report_type": {
+            "default": "weekly",
+            "pattern": "^(daily|weekly|monthly)$",
+            "title": "Report Type",
+            "type": "string"
+          },
+          "to_date": {
+            "anyOf": [
+              {
+                "format": "date",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "To Date"
+          },
+          "user_id": {
+            "format": "uuid",
+            "title": "User Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "user_id",
+          "consent"
+        ],
+        "title": "SendToDietitianRequest",
+        "type": "object"
+      },
+      "SendToDietitianResponse": {
+        "description": "POST /api/v1/send-to-dietitian yanıt gövdesi.",
+        "properties": {
+          "dietitian_name": {
+            "title": "Dietitian Name",
+            "type": "string"
+          },
+          "message": {
+            "title": "Message",
+            "type": "string"
+          },
+          "report_id": {
+            "format": "uuid",
+            "title": "Report Id",
+            "type": "string"
+          },
+          "sent_via_email": {
+            "title": "Sent Via Email",
+            "type": "boolean"
+          },
+          "sent_via_sms": {
+            "title": "Sent Via Sms",
+            "type": "boolean"
+          },
+          "success": {
+            "title": "Success",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "success",
+          "report_id",
+          "sent_via_email",
+          "sent_via_sms",
+          "dietitian_name",
+          "message"
+        ],
+        "title": "SendToDietitianResponse",
+        "type": "object"
+      },
+      "SurveyAnswerSchema": {
+        "description": "Tek soru yanıtı",
+        "properties": {
+          "answer": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "integer"
+              },
+              {
+                "items": {},
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Answer"
+          },
+          "question_id": {
+            "title": "Question Id",
+            "type": "string"
+          },
+          "timestamp": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Timestamp"
+          }
+        },
+        "required": [
+          "question_id",
+          "answer"
+        ],
+        "title": "SurveyAnswerSchema",
+        "type": "object"
+      },
+      "SurveyResponseSchema": {
+        "description": "Yanıt",
+        "properties": {
+          "message": {
+            "title": "Message",
+            "type": "string"
+          },
+          "success": {
+            "title": "Success",
+            "type": "boolean"
+          },
+          "survey_id": {
+            "format": "uuid",
+            "title": "Survey Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "success",
+          "message",
+          "survey_id"
+        ],
+        "title": "SurveyResponseSchema",
+        "type": "object"
+      },
+      "SurveySubmissionSchema": {
+        "description": "Anket gönderimi",
+        "properties": {
+          "answers": {
+            "items": {
+              "$ref": "#/components/schemas/SurveyAnswerSchema"
+            },
+            "title": "Answers",
+            "type": "array"
+          },
+          "completion_seconds": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Completion Seconds"
+          },
+          "device_info": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Device Info"
+          },
+          "id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Id"
+          },
+          "participant_id": {
+            "format": "uuid",
+            "title": "Participant Id",
+            "type": "string"
+          },
+          "submitted_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Submitted At"
+          }
+        },
+        "required": [
+          "participant_id",
+          "answers"
+        ],
+        "title": "SurveySubmissionSchema",
+        "type": "object"
+      },
+      "TokenResponse": {
+        "description": "JWT token yanıtı.",
+        "properties": {
+          "access_token": {
+            "title": "Access Token",
+            "type": "string"
+          },
+          "expires_in": {
+            "title": "Expires In",
+            "type": "integer"
+          },
+          "full_name": {
+            "title": "Full Name",
+            "type": "string"
+          },
+          "refresh_expires_in": {
+            "title": "Refresh Expires In",
+            "type": "integer"
+          },
+          "refresh_token": {
+            "title": "Refresh Token",
+            "type": "string"
+          },
+          "token_type": {
+            "default": "bearer",
+            "title": "Token Type",
+            "type": "string"
+          },
+          "user_id": {
+            "format": "uuid",
+            "title": "User Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "access_token",
+          "refresh_token",
+          "expires_in",
+          "refresh_expires_in",
+          "user_id",
+          "full_name"
+        ],
+        "title": "TokenResponse",
+        "type": "object"
+      },
+      "UsabilityResponseSchema": {
+        "properties": {
+          "message": {
+            "title": "Message",
+            "type": "string"
+          },
+          "session_id": {
+            "format": "uuid",
+            "title": "Session Id",
+            "type": "string"
+          },
+          "success": {
+            "title": "Success",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "success",
+          "message",
+          "session_id"
+        ],
+        "title": "UsabilityResponseSchema",
+        "type": "object"
+      },
+      "UsabilitySessionSchema": {
+        "description": "Kullanılabilirlik test oturumu",
+        "properties": {
+          "avg_task_duration": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Avg Task Duration"
+          },
+          "general_note": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "General Note"
+          },
+          "id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Id"
+          },
+          "participant_id": {
+            "title": "Participant Id",
+            "type": "string"
+          },
+          "session_date": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Session Date"
+          },
+          "success_rate": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Success Rate"
+          },
+          "tasks": {
+            "items": {
+              "$ref": "#/components/schemas/UsabilityTaskSchema"
+            },
+            "title": "Tasks",
+            "type": "array"
+          }
+        },
+        "required": [
+          "participant_id",
+          "tasks"
+        ],
+        "title": "UsabilitySessionSchema",
+        "type": "object"
+      },
+      "UsabilityTaskSchema": {
+        "description": "Kullanılabilirlik test görevi",
+        "properties": {
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "duration_seconds": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Duration Seconds"
+          },
+          "end_time": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "End Time"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "is_success": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Is Success"
+          },
+          "researcher_note": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Researcher Note"
+          },
+          "start_time": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Start Time"
+          },
+          "status": {
+            "title": "Status",
+            "type": "string"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "title",
+          "status"
+        ],
+        "title": "UsabilityTaskSchema",
+        "type": "object"
+      },
+      "UserCreate": {
+        "description": "Kullanıcı kayıt.",
+        "properties": {
+          "daily_calorie_target": {
+            "default": 2000.0,
+            "maximum": 10000.0,
+            "minimum": 500.0,
+            "title": "Daily Calorie Target",
+            "type": "number"
+          },
+          "email": {
+            "format": "email",
+            "title": "Email",
+            "type": "string"
+          },
+          "full_name": {
+            "maxLength": 255,
+            "minLength": 2,
+            "title": "Full Name",
+            "type": "string"
+          },
+          "password": {
+            "maxLength": 128,
+            "minLength": 8,
+            "title": "Password",
+            "type": "string"
+          },
+          "phone": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Phone"
+          }
+        },
+        "required": [
+          "email",
+          "password",
+          "full_name"
+        ],
+        "title": "UserCreate",
+        "type": "object"
+      },
+      "UserLogin": {
+        "description": "Kullanıcı giriş.",
+        "properties": {
+          "email": {
+            "format": "email",
+            "title": "Email",
+            "type": "string"
+          },
+          "password": {
+            "title": "Password",
+            "type": "string"
+          }
+        },
+        "required": [
+          "email",
+          "password"
+        ],
+        "title": "UserLogin",
+        "type": "object"
+      },
+      "UserResponse": {
+        "properties": {
+          "email": {
+            "format": "email",
+            "title": "Email",
+            "type": "string"
+          },
+          "full_name": {
+            "title": "Full Name",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "is_active": {
+            "title": "Is Active",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "id",
+          "email",
+          "full_name",
+          "is_active"
+        ],
+        "title": "UserResponse",
+        "type": "object"
+      },
+      "ValidationError": {
+        "properties": {
+          "ctx": {
+            "title": "Context",
+            "type": "object"
+          },
+          "input": {
+            "title": "Input"
+          },
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "title": "Location",
+            "type": "array"
+          },
+          "msg": {
+            "title": "Message",
+            "type": "string"
+          },
+          "type": {
+            "title": "Error Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError",
+        "type": "object"
+      }
+    },
+    "securitySchemes": {
+      "HTTPBearer": {
+        "scheme": "bearer",
+        "type": "http"
+      }
+    }
+  },
+  "info": {
+    "description": "Görme engelli bireyler için yapay zeka destekli besin tanıma ve kalori takip API'si. Google Vision + Nutritionix entegrasyonu.",
+    "title": "NutriSense",
+    "version": "1.0.0"
+  },
+  "openapi": "3.1.0",
+  "paths": {
+    "/": {
+      "get": {
+        "description": "Kök endpoint — API bilgisi.",
+        "operationId": "root__get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Root",
+        "tags": [
+          "System"
+        ]
+      }
+    },
+    "/api/v1/analyze-food": {
+      "post": {
+        "description": "Multipart görüntüyü MIME/boyut doğrulaması ve EXIF temizliği sonrası Google Vision API ile analiz eder, besin adını tanır, Nutritionix'ten kalori bilgisini çeker ve sonucu MySQL'e kaydeder.",
+        "operationId": "analyze_food_api_v1_analyze_food_post",
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/Body_analyze_food_api_v1_analyze_food_post"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FoodAnalysisResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Geçersiz istek"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Besin bulunamadı"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "API hatası"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Görüntüden besin tanıma ve kalori hesaplama",
+        "tags": [
+          "NutriSense API"
+        ]
+      }
+    },
+    "/api/v1/auth/login": {
+      "post": {
+        "description": "E-posta ve şifre ile giriş yapar, JWT token döner.",
+        "operationId": "login_api_v1_auth_login_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserLogin"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TokenResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Kullanıcı girişi",
+        "tags": [
+          "NutriSense API"
+        ]
+      }
+    },
+    "/api/v1/auth/logout": {
+      "post": {
+        "operationId": "logout_api_v1_auth_logout_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LogoutRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Refresh token'ı iptal ederek çıkış yap",
+        "tags": [
+          "NutriSense API"
+        ]
+      }
+    },
+    "/api/v1/auth/password-reset": {
+      "post": {
+        "operationId": "password_reset_unavailable_api_v1_auth_password_reset_post",
+        "responses": {
+          "501": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Password Reset Unavailable",
+        "tags": [
+          "NutriSense API"
+        ]
+      }
+    },
+    "/api/v1/auth/refresh": {
+      "post": {
+        "description": "Refresh token rotation uygular; eski token yeniden kullanılamaz.",
+        "operationId": "refresh_auth_token_api_v1_auth_refresh_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RefreshTokenRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TokenResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Access token yenile ve refresh token döndür",
+        "tags": [
+          "NutriSense API"
+        ]
+      }
+    },
+    "/api/v1/auth/register": {
+      "post": {
+        "description": "Yeni hesap oluşturur ve JWT token döner.",
+        "operationId": "register_api_v1_auth_register_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TokenResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Yeni kullanıcı kaydı",
+        "tags": [
+          "NutriSense API"
+        ]
+      }
+    },
+    "/api/v1/dietitians/assignment": {
+      "get": {
+        "operationId": "get_dietitian_assignment_api_v1_dietitians_assignment_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/DietitianAssignmentResponse"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "title": "Response Get Dietitian Assignment Api V1 Dietitians Assignment Get"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Get Dietitian Assignment",
+        "tags": [
+          "NutriSense API"
+        ]
+      },
+      "post": {
+        "operationId": "request_dietitian_assignment_api_v1_dietitians_assignment_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DietitianAssignmentRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DietitianAssignmentResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Request Dietitian Assignment",
+        "tags": [
+          "NutriSense API"
+        ]
+      }
+    },
+    "/api/v1/dietitians/assignment/{assignment_id}": {
+      "delete": {
+        "operationId": "cancel_dietitian_assignment_api_v1_dietitians_assignment__assignment_id__delete",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "assignment_id",
+            "required": true,
+            "schema": {
+              "title": "Assignment Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Cancel Dietitian Assignment",
+        "tags": [
+          "NutriSense API"
+        ]
+      }
+    },
+    "/api/v1/dietitians/assignment/{assignment_id}/approve": {
+      "post": {
+        "operationId": "approve_dietitian_assignment_api_v1_dietitians_assignment__assignment_id__approve_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "assignment_id",
+            "required": true,
+            "schema": {
+              "title": "Assignment Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DietitianAssignmentResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Approve Dietitian Assignment",
+        "tags": [
+          "NutriSense API"
+        ]
+      }
+    },
+    "/api/v1/food-history/{user_id}": {
+      "get": {
+        "description": "Belirtilen tarih aralığında kullanıcının yemek kayıtlarını döner.",
+        "operationId": "get_food_history_api_v1_food_history__user_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "user_id",
+            "required": true,
+            "schema": {
+              "title": "User Id",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Başlangıç tarihi (YYYY-MM-DD)",
+            "in": "query",
+            "name": "from_date",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "format": "date",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Başlangıç tarihi (YYYY-MM-DD)",
+              "title": "From Date"
+            }
+          },
+          {
+            "description": "Bitiş tarihi (YYYY-MM-DD)",
+            "in": "query",
+            "name": "to_date",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "format": "date",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Bitiş tarihi (YYYY-MM-DD)",
+              "title": "To Date"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FoodHistoryResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Yemek geçmişi sorgulama",
+        "tags": [
+          "NutriSense API"
+        ]
+      }
+    },
+    "/api/v1/send-to-dietitian": {
+      "post": {
+        "description": "Belirlenen tarih aralığındaki besin kayıtlarını e-posta ve SMS ile diyetisyene gönderir.",
+        "operationId": "send_to_dietitian_api_v1_send_to_dietitian_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SendToDietitianRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SendToDietitianResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Beslenme raporunu diyetisyene gönder",
+        "tags": [
+          "NutriSense API"
+        ]
+      }
+    },
+    "/api/v1/survey": {
+      "post": {
+        "description": "Anket yanıtlarını kaydeder.\n\nİstek gövdesi:\n```json\n{\n    \"participant_id\": \"anonim-uuid\",\n    \"answers\": [\n        {\"question_id\": \"q1\", \"answer\": \"Birinden yardım istiyordum\", \"timestamp\": \"...\"},\n        {\"question_id\": \"q2\", \"answer\": 4, \"timestamp\": \"...\"}\n    ],\n    \"completion_seconds\": 180,\n    \"device_info\": \"Android 14 | Pixel 8\"\n}\n```",
+        "operationId": "submit_survey_api_v1_survey_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SurveySubmissionSchema"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SurveyResponseSchema"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Submit Survey",
+        "tags": [
+          "Anket"
+        ]
+      }
+    },
+    "/api/v1/survey/stats": {
+      "get": {
+        "description": "Araştırmacılar için anket istatistikleri.\n\nDöner:\n- Toplam yanıt sayısı\n- Soru bazlı ortalamalar (Likert soruları için)\n- Ortalama tamamlama süresi",
+        "operationId": "get_survey_stats_api_v1_survey_stats_get",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "x-research-export-token",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Research-Export-Token"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Get Survey Stats",
+        "tags": [
+          "Anket"
+        ]
+      }
+    },
+    "/api/v1/usability": {
+      "post": {
+        "description": "Kullanılabilirlik testi oturumunu kaydeder.",
+        "operationId": "submit_usability_session_api_v1_usability_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UsabilitySessionSchema"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UsabilityResponseSchema"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Submit Usability Session",
+        "tags": [
+          "Anket"
+        ]
+      }
+    },
+    "/api/v1/usability/export": {
+      "get": {
+        "description": "Tüm kullanılabilirlik testi oturumlarını JSON olarak dışa aktarır.",
+        "operationId": "export_usability_sessions_api_v1_usability_export_get",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "x-research-export-token",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Research-Export-Token"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Export Usability Sessions",
+        "tags": [
+          "Anket"
+        ]
+      }
+    },
+    "/api/v1/users/me": {
+      "delete": {
+        "operationId": "delete_account_api_v1_users_me_delete",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AccountDeletionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Delete Account",
+        "tags": [
+          "NutriSense API"
+        ]
+      },
+      "get": {
+        "operationId": "get_me_api_v1_users_me_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Get Me",
+        "tags": [
+          "NutriSense API"
+        ]
+      }
+    },
+    "/health": {
+      "get": {
+        "description": "Sunucu sağlık kontrolü endpoint'i.",
+        "operationId": "health_check_health_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Health Check",
+        "tags": [
+          "System"
+        ]
+      }
+    }
+  }
+}

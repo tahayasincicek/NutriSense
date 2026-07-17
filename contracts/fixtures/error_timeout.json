@@ -1,0 +1,8 @@
+{
+  "error": {
+    "code": "TIMEOUT",
+    "message": "Sunucu zamanında yanıt vermedi.",
+    "request_id": null,
+    "details": null
+  }
+}

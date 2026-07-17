@@ -1,0 +1,9 @@
+{
+  "access_token": "fixture-access-token-not-a-secret",
+  "refresh_token": "fixture-refresh-token-not-a-secret",
+  "token_type": "bearer",
+  "expires_in": 3600,
+  "refresh_expires_in": 2592000,
+  "user_id": "9e4e5356-b491-4575-a9dd-c5abbc777fe9",
+  "full_name": "Sözleşme Kullanıcısı"
+}

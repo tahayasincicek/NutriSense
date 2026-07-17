@@ -1,0 +1,8 @@
+{
+  "error": {
+    "code": "NOT_FOUND",
+    "message": "Görüntüde yiyecek tespit edilemedi.",
+    "request_id": "9aef4e30-d772-487e-bc2b-c93662f08625",
+    "details": null
+  }
+}

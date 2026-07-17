@@ -1,0 +1,8 @@
+{
+  "error": {
+    "code": "VALIDATION_ERROR",
+    "message": "Görüntü dosyası bozuk veya desteklenmeyen biçimde.",
+    "request_id": "8aef4e30-d772-487e-bc2b-c93662f08624",
+    "details": null
+  }
+}

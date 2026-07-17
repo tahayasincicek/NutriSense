@@ -1,0 +1,46 @@
+{
+  "user_id": "9e4e5356-b491-4575-a9dd-c5abbc777fe9",
+  "from_date": "2026-07-10",
+  "to_date": "2026-07-17",
+  "total_days": 8,
+  "average_daily_calories": 9.8,
+  "total_calories": 78.0,
+  "daily_logs": [
+    {
+      "date": "2026-07-17",
+      "total_calories": 78.0,
+      "calorie_target": 2000.0,
+      "remaining_calories": 1922.0,
+      "total_protein": 0.4,
+      "total_carbs": 20.7,
+      "total_fat": 0.3,
+      "meal_count": 1,
+      "meals": [
+        {
+          "meal_type": "atistirmalik",
+          "meal_type_tr": "Atıştırmalık",
+          "total_calories": 78.0,
+          "food_count": 1
+        }
+      ],
+      "foods": [
+        {
+          "id": "550e8400-e29b-41d4-a716-446655440000",
+          "food_name": "apple",
+          "food_name_tr": "Elma",
+          "calories": 78.0,
+          "portion_g": 150.0,
+          "meal_type": "atistirmalik",
+          "confidence": 0.93,
+          "nutrients": {
+            "protein": 0.4,
+            "carbs": 20.7,
+            "fat": 0.3,
+            "fiber": 3.6
+          },
+          "logged_at": "2026-07-17T10:30:00Z"
+        }
+      ]
+    }
+  ]
+}
