@@ -1,0 +1,24 @@
+{
+  "schema_version": 1,
+  "scope_id": "nutrisense-mvp-tr-10-v1",
+  "labels_file": "labels.txt",
+  "input": {
+    "shape": [1, 224, 224, 3],
+    "color_space": "RGB",
+    "exif_orientation": "transpose",
+    "resize": "bilinear_center_crop",
+    "keras_dtype": "float32",
+    "keras_range": [0.0, 255.0],
+    "mobilenet_v3_include_preprocessing": true
+  },
+  "output": {
+    "type": "softmax_probabilities",
+    "confidence_range": [0.0, 1.0],
+    "label_order": "exactly the UTF-8 line order in labels.txt"
+  },
+  "decision": {
+    "threshold_source": "validation decision.json; deployment forbidden when absent",
+    "below_threshold": "unknown_needs_manual_confirmation",
+    "unsupported_food": "unknown_needs_manual_confirmation"
+  }
+}

@@ -62,3 +62,14 @@ app.*.map.json
 **/*credentials*.json
 *.jks
 *.keystore
+
+# Reproducible ML pipeline: data and generated evidence stay out of Git.
+/ml/data/
+/ml/runs/*
+!/ml/runs/NOT_RUN/
+/ml/artifacts/*
+!/ml/artifacts/index.example.json
+*.keras
+*.h5
+*.tflite
+*.ckpt

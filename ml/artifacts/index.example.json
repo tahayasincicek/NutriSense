@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "artifacts": [
+    {
+      "experiment_id": "REPLACE_AFTER_A_REAL_RUN",
+      "kind": "tflite_int8",
+      "url": "https://REPLACE_WITH_PRIVATE_ARTIFACT_STORE/model.tflite",
+      "sha256": "REPLACE_WITH_64_LOWERCASE_HEX_CHARACTERS",
+      "bytes": null,
+      "metrics_sha256": "REPLACE_WITH_64_LOWERCASE_HEX_CHARACTERS"
+    }
+  ]
+}

@@ -1,0 +1,50 @@
+{
+  "schema_version": 1,
+  "scope_id": "nutrisense-mvp-tr-10-v1",
+  "seed": 2209,
+  "image": {
+    "height": 224,
+    "width": 224,
+    "channels": 3,
+    "color_space": "RGB",
+    "keras_dtype": "float32",
+    "keras_range": [0.0, 255.0],
+    "resize": "bilinear_center_crop",
+    "exif_orientation": "transpose_before_resize",
+    "include_preprocessing": true
+  },
+  "splits": {"train": 0.70, "validation": 0.15, "test": 0.15},
+  "classes": [
+    {"id": "baklava", "tr": "baklava", "target": 1000, "source_plan": "Food-101 after license approval plus consented local captures", "min_groups": 60, "confusions": ["borek"]},
+    {"id": "hamburger", "tr": "hamburger", "target": 1000, "source_plan": "Food-101 after license approval", "min_groups": 60, "confusions": ["sandvic", "unsupported"]},
+    {"id": "pizza", "tr": "pizza", "target": 1000, "source_plan": "Food-101 after license approval", "min_groups": 60, "confusions": ["lahmacun"]},
+    {"id": "omelette", "tr": "omlet", "target": 1000, "source_plan": "Food-101 after license approval plus consented local captures", "min_groups": 60, "confusions": ["menemen"]},
+    {"id": "french_fries", "tr": "patates kızartması", "target": 1000, "source_plan": "Food-101 after license approval", "min_groups": 60, "confusions": ["unsupported"]},
+    {"id": "simit", "tr": "simit", "target": 300, "source_plan": "consented NutriSense controlled collection", "min_groups": 60, "confusions": ["unsupported"]},
+    {"id": "lahmacun", "tr": "lahmacun", "target": 300, "source_plan": "consented NutriSense controlled collection", "min_groups": 60, "confusions": ["pizza"]},
+    {"id": "manti", "tr": "mantı", "target": 300, "source_plan": "consented NutriSense controlled collection", "min_groups": 60, "confusions": ["unsupported"]},
+    {"id": "mercimek_corbasi", "tr": "mercimek çorbası", "target": 300, "source_plan": "consented NutriSense controlled collection", "min_groups": 60, "confusions": ["unsupported"]},
+    {"id": "menemen", "tr": "menemen", "target": 300, "source_plan": "consented NutriSense controlled collection", "min_groups": 60, "confusions": ["omelette"]}
+  ],
+  "ood": {"label": "__ood__", "target": 500, "sources": "consented unsupported foods and non-food scenes; never train as an eleventh food class"},
+  "model": {
+    "architecture": "MobileNetV3Small",
+    "alpha": 0.75,
+    "imagenet_weights": true,
+    "batch_size": 32,
+    "head_epochs": 20,
+    "fine_tune_epochs": 20,
+    "fine_tune_last_layers": 30,
+    "learning_rate_head": 0.001,
+    "learning_rate_fine_tune": 0.0001,
+    "mixed_precision": true,
+    "early_stopping_patience": 5
+  },
+  "decision": {
+    "threshold_selection_split": "validation",
+    "min_coverage": 0.50,
+    "max_selective_error": 0.10,
+    "default_threshold_before_validation": null,
+    "manual_confirmation_on_reject": true
+  }
+}

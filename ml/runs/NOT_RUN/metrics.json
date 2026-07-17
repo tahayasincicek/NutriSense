@@ -1,0 +1,18 @@
+{
+  "schema_version": 1,
+  "status": "not_run",
+  "reason": "No approved dataset, trained model, checkpoint or held-out evaluation artifact exists in the repository.",
+  "experiment_id": null,
+  "dataset_version": null,
+  "accuracy": null,
+  "macro_f1": null,
+  "top_k_accuracy": null,
+  "ece": null,
+  "per_class": null,
+  "confusion_matrix": null,
+  "model_size_bytes": null,
+  "target_device_latency_ms": null,
+  "selective_threshold": null,
+  "coverage": null,
+  "selective_error": null
+}

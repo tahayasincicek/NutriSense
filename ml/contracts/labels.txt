@@ -1,0 +1,10 @@
+baklava
+hamburger
+pizza
+omelette
+french_fries
+simit
+lahmacun
+manti
+mercimek_corbasi
+menemen
