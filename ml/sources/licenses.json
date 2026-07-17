@@ -1,0 +1,38 @@
+{
+  "schema_version": 1,
+  "reviewed_at": "2026-07-17",
+  "sources": [
+    {
+      "id": "food101_official",
+      "official_url": "https://data.vision.ee.ethz.ch/cvl/datasets_extra/food-101/",
+      "declared_terms": "No dataset license is stated on the official download page.",
+      "allowed_for_training": false,
+      "redistribution": false,
+      "required_action": "Obtain written institutional/legal confirmation before download, training or redistribution."
+    },
+    {
+      "id": "uecfood256_official",
+      "official_url": "https://foodcam.mobi/dataset256.html",
+      "declared_terms": "Non-commercial research use only; other purposes require contacting the publisher.",
+      "allowed_for_training": true,
+      "redistribution": false,
+      "required_action": "Record non-commercial research purpose and cite Kawano and Yanai (2014). Not selected for MVP because of domain mismatch."
+    },
+    {
+      "id": "nutrisense_consent_v1",
+      "official_url": "docs/data_collection_protocol.md",
+      "declared_terms": "Project-specific consent and copyright permission; no public redistribution by default.",
+      "allowed_for_training": true,
+      "redistribution": false,
+      "required_action": "Store signed consent separately; manifest contains only pseudonymous capture-group identifiers."
+    },
+    {
+      "id": "synthetic_test_only",
+      "official_url": "ml/tests",
+      "declared_terms": "Programmatically generated test fixtures only.",
+      "allowed_for_training": false,
+      "redistribution": true,
+      "required_action": "Never use synthetic fixtures as scientific evidence or model evaluation data."
+    }
+  ]
+}
