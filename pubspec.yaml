@@ -1,0 +1,71 @@
+# ==============================================================================
+# NutriSense — Görme Engelli Bireyler İçin Kalori Takip Uygulaması
+# Flutter pubspec.yaml — Tüm proje bağımlılıkları
+# ==============================================================================
+
+name: nutrisense
+description: >
+  Görme engelli bireyler için yapay zeka destekli besin tanıma ve kalori
+  takip uygulaması. Kamera ile besin tanıma, sesli geri bildirim ve
+  diyetisyen entegrasyonu sunar.
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.2.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+
+  # ---------- State Management ----------
+  # Riverpod: Compile-time güvenli, test edilebilir, bağımlılık enjeksiyonu
+  # desteği. Provider'a kıyasla daha güçlü ve BuildContext bağımsız çalışır.
+  flutter_riverpod: ^2.5.1
+
+  # ---------- Kamera & Görüntü ----------
+  camera: ^0.11.0+2              # Kamera erişimi ve canlı önizleme
+  # Yeni CameraX alt sürümleri Flutter 3.22 TextureRegistry API'siyle uyumsuz.
+  camera_android_camerax: 0.6.5
+  image: ^4.1.7                  # Görüntü ön işleme (resize, crop)
+
+  # ---------- Sesli Etkileşim ----------
+  flutter_tts: 4.0.2             # Flutter 3.22 / minSdk 21 ile uyumlu TTS
+  speech_to_text: ^7.4.0         # Flutter 3.41 embedding v2 ile uyumlu STT
+
+  # ---------- Ağ & API ----------
+  dio: ^5.4.3+1                  # HTTP istemci (interceptors, retry desteği)
+
+  # ---------- Yerel Depolama ----------
+  shared_preferences: ^2.2.3     # Basit key-value depolama (tercihler)
+  flutter_secure_storage: ^10.3.1 # Access/refresh token platform kasası
+
+  # ---------- İzinler ----------
+  permission_handler: ^11.3.1    # Kamera, mikrofon, depolama izinleri
+
+  # ---------- UI & Erişilebilirlik ----------
+  vibration: ^2.0.0              # Haptic feedback (titreşim)
+
+  # ---------- Yardımcılar ----------
+  equatable: ^2.0.5              # Nesne eşitlik karşılaştırması
+  path_provider: ^2.1.3          # Cihaz dosya yolları
+  device_info_plus: ^10.1.2      # Araştırma formunda cihaz bilgisi
+  share_plus: ^12.0.2            # Flutter 3.41 uyumlu dışa aktarım paylaşımı
+  uuid: ^4.4.0                   # Benzersiz kimlik üretimi
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^4.0.0          # Lint kuralları
+
+flutter:
+  uses-material-design: true
+
+  # Boş images/icons/sounds/models klasörleri bilinçli olarak bundle edilmez.
+  # Gerçek model eklenmeden assets/models deklarasyonu yapılmamalıdır.
+  # assets/fonts altındaki yerel fontlar da tema tarafından kullanılmadığı için
+  # APK'ya eklenmez; sistem fontu deterministik ve ek indirme olmadan kullanılır.
+
+
