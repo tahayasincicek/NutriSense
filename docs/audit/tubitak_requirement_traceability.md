@@ -130,7 +130,7 @@ Proje; erişilebilir arayüz, kamera akışı, TTS/STT servisleri, FastAPI şema
 | Kamera URL/gövde/yanıt | **Çelişkili** | Aktif ekran `https://api.nutrisense.app/v1/food/recognize`, `{image,timestamp}` ve `calories` bekliyor. Backend `POST /api/v1/analyze-food`, `{image_base64,meal_type}`, JWT ve `total_calories` sunuyor. |
 | Aktif geçmiş ekranı | **Çelişkili** | `app.dart:37` `HistoryScreen` seçiyor; ekran sabit `_MockFoodLog` listesi gösteriyor. Gerçek servis kullanan `FoodHistoryScreen` aktif değil. |
 | Gerçek model dosyaları | **Eksik** | `assets/models/` yalnız `.gitkeep`; `.keras/.h5/.tflite/checkpoint` yok. |
-| Model eğitim çıktıları | **Eksik** | Kod var; veri, checkpoint, metrik JSON, `training_results.png`, confusion matrix ve run log yok. Dönüştürücü gerçek model yoksa ImageNet tabanlı “demo model” üretebiliyor; bu eğitim başarısı değildir. |
+| Model eğitim çıktıları | **Eksik** | Yeniden üretilebilir hat, veri/model kartları ve `NOT_RUN` metrik şablonu var; veri, checkpoint, gerçek metrik/grafik ve run log hâlâ yok. Dönüştürücüdeki demo ve rastgele kalibrasyon fallback’i kaldırıldı; eksik gerçek modelde komut açıkça başarısızdır. |
 | iOS platformu | **Eksik** | `ios/` ve `.ipa` yok. |
 | Android izinleri | **Eksik** | Ana manifestte `uses-permission` yok; Internet yalnız debug/profile manifestlerinde. Kamera/mikrofon/release ağ erişimi kanıtlanmıyor. |
 | Android release | **Çelişkili** | `applicationId=com.example.nutrisense`; release debug anahtarıyla imzalanıyor; release APK/AAB yok. |

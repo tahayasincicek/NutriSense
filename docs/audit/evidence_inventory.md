@@ -35,18 +35,18 @@
 | Veri hazırlama kodu | **Var** | `ai_model/01_data_preparation.py` | Kilitli ortam ve gerçek run logu | Kod, veri setinin üretildiğini kanıtlamaz. |
 | Etiketli ham veri seti | **Yok** | `raw_datasets/`, görüntü manifesti veya arşiv yok | Kaynak, lisans, checksum, sınıf listesi | Eğitim yapılmış sayılamaz. |
 | Birleştirilmiş/split veri seti | **Yok** | `merged_dataset`, train/val/test manifestleri yok | Örneğe göre split, sızıntı kontrolü | Metrik üretilemez. |
-| Veri seti yapılandırması | **Yok** | `ai_model/dataset_config.json` yok | Sınıflar, seed, split, ağırlıklar | Eğitim kodu varsayılanlara düşebilir. |
-| Eğitim kodu | **Var** | `ai_model/02_model_training.py` | Çalıştırma komutu ve ortam lock’u | Pipeline niyet kanıtıdır. |
+| Veri seti yapılandırması | **Var; çalıştırılmadı** | `ml/configs/mvp_v1.json` | Onaylı gerçek manifest ve veri sürümü | 10 sınıflı kapsam, seed, group split hedefleri ve güvenlik eşiği sürümlüdür; veri kanıtı değildir. |
+| Eğitim kodu | **Var; çalıştırılmadı** | `ml/src/nutrisense_ml/train.py`; `ml/requirements.lock`; `ml/README.md` | Gerçek deney kimliği, checkpoint ve metrik | Test splitini eğitimden ayıran deterministik hat vardır; model başarısı henüz yoktur. |
 | Keras model | **Yok** | `.keras`/`.h5` bulunmadı | Model checksum ve model card | “MobileNetV3 tamamlandı” iddiası desteklenmiyor. |
 | Checkpoint | **Yok** | `.ckpt`/`best_model_*.keras` yok | Run kimliği, epoch, val metriği | En iyi model seçimi doğrulanamaz. |
 | TFLite mobil model | **Yok** | `assets/models/` yalnız `.gitkeep`; `.tflite` yok | Dönüşüm logu, quantization raporu | Cihazda yerel YZ çıkarımı yok. |
 | ONNX/PB model | **Yok** | `.onnx`/`.pb` yok | — | Alternatif model artefaktı yok. |
-| Model eğitim geçmişi/metrik JSON | **Yok** | history/log/CSV/TensorBoard artefaktı yok | Loss/accuracy/precision/recall, seed | Başarı metrikleri doğrulanamaz. |
+| Model eğitim geçmişi/metrik JSON | **NOT RUN şablonu var** | `ml/runs/NOT_RUN/metrics.json` | Gerçek run altındaki history/metrics/grafikler | Alanların `null` olması kasıtlıdır; başarı metrikleri hâlâ doğrulanamaz. |
 | Eğitim grafiği | **Yok** | Kodun hedeflediği `training_results.png` yok | Üretim komutu ve kaynak run | Grafik üretilmemiş. |
 | Confusion matrix | **Yok** | Kodun hedeflediği `confusion_matrix.png` yok | Etiket sırası ve sayımlar | Sınıf bazlı performans bilinmiyor. |
 | Model benchmark raporu | **Yok** | TFLite latency/boyut raporu yok | Cihaz modeli, tekrar sayısı, P50/P95 | “Hızlı” iddiası desteklenmiyor. |
 | Kalori veritabanı | **Var** | `ai_model/calorie_database.json` | Kaynak, sürüm, güncelleme tarihi, uzman doğrulaması | Fallback verisi var; bilimsel doğruluğu kanıtsız. |
-| Model dönüştürme kodu | **Kısmi** | `ai_model/04_model_converter.py` | Gerçek eğitilmiş modelle run | Gerçek model yoksa kod ImageNet tabanlı demo model oluşturuyor; demo çıktı araştırma modeli sayılamaz. |
+| Model dönüştürme kodu | **Var; çalıştırılmadı** | `ml/src/nutrisense_ml/convert.py`; `ai_model/04_model_converter.py` | Gerçek eğitilmiş modelle dönüşüm/eşdeğerlik raporu | Demo ve rastgele kalibrasyon fallback’i kaldırıldı; model/validation kararı/gerçek kalibrasyon yoksa komut kapanır. |
 | Model card | **Yok** | Bulunmadı | Amaç, veri, metrik, sınırlama, etik risk | Model yönetişimi eksik. |
 
 ## 3. Test ve CI artefaktları
