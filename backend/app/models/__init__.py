@@ -2,8 +2,10 @@
 # backend/app/models/__init__.py
 # ==============================================================================
 from .database import (
-    AuthAuditLog, Base, Dietitian, DietitianAssignment, DietitianReport,
-    FoodLog, RefreshToken, User, get_db, init_db,
+    AuditEvent, AuthAuditLog, Base, ConsentRecord, Dietitian,
+    DietitianAssignment, DietitianReport, FoodLog, NotificationDelivery,
+    NutritionSource, RecognitionAttempt, RefreshToken, SurveySubmission,
+    SurveyVersion, UsabilitySession, UsabilityTask, User, get_db, utc_now,
 )
 from .schemas import (
     FoodAnalysisResponse,

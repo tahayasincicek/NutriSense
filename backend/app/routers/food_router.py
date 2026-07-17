@@ -12,6 +12,7 @@
 import base64
 import hashlib
 import io
+import json
 import logging
 import uuid
 from datetime import date, timedelta, datetime
@@ -19,15 +20,17 @@ from typing import Annotated, Optional
 from collections import defaultdict
 
 from fastapi import (
-    APIRouter, Depends, File, Form, HTTPException, Query, Request, UploadFile, status,
+    APIRouter, Depends, File, Form, Header, HTTPException, Query, Request,
+    UploadFile, status,
 )
 from PIL import Image, UnidentifiedImageError
 from sqlalchemy.orm import Session
 from sqlalchemy import func
 
 from ..models.database import (
-    AuthAuditLog, Dietitian, DietitianAssignment, DietitianReport, FoodLog,
-    RefreshToken, User, get_db, utcnow_naive,
+    AuthAuditLog, ConsentRecord, Dietitian, DietitianAssignment,
+    DietitianReport, FoodLog, NotificationDelivery, NutritionSource,
+    RecognitionAttempt, RefreshToken, User, get_db, utc_now, utc_today,
 )
 from ..models.schemas import (
     FoodAnalysisResponse, NutrientData,
@@ -174,6 +177,7 @@ async def _sanitized_image_base64(upload: UploadFile) -> str:
 )
 async def analyze_food(
     image: Annotated[UploadFile, File(description="JPEG, PNG veya WebP; en fazla 5 MB")],
+    http_request: Request,
     meal_type: Annotated[
         str,
         Form(pattern=r"^(kahvalti|ogle|aksam|atistirmalik)$"),
@@ -224,10 +228,31 @@ async def analyze_food(
         food_name, food_name.replace("_", " ").title()
     )
 
-    # ── 4. MySQL'e kaydet ──
+    # ── 4. Recognition + nutrition provenance + food log tek transaction ──
+    recognition_attempt = RecognitionAttempt(
+        id=str(uuid.uuid4()),
+        user_id=current_user.id,
+        provider="google_vision",
+        status="succeeded",
+        food_name=food_name,
+        confidence=confidence,
+        request_id=getattr(http_request.state, "request_id", None),
+    )
+    nutrition_source = NutritionSource(
+        id=str(uuid.uuid4()),
+        provider=nutrition.get("source", "unknown"),
+        external_reference=nutrition.get("external_reference"),
+        food_name=food_name,
+        calories_per_100g=nutrition["calories_per_100g"],
+        payload_checksum=hashlib.sha256(
+            json.dumps(nutrition, sort_keys=True, default=str).encode("utf-8")
+        ).hexdigest(),
+    )
     log_entry = FoodLog(
         id=str(uuid.uuid4()),
         user_id=current_user.id,
+        recognition_attempt_id=recognition_attempt.id,
+        nutrition_source_id=nutrition_source.id,
         food_name=food_name,
         food_name_tr=food_name_tr,
         calories_per_100g=nutrition["calories_per_100g"],
@@ -240,11 +265,19 @@ async def analyze_food(
         confidence=confidence,
         meal_type=meal_type,
         recognition_source="google_vision",
-        log_date=date.today(),
+        log_date=utc_today(),
     )
-    db.add(log_entry)
-    db.commit()
-    db.refresh(log_entry)
+    try:
+        db.add_all([recognition_attempt, nutrition_source, log_entry])
+        db.commit()
+        db.refresh(log_entry)
+    except Exception:
+        db.rollback()
+        logger.exception("Besin analizi transaction'ı geri alındı.")
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="Besin analizi güvenli biçimde kaydedilemedi.",
+        )
 
     # ── 5. TTS metin ──
     tts_text = (
@@ -305,7 +338,7 @@ async def get_food_history(
 
     # Varsayılan tarih aralığı: son 7 gün
     if not to_date:
-        to_date = date.today()
+        to_date = utc_today()
     if not from_date:
         from_date = to_date - timedelta(days=7)
 
@@ -501,7 +534,7 @@ async def approve_dietitian_assignment(
     ):
         raise HTTPException(status_code=409, detail="Diyetisyen doğrulaması geçersiz.")
     assignment.status = "approved"
-    assignment.approved_at = utcnow_naive()
+    assignment.approved_at = utc_now()
     current_user.dietitian_id = dietitian.id
     db.commit()
     return DietitianAssignmentResponse(
@@ -531,7 +564,7 @@ async def cancel_dietitian_assignment(
     if assignment is None:
         raise HTTPException(status_code=404, detail="Atama bulunamadı.")
     assignment.status = "cancelled"
-    assignment.cancelled_at = utcnow_naive()
+    assignment.cancelled_at = utc_now()
     if current_user.dietitian_id == assignment.dietitian_id:
         current_user.dietitian_id = None
     db.commit()
@@ -546,6 +579,12 @@ async def cancel_dietitian_assignment(
 )
 async def send_to_dietitian(
     request: SendToDietitianRequest,
+    idempotency_key: Optional[str] = Header(
+        default=None,
+        alias="Idempotency-Key",
+        min_length=8,
+        max_length=128,
+    ),
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
@@ -592,13 +631,37 @@ async def send_to_dietitian(
         )
 
     # Tarih aralığı
-    to_dt = request.to_date or date.today()
+    to_dt = request.to_date or utc_today()
     if request.report_type == "daily":
         from_dt = request.from_date or to_dt
     elif request.report_type == "weekly":
         from_dt = request.from_date or (to_dt - timedelta(days=7))
     else:
         from_dt = request.from_date or (to_dt - timedelta(days=30))
+
+    canonical_key = idempotency_key or hashlib.sha256(
+        (
+            f"{current_user.id}|{dietitian.id}|{request.report_type}|"
+            f"{from_dt.isoformat()}|{to_dt.isoformat()}|{request.message or ''}"
+        ).encode("utf-8")
+    ).hexdigest()
+    existing_report = db.query(DietitianReport).filter(
+        DietitianReport.user_id == current_user.id,
+        DietitianReport.idempotency_key == canonical_key,
+    ).first()
+    if existing_report is not None:
+        return SendToDietitianResponse(
+            success=existing_report.status == "sent",
+            report_id=existing_report.id,
+            sent_via_email=existing_report.sent_via_email,
+            sent_via_sms=existing_report.sent_via_sms,
+            dietitian_name=dietitian.full_name,
+            message=(
+                "Bu gönderim isteği daha önce işlendi."
+                if existing_report.status != "pending"
+                else "Bu gönderim isteği halen işleniyor."
+            ),
+        )
 
     # Kayıtları çek
     logs = (
@@ -644,6 +707,38 @@ async def send_to_dietitian(
         "message": request.message,
     }
 
+    # Sağlayıcı çağrısından önce idempotency kaydını kalıcılaştır. Böylece DB
+    # sonucu yazılamasa dahi aynı anahtarlı retry ikinci mesajı göndermez.
+    report = DietitianReport(
+        id=str(uuid.uuid4()),
+        user_id=current_user.id,
+        dietitian_id=dietitian.id,
+        idempotency_key=canonical_key,
+        report_type=request.report_type,
+        date_from=from_dt,
+        date_to=to_dt,
+        total_calories=total_cal,
+        total_meals=len(logs),
+        status="pending",
+    )
+    consent = ConsentRecord(
+        user_id=current_user.id,
+        assignment_id=assignment.id,
+        consent_type="dietitian_report_share",
+        policy_version="report-share-v1",
+        granted=True,
+    )
+    try:
+        db.add_all([report, consent])
+        db.commit()
+    except Exception:
+        db.rollback()
+        logger.exception("Rapor gönderim isteği kaydedilemedi.")
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="Rapor gönderim isteği güvenli biçimde başlatılamadı.",
+        )
+
     # E-posta + SMS gönder
     send_result = await notification_service.send_dietitian_report(
         dietitian_email=dietitian.email if dietitian.email_verified else None,
@@ -653,21 +748,35 @@ async def send_to_dietitian(
         report_data=report_data,
     )
 
-    # Rapor kaydı
-    report = DietitianReport(
-        id=str(uuid.uuid4()),
-        user_id=current_user.id,
-        dietitian_id=dietitian.id,
-        report_type=request.report_type,
-        date_from=from_dt,
-        date_to=to_dt,
-        total_calories=total_cal,
-        total_meals=len(logs),
-        sent_via_email=send_result["email_sent"],
-        sent_via_sms=send_result["sms_sent"],
-    )
-    db.add(report)
-    db.commit()
+    report.sent_via_email = send_result["email_sent"]
+    report.sent_via_sms = send_result["sms_sent"]
+    report.status = "sent" if send_result["email_sent"] or send_result["sms_sent"] else "failed"
+    report.sent_at = utc_now() if report.status == "sent" else None
+    if dietitian.email_verified:
+        db.add(
+            NotificationDelivery(
+                report_id=report.id,
+                channel="email",
+                status="sent" if send_result["email_sent"] else "failed",
+            )
+        )
+    if dietitian.phone_verified:
+        db.add(
+            NotificationDelivery(
+                report_id=report.id,
+                channel="sms",
+                status="sent" if send_result["sms_sent"] else "failed",
+            )
+        )
+    try:
+        db.commit()
+    except Exception:
+        db.rollback()
+        logger.exception("Sağlayıcı sonucu kaydedilemedi; idempotency kaydı pending kaldı.")
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="Gönderim sonucu doğrulanamadı; aynı anahtarla tekrar mesaj gönderilmeyecek.",
+        )
 
     # Status mesajı
     channels = []
@@ -738,7 +847,7 @@ async def login(
 ):
     """E-posta ve şifre ile giriş yapar, JWT token döner."""
     key, email_hash = _login_key(http_request, credentials.email)
-    now = utcnow_naive()
+    now = utc_now()
     cutoff = now - timedelta(seconds=LOGIN_WINDOW_SECONDS)
     _login_failures[key] = [value for value in _login_failures[key] if value > cutoff]
     if len(_login_failures[key]) >= LOGIN_MAX_FAILURES:
@@ -843,6 +952,11 @@ async def delete_account(
         DietitianAssignment.user_id == user_id
     ).delete()
     db.query(DietitianReport).filter(DietitianReport.user_id == user_id).delete()
+    db.query(ConsentRecord).filter(ConsentRecord.user_id == user_id).delete()
+    db.query(AuthAuditLog).filter(AuthAuditLog.user_id == user_id).update(
+        {AuthAuditLog.user_id: None},
+        synchronize_session=False,
+    )
     db.delete(current_user)
     db.commit()
     _audit_auth(
@@ -850,7 +964,7 @@ async def delete_account(
         event="account_deleted",
         success=True,
         email_hash=email_hash,
-        user_id=user_id,
+        user_id=None,
         ip_address=http_request.client.host if http_request.client else None,
     )
     return None

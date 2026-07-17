@@ -26,7 +26,7 @@ settings = get_settings()
 
 
 def _utcnow() -> datetime:
-    return datetime.now(timezone.utc).replace(tzinfo=None)
+    return datetime.now(timezone.utc)
 
 
 # ── Şifre ──

@@ -12,6 +12,12 @@
 import logging
 import uuid
 from contextlib import asynccontextmanager
+from pathlib import Path
+
+from alembic.config import Config
+from alembic.runtime.migration import MigrationContext
+from alembic.script import ScriptDirectory
+from sqlalchemy import text
 
 from fastapi import FastAPI, HTTPException, Request, status
 from fastapi.exceptions import RequestValidationError
@@ -19,11 +25,12 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
 from .config import get_settings
-from .models.database import init_db
+from .models.database import engine
 from .routers.food_router import router as food_router
 from .routers.survey_router import router as survey_router
 
 settings = get_settings()
+BACKEND_DIR = Path(__file__).resolve().parent.parent
 
 # ── Logging ──
 logging.basicConfig(
@@ -47,9 +54,13 @@ async def lifespan(app: FastAPI):
     logger.info(f"  {settings.app_name} v{settings.app_version} başlatılıyor...")
     logger.info("=" * 60)
 
-    # Veritabanı tablolarını oluştur
-    init_db()
-    logger.info("✅ Veritabanı tabloları hazır")
+    if settings.app_environment.lower() != "test":
+        readiness = database_readiness()
+        if not readiness["ready"]:
+            raise RuntimeError(
+                "Veritabanı migration durumu hazır değil; önce 'alembic upgrade head' çalıştırın."
+            )
+        logger.info("Veritabanı bağlantısı ve Alembic revision hazır")
 
     yield
 
@@ -178,15 +189,44 @@ app.include_router(food_router)
 app.include_router(survey_router)
 
 
-# ── Sağlık Kontrolü ──
+def database_readiness() -> dict:
+    """Check DB connectivity and whether Alembic is exactly at head."""
+    result = {"database": False, "migration": False, "ready": False}
+    try:
+        with engine.connect() as connection:
+            connection.execute(text("SELECT 1"))
+            result["database"] = True
+            if settings.migration_check_enabled:
+                current = MigrationContext.configure(connection).get_current_revision()
+                config = Config(str(BACKEND_DIR / "alembic.ini"))
+                config.set_main_option("script_location", str(BACKEND_DIR / "migrations"))
+                heads = set(ScriptDirectory.from_config(config).get_heads())
+                result["migration"] = current is not None and current in heads
+            else:
+                result["migration"] = True
+    except Exception:
+        logger.exception("Readiness kontrolü başarısız.")
+    result["ready"] = result["database"] and result["migration"]
+    return result
+
+
+@app.get("/health/live", tags=["System"])
+async def liveness_check():
+    return {"status": "alive", "app": settings.app_name, "version": settings.app_version}
+
+
+@app.get("/health/ready", tags=["System"])
+async def readiness_check():
+    readiness = database_readiness()
+    return JSONResponse(
+        status_code=200 if readiness["ready"] else 503,
+        content={"status": "ready" if readiness["ready"] else "not_ready", **readiness},
+    )
+
+
 @app.get("/health", tags=["System"])
 async def health_check():
-    """Sunucu sağlık kontrolü endpoint'i."""
-    return {
-        "status": "healthy",
-        "app": settings.app_name,
-        "version": settings.app_version,
-    }
+    return await readiness_check()
 
 
 @app.get("/", tags=["System"])

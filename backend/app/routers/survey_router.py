@@ -1,33 +1,34 @@
-# ==============================================================================
-# backend/app/routers/survey_router.py
-# NutriSense — Anket API Endpoint'leri
-#
-# POST /api/v1/survey         — Anket yanıtlarını kaydet
-# GET  /api/v1/survey/stats   — Anket istatistikleri (araştırmacı)
-# POST /api/v1/usability      — Kullanılabilirlik testi oturumu kaydet
-# GET  /api/v1/usability/export — Tüm oturumları JSON dışa aktar
-# ==============================================================================
+"""Database-backed, pseudonymous research data endpoints."""
 
-import json
-from datetime import datetime
-from pathlib import Path
-from typing import Optional
+import hmac
+from datetime import datetime, timezone
+from typing import Any, Optional
 from uuid import UUID, uuid4
 
 from fastapi import APIRouter, Depends, Header, HTTPException, status
-from pydantic import BaseModel
+from pydantic import BaseModel, Field, field_validator
+from sqlalchemy.orm import Session
 
 from ..config import get_settings
+from ..models.database import (
+    AuditEvent,
+    SurveySubmission,
+    SurveyVersion,
+    UsabilitySession,
+    UsabilityTask,
+    get_db,
+    utc_now,
+)
 
 router = APIRouter(prefix="/api/v1", tags=["Anket"])
 settings = get_settings()
+DEFAULT_SURVEY_VERSION = "1.0"
+MAX_FREE_TEXT_LENGTH = 1000
 
 
 def require_research_export_token(
     x_research_export_token: Optional[str] = Header(default=None),
 ):
-    import hmac
-
     expected = settings.research_export_token
     if not expected or not x_research_export_token or not hmac.compare_digest(
         expected, x_research_export_token
@@ -38,56 +39,81 @@ def require_research_export_token(
         )
 
 
-# ═══════════════════════════════════════════════════════════════════════════════
-# ŞEMALAR (Pydantic)
-# ═══════════════════════════════════════════════════════════════════════════════
+def _aware_utc(value: Optional[datetime]) -> datetime:
+    if value is None:
+        return utc_now()
+    if value.tzinfo is None:
+        raise ValueError("Tarih/saat UTC offset bilgisi içermelidir.")
+    return value.astimezone(timezone.utc)
+
+
+def _validate_answer(value: Any) -> Any:
+    if isinstance(value, str) and len(value) > MAX_FREE_TEXT_LENGTH:
+        raise ValueError(f"Açık uçlu yanıt en fazla {MAX_FREE_TEXT_LENGTH} karakter olabilir.")
+    if isinstance(value, list):
+        for item in value:
+            _validate_answer(item)
+    return value
+
 
 class SurveyAnswerSchema(BaseModel):
-    """Tek soru yanıtı"""
-    question_id: str
-    answer: str | int | list | None
+    question_id: str = Field(min_length=1, max_length=64)
+    answer: str | int | float | bool | list | None = Field(
+        default=None,
+        description="Ad, e-posta, telefon veya başka doğrudan kişisel veri yazmayın.",
+    )
     timestamp: Optional[datetime] = None
+
+    @field_validator("answer")
+    @classmethod
+    def limit_free_text(cls, value):
+        return _validate_answer(value)
 
 
 class SurveySubmissionSchema(BaseModel):
-    """Anket gönderimi"""
     id: Optional[UUID] = None
-    participant_id: UUID
-    answers: list[SurveyAnswerSchema]
-    completion_seconds: Optional[int] = None
-    device_info: Optional[str] = None
+    participant_id: UUID = Field(description="Hesap UUID'sinden bağımsız rastgele pseudonym")
+    survey_version: str = Field(default=DEFAULT_SURVEY_VERSION, max_length=32)
+    answers: list[SurveyAnswerSchema] = Field(min_length=1, max_length=100)
+    completion_seconds: Optional[int] = Field(default=None, ge=0, le=86400)
+    device_info: Optional[str] = Field(default=None, max_length=255)
     submitted_at: Optional[datetime] = None
 
 
 class SurveyResponseSchema(BaseModel):
-    """Yanıt"""
     success: bool
     message: str
     survey_id: UUID
 
 
 class UsabilityTaskSchema(BaseModel):
-    """Kullanılabilirlik test görevi"""
-    id: str
-    title: str
-    description: Optional[str] = None
-    status: str
-    start_time: Optional[str] = None
-    end_time: Optional[str] = None
-    duration_seconds: Optional[float] = None
+    id: str = Field(min_length=1, max_length=64)
+    title: str = Field(min_length=1, max_length=255)
+    description: Optional[str] = Field(default=None, max_length=1000)
+    status: str = Field(min_length=1, max_length=32)
+    start_time: Optional[datetime] = None
+    end_time: Optional[datetime] = None
+    duration_seconds: Optional[float] = Field(default=None, ge=0)
     is_success: Optional[bool] = None
-    researcher_note: Optional[str] = None
+    researcher_note: Optional[str] = Field(
+        default=None,
+        max_length=1000,
+        description="Doğrudan kişisel veri yazmayın.",
+    )
 
 
 class UsabilitySessionSchema(BaseModel):
-    """Kullanılabilirlik test oturumu"""
     id: Optional[UUID] = None
-    participant_id: str
+    participant_id: UUID = Field(description="Hesap UUID'sinden bağımsız rastgele pseudonym")
     session_date: Optional[datetime] = None
-    tasks: list[UsabilityTaskSchema]
-    general_note: Optional[str] = None
-    success_rate: Optional[float] = None
-    avg_task_duration: Optional[float] = None
+    tasks: list[UsabilityTaskSchema] = Field(min_length=1, max_length=100)
+    general_note: Optional[str] = Field(
+        default=None,
+        max_length=1000,
+        description="Doğrudan kişisel veri yazmayın.",
+    )
+    success_rate: Optional[float] = Field(default=None, ge=0, le=100)
+    avg_task_duration: Optional[float] = Field(default=None, ge=0)
 
 
 class UsabilityResponseSchema(BaseModel):
@@ -96,224 +122,182 @@ class UsabilityResponseSchema(BaseModel):
     session_id: UUID
 
 
-# ═══════════════════════════════════════════════════════════════════════════════
-# ANKET KAYIT VERİTABANI — basit JSON storage
-# ═══════════════════════════════════════════════════════════════════════════════
-# Not: Gerçek üretimde bu veriler MySQL'e kaydedilir (SurveyResponse tablosu).
-# Burada basitlik için in-memory + dosya tabanlı yaklaşım kullanıyoruz.
-
-DATA_DIR = Path(__file__).parent.parent.parent / "data"
-SURVEY_FILE = DATA_DIR / "survey_responses.json"
-USABILITY_FILE = DATA_DIR / "usability_sessions.json"
-
-
-def _ensure_data_dir():
-    """Veri dizinini oluştur"""
-    DATA_DIR.mkdir(parents=True, exist_ok=True)
+def _survey_version(db: Session, version_name: str) -> SurveyVersion:
+    version = db.query(SurveyVersion).filter(SurveyVersion.version == version_name).first()
+    if version is None or not version.is_active:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Aktif anket sürümü bulunamadı.",
+        )
+    return version
 
 
-def _load_json(path: Path) -> list:
-    """JSON dosyasından veri yükle"""
-    if not path.exists():
-        return []
-    try:
-        with open(path, "r", encoding="utf-8") as f:
-            return json.load(f)
-    except (json.JSONDecodeError, IOError):
-        return []
+def _audit_export(db: Session, event: str, record_count: int) -> None:
+    db.add(
+        AuditEvent(
+            actor_type="researcher",
+            event=event,
+            success=True,
+            metadata_json={"record_count": record_count},
+        )
+    )
 
-
-def _save_json(path: Path, data: list):
-    """Veriyi JSON dosyasına kaydet"""
-    _ensure_data_dir()
-    with open(path, "w", encoding="utf-8") as f:
-        json.dump(data, f, ensure_ascii=False, indent=2)
-
-
-# ═══════════════════════════════════════════════════════════════════════════════
-# ENDPOINT'LER
-# ═══════════════════════════════════════════════════════════════════════════════
 
 @router.post("/survey", response_model=SurveyResponseSchema)
-async def submit_survey(submission: SurveySubmissionSchema):
-    """
-    Anket yanıtlarını kaydeder.
-
-    İstek gövdesi:
-    ```json
-    {
-        "participant_id": "anonim-uuid",
-        "answers": [
-            {"question_id": "q1", "answer": "Birinden yardım istiyordum", "timestamp": "..."},
-            {"question_id": "q2", "answer": 4, "timestamp": "..."}
-        ],
-        "completion_seconds": 180,
-        "device_info": "Android 14 | Pixel 8"
-    }
-    ```
-    """
+async def submit_survey(
+    submission: SurveySubmissionSchema,
+    db: Session = Depends(get_db),
+):
+    survey_id = submission.id or uuid4()
+    version = _survey_version(db, submission.survey_version)
+    record = SurveySubmission(
+        id=str(survey_id),
+        participant_pseudonym=str(submission.participant_id),
+        survey_version_id=version.id,
+        answers_json=[answer.model_dump(mode="json") for answer in submission.answers],
+        completion_seconds=submission.completion_seconds,
+        device_info=submission.device_info,
+        submitted_at=_aware_utc(submission.submitted_at),
+    )
     try:
-        survey_id = submission.id or uuid4()
-
-        # Yanıt verisini hazırla
-        record = {
-            "id": str(survey_id),
-            "participant_id": str(submission.participant_id),
-            "answers": [a.model_dump(mode="json") for a in submission.answers],
-            "completion_seconds": submission.completion_seconds,
-            "device_info": submission.device_info,
-            "submitted_at": (
-                submission.submitted_at or datetime.now()
-            ).isoformat(),
-        }
-
-        # Dosyaya kaydet
-        data = _load_json(SURVEY_FILE)
-        data.append(record)
-        _save_json(SURVEY_FILE, data)
-
-        return SurveyResponseSchema(
-            success=True,
-            message="Anket yanıtlarınız başarıyla kaydedildi. Teşekkür ederiz.",
-            survey_id=survey_id,
-        )
-    except Exception as e:
-        raise HTTPException(
-            status_code=500,
-            detail=f"Anket kaydedilemedi: {str(e)}"
-        )
+        db.add(record)
+        db.commit()
+    except Exception:
+        db.rollback()
+        raise HTTPException(status_code=500, detail="Anket kaydedilemedi.")
+    return SurveyResponseSchema(
+        success=True,
+        message="Anket yanıtlarınız başarıyla kaydedildi. Teşekkür ederiz.",
+        survey_id=survey_id,
+    )
 
 
 @router.get("/survey/stats")
-async def get_survey_stats(_: None = Depends(require_research_export_token)):
-    """
-    Araştırmacılar için anket istatistikleri.
-
-    Döner:
-    - Toplam yanıt sayısı
-    - Soru bazlı ortalamalar (Likert soruları için)
-    - Ortalama tamamlama süresi
-    """
-    data = _load_json(SURVEY_FILE)
-
-    if not data:
-        return {
-            "total_responses": 0,
-            "message": "Henüz anket yanıtı yok.",
-        }
-
-    total = len(data)
-
-    # Likert ortalamalarını hesapla
+async def get_survey_stats(
+    _: None = Depends(require_research_export_token),
+    db: Session = Depends(get_db),
+):
+    submissions = db.query(SurveySubmission).all()
     likert_questions = ["q2", "q3", "q4", "q8"]
-    averages = {}
-
-    for qid in likert_questions:
-        values = []
-        for survey in data:
-            for ans in survey.get("answers", []):
-                if ans.get("question_id") == qid and isinstance(ans.get("answer"), (int, float)):
-                    values.append(ans["answer"])
+    averages: dict[str, dict] = {}
+    for question_id in likert_questions:
+        values = [
+            answer["answer"]
+            for submission in submissions
+            for answer in submission.answers_json
+            if answer.get("question_id") == question_id
+            and isinstance(answer.get("answer"), (int, float))
+        ]
         if values:
-            averages[qid] = {
+            averages[question_id] = {
                 "average": round(sum(values) / len(values), 2),
                 "count": len(values),
                 "min": min(values),
                 "max": max(values),
             }
-
-    # Ortalama tamamlama süresi
-    durations = [
-        s.get("completion_seconds", 0)
-        for s in data
-        if s.get("completion_seconds")
-    ]
-    avg_duration = round(sum(durations) / len(durations), 1) if durations else 0
-
-    # Evet/Hayır dağılımı (q5)
+    durations = [item.completion_seconds for item in submissions if item.completion_seconds]
     q5_counts = {"Evet": 0, "Hayır": 0, "Belki": 0}
-    for survey in data:
-        for ans in survey.get("answers", []):
-            if ans.get("question_id") == "q5":
-                val = str(ans.get("answer", ""))
-                if val in q5_counts:
-                    q5_counts[val] += 1
+    for submission in submissions:
+        for answer in submission.answers_json:
+            if answer.get("question_id") == "q5" and str(answer.get("answer")) in q5_counts:
+                q5_counts[str(answer["answer"])] += 1
 
+    _audit_export(db, "survey_stats_exported", len(submissions))
+    db.commit()
     return {
-        "total_responses": total,
+        "total_responses": len(submissions),
         "likert_averages": averages,
-        "avg_completion_seconds": avg_duration,
+        "avg_completion_seconds": round(sum(durations) / len(durations), 1) if durations else 0,
         "q5_distribution": q5_counts,
     }
 
 
 @router.post("/usability", response_model=UsabilityResponseSchema)
-async def submit_usability_session(session: UsabilitySessionSchema):
-    """
-    Kullanılabilirlik testi oturumunu kaydeder.
-    """
+async def submit_usability_session(
+    session: UsabilitySessionSchema,
+    db: Session = Depends(get_db),
+):
+    session_id = session.id or uuid4()
+    record = UsabilitySession(
+        id=str(session_id),
+        participant_pseudonym=str(session.participant_id),
+        session_date=_aware_utc(session.session_date),
+        general_note=session.general_note,
+        success_rate=session.success_rate,
+        avg_task_duration=session.avg_task_duration,
+    )
     try:
-        session_id = session.id or uuid4()
-
-        record = {
-            "id": str(session_id),
-            "participant_id": session.participant_id,
-            "session_date": (
-                session.session_date or datetime.now()
-            ).isoformat(),
-            "tasks": [t.model_dump() for t in session.tasks],
-            "general_note": session.general_note,
-            "success_rate": session.success_rate,
-            "avg_task_duration": session.avg_task_duration,
-        }
-
-        data = _load_json(USABILITY_FILE)
-        data.append(record)
-        _save_json(USABILITY_FILE, data)
-
-        return {
-            "success": True,
-            "message": "Kullanılabilirlik testi oturumu kaydedildi.",
-            "session_id": session_id,
-        }
-    except Exception as e:
-        raise HTTPException(
-            status_code=500,
-            detail=f"Oturum kaydedilemedi: {str(e)}"
-        )
+        db.add(record)
+        db.flush()
+        for task in session.tasks:
+            db.add(
+                UsabilityTask(
+                    session_id=record.id,
+                    task_key=task.id,
+                    title=task.title,
+                    description=task.description,
+                    status=task.status,
+                    started_at=_aware_utc(task.start_time) if task.start_time else None,
+                    ended_at=_aware_utc(task.end_time) if task.end_time else None,
+                    duration_seconds=task.duration_seconds,
+                    is_success=task.is_success,
+                    researcher_note=task.researcher_note,
+                )
+            )
+        db.commit()
+    except Exception:
+        db.rollback()
+        raise HTTPException(status_code=500, detail="Oturum kaydedilemedi.")
+    return UsabilityResponseSchema(
+        success=True,
+        message="Kullanılabilirlik testi oturumu kaydedildi.",
+        session_id=session_id,
+    )
 
 
 @router.get("/usability/export")
 async def export_usability_sessions(
     _: None = Depends(require_research_export_token),
+    db: Session = Depends(get_db),
 ):
-    """
-    Tüm kullanılabilirlik testi oturumlarını JSON olarak dışa aktarır.
-    """
-    sessions = _load_json(USABILITY_FILE)
-
-    if not sessions:
-        return {
-            "export_date": datetime.now().isoformat(),
-            "total_sessions": 0,
-            "sessions": [],
-            "message": "Henüz kayıtlı oturum yok.",
-        }
-
-    # Genel istatistikler
-    total_tasks = sum(len(s.get("tasks", [])) for s in sessions)
-    successful_tasks = sum(
-        1
-        for s in sessions
-        for t in s.get("tasks", [])
-        if t.get("is_success")
-    )
-    overall_success = (successful_tasks / total_tasks * 100) if total_tasks > 0 else 0
-
+    sessions = db.query(UsabilitySession).all()
+    rows = []
+    successful_tasks = 0
+    total_tasks = 0
+    for session in sessions:
+        tasks = db.query(UsabilityTask).filter(UsabilityTask.session_id == session.id).all()
+        total_tasks += len(tasks)
+        successful_tasks += sum(1 for task in tasks if task.is_success)
+        rows.append(
+            {
+                "id": session.id,
+                "participant_id": session.participant_pseudonym,
+                "session_date": session.session_date.isoformat(),
+                "general_note": session.general_note,
+                "success_rate": session.success_rate,
+                "avg_task_duration": session.avg_task_duration,
+                "tasks": [
+                    {
+                        "id": task.task_key,
+                        "title": task.title,
+                        "description": task.description,
+                        "status": task.status,
+                        "start_time": task.started_at.isoformat() if task.started_at else None,
+                        "end_time": task.ended_at.isoformat() if task.ended_at else None,
+                        "duration_seconds": task.duration_seconds,
+                        "is_success": task.is_success,
+                        "researcher_note": task.researcher_note,
+                    }
+                    for task in tasks
+                ],
+            }
+        )
+    _audit_export(db, "usability_exported", len(sessions))
+    db.commit()
     return {
-        "export_date": datetime.now().isoformat(),
+        "export_date": utc_now().isoformat(),
         "total_sessions": len(sessions),
         "total_tasks": total_tasks,
-        "overall_success_rate": round(overall_success, 1),
-        "sessions": sessions,
+        "overall_success_rate": round(successful_tasks / total_tasks * 100, 1) if total_tasks else 0,
+        "sessions": rows,
     }
