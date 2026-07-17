@@ -626,7 +626,6 @@
         "type": "object"
       },
       "SurveyAnswerSchema": {
-        "description": "Tek soru yanıtı",
         "properties": {
           "answer": {
             "anyOf": [
@@ -637,6 +636,12 @@
                 "type": "integer"
               },
               {
+                "type": "number"
+              },
+              {
+                "type": "boolean"
+              },
+              {
                 "items": {},
                 "type": "array"
               },
@@ -644,9 +649,12 @@
                 "type": "null"
               }
             ],
+            "description": "Ad, e-posta, telefon veya başka doğrudan kişisel veri yazmayın.",
             "title": "Answer"
           },
           "question_id": {
+            "maxLength": 64,
+            "minLength": 1,
             "title": "Question Id",
             "type": "string"
           },
@@ -664,14 +672,12 @@
           }
         },
         "required": [
-          "question_id",
-          "answer"
+          "question_id"
         ],
         "title": "SurveyAnswerSchema",
         "type": "object"
       },
       "SurveyResponseSchema": {
-        "description": "Yanıt",
         "properties": {
           "message": {
             "title": "Message",
@@ -696,18 +702,21 @@
         "type": "object"
       },
       "SurveySubmissionSchema": {
-        "description": "Anket gönderimi",
         "properties": {
           "answers": {
             "items": {
               "$ref": "#/components/schemas/SurveyAnswerSchema"
             },
+            "maxItems": 100,
+            "minItems": 1,
             "title": "Answers",
             "type": "array"
           },
           "completion_seconds": {
             "anyOf": [
               {
+                "maximum": 86400.0,
+                "minimum": 0.0,
                 "type": "integer"
               },
               {
@@ -719,6 +728,7 @@
           "device_info": {
             "anyOf": [
               {
+                "maxLength": 255,
                 "type": "string"
               },
               {
@@ -740,6 +750,7 @@
             "title": "Id"
           },
           "participant_id": {
+            "description": "Hesap UUID'sinden bağımsız rastgele pseudonym",
             "format": "uuid",
             "title": "Participant Id",
             "type": "string"
@@ -755,6 +766,12 @@
               }
             ],
             "title": "Submitted At"
+          },
+          "survey_version": {
+            "default": "1.0",
+            "maxLength": 32,
+            "title": "Survey Version",
+            "type": "string"
           }
         },
         "required": [
@@ -834,11 +851,11 @@
         "type": "object"
       },
       "UsabilitySessionSchema": {
-        "description": "Kullanılabilirlik test oturumu",
         "properties": {
           "avg_task_duration": {
             "anyOf": [
               {
+                "minimum": 0.0,
                 "type": "number"
               },
               {
@@ -850,12 +867,14 @@
           "general_note": {
             "anyOf": [
               {
+                "maxLength": 1000,
                 "type": "string"
               },
               {
                 "type": "null"
               }
             ],
+            "description": "Doğrudan kişisel veri yazmayın.",
             "title": "General Note"
           },
           "id": {
@@ -871,6 +890,8 @@
             "title": "Id"
           },
           "participant_id": {
+            "description": "Hesap UUID'sinden bağımsız rastgele pseudonym",
+            "format": "uuid",
             "title": "Participant Id",
             "type": "string"
           },
@@ -889,6 +910,8 @@
           "success_rate": {
             "anyOf": [
               {
+                "maximum": 100.0,
+                "minimum": 0.0,
                 "type": "number"
               },
               {
@@ -901,6 +924,8 @@
             "items": {
               "$ref": "#/components/schemas/UsabilityTaskSchema"
             },
+            "maxItems": 100,
+            "minItems": 1,
             "title": "Tasks",
             "type": "array"
           }
@@ -913,11 +938,11 @@
         "type": "object"
       },
       "UsabilityTaskSchema": {
-        "description": "Kullanılabilirlik test görevi",
         "properties": {
           "description": {
             "anyOf": [
               {
+                "maxLength": 1000,
                 "type": "string"
               },
               {
@@ -929,6 +954,7 @@
           "duration_seconds": {
             "anyOf": [
               {
+                "minimum": 0.0,
                 "type": "number"
               },
               {
@@ -940,6 +966,7 @@
           "end_time": {
             "anyOf": [
               {
+                "format": "date-time",
                 "type": "string"
               },
               {
@@ -949,6 +976,8 @@
             "title": "End Time"
           },
           "id": {
+            "maxLength": 64,
+            "minLength": 1,
             "title": "Id",
             "type": "string"
           },
@@ -966,17 +995,20 @@
           "researcher_note": {
             "anyOf": [
               {
+                "maxLength": 1000,
                 "type": "string"
               },
               {
                 "type": "null"
               }
             ],
+            "description": "Doğrudan kişisel veri yazmayın.",
             "title": "Researcher Note"
           },
           "start_time": {
             "anyOf": [
               {
+                "format": "date-time",
                 "type": "string"
               },
               {
@@ -986,10 +1018,14 @@
             "title": "Start Time"
           },
           "status": {
+            "maxLength": 32,
+            "minLength": 1,
             "title": "Status",
             "type": "string"
           },
           "title": {
+            "maxLength": 255,
+            "minLength": 1,
             "title": "Title",
             "type": "string"
           }
@@ -1685,6 +1721,26 @@
       "post": {
         "description": "Belirlenen tarih aralığındaki besin kayıtlarını e-posta ve SMS ile diyetisyene gönderir.",
         "operationId": "send_to_dietitian_api_v1_send_to_dietitian_post",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Idempotency-Key",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "maxLength": 128,
+                  "minLength": 8,
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Idempotency-Key"
+            }
+          }
+        ],
         "requestBody": {
           "content": {
             "application/json": {
@@ -1730,7 +1786,6 @@
     },
     "/api/v1/survey": {
       "post": {
-        "description": "Anket yanıtlarını kaydeder.\n\nİstek gövdesi:\n```json\n{\n    \"participant_id\": \"anonim-uuid\",\n    \"answers\": [\n        {\"question_id\": \"q1\", \"answer\": \"Birinden yardım istiyordum\", \"timestamp\": \"...\"},\n        {\"question_id\": \"q2\", \"answer\": 4, \"timestamp\": \"...\"}\n    ],\n    \"completion_seconds\": 180,\n    \"device_info\": \"Android 14 | Pixel 8\"\n}\n```",
         "operationId": "submit_survey_api_v1_survey_post",
         "requestBody": {
           "content": {
@@ -1772,7 +1827,6 @@
     },
     "/api/v1/survey/stats": {
       "get": {
-        "description": "Araştırmacılar için anket istatistikleri.\n\nDöner:\n- Toplam yanıt sayısı\n- Soru bazlı ortalamalar (Likert soruları için)\n- Ortalama tamamlama süresi",
         "operationId": "get_survey_stats_api_v1_survey_stats_get",
         "parameters": [
           {
@@ -1820,7 +1874,6 @@
     },
     "/api/v1/usability": {
       "post": {
-        "description": "Kullanılabilirlik testi oturumunu kaydeder.",
         "operationId": "submit_usability_session_api_v1_usability_post",
         "requestBody": {
           "content": {
@@ -1862,7 +1915,6 @@
     },
     "/api/v1/usability/export": {
       "get": {
-        "description": "Tüm kullanılabilirlik testi oturumlarını JSON olarak dışa aktarır.",
         "operationId": "export_usability_sessions_api_v1_usability_export_get",
         "parameters": [
           {
@@ -1973,7 +2025,6 @@
     },
     "/health": {
       "get": {
-        "description": "Sunucu sağlık kontrolü endpoint'i.",
         "operationId": "health_check_health_get",
         "responses": {
           "200": {
@@ -1986,6 +2037,44 @@
           }
         },
         "summary": "Health Check",
+        "tags": [
+          "System"
+        ]
+      }
+    },
+    "/health/live": {
+      "get": {
+        "operationId": "liveness_check_health_live_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Liveness Check",
+        "tags": [
+          "System"
+        ]
+      }
+    },
+    "/health/ready": {
+      "get": {
+        "operationId": "readiness_check_health_ready_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Readiness Check",
         "tags": [
           "System"
         ]

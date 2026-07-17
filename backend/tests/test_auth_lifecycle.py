@@ -140,7 +140,8 @@ def test_account_deletion_requires_password_and_removes_owned_data(client):
         audit = db.query(AuthAuditLog).filter(
             AuthAuditLog.event == "account_deleted"
         ).one()
-        assert audit.user_id == auth["user_id"]
+        assert audit.user_id is None
+        assert audit.email_hash is not None
     finally:
         db.close()
 

@@ -133,7 +133,9 @@ jobs:
         env:
           DATABASE_URL: "sqlite+pysqlite:///:memory:"
           JWT_SECRET_KEY: "test-secret-key-for-ci-only"
-          DEBUG: "true"
+          APP_ENVIRONMENT: "test"
+          DEBUG: "false"
+          MIGRATION_CHECK_ENABLED: "false"
         run: |
           python scripts/export_openapi.py --check
           pytest -v --tb=short

@@ -116,9 +116,19 @@ def test_multipart_food_analysis_matches_shared_fixture_shape(client, monkeypatc
                 "source": "nutritionix",
             }
 
-    app.dependency_overrides[get_current_user] = lambda: SimpleNamespace(
-        id="9e4e5356-b491-4575-a9dd-c5abbc777fe9"
+    user_id = "9e4e5356-b491-4575-a9dd-c5abbc777fe9"
+    db = SessionLocal()
+    db.add(
+        User(
+            id=user_id,
+            email="contract-food@example.com",
+            hashed_password="not-used-in-this-test",
+            full_name="Contract Test User",
+        )
     )
+    db.commit()
+    db.close()
+    app.dependency_overrides[get_current_user] = lambda: SimpleNamespace(id=user_id)
     monkeypatch.setattr(food_router, "vision_service", SuccessfulVision())
     monkeypatch.setattr(food_router, "nutrition_service", SuccessfulNutrition())
 
