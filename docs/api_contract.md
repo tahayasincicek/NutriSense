@@ -79,11 +79,11 @@ OpenAPI snapshot değişikliği; backend testi, mobil fixture testi ve migration
 | DELETE | `/dietitians/assignment/{id}` | Bearer access | Yok | 204 |
 | POST | `/analyze-food` | Bearer access | Multipart `image`, `meal_type` | `FoodAnalysisResponse` |
 | GET | `/food-history/{user_id}` | Bearer access | `from_date`, `to_date` | `FoodHistoryResponse` |
-| POST | `/send-to-dietitian` | Bearer access | JSON `SendToDietitianRequest`; `consent=true` zorunlu | `SendToDietitianResponse` |
+| POST | `/send-to-dietitian` | Bearer access | JSON `SendToDietitianRequest`; `consent=true`; önerilen `Idempotency-Key` başlığı | `SendToDietitianResponse` |
 | POST | `/survey` | Araştırma katılımcı kimliği gövdede | JSON `SurveySubmissionSchema` | `SurveyResponseSchema` |
 | POST | `/usability` | Araştırma katılımcı kimliği gövdede | JSON `UsabilitySessionSchema` | `UsabilityResponseSchema` |
 
-Survey/usability gönderimlerinde hesap `user_id` değeri kullanılmaz; yalnız ayrı UUID/pseudonym `participant_id` kabul edilir. İstatistik ve ham veri export yolları `X-Research-Export-Token` ile korunur. Production saha dağıtımından önce etik onam, rate limit ve araştırmacı rol/yetki politikası ayrıca tamamlanmalıdır.
+Survey/usability gönderimlerinde hesap `user_id` değeri kullanılmaz; yalnız ayrı UUID/pseudonym `participant_id` kabul edilir. Kayıtlar JSON dosyasına değil sürümlü veritabanı tablolarına transaction ile yazılır. İstatistik ve ham veri export yolları `X-Research-Export-Token` ile korunur ve başarılı export audit olayı üretir. Production saha dağıtımından önce etik onam, rate limit ve araştırmacı rol/yetki politikası ayrıca tamamlanmalıdır.
 
 ## 5. Besin analizi
 
