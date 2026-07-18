@@ -1,0 +1,13 @@
+{
+  "food_name": "apple",
+  "brand_name": null,
+  "serving_qty": 1,
+  "serving_unit": "medium",
+  "serving_weight_grams": 182,
+  "nf_calories": 94.64,
+  "nf_total_fat": 0.31,
+  "nf_total_carbohydrate": 25.13,
+  "nf_dietary_fiber": 4.37,
+  "nf_protein": 0.47,
+  "nix_item_id": null
+}

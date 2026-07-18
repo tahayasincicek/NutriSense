@@ -1,39 +1,39 @@
-# ==============================================================================
-# backend/app/services/nutritionix_service.py
-# NutriSense — Nutritionix API Servisi
-#
-# 800.000+ besin kaydından kalori ve besin değeri çeker.
-# Exponential backoff ile rate limit yönetimi.
-# Fallback: yerel JSON veritabanı.
-# ==============================================================================
+"""Nutritionix adapter with explicit provenance and fail-closed local fallback."""
+
+from __future__ import annotations
 
 import json
 import logging
+from datetime import datetime, timezone
+from decimal import Decimal
 from pathlib import Path
 from typing import Optional
 
 import httpx
-from tenacity import retry, stop_after_attempt, wait_exponential, retry_if_exception_type
+from tenacity import retry, retry_if_exception_type, stop_after_attempt, wait_exponential
 
 from ..config import get_settings
+from ..domain.nutrition import (
+    NORMALIZATION_VERSION,
+    NutritionDomainError,
+    NutrientsPer100g,
+    calculate_nutrition,
+    normalize_food_name,
+    validate_portion_grams,
+)
 
 logger = logging.getLogger(__name__)
 settings = get_settings()
 
-# Yerel fallback veritabanı yolu
-LOCAL_DB_PATH = Path(__file__).parent.parent.parent.parent / "ai_model" / "calorie_database.json"
+LOCAL_DB_PATH = (
+    Path(__file__).parent.parent.parent.parent / "ai_model" / "calorie_database.json"
+)
+NUTRITIONIX_LICENSE = "Nutritionix API Terms of Service"
+NUTRITIONIX_ATTRIBUTION = "Nutrition data provided by Nutritionix"
 
 
 class NutritionixService:
-    """
-    Nutritionix API ile besin değeri sorgulama servisi.
-
-    Özellikler:
-    - Natural language besin sorgulama
-    - Detaylı makro besin değerleri (protein, carb, fat, fiber)
-    - API başarısız olursa yerel JSON veritabanına fallback
-    - Exponential backoff (rate limit koruması)
-    """
+    """Fetch nutrition data while preserving source and portion semantics."""
 
     API_BASE = "https://trackapi.nutritionix.com/v2"
 
@@ -41,20 +41,26 @@ class NutritionixService:
         self.app_id = settings.nutritionix_app_id
         self.api_key = settings.nutritionix_api_key
         self._available = bool(self.app_id and self.api_key)
-        self._local_db = self._load_local_db()
-
+        self._local_meta, self._local_db = self._load_local_db()
+        self._local_verified = (
+            self._local_meta.get("evidence_status") == "VERIFIED"
+            and bool(self._local_meta.get("source_inventory"))
+        )
         if self._available:
             logger.info("Nutritionix API yapılandırıldı")
         else:
-            logger.warning("Nutritionix API anahtarları eksik, yerel DB kullanılacak.")
+            logger.warning("Nutritionix yapılandırılmadı; yalnız doğrulanmış yerel veri kullanılabilir.")
+        if self._local_db and not self._local_verified:
+            logger.warning("Yerel besin verisi doğrulanmamış; kalori sonucu olarak kullanılmayacak.")
 
-    def _load_local_db(self) -> dict:
-        """Yerel kalori veritabanını yükler (fallback)."""
-        if LOCAL_DB_PATH.exists():
-            with open(LOCAL_DB_PATH, "r", encoding="utf-8") as f:
-                data = json.load(f)
-            return {k: v for k, v in data.items() if k != "_meta"}
-        return {}
+    def _load_local_db(self) -> tuple[dict, dict]:
+        if not LOCAL_DB_PATH.exists():
+            return {}, {}
+        with LOCAL_DB_PATH.open("r", encoding="utf-8") as file:
+            payload = json.load(file)
+        return payload.get("_meta", {}), {
+            key: value for key, value in payload.items() if key != "_meta"
+        }
 
     @retry(
         stop=stop_after_attempt(3),
@@ -66,190 +72,204 @@ class NutritionixService:
         self,
         food_name: str,
         portion_grams: Optional[float] = None,
+        *,
+        input_locale: str = "en-US",
     ) -> dict:
-        """
-        Besin adına göre kalori ve besin değerlerini döner.
-
-        API başarısız olursa yerel veritabanına fallback yapar.
-
-        Args:
-            food_name: Besin adı (Türkçe veya İngilizce)
-            portion_grams: Porsiyon gramı (None = varsayılan)
-
-        Returns:
-            {
-                "food_name": "elma",
-                "calories_per_100g": 52,
-                "default_portion_g": 150,
-                "total_calories": 78,
-                "nutrients": {
-                    "protein": 0.3,
-                    "carb": 13.8,
-                    "fat": 0.2,
-                    "fiber": 2.4
-                },
-                "source": "nutritionix" | "local_db"
-            }
-        """
-        # Önce API dene
+        if portion_grams is not None:
+            validate_portion_grams(portion_grams)
         if self._available:
             try:
                 result = await self._query_api(food_name)
                 if result:
-                    return self._format_result(result, portion_grams, "nutritionix")
-            except Exception as e:
-                logger.warning(f"Nutritionix API hatası: {e}, fallback'e geçiliyor")
-
-        # Fallback: yerel veritabanı
-        return self._query_local_db(food_name, portion_grams)
+                    return self._format_result(
+                        result, portion_grams, input_locale=input_locale
+                    )
+            except (httpx.HTTPError, NutritionDomainError, KeyError, TypeError) as exc:
+                logger.warning("Nutritionix sonucu kullanılamadı: %s", type(exc).__name__)
+        return self._query_local_db(food_name, portion_grams, input_locale=input_locale)
 
     async def _query_api(self, food_name: str) -> Optional[dict]:
-        """Nutritionix API'ye natural language sorgusu gönderir."""
         headers = {
             "x-app-id": self.app_id,
             "x-app-key": self.api_key,
             "Content-Type": "application/json",
         }
-
-        # Natural language endpoint — "150g elma" gibi sorgular
-        body = {
-            "query": food_name,
-            "locale": "tr_TR",
-        }
-
+        body = {"query": food_name, "locale": "tr_TR"}
         async with httpx.AsyncClient(timeout=15.0) as client:
             response = await client.post(
-                f"{self.API_BASE}/natural/nutrients",
-                headers=headers,
-                json=body,
+                f"{self.API_BASE}/natural/nutrients", headers=headers, json=body
             )
-
-            if response.status_code == 200:
-                data = response.json()
-                foods = data.get("foods", [])
-                if foods:
-                    return foods[0]
-
-            elif response.status_code == 401:
-                logger.error("Nutritionix API: Yetkisiz erişim (API key kontrolü)")
-                self._available = False
-
-            elif response.status_code == 429:
-                logger.warning("Nutritionix API: Rate limit aşıldı")
-                raise httpx.HTTPError("Rate limit aşıldı")
-
-            return None
+        if response.status_code == 200:
+            foods = response.json().get("foods", [])
+            return foods[0] if foods else None
+        if response.status_code == 401:
+            logger.error("Nutritionix yetkilendirmesi başarısız")
+            self._available = False
+        elif response.status_code == 429:
+            raise httpx.HTTPError("Nutritionix rate limit")
+        return None
 
     def _format_result(
-        self, api_food: dict, portion_grams: Optional[float], source: str
+        self,
+        api_food: dict,
+        portion_grams: Optional[float],
+        *,
+        input_locale: str,
     ) -> dict:
-        """API yanıtını standart formata dönüştürür."""
-        # Nutritionix API alanları
-        serving_weight = api_food.get("serving_weight_grams", 100)
-        calories = api_food.get("nf_calories", 0)
-        protein = api_food.get("nf_protein", 0)
-        carbs = api_food.get("nf_total_carbohydrate", 0)
-        fat = api_food.get("nf_total_fat", 0)
-        fiber = api_food.get("nf_dietary_fiber", 0)
+        serving_weight = validate_portion_grams(api_food["serving_weight_grams"])
+        canonical = normalize_food_name(api_food.get("food_name", ""), "en-US")
+        profile = self._profile_from_serving(api_food, serving_weight)
+        selected_grams = serving_weight if portion_grams is None else validate_portion_grams(portion_grams)
+        calculation = calculate_nutrition(profile, selected_grams)
+        source_item_id = str(
+            api_food.get("nix_item_id")
+            or f"common:{canonical.canonical_name}:{api_food.get('serving_qty', 1)}:{api_food.get('serving_unit', 'serving')}"
+        )
+        retrieved_at = datetime.now(timezone.utc).isoformat()
+        return self._result_dict(
+            canonical=canonical,
+            profile=profile,
+            calculation=calculation,
+            default_portion=serving_weight,
+            portion_method="source_default" if portion_grams is None else "user_selected",
+            source="nutritionix",
+            source_item_id=source_item_id,
+            source_locale=input_locale,
+            retrieved_at=retrieved_at,
+            serving_unit=str(api_food.get("serving_unit") or "serving"),
+            license_name=NUTRITIONIX_LICENSE,
+            attribution=NUTRITIONIX_ATTRIBUTION,
+        )
 
-        # 100g başına hesapla
-        scale_to_100 = 100 / max(serving_weight, 1)
-        cal_per_100 = calories * scale_to_100
-        prot_per_100 = protein * scale_to_100
-        carb_per_100 = carbs * scale_to_100
-        fat_per_100 = fat * scale_to_100
-        fiber_per_100 = fiber * scale_to_100
-
-        # Porsiyon hesabı
-        portion = portion_grams or serving_weight
-        scale = portion / 100
-
-        return {
-            "food_name": api_food.get("food_name", "bilinmeyen"),
-            "calories_per_100g": round(cal_per_100, 1),
-            "default_portion_g": round(serving_weight, 0),
-            "estimated_portion_g": round(portion, 0),
-            "total_calories": round(cal_per_100 * scale, 1),
-            "nutrients": {
-                "protein": round(prot_per_100 * scale, 1),
-                "carb": round(carb_per_100 * scale, 1),
-                "fat": round(fat_per_100 * scale, 1),
-                "fiber": round(fiber_per_100 * scale, 1),
-            },
-            "source": source,
-        }
+    @staticmethod
+    def _profile_from_serving(api_food: dict, serving_weight: Decimal) -> NutrientsPer100g:
+        scale = Decimal("100") / serving_weight
+        return NutrientsPer100g(
+            calories=Decimal(str(api_food.get("nf_calories", 0))) * scale,
+            protein=Decimal(str(api_food.get("nf_protein", 0))) * scale,
+            carbs=Decimal(str(api_food.get("nf_total_carbohydrate", 0))) * scale,
+            fat=Decimal(str(api_food.get("nf_total_fat", 0))) * scale,
+            fiber=Decimal(str(api_food.get("nf_dietary_fiber", 0))) * scale,
+        )
 
     def _query_local_db(
-        self, food_name: str, portion_grams: Optional[float]
+        self,
+        food_name: str,
+        portion_grams: Optional[float],
+        *,
+        input_locale: str = "tr-TR",
     ) -> dict:
-        """Yerel JSON veritabanından besin bilgisi çeker."""
         key = food_name.lower().replace(" ", "_")
+        if not self._local_verified or key not in self._local_db:
+            logger.warning("Doğrulanmış besin değeri bulunamadı: %s", key)
+            return self._not_found(food_name, input_locale)
 
-        if key in self._local_db:
-            data = self._local_db[key]
-            portion = portion_grams or data.get("default_portion_g", 100)
-            scale = portion / 100
+        data = self._local_db[key]
+        canonical = normalize_food_name(key, input_locale)
+        profile = NutrientsPer100g(
+            calories=data["calories_per_100g"],
+            protein=data.get("protein_per_100g", 0),
+            carbs=data.get("carbs_per_100g", 0),
+            fat=data.get("fat_per_100g", 0),
+            fiber=data.get("fiber_per_100g", 0),
+        )
+        default_portion = validate_portion_grams(data["default_portion_g"])
+        selected_grams = default_portion if portion_grams is None else validate_portion_grams(portion_grams)
+        calculation = calculate_nutrition(profile, selected_grams)
+        source_info = self._local_meta["source_inventory"][data["source_item_id"]]
+        return self._result_dict(
+            canonical=canonical,
+            profile=profile,
+            calculation=calculation,
+            default_portion=default_portion,
+            portion_method="source_default" if portion_grams is None else "user_selected",
+            source="local_verified",
+            source_item_id=data["source_item_id"],
+            source_locale=data.get("locale", "tr-TR"),
+            retrieved_at=source_info["retrieved_at"],
+            serving_unit=data.get("serving_unit", "gram"),
+            license_name=source_info["license"],
+            attribution=source_info["attribution"],
+        )
 
-            return {
-                "food_name": key,
-                "calories_per_100g": data["calories_per_100g"],
-                "default_portion_g": data.get("default_portion_g", 100),
-                "estimated_portion_g": round(portion, 0),
-                "total_calories": round(data["calories_per_100g"] * scale, 1),
-                "nutrients": {
-                    "protein": round(data.get("protein_per_100g", 0) * scale, 1),
-                    "carb": round(data.get("carbs_per_100g", 0) * scale, 1),
-                    "fat": round(data.get("fat_per_100g", 0) * scale, 1),
-                    "fiber": round(data.get("fiber_per_100g", 0) * scale, 1),
-                },
-                "source": "local_db",
-            }
-
-        # Bulunamazsa varsayılan
-        logger.warning(f"Besin '{food_name}' ne API'de ne yerel DB'de bulunamadı")
+    @staticmethod
+    def _result_dict(
+        *, canonical, profile, calculation, default_portion, portion_method,
+        source, source_item_id, source_locale, retrieved_at, serving_unit,
+        license_name, attribution,
+    ) -> dict:
         return {
-            "food_name": food_name,
-            "calories_per_100g": 0,
-            "default_portion_g": 100,
-            "estimated_portion_g": portion_grams or 100,
-            "total_calories": 0,
-            "nutrients": {"protein": 0, "carb": 0, "fat": 0, "fiber": 0},
+            "available": True,
+            "canonical_food_id": canonical.canonical_food_id,
+            "food_name": canonical.canonical_name,
+            "food_name_tr": canonical.food_name_tr,
+            "normalization_version": NORMALIZATION_VERSION,
+            "calories_per_100g": float(profile.calories),
+            "default_portion_g": float(default_portion),
+            "estimated_portion_g": float(calculation.portion_grams),
+            "portion_value": float(calculation.portion_grams),
+            "portion_unit": "gram",
+            "portion_method": portion_method,
+            "portion_is_estimate": portion_method == "source_default",
+            "total_calories": float(calculation.calories),
+            "nutrients": {
+                "protein": float(calculation.protein),
+                "carb": float(calculation.carbs),
+                "fat": float(calculation.fat),
+                "fiber": float(calculation.fiber),
+            },
+            "macro_calories": float(calculation.macro_calories),
+            "macro_calorie_delta": float(calculation.macro_calorie_delta),
+            "macro_calorie_delta_percent": float(calculation.macro_calorie_delta_percent),
+            "source": source,
+            "nutrition_reliability": "verified_provider" if source == "nutritionix" else "verified_local",
+            "provenance": {
+                "source": source,
+                "source_item_id": source_item_id,
+                "locale": source_locale,
+                "retrieved_at": retrieved_at,
+                "serving_unit": serving_unit,
+                "serving_grams": float(default_portion),
+                "license_name": license_name,
+                "attribution": attribution,
+            },
+        }
+
+    @staticmethod
+    def _not_found(food_name: str, input_locale: str) -> dict:
+        canonical = normalize_food_name(food_name, input_locale)
+        return {
+            "available": False,
+            "canonical_food_id": canonical.canonical_food_id,
+            "food_name": canonical.canonical_name,
+            "food_name_tr": canonical.food_name_tr,
+            "normalization_version": NORMALIZATION_VERSION,
             "source": "not_found",
+            "nutrition_reliability": "not_found",
+            "provenance": None,
         }
 
     async def search_foods(self, query: str, limit: int = 10) -> list[dict]:
-        """Besin adı araması yapar."""
         if self._available:
             try:
-                headers = {
-                    "x-app-id": self.app_id,
-                    "x-app-key": self.api_key,
-                }
+                headers = {"x-app-id": self.app_id, "x-app-key": self.api_key}
                 async with httpx.AsyncClient(timeout=10.0) as client:
                     response = await client.get(
                         f"{self.API_BASE}/search/instant",
                         headers=headers,
                         params={"query": query},
                     )
-                    if response.status_code == 200:
-                        data = response.json()
-                        common = data.get("common", [])[:limit]
-                        return [
-                            {
-                                "food_name": f.get("food_name", ""),
-                                "photo": f.get("photo", {}).get("thumb", ""),
-                            }
-                            for f in common
-                        ]
-            except Exception as e:
-                logger.warning(f"Nutritionix arama hatası: {e}")
-
-        # Yerel arama
-        results = []
+                if response.status_code == 200:
+                    return [
+                        {"food_name": item.get("food_name", ""), "photo": item.get("photo", {}).get("thumb", "")}
+                        for item in response.json().get("common", [])[:limit]
+                    ]
+            except httpx.HTTPError:
+                logger.warning("Nutritionix araması kullanılamıyor")
+        if not self._local_verified:
+            return []
         query_lower = query.lower()
-        for key in self._local_db:
-            if query_lower in key:
-                results.append({"food_name": key, "photo": ""})
-                if len(results) >= limit:
-                    break
-        return results
+        return [
+            {"food_name": key, "photo": ""}
+            for key in self._local_db if query_lower in key
+        ][:limit]
