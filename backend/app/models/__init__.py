@@ -9,7 +9,8 @@ from .database import (
 )
 from .schemas import (
     FoodAnalysisResponse,
-    FoodHistoryResponse, DailyLogResponse, FoodLogItem,
+    FoodHistoryResponse, DailyLogResponse, FoodLogDeleteResponse, FoodLogItem,
+    FoodLogUpdateRequest,
     SendToDietitianRequest, SendToDietitianResponse,
     LogoutRequest, RefreshTokenRequest, TokenResponse, UserCreate, UserLogin,
     ErrorResponse,

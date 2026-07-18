@@ -219,12 +219,52 @@ class FoodLogItem(BaseModel):
     id: UUID
     food_name: str
     food_name_tr: str
+    canonical_food_id: str
     calories: float
+    calories_per_100g: float
     portion_g: float
+    portion_value: float
+    portion_unit: str
+    portion_method: str
+    portion_is_estimate: bool
     meal_type: str
     confidence: float
+    recognition_source: str
+    nutrition_source: str
+    nutrition_reliability: str
+    is_corrected: bool
+    is_user_confirmed: bool
     nutrients: NutrientData
     logged_at: datetime
+    updated_at: datetime
+
+
+class FoodLogUpdateRequest(BaseModel):
+    """User-visible corrections without silently replacing nutrition identity."""
+
+    food_name_tr: Optional[str] = Field(None, min_length=2, max_length=120)
+    portion_g: Optional[float] = Field(None, gt=0, le=2000, allow_inf_nan=False)
+    meal_type: Optional[Literal[
+        "kahvalti", "ogle", "aksam", "atistirmalik"
+    ]] = None
+
+    @model_validator(mode="after")
+    def require_change(self):
+        if (
+            self.food_name_tr is None
+            and self.portion_g is None
+            and self.meal_type is None
+        ):
+            raise ValueError("En az bir düzeltme alanı gönderilmelidir.")
+        if self.food_name_tr is not None:
+            self.food_name_tr = self.food_name_tr.strip()
+        return self
+
+
+class FoodLogDeleteResponse(BaseModel):
+    log_id: UUID
+    status: Literal["deleted", "restored"]
+    message: str
 
 
 class MealSummary(BaseModel):
@@ -257,6 +297,11 @@ class FoodHistoryResponse(BaseModel):
     total_days: int
     average_daily_calories: float
     total_calories: float
+    total_log_count: int
+    total_date_count: int
+    page: int
+    page_size: int
+    has_more: bool
     daily_logs: list[DailyLogResponse]
 
 

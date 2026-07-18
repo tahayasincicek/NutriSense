@@ -5,6 +5,11 @@
   "total_days": 8,
   "average_daily_calories": 9.8,
   "total_calories": 78.0,
+  "total_log_count": 1,
+  "total_date_count": 1,
+  "page": 1,
+  "page_size": 7,
+  "has_more": false,
   "daily_logs": [
     {
       "date": "2026-07-17",
@@ -28,17 +33,29 @@
           "id": "550e8400-e29b-41d4-a716-446655440000",
           "food_name": "apple",
           "food_name_tr": "Elma",
+          "canonical_food_id": "food.apple",
           "calories": 78.0,
+          "calories_per_100g": 52.0,
           "portion_g": 150.0,
+          "portion_value": 150.0,
+          "portion_unit": "gram",
+          "portion_method": "user_selected",
+          "portion_is_estimate": false,
           "meal_type": "atistirmalik",
           "confidence": 0.93,
+          "recognition_source": "google_vision",
+          "nutrition_source": "nutritionix",
+          "nutrition_reliability": "verified_provider",
+          "is_corrected": false,
+          "is_user_confirmed": true,
           "nutrients": {
             "protein": 0.4,
             "carbs": 20.7,
             "fat": 0.3,
             "fiber": 3.6
           },
-          "logged_at": "2026-07-17T10:30:00Z"
+          "logged_at": "2026-07-17T10:30:00Z",
+          "updated_at": "2026-07-17T10:31:00Z"
         }
       ]
     }

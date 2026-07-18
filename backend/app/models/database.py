@@ -2,6 +2,7 @@
 
 import uuid
 from datetime import date, datetime, timezone
+from zoneinfo import ZoneInfo
 
 from sqlalchemy import (
     JSON,
@@ -35,6 +36,18 @@ def utc_now() -> datetime:
 
 def utc_today() -> date:
     return utc_now().date()
+
+
+ISTANBUL_TIMEZONE = ZoneInfo("Europe/Istanbul")
+
+
+def istanbul_date(value: datetime | None = None) -> date:
+    """Return the product's explicit local calendar day from a UTC instant."""
+
+    instant = value or utc_now()
+    if instant.tzinfo is None:
+        instant = instant.replace(tzinfo=timezone.utc)
+    return instant.astimezone(ISTANBUL_TIMEZONE).date()
 
 
 settings = get_settings()
@@ -207,6 +220,8 @@ class FoodLog(Base):
     nutrition_source_id = Column(UUIDString, ForeignKey("nutrition_sources.id", ondelete="RESTRICT"), nullable=True)
     food_name = Column(String(255), nullable=False)
     food_name_tr = Column(String(255), nullable=False)
+    original_food_name = Column(String(255), nullable=True)
+    original_food_name_tr = Column(String(255), nullable=True)
     canonical_food_id = Column(String(255), default="food.legacy.unmapped", nullable=False)
     calories_per_100g = Column(Numeric(14, 6), nullable=False)
     estimated_portion_g = Column(Numeric(14, 6), nullable=False)
@@ -225,9 +240,13 @@ class FoodLog(Base):
     confidence = Column(Float, default=0.0, nullable=False)
     meal_type = Column(Enum("kahvalti", "ogle", "aksam", "atistirmalik", name="meal_type_enum"), default="atistirmalik", nullable=False)
     recognition_source = Column(Enum("google_vision", "tflite", "manual", name="recognition_source_enum"), default="google_vision", nullable=False)
+    is_user_confirmed = Column(Boolean, default=True, nullable=False, index=True)
+    is_corrected = Column(Boolean, default=False, nullable=False)
     image_url = Column(Text, nullable=True)
     logged_at = Column(UTCDateTime, default=utc_now, nullable=False, index=True)
-    log_date = Column(Date, default=utc_today, nullable=False, index=True)
+    log_date = Column(Date, default=istanbul_date, nullable=False, index=True)
+    updated_at = Column(UTCDateTime, default=utc_now, onupdate=utc_now, nullable=False)
+    deleted_at = Column(UTCDateTime, nullable=True, index=True)
 
     user = relationship("User", back_populates="food_logs")
     recognition_attempt = relationship("RecognitionAttempt")

@@ -695,6 +695,18 @@
             "title": "From Date",
             "type": "string"
           },
+          "has_more": {
+            "title": "Has More",
+            "type": "boolean"
+          },
+          "page": {
+            "title": "Page",
+            "type": "integer"
+          },
+          "page_size": {
+            "title": "Page Size",
+            "type": "integer"
+          },
           "to_date": {
             "format": "date",
             "title": "To Date",
@@ -704,8 +716,16 @@
             "title": "Total Calories",
             "type": "number"
           },
+          "total_date_count": {
+            "title": "Total Date Count",
+            "type": "integer"
+          },
           "total_days": {
             "title": "Total Days",
+            "type": "integer"
+          },
+          "total_log_count": {
+            "title": "Total Log Count",
             "type": "integer"
           },
           "user_id": {
@@ -721,9 +741,42 @@
           "total_days",
           "average_daily_calories",
           "total_calories",
+          "total_log_count",
+          "total_date_count",
+          "page",
+          "page_size",
+          "has_more",
           "daily_logs"
         ],
         "title": "FoodHistoryResponse",
+        "type": "object"
+      },
+      "FoodLogDeleteResponse": {
+        "properties": {
+          "log_id": {
+            "format": "uuid",
+            "title": "Log Id",
+            "type": "string"
+          },
+          "message": {
+            "title": "Message",
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "deleted",
+              "restored"
+            ],
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "log_id",
+          "status",
+          "message"
+        ],
+        "title": "FoodLogDeleteResponse",
         "type": "object"
       },
       "FoodLogItem": {
@@ -732,6 +785,14 @@
           "calories": {
             "title": "Calories",
             "type": "number"
+          },
+          "calories_per_100g": {
+            "title": "Calories Per 100G",
+            "type": "number"
+          },
+          "canonical_food_id": {
+            "title": "Canonical Food Id",
+            "type": "string"
           },
           "confidence": {
             "title": "Confidence",
@@ -750,6 +811,14 @@
             "title": "Id",
             "type": "string"
           },
+          "is_corrected": {
+            "title": "Is Corrected",
+            "type": "boolean"
+          },
+          "is_user_confirmed": {
+            "title": "Is User Confirmed",
+            "type": "boolean"
+          },
           "logged_at": {
             "format": "date-time",
             "title": "Logged At",
@@ -762,23 +831,118 @@
           "nutrients": {
             "$ref": "#/components/schemas/NutrientData"
           },
+          "nutrition_reliability": {
+            "title": "Nutrition Reliability",
+            "type": "string"
+          },
+          "nutrition_source": {
+            "title": "Nutrition Source",
+            "type": "string"
+          },
           "portion_g": {
             "title": "Portion G",
             "type": "number"
+          },
+          "portion_is_estimate": {
+            "title": "Portion Is Estimate",
+            "type": "boolean"
+          },
+          "portion_method": {
+            "title": "Portion Method",
+            "type": "string"
+          },
+          "portion_unit": {
+            "title": "Portion Unit",
+            "type": "string"
+          },
+          "portion_value": {
+            "title": "Portion Value",
+            "type": "number"
+          },
+          "recognition_source": {
+            "title": "Recognition Source",
+            "type": "string"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "title": "Updated At",
+            "type": "string"
           }
         },
         "required": [
           "id",
           "food_name",
           "food_name_tr",
+          "canonical_food_id",
           "calories",
+          "calories_per_100g",
           "portion_g",
+          "portion_value",
+          "portion_unit",
+          "portion_method",
+          "portion_is_estimate",
           "meal_type",
           "confidence",
+          "recognition_source",
+          "nutrition_source",
+          "nutrition_reliability",
+          "is_corrected",
+          "is_user_confirmed",
           "nutrients",
-          "logged_at"
+          "logged_at",
+          "updated_at"
         ],
         "title": "FoodLogItem",
+        "type": "object"
+      },
+      "FoodLogUpdateRequest": {
+        "description": "User-visible corrections without silently replacing nutrition identity.",
+        "properties": {
+          "food_name_tr": {
+            "anyOf": [
+              {
+                "maxLength": 120,
+                "minLength": 2,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Food Name Tr"
+          },
+          "meal_type": {
+            "anyOf": [
+              {
+                "enum": [
+                  "kahvalti",
+                  "ogle",
+                  "aksam",
+                  "atistirmalik"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Meal Type"
+          },
+          "portion_g": {
+            "anyOf": [
+              {
+                "exclusiveMinimum": 0.0,
+                "maximum": 2000.0,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Portion G"
+          }
+        },
+        "title": "FoodLogUpdateRequest",
         "type": "object"
       },
       "FoodPortionRequest": {
@@ -2315,6 +2479,31 @@
             }
           },
           {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 1,
+              "minimum": 1,
+              "title": "Page",
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Sayfa başına yerel gün",
+            "in": "query",
+            "name": "page_size",
+            "required": false,
+            "schema": {
+              "default": 7,
+              "description": "Sayfa başına yerel gün",
+              "maximum": 31,
+              "minimum": 1,
+              "title": "Page Size",
+              "type": "integer"
+            }
+          },
+          {
             "description": "Başlangıç tarihi (YYYY-MM-DD)",
             "in": "query",
             "name": "from_date",
@@ -2427,6 +2616,155 @@
           }
         ],
         "summary": "Kullanıcı onaylı manuel yemek kaydı",
+        "tags": [
+          "NutriSense API"
+        ]
+      }
+    },
+    "/api/v1/food-logs/{log_id}": {
+      "delete": {
+        "operationId": "delete_food_log_api_v1_food_logs__log_id__delete",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "log_id",
+            "required": true,
+            "schema": {
+              "title": "Log Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FoodLogDeleteResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Besin günlüğü kaydını geri alınabilir biçimde sil",
+        "tags": [
+          "NutriSense API"
+        ]
+      },
+      "patch": {
+        "operationId": "update_food_log_api_v1_food_logs__log_id__patch",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "log_id",
+            "required": true,
+            "schema": {
+              "title": "Log Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FoodLogUpdateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FoodLogItem"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Besin günlüğü kaydını düzelt",
+        "tags": [
+          "NutriSense API"
+        ]
+      }
+    },
+    "/api/v1/food-logs/{log_id}/restore": {
+      "post": {
+        "operationId": "restore_food_log_api_v1_food_logs__log_id__restore_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "log_id",
+            "required": true,
+            "schema": {
+              "title": "Log Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FoodLogDeleteResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Silinen besin günlüğü kaydını geri al",
         "tags": [
           "NutriSense API"
         ]

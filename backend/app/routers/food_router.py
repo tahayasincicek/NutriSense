@@ -33,13 +33,14 @@ from sqlalchemy import func
 from ..models.database import (
     AuthAuditLog, ConsentRecord, Dietitian, DietitianAssignment,
     DietitianReport, FoodLog, NotificationDelivery, NutritionSource,
-    RecognitionAttempt, RefreshToken, User, get_db, utc_now, utc_today,
+    RecognitionAttempt, RefreshToken, User, get_db, istanbul_date, utc_now,
 )
 from ..models.schemas import (
     FoodAnalysisResponse, FoodCandidate, FoodAnalysisDecisionRequest,
     FoodAnalysisDecisionResponse, FoodPortionRequest, ManualFoodLogRequest,
     NutrientData,
-    FoodHistoryResponse, DailyLogResponse, FoodLogItem, MealSummary,
+    FoodHistoryResponse, DailyLogResponse, FoodLogDeleteResponse, FoodLogItem,
+    FoodLogUpdateRequest, MealSummary,
     SendToDietitianRequest, SendToDietitianResponse,
     AccountDeletionRequest, DietitianAssignmentRequest,
     DietitianAssignmentResponse, LogoutRequest, RefreshTokenRequest,
@@ -728,7 +729,7 @@ async def decide_food_analysis(
         confidence=float(payload["confidence"]),
         meal_type=payload["meal_type"],
         recognition_source=recognition_source,
-        log_date=utc_today(),
+        log_date=istanbul_date(),
     )
     attempt.decision = "corrected" if request.action == "correct" else "confirmed"
     attempt.decided_at = utc_now()
@@ -848,7 +849,7 @@ async def create_manual_food_log(
         confidence=0.0,
         meal_type=request.meal_type,
         recognition_source="manual",
-        log_date=utc_today(),
+        log_date=istanbul_date(),
     )
     try:
         db.add_all([attempt, nutrition_source, log_entry])
@@ -877,6 +878,8 @@ async def create_manual_food_log(
 )
 async def get_food_history(
     user_id: str,
+    page: int = Query(1, ge=1),
+    page_size: int = Query(7, ge=1, le=31, description="Sayfa başına yerel gün"),
     from_date: Optional[date] = Query(None, description="Başlangıç tarihi (YYYY-MM-DD)"),
     to_date: Optional[date] = Query(None, description="Bitiş tarihi (YYYY-MM-DD)"),
     db: Session = Depends(get_db),
@@ -892,9 +895,16 @@ async def get_food_history(
 
     # Varsayılan tarih aralığı: son 7 gün
     if not to_date:
-        to_date = utc_today()
+        to_date = istanbul_date()
     if not from_date:
         from_date = to_date - timedelta(days=7)
+    if from_date > to_date:
+        raise HTTPException(
+            status_code=422,
+            detail="Başlangıç tarihi bitiş tarihinden sonra olamaz.",
+        )
+    if (to_date - from_date).days > 366:
+        raise HTTPException(status_code=422, detail="Tarih aralığı en fazla 366 gün olabilir.")
 
     # Sorgu
     logs = (
@@ -903,18 +913,28 @@ async def get_food_history(
             FoodLog.user_id == user_id,
             FoodLog.log_date >= from_date,
             FoodLog.log_date <= to_date,
+            FoodLog.deleted_at.is_(None),
+            FoodLog.is_user_confirmed.is_(True),
         )
         .order_by(FoodLog.logged_at.desc())
         .all()
     )
 
     # Günlük grupla
+    all_logs = logs
+    all_dates = sorted({log.log_date for log in all_logs}, reverse=True)
+    page_start = (page - 1) * page_size
+    page_dates = set(all_dates[page_start:page_start + page_size])
+    logs = [log for log in all_logs if log.log_date in page_dates]
+
     daily_map = defaultdict(list)
     for log in logs:
         daily_map[log.log_date].append(log)
 
     daily_logs = []
-    total_calories = Decimal("0")
+    total_calories = sum(
+        (log.total_calories for log in all_logs), start=Decimal("0")
+    )
 
     for log_date in sorted(daily_map.keys(), reverse=True):
         day_logs = daily_map[log_date]
@@ -922,8 +942,6 @@ async def get_food_history(
         day_protein = sum(l.protein for l in day_logs)
         day_carbs = sum(l.carbs for l in day_logs)
         day_fat = sum(l.fat for l in day_logs)
-        total_calories += day_cal
-
         # Öğün bazlı özet
         meal_groups = defaultdict(list)
         for l in day_logs:
@@ -939,22 +957,7 @@ async def get_food_history(
             for mt, items in meal_groups.items()
         ]
 
-        foods = [
-            FoodLogItem(
-                id=l.id,
-                food_name=l.food_name,
-                food_name_tr=l.food_name_tr,
-                calories=l.total_calories,
-                portion_g=l.estimated_portion_g,
-                meal_type=l.meal_type,
-                confidence=l.confidence,
-                nutrients=NutrientData(
-                    protein=l.protein, carbs=l.carbs, fat=l.fat, fiber=l.fiber
-                ),
-                logged_at=l.logged_at,
-            )
-            for l in day_logs
-        ]
+        foods = [_food_log_item(log) for log in day_logs]
 
         daily_logs.append(DailyLogResponse(
             date=log_date,
@@ -981,6 +984,11 @@ async def get_food_history(
         total_days=total_days,
         average_daily_calories=round(avg_daily, 1),
         total_calories=round(total_calories, 1),
+        total_log_count=len(all_logs),
+        total_date_count=len(all_dates),
+        page=page,
+        page_size=page_size,
+        has_more=page_start + page_size < len(all_dates),
         daily_logs=daily_logs,
     )
 
@@ -988,6 +996,192 @@ async def get_food_history(
 # ═══════════════════════════════════════════════════════════════════════════════
 # DİYETİSYENE RAPOR GÖNDERME
 # ═══════════════════════════════════════════════════════════════════════════════
+
+def _food_log_item(log: FoodLog) -> FoodLogItem:
+    source = log.nutrition_source
+    return FoodLogItem(
+        id=log.id,
+        food_name=log.food_name,
+        food_name_tr=log.food_name_tr,
+        canonical_food_id=log.canonical_food_id,
+        calories=log.total_calories,
+        calories_per_100g=log.calories_per_100g,
+        portion_g=log.estimated_portion_g,
+        portion_value=log.portion_value,
+        portion_unit=log.portion_unit,
+        portion_method=log.portion_method,
+        portion_is_estimate=log.portion_is_estimate,
+        meal_type=log.meal_type,
+        confidence=log.confidence,
+        recognition_source=log.recognition_source,
+        nutrition_source=source.provider if source is not None else "unavailable",
+        nutrition_reliability=log.nutrition_reliability,
+        is_corrected=log.is_corrected,
+        is_user_confirmed=log.is_user_confirmed,
+        nutrients=NutrientData(
+            protein=log.protein, carbs=log.carbs, fat=log.fat, fiber=log.fiber,
+        ),
+        logged_at=log.logged_at,
+        updated_at=log.updated_at,
+    )
+
+
+def _owned_food_log(
+    db: Session,
+    *,
+    current_user: User,
+    log_id: str,
+    include_deleted: bool = False,
+) -> FoodLog:
+    query = db.query(FoodLog).filter(
+        FoodLog.id == log_id,
+        FoodLog.user_id == str(current_user.id),
+    )
+    if not include_deleted:
+        query = query.filter(FoodLog.deleted_at.is_(None))
+    log = query.first()
+    if log is None:
+        # Do not reveal whether a record belongs to another user.
+        raise HTTPException(status_code=404, detail="Besin kaydı bulunamadı.")
+    return log
+
+
+@router.patch(
+    "/food-logs/{log_id}",
+    response_model=FoodLogItem,
+    summary="Besin günlüğü kaydını düzelt",
+)
+async def update_food_log(
+    log_id: str,
+    request: FoodLogUpdateRequest,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    log = _owned_food_log(db, current_user=current_user, log_id=log_id)
+    changed_fields: list[str] = []
+
+    if request.food_name_tr is not None and request.food_name_tr != log.food_name_tr:
+        if log.original_food_name is None:
+            log.original_food_name = log.food_name
+            log.original_food_name_tr = log.food_name_tr
+        log.food_name_tr = request.food_name_tr
+        log.is_corrected = True
+        changed_fields.append("food_name_tr")
+
+    if request.meal_type is not None and request.meal_type != log.meal_type:
+        log.meal_type = request.meal_type
+        log.is_corrected = True
+        changed_fields.append("meal_type")
+
+    if request.portion_g is not None:
+        old_grams = Decimal(str(log.estimated_portion_g))
+        if old_grams <= 0:
+            raise HTTPException(status_code=409, detail="Mevcut porsiyon güvenli değil.")
+        profile = NutrientsPer100g(
+            calories=Decimal(str(log.calories_per_100g)),
+            protein=Decimal(str(log.protein)) * 100 / old_grams,
+            carbs=Decimal(str(log.carbs)) * 100 / old_grams,
+            fat=Decimal(str(log.fat)) * 100 / old_grams,
+            fiber=Decimal(str(log.fiber)) * 100 / old_grams,
+        )
+        try:
+            calculation = calculate_nutrition(profile, request.portion_g)
+        except NutritionDomainError as exc:
+            raise HTTPException(status_code=422, detail=str(exc)) from exc
+        log.estimated_portion_g = calculation.portion_grams
+        log.portion_value = calculation.portion_grams
+        log.portion_unit = "gram"
+        log.portion_method = "user_selected"
+        log.portion_is_estimate = False
+        log.total_calories = calculation.calories
+        log.protein = calculation.protein
+        log.carbs = calculation.carbs
+        log.fat = calculation.fat
+        log.fiber = calculation.fiber
+        log.macro_calories = calculation.macro_calories
+        log.macro_calorie_delta = calculation.macro_calorie_delta
+        log.is_corrected = True
+        changed_fields.append("portion_g")
+
+    log.updated_at = utc_now()
+    db.add(AuthAuditLog(
+        user_id=str(current_user.id),
+        event="food_log_updated",
+        success=True,
+        reason="user_correction",
+        metadata_json={"log_id": str(log.id), "changed_fields": changed_fields},
+    ))
+    try:
+        db.commit()
+        db.refresh(log)
+    except Exception:
+        db.rollback()
+        logger.exception("Besin günlüğü düzeltmesi geri alındı.")
+        raise HTTPException(status_code=503, detail="Düzeltme kaydedilemedi.")
+    return _food_log_item(log)
+
+
+@router.delete(
+    "/food-logs/{log_id}",
+    response_model=FoodLogDeleteResponse,
+    summary="Besin günlüğü kaydını geri alınabilir biçimde sil",
+)
+async def delete_food_log(
+    log_id: str,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    log = _owned_food_log(
+        db, current_user=current_user, log_id=log_id, include_deleted=True,
+    )
+    if log.deleted_at is None:
+        log.deleted_at = utc_now()
+        log.updated_at = log.deleted_at
+        db.add(AuthAuditLog(
+            user_id=str(current_user.id),
+            event="food_log_deleted",
+            success=True,
+            reason="user_request",
+            metadata_json={"log_id": str(log.id)},
+        ))
+        db.commit()
+    return FoodLogDeleteResponse(
+        log_id=log.id,
+        status="deleted",
+        message="Kayıt silindi. Geri alma işlemi kullanılabilir.",
+    )
+
+
+@router.post(
+    "/food-logs/{log_id}/restore",
+    response_model=FoodLogDeleteResponse,
+    summary="Silinen besin günlüğü kaydını geri al",
+)
+async def restore_food_log(
+    log_id: str,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    log = _owned_food_log(
+        db, current_user=current_user, log_id=log_id, include_deleted=True,
+    )
+    if log.deleted_at is not None:
+        log.deleted_at = None
+        log.updated_at = utc_now()
+        db.add(AuthAuditLog(
+            user_id=str(current_user.id),
+            event="food_log_restored",
+            success=True,
+            reason="user_undo",
+            metadata_json={"log_id": str(log.id)},
+        ))
+        db.commit()
+    return FoodLogDeleteResponse(
+        log_id=log.id,
+        status="restored",
+        message="Kayıt geri alındı.",
+    )
+
 
 @router.get(
     "/dietitians/assignment",
@@ -1185,7 +1379,7 @@ async def send_to_dietitian(
         )
 
     # Tarih aralığı
-    to_dt = request.to_date or utc_today()
+    to_dt = request.to_date or istanbul_date()
     if request.report_type == "daily":
         from_dt = request.from_date or to_dt
     elif request.report_type == "weekly":
@@ -1224,6 +1418,8 @@ async def send_to_dietitian(
             FoodLog.user_id == str(request.user_id),
             FoodLog.log_date >= from_dt,
             FoodLog.log_date <= to_dt,
+            FoodLog.deleted_at.is_(None),
+            FoodLog.is_user_confirmed.is_(True),
         )
         .order_by(FoodLog.log_date, FoodLog.logged_at)
         .all()
