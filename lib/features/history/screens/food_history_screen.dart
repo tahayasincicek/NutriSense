@@ -1,10 +1,14 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/theme/app_theme.dart';
 import '../../../shared/models/food_analysis_model.dart';
 import '../../../shared/services/accessibility_service.dart';
+import '../../../shared/services/contextual_voice_command.dart';
 import '../../../shared/services/navigation_announcer.dart';
+import '../../../shared/services/stt_service.dart';
 import '../state/history_controller.dart';
 
 class FoodHistoryScreen extends ConsumerStatefulWidget {
@@ -19,16 +23,37 @@ class FoodHistoryScreen extends ConsumerStatefulWidget {
 class _FoodHistoryScreenState extends ConsumerState<FoodHistoryScreen> {
   late final AccessibilityService _accessibility;
   late final NavigationAnnouncer _announcer;
+  late final SttService _stt;
+  static const _voiceParser = ContextualVoiceCommandParser();
+  final _voiceConfirmation = VoiceConfirmationGate();
+  FoodLogEntry? _voiceEntry;
+  bool _voiceListening = false;
+  String? _voiceStatus;
 
   @override
   void initState() {
     super.initState();
     _accessibility = ref.read(accessibilityServiceProvider);
     _announcer = ref.read(navigationAnnouncerProvider);
+    _stt = ref.read(sttServiceProvider);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _announcer.announceScreen(AppScreen.history);
       ref.read(historyControllerProvider.notifier).load();
     });
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _accessibility
+        .setScreenReaderActive(MediaQuery.of(context).accessibleNavigation);
+  }
+
+  @override
+  void dispose() {
+    if (_voiceListening) unawaited(_stt.cancelListening());
+    _accessibility.finishSpeechInput();
+    super.dispose();
   }
 
   @override
@@ -67,6 +92,22 @@ class _FoodHistoryScreenState extends ConsumerState<FoodHistoryScreen> {
             onSelected: (period) =>
                 ref.read(historyControllerProvider.notifier).setPeriod(period),
           ),
+          if (_voiceStatus != null)
+            Semantics(
+              liveRegion: true,
+              container: true,
+              label: _voiceStatus,
+              child: MaterialBanner(
+                key: const Key('history_voice_status'),
+                content: Text(_voiceStatus!),
+                actions: [
+                  TextButton(
+                    onPressed: _cancelVoiceInteraction,
+                    child: const Text('İptal'),
+                  ),
+                ],
+              ),
+            ),
           Expanded(child: _buildContent(state)),
         ],
       ),
@@ -185,10 +226,13 @@ class _FoodHistoryScreenState extends ConsumerState<FoodHistoryScreen> {
                 onListen: () => _accessibility.speak(
                   entry.semanticLabel,
                   priority: TtsPriority.normal,
+                  allowWhileScreenReaderActive: true,
                 ),
                 onEdit: () => _showEditDialog(entry),
                 onChangeMeal: () => _showMealDialog(entry),
                 onDelete: () => _confirmAndDelete(entry),
+                onVoice: () => _startVoiceInteraction(entry),
+                voiceListening: _voiceListening && _voiceEntry?.id == entry.id,
               ),
           ],
           if (history.hasMore)
@@ -233,7 +277,137 @@ class _FoodHistoryScreenState extends ConsumerState<FoodHistoryScreen> {
       'Günlük ortalama ${history.averageDailyCalories.toStringAsFixed(0)} kalori. '
       'Değerler tahminidir ve tıbbi öneri değildir.',
       priority: TtsPriority.high,
+      allowWhileScreenReaderActive: true,
     );
+  }
+
+  Future<void> _startVoiceInteraction(FoodLogEntry entry) async {
+    if (_voiceListening) {
+      await _cancelVoiceInteraction();
+      return;
+    }
+    if (_voiceEntry?.id != entry.id) _voiceConfirmation.clear();
+    _voiceEntry = entry;
+    await _accessibility.prepareForSpeechInput();
+    if (!mounted) return;
+    setState(() {
+      _voiceListening = true;
+      _voiceStatus = _voiceConfirmation.isActive
+          ? '${entry.foodNameTr} kaydını silmek için yalnız “evet”, vazgeçmek için “hayır” deyin.'
+          : '${entry.foodNameTr} için dinleniyor. Kaydı dinle, kaydı düzelt, öğünü değiştir, porsiyon 150 gram veya kaydı sil diyebilirsiniz.';
+    });
+    unawaited(_accessibility.lightHaptic());
+    await _stt.startListening(
+      listenFor: const Duration(seconds: 12),
+      onResult: (result) {
+        if (!mounted || _voiceEntry?.id != entry.id) return;
+        if (!result.isFinal) {
+          setState(() => _voiceStatus = result.text.trim().isEmpty
+              ? 'Dinleniyor…'
+              : 'Algılanan: ${result.text}. Komut henüz çalıştırılmadı.');
+          return;
+        }
+        _accessibility.finishSpeechInput();
+        setState(() => _voiceListening = false);
+        unawaited(_handleVoiceIntent(entry, result.text));
+      },
+      onError: (message) {
+        _accessibility.finishSpeechInput();
+        if (!mounted) return;
+        setState(() {
+          _voiceListening = false;
+          _voiceStatus = '$message. Dokunmatik düğmelerle devam edebilirsiniz.';
+        });
+        unawaited(_accessibility.errorHaptic());
+      },
+      onListeningStopped: () {
+        _accessibility.finishSpeechInput();
+        if (mounted) setState(() => _voiceListening = false);
+      },
+    );
+  }
+
+  Future<void> _handleVoiceIntent(FoodLogEntry entry, String transcript) async {
+    final confirmationActive = _voiceConfirmation.isActive;
+    final intent = _voiceParser.parse(
+      transcript,
+      context: confirmationActive
+          ? VoiceInteractionContext.historyDeleteConfirmation
+          : VoiceInteractionContext.history,
+    );
+    if (confirmationActive) {
+      final resolved = _voiceConfirmation.resolve(intent);
+      if (resolved == ContextualVoiceAction.deleteEntry) {
+        setState(() => _voiceStatus = 'Silme onaylandı.');
+        await _deleteEntryWithUndo(entry);
+        return;
+      }
+      final cancelled = !_voiceConfirmation.isActive;
+      setState(() => _voiceStatus = cancelled
+          ? 'Silme iptal edildi.'
+          : 'Silme yapılmadı. Onay için yalnız tam olarak “evet” deyin.');
+      return;
+    }
+    if (!intent.accepted) {
+      setState(() => _voiceStatus =
+          '${intent.rejectionReason} Dokunmatik düğmelerle devam edebilirsiniz.');
+      await _accessibility.lightHaptic();
+      return;
+    }
+    switch (intent.action!) {
+      case ContextualVoiceAction.listenEntry:
+        setState(() => _voiceStatus = 'Kayıt seslendiriliyor.');
+        await _accessibility.speak(entry.semanticLabel,
+            priority: TtsPriority.high, allowWhileScreenReaderActive: true);
+        break;
+      case ContextualVoiceAction.editEntry:
+        setState(() => _voiceStatus = 'Düzeltme formu açıldı.');
+        await _showEditDialog(entry);
+        break;
+      case ContextualVoiceAction.changeMeal:
+        setState(() => _voiceStatus = 'Öğün seçimi açıldı.');
+        await _showMealDialog(entry);
+        break;
+      case ContextualVoiceAction.setPortion:
+        final result =
+            await ref.read(historyControllerProvider.notifier).updateEntry(
+                  logId: entry.id,
+                  portionGrams: intent.portionGrams,
+                );
+        if (mounted) _showMessage(result.message);
+        break;
+      case ContextualVoiceAction.deleteEntry:
+        _voiceConfirmation.request(ContextualVoiceAction.deleteEntry);
+        setState(() => _voiceStatus =
+            '${entry.foodNameTr} kaydı silinecek. Mikrofon düğmesine tekrar basıp yalnız tam olarak “evet” deyin.');
+        await _accessibility.speakWarning(
+          '${entry.foodNameTr} kaydını silmek için mikrofon düğmesine tekrar basıp evet deyin.',
+        );
+        break;
+      case ContextualVoiceAction.today:
+        _speakSummary(ref.read(historyControllerProvider));
+        break;
+      case ContextualVoiceAction.back:
+        if (mounted) await Navigator.maybePop(context);
+        break;
+      case ContextualVoiceAction.cancel:
+        await _cancelVoiceInteraction();
+        break;
+      default:
+        setState(() => _voiceStatus = 'Bu komut geçmiş kaydında kullanılamaz.');
+    }
+  }
+
+  Future<void> _cancelVoiceInteraction() async {
+    if (_voiceListening) await _stt.cancelListening();
+    _accessibility.finishSpeechInput();
+    _voiceConfirmation.clear();
+    if (!mounted) return;
+    setState(() {
+      _voiceListening = false;
+      _voiceStatus = null;
+      _voiceEntry = null;
+    });
   }
 
   Future<void> _showEditDialog(FoodLogEntry entry) async {
@@ -355,6 +529,10 @@ class _FoodHistoryScreenState extends ConsumerState<FoodHistoryScreen> {
       ),
     );
     if (confirmed != true || !mounted) return;
+    await _deleteEntryWithUndo(entry);
+  }
+
+  Future<void> _deleteEntryWithUndo(FoodLogEntry entry) async {
     final result = await ref
         .read(historyControllerProvider.notifier)
         .deleteEntry(entry.id);
@@ -566,6 +744,8 @@ class _FoodLogCard extends StatelessWidget {
     required this.onEdit,
     required this.onChangeMeal,
     required this.onDelete,
+    required this.onVoice,
+    required this.voiceListening,
   });
 
   final FoodLogEntry entry;
@@ -573,6 +753,8 @@ class _FoodLogCard extends StatelessWidget {
   final VoidCallback onEdit;
   final VoidCallback onChangeMeal;
   final VoidCallback onDelete;
+  final VoidCallback onVoice;
+  final bool voiceListening;
 
   @override
   Widget build(BuildContext context) {
@@ -642,6 +824,14 @@ class _FoodLogCard extends StatelessWidget {
                   tooltip: '${entry.foodNameTr} kaydını sil',
                   onPressed: onDelete,
                   icon: const Icon(Icons.delete_outline),
+                ),
+                IconButton(
+                  key: Key('voice_${entry.id}'),
+                  tooltip: voiceListening
+                      ? '${entry.foodNameTr} sesli komutunu durdur'
+                      : '${entry.foodNameTr} kaydı için sesli eylemler',
+                  onPressed: onVoice,
+                  icon: Icon(voiceListening ? Icons.mic : Icons.mic_none),
                 ),
               ],
             ),

@@ -5,9 +5,14 @@
 // Erişilebilirlik tercihleri, TTS hızı, tema, bildirim ayarları.
 // =============================================================================
 
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/utils/accessibility_utils.dart';
+import '../../../shared/services/accessibility_service.dart';
+import '../../../shared/services/contextual_voice_command.dart';
+import '../../../shared/services/stt_service.dart';
 import '../../../shared/widgets/accessible_text.dart';
 import '../../auth/state/auth_controller.dart';
 
@@ -20,6 +25,12 @@ class SettingsScreen extends ConsumerStatefulWidget {
 }
 
 class _SettingsScreenState extends ConsumerState<SettingsScreen> {
+  static const _voiceParser = ContextualVoiceCommandParser();
+  final _voiceConfirmation = VoiceConfirmationGate();
+  late final AccessibilityService _accessibility;
+  late final SttService _stt;
+  bool _voiceListening = false;
+  String? _voiceStatus;
   // Tercih durumları (gerçek uygulamada SharedPreferences/Provider'dan gelecek)
   bool _isDarkMode = false;
   bool _highContrast = false;
@@ -32,11 +43,30 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   @override
   void initState() {
     super.initState();
+    _accessibility = ref.read(accessibilityServiceProvider);
+    _stt = ref.read(sttServiceProvider);
+    _highContrast = _accessibility.highContrast;
+    _hapticFeedback = _accessibility.vibrationEnabled;
+    _ttsSpeed = _accessibility.speechRate;
     WidgetsBinding.instance.addPostFrameCallback((_) {
       AccessibilityUtils.announce(
         'Ayarlar ekranı. Erişilebilirlik, bildirim ve hesap ayarlarını düzenleyebilirsiniz.',
       );
     });
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _accessibility
+        .setScreenReaderActive(MediaQuery.of(context).accessibleNavigation);
+  }
+
+  @override
+  void dispose() {
+    if (_voiceListening) unawaited(_stt.cancelListening());
+    _accessibility.finishSpeechInput();
+    super.dispose();
   }
 
   @override
@@ -46,10 +76,36 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Ayarlar'),
+        actions: [
+          IconButton(
+            key: const Key('settings_voice_action'),
+            tooltip: _voiceListening
+                ? 'Sesli komutu durdur'
+                : 'Ayarlar sesli komutunu başlat',
+            onPressed: _toggleVoiceInteraction,
+            icon: Icon(_voiceListening ? Icons.mic : Icons.mic_none),
+          ),
+        ],
       ),
       body: ListView(
         padding: const EdgeInsets.symmetric(vertical: 8),
         children: [
+          if (_voiceStatus != null)
+            Semantics(
+              liveRegion: true,
+              container: true,
+              label: _voiceStatus,
+              child: MaterialBanner(
+                key: const Key('settings_voice_status'),
+                content: Text(_voiceStatus!),
+                actions: [
+                  TextButton(
+                    onPressed: _cancelVoiceInteraction,
+                    child: const Text('İptal'),
+                  ),
+                ],
+              ),
+            ),
           // ═══════════════════════════════════════════
           // ERİŞİLEBİLİRLİK AYARLARI
           // ═══════════════════════════════════════════
@@ -81,6 +137,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             value: _highContrast,
             onChanged: (value) {
               setState(() => _highContrast = value);
+              unawaited(_accessibility.setHighContrast(value));
               AccessibilityUtils.announce(
                 'Yüksek kontrast ${value ? "açıldı" : "kapatıldı"}',
               );
@@ -97,6 +154,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             value: _hapticFeedback,
             onChanged: (value) {
               setState(() => _hapticFeedback = value);
+              unawaited(_accessibility.setVibrationEnabled(value));
               AccessibilityUtils.announce(
                 'Titreşim geri bildirimi ${value ? "açıldı" : "kapatıldı"}',
               );
@@ -156,6 +214,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 label: '${(_ttsSpeed * 100).toStringAsFixed(0)}%',
                 onChanged: (value) {
                   setState(() => _ttsSpeed = value);
+                  unawaited(_accessibility.setSpeechRate(value));
                 },
                 onChangeEnd: (value) {
                   AccessibilityUtils.announce(
@@ -287,8 +346,106 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       ),
     );
     if (approved != true || !mounted) return;
+    await _performLogout();
+  }
+
+  Future<void> _performLogout() async {
     AccessibilityUtils.announce('Çıkış yapılıyor');
     await ref.read(authControllerProvider.notifier).logout();
+  }
+
+  Future<void> _toggleVoiceInteraction() async {
+    if (_voiceListening) {
+      await _cancelVoiceInteraction();
+      return;
+    }
+    await _accessibility.prepareForSpeechInput();
+    if (!mounted) return;
+    setState(() {
+      _voiceListening = true;
+      _voiceStatus = _voiceConfirmation.isActive
+          ? 'Çıkışı onaylamak için yalnız “evet”, vazgeçmek için “hayır” deyin.'
+          : 'Ayarlar için dinleniyor. Çıkış yapmak için “çıkış yap” deyin.';
+    });
+    unawaited(_accessibility.lightHaptic());
+    await _stt.startListening(
+      listenFor: const Duration(seconds: 12),
+      onResult: (result) {
+        if (!mounted) return;
+        if (!result.isFinal) {
+          setState(() => _voiceStatus = result.text.trim().isEmpty
+              ? 'Dinleniyor…'
+              : 'Algılanan: ${result.text}. Komut henüz çalıştırılmadı.');
+          return;
+        }
+        _accessibility.finishSpeechInput();
+        setState(() => _voiceListening = false);
+        unawaited(_handleVoiceIntent(result.text));
+      },
+      onError: (message) {
+        _accessibility.finishSpeechInput();
+        if (!mounted) return;
+        setState(() {
+          _voiceListening = false;
+          _voiceStatus = '$message. Çıkış Yap düğmesini kullanabilirsiniz.';
+        });
+        unawaited(_accessibility.errorHaptic());
+      },
+      onListeningStopped: () {
+        _accessibility.finishSpeechInput();
+        if (mounted) setState(() => _voiceListening = false);
+      },
+    );
+  }
+
+  Future<void> _handleVoiceIntent(String transcript) async {
+    final confirmationActive = _voiceConfirmation.isActive;
+    final intent = _voiceParser.parse(
+      transcript,
+      context: confirmationActive
+          ? VoiceInteractionContext.logoutConfirmation
+          : VoiceInteractionContext.settings,
+    );
+    if (confirmationActive) {
+      final resolved = _voiceConfirmation.resolve(intent);
+      if (resolved == ContextualVoiceAction.logout) {
+        if (mounted) setState(() => _voiceStatus = 'Çıkış onaylandı.');
+        await _performLogout();
+        return;
+      }
+      if (!mounted) return;
+      setState(() => _voiceStatus = _voiceConfirmation.isActive
+          ? 'Çıkış yapılmadı. Onay için yalnız tam olarak “evet” deyin.'
+          : 'Çıkış iptal edildi.');
+      return;
+    }
+    if (intent.action == ContextualVoiceAction.logout && intent.isExact) {
+      _voiceConfirmation.request(ContextualVoiceAction.logout);
+      setState(() => _voiceStatus =
+          'Güvenli oturum kapatılacak. Mikrofon düğmesine tekrar basıp yalnız tam olarak “evet” deyin.');
+      await _accessibility.speakWarning(
+        'Çıkış yapmak için mikrofon düğmesine tekrar basıp evet deyin.',
+      );
+      return;
+    }
+    if (intent.action == ContextualVoiceAction.cancel) {
+      await _cancelVoiceInteraction();
+      return;
+    }
+    if (!mounted) return;
+    setState(() => _voiceStatus =
+        '${intent.rejectionReason ?? "Bu komut ayarlarda kullanılamaz."} Çıkış Yap düğmesini de kullanabilirsiniz.');
+  }
+
+  Future<void> _cancelVoiceInteraction() async {
+    if (_voiceListening) await _stt.cancelListening();
+    _accessibility.finishSpeechInput();
+    _voiceConfirmation.clear();
+    if (!mounted) return;
+    setState(() {
+      _voiceListening = false;
+      _voiceStatus = null;
+    });
   }
 
   Future<void> _showDeleteAccountDialog() async {

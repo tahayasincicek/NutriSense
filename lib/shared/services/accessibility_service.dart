@@ -15,6 +15,7 @@
 
 import 'dart:async';
 import 'dart:collection';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -90,7 +91,7 @@ class AccessibilityService with WidgetsBindingObserver {
   bool _screenReaderActive = false;
   bool _speechInputActive = false;
   bool _observerRegistered = false;
-  String? _ttsFailureReason;
+  final ValueNotifier<String?> _ttsFailure = ValueNotifier<String?>(null);
 
   // ── Öncelikli kuyruk ──
   final SplayTreeSet<_TtsMessage> _messageQueue = SplayTreeSet<_TtsMessage>();
@@ -117,7 +118,8 @@ class AccessibilityService with WidgetsBindingObserver {
   bool get highContrast => _highContrast;
   bool get screenReaderActive => _screenReaderActive;
   bool get speechInputActive => _speechInputActive;
-  String? get ttsFailureReason => _ttsFailureReason;
+  String? get ttsFailureReason => _ttsFailure.value;
+  ValueListenable<String?> get ttsFailureListenable => _ttsFailure;
 
   // ─────────────────────────────────────────────────────────────────────────
   // BAŞLATMA
@@ -136,29 +138,36 @@ class AccessibilityService with WidgetsBindingObserver {
     _prefs = await SharedPreferences.getInstance();
     _loadPreferences();
 
-    // TTS konfigürasyonu
-    final languageAvailable = await _tts.isLanguageAvailable('tr-TR');
-    if (languageAvailable == true) {
-      await _tts.setLanguage('tr-TR');
-    } else {
-      _ttsFailureReason = 'Türkçe metin okuma sesi bu cihazda bulunamadı.';
-    }
-    await _tts.setSpeechRate(_speechRate);
-    await _tts.setPitch(_pitch);
-    await _tts.setVolume(_volume);
-    await _tts.awaitSpeakCompletion(true);
+    try {
+      // TTS konfigürasyonu
+      final languageAvailable = await _tts.isLanguageAvailable('tr-TR');
+      if (languageAvailable == true) {
+        await _tts.setLanguage('tr-TR');
+        _setTtsFailure(null);
+      } else {
+        _setTtsFailure('Türkçe metin okuma sesi bu cihazda bulunamadı.');
+      }
+      await _tts.setSpeechRate(_speechRate);
+      await _tts.setPitch(_pitch);
+      await _tts.setVolume(_volume);
+      await _tts.awaitSpeakCompletion(true);
 
-    // iOS ayarları
-    await _tts.setIosAudioCategory(
-      IosTextToSpeechAudioCategory.playback,
-      [
-        IosTextToSpeechAudioCategoryOptions.allowBluetooth,
-        IosTextToSpeechAudioCategoryOptions.allowBluetoothA2DP,
-        IosTextToSpeechAudioCategoryOptions.mixWithOthers,
-        IosTextToSpeechAudioCategoryOptions.duckOthers,
-      ],
-      IosTextToSpeechAudioMode.voicePrompt,
-    );
+      // iOS ayarları. Android motorları bu çağrıyı yok sayar.
+      await _tts.setIosAudioCategory(
+        IosTextToSpeechAudioCategory.playback,
+        [
+          IosTextToSpeechAudioCategoryOptions.allowBluetooth,
+          IosTextToSpeechAudioCategoryOptions.allowBluetoothA2DP,
+          IosTextToSpeechAudioCategoryOptions.mixWithOthers,
+          IosTextToSpeechAudioCategoryOptions.duckOthers,
+        ],
+        IosTextToSpeechAudioMode.voicePrompt,
+      );
+    } catch (_) {
+      _setTtsFailure(
+        'Metin okuma servisi başlatılamadı. Dokunma ve ekran okuyucu ile devam edebilirsiniz.',
+      );
+    }
 
     // Durum dinleyicileri
     _tts.setStartHandler(() {
@@ -186,7 +195,7 @@ class AccessibilityService with WidgetsBindingObserver {
 
     _tts.setErrorHandler((msg) {
       _isSpeaking = false;
-      _ttsFailureReason = 'Metin okuma motoru konuşmayı tamamlayamadı.';
+      _setTtsFailure('Metin okuma motoru konuşmayı tamamlayamadı.');
     });
 
     _isInitialized = true;
@@ -218,7 +227,7 @@ class AccessibilityService with WidgetsBindingObserver {
   }) async {
     if (text.isEmpty || !_isInitialized) return;
     if (!_isAppInForeground && priority != TtsPriority.critical) return;
-    if (_speechInputActive || _ttsFailureReason != null) return;
+    if (_speechInputActive || _ttsFailure.value != null) return;
     if (_screenReaderActive && !allowWhileScreenReaderActive) return;
 
     if (priority == TtsPriority.critical) {
@@ -286,6 +295,11 @@ class AccessibilityService with WidgetsBindingObserver {
   /// STT tamamlandığında TTS kuyruğunun yeniden kullanılabilmesini sağlar.
   void finishSpeechInput() {
     _speechInputActive = false;
+  }
+
+  void _setTtsFailure(String? reason) {
+    if (_ttsFailure.value == reason) return;
+    _ttsFailure.value = reason;
   }
 
   /// Konuşmayı duraklatır.
@@ -473,6 +487,7 @@ class AccessibilityService with WidgetsBindingObserver {
     }
     _messageQueue.clear();
     _tts.stop();
+    _ttsFailure.dispose();
     _isInitialized = false;
   }
 }

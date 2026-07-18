@@ -12,6 +12,7 @@ import 'package:nutrisense/features/history/screens/food_history_screen.dart';
 import 'package:nutrisense/features/history/state/history_controller.dart';
 import 'package:nutrisense/shared/models/food_analysis_model.dart';
 import 'package:nutrisense/shared/services/api_service.dart';
+import 'package:nutrisense/shared/services/stt_service.dart';
 
 const _userId = '9e4e5356-b491-4575-a9dd-c5abbc777fe9';
 const _logId = '550e8400-e29b-41d4-a716-446655440000';
@@ -162,6 +163,76 @@ void main() {
       expect(repository.restoreCount, 1);
       expect(find.text('Elma'), findsOneWidget);
     });
+
+    testWidgets('sesli silme tam komut ve ayrı tam evet olmadan çalışmaz',
+        (tester) async {
+      final repository = _FakeHistoryRepository(_fixtureHistory());
+      final stt = _FakeSttService([
+        const SttResult(text: 'kaydı sil', confidence: 1, isFinal: true),
+        const SttResult(text: 'evet', confidence: 1, isFinal: true),
+      ]);
+      await tester.pumpWidget(_app(repository, stt: stt));
+      await _load(tester);
+      await _revealActions(tester);
+
+      await tester.ensureVisible(find.byKey(const Key('voice_$_logId')));
+      await tester.pumpAndSettle();
+      _invokeVoiceButton(tester);
+      await tester.pumpAndSettle();
+      expect(stt.startCount, 1);
+      expect(repository.deleteCount, 0);
+      expect(find.textContaining('Mikrofon düğmesine tekrar basıp'),
+          findsOneWidget);
+
+      await tester.ensureVisible(find.byKey(const Key('voice_$_logId')));
+      await tester.pumpAndSettle();
+      _invokeVoiceButton(tester);
+      await tester.pumpAndSettle();
+      expect(repository.deleteCount, 1);
+      expect(find.text('Geri al'), findsOneWidget);
+    });
+
+    testWidgets('kısmi STT sonucu geçmiş kaydını değiştirmez', (tester) async {
+      final repository = _FakeHistoryRepository(_fixtureHistory());
+      final stt = _FakeSttService([
+        const SttResult(
+          text: 'porsiyon 150 gram',
+          confidence: 1,
+          isFinal: false,
+        ),
+      ]);
+      await tester.pumpWidget(_app(repository, stt: stt));
+      await _load(tester);
+      await _revealActions(tester);
+
+      await tester.ensureVisible(find.byKey(const Key('voice_$_logId')));
+      await tester.pumpAndSettle();
+      _invokeVoiceButton(tester);
+      await tester.pumpAndSettle();
+
+      expect(stt.startCount, 1);
+      expect(repository.updateCount, 0);
+      expect(find.textContaining('Komut henüz çalıştırılmadı'), findsOneWidget);
+    });
+
+    testWidgets('gerçek geçmiş ekranı yüzde 200 fontta taşmaz', (tester) async {
+      tester.view.devicePixelRatio = 1;
+      tester.view.physicalSize = const Size(430, 900);
+      addTearDown(() {
+        tester.view.resetPhysicalSize();
+        tester.view.resetDevicePixelRatio();
+      });
+      await tester.pumpWidget(
+        _app(
+          _FakeHistoryRepository(_fixtureHistory()),
+          textScale: 2,
+        ),
+      );
+      await _load(tester);
+
+      expect(tester.takeException(), isNull);
+      expect(find.byKey(const Key('history_list')), findsOneWidget);
+    });
   });
 }
 
@@ -212,15 +283,21 @@ Widget _app(
   _FakeHistoryRepository repository, {
   String? userId = _userId,
   VoidCallback? onScanRequested,
+  SttService? stt,
+  double textScale = 1,
 }) {
   return ProviderScope(
     overrides: [
       historyRepositoryProvider.overrideWithValue(repository),
       historyUserIdProvider.overrideWithValue(userId),
+      if (stt != null) sttServiceProvider.overrideWithValue(stt),
     ],
-    child: MaterialApp(
-      theme: AppTheme.lightTheme,
-      home: FoodHistoryScreen(onScanRequested: onScanRequested),
+    child: MediaQuery(
+      data: MediaQueryData(textScaler: TextScaler.linear(textScale)),
+      child: MaterialApp(
+        theme: AppTheme.lightTheme,
+        home: FoodHistoryScreen(onScanRequested: onScanRequested),
+      ),
     ),
   );
 }
@@ -236,6 +313,14 @@ Future<void> _revealActions(WidgetTester tester) async {
     const Offset(0, -500),
   );
   await tester.pumpAndSettle();
+}
+
+void _invokeVoiceButton(WidgetTester tester) {
+  final button = tester.widget<IconButton>(
+    find.byKey(const Key('voice_$_logId')),
+  );
+  expect(button.onPressed, isNotNull);
+  button.onPressed!.call();
 }
 
 class _FakeHistoryRepository implements HistoryRepository {
@@ -315,6 +400,34 @@ class _FakeHistoryRepository implements HistoryRepository {
     if (_deleted != null) remote = _deleted!;
     return const ApiResult.success({'restored': true});
   }
+}
+
+class _FakeSttService extends SttService {
+  _FakeSttService(this.results);
+
+  final List<SttResult> results;
+  int startCount = 0;
+
+  @override
+  Future<void> startListening({
+    required void Function(SttResult) onResult,
+    void Function(String)? onError,
+    void Function()? onListeningStarted,
+    void Function()? onListeningStopped,
+    String? locale,
+    Duration listenFor = const Duration(seconds: 30),
+  }) async {
+    startCount += 1;
+    onListeningStarted?.call();
+    if (results.isNotEmpty) onResult(results.removeAt(0));
+    onListeningStopped?.call();
+  }
+
+  @override
+  Future<void> cancelListening() async {}
+
+  @override
+  void dispose() {}
 }
 
 FoodHistoryResult _withRange(

@@ -1,5 +1,6 @@
 import 'dart:math' as math;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -7,6 +8,7 @@ import 'package:nutrisense/app.dart';
 import 'package:nutrisense/core/theme/app_theme.dart';
 import 'package:nutrisense/features/food_scan/screens/food_scan_screen.dart';
 import 'package:nutrisense/main.dart';
+import 'package:nutrisense/shared/services/accessibility_service.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -72,6 +74,31 @@ void main() {
     expect(fab.height, greaterThanOrEqualTo(48));
   });
 
+  testWidgets(
+      'Türkçe TTS yoksa merkezi ve erişilebilir alternatif uyarısı görünür',
+      (tester) async {
+    final accessibility = _UnavailableTtsService();
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          accessibilityServiceProvider.overrideWithValue(accessibility),
+        ],
+        child: const NutriSenseApp(
+          initializePlatformServices: false,
+          bypassAuthenticationForTests: true,
+        ),
+      ),
+    );
+    await tester.pump();
+
+    expect(find.byKey(const Key('tts_failure_banner')), findsOneWidget);
+    expect(
+      find.bySemanticsLabel(RegExp('Sesli okuma kullanılamıyor')),
+      findsOneWidget,
+    );
+    expect(find.text('Ayarları Aç'), findsOneWidget);
+  });
+
   test('tema ana metin kontrastı WCAG AA hedefini karşılar', () {
     expect(
         _contrastRatio(Colors.black, Colors.white), greaterThanOrEqualTo(4.5));
@@ -80,6 +107,26 @@ void main() {
       greaterThanOrEqualTo(4.5),
     );
   });
+}
+
+class _UnavailableTtsService extends AccessibilityService {
+  final ValueNotifier<String?> _failure = ValueNotifier<String?>(
+    'Türkçe metin okuma sesi bu cihazda bulunamadı.',
+  );
+
+  @override
+  ValueListenable<String?> get ttsFailureListenable => _failure;
+
+  @override
+  String? get ttsFailureReason => _failure.value;
+
+  @override
+  void setScreenReaderActive(bool active) {}
+
+  @override
+  void dispose() {
+    _failure.dispose();
+  }
 }
 
 double _contrastRatio(Color foreground, Color background) {

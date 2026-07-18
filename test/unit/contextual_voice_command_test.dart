@@ -50,6 +50,71 @@ void main() {
       expect(result.accepted, isFalse);
     });
 
+    test('geçmiş komutları yalnız seçili kayıt bağlamında kabul edilir', () {
+      final listen = parser.parse(
+        'kaydı dinle',
+        context: VoiceInteractionContext.history,
+      );
+      final edit = parser.parse(
+        'kaydı düzelt',
+        context: VoiceInteractionContext.history,
+      );
+      final meal = parser.parse(
+        'öğünü değiştir',
+        context: VoiceInteractionContext.history,
+      );
+      expect(listen.action, ContextualVoiceAction.listenEntry);
+      expect(edit.action, ContextualVoiceAction.editEntry);
+      expect(meal.action, ContextualVoiceAction.changeMeal);
+      expect(
+        parser
+            .parse(
+              'kaydı düzelt',
+              context: VoiceInteractionContext.globalNavigation,
+            )
+            .accepted,
+        isFalse,
+      );
+    });
+
+    test('geçmiş porsiyon komutu sınırları doğrulanmış sayı taşır', () {
+      final valid = parser.parse(
+        'porsiyon 150 gram',
+        context: VoiceInteractionContext.history,
+      );
+      final excessive = parser.parse(
+        'porsiyon 2500 gram',
+        context: VoiceInteractionContext.history,
+      );
+      expect(valid.action, ContextualVoiceAction.setPortion);
+      expect(valid.portionGrams, 150);
+      expect(excessive.accepted, isFalse);
+    });
+
+    test('çıkış yalnız ayarlar bağlamında ve ikinci onayla kabul edilir', () {
+      final settings = parser.parse(
+        'çıkış yap',
+        context: VoiceInteractionContext.settings,
+      );
+      final global = parser.parse(
+        'çıkış yap',
+        context: VoiceInteractionContext.globalNavigation,
+      );
+      expect(settings.action, ContextualVoiceAction.logout);
+      expect(settings.isExact, isTrue);
+      expect(settings.requiresSecondConfirmation, isTrue);
+      expect(global.accepted, isFalse);
+    });
+
+    test('iptal onay dışındaki bağlamlarda güvenli biçimde kabul edilir', () {
+      final result = parser.parse(
+        'iptal',
+        context: VoiceInteractionContext.history,
+      );
+      expect(result.action, ContextualVoiceAction.cancel);
+      expect(result.isExact, isTrue);
+    });
+
     test('aday ve porsiyon komutları gerçek değer taşır', () {
       final option = parser.parse(
         'birinci seçenek',
@@ -116,6 +181,17 @@ void main() {
       );
       expect(gate.resolve(yes), isNull);
       expect(gate.isActive, isFalse);
+    });
+
+    test('fuzzy evet çıkışı tetiklemez', () {
+      final gate = VoiceConfirmationGate();
+      gate.request(ContextualVoiceAction.logout);
+      final fuzzy = parser.parse(
+        'evett',
+        context: VoiceInteractionContext.logoutConfirmation,
+      );
+      expect(gate.resolve(fuzzy), isNull);
+      expect(gate.isActive, isTrue);
     });
   });
 }

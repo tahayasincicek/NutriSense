@@ -8,6 +8,8 @@ enum VoiceInteractionContext {
   portionEditing,
   history,
   historyDeleteConfirmation,
+  settings,
+  logoutConfirmation,
   reportPreview,
   reportConsent,
   reportSendConfirmation,
@@ -22,8 +24,12 @@ enum ContextualVoiceAction {
   setPortion,
   save,
   today,
+  listenEntry,
+  editEntry,
+  changeMeal,
   sendReport,
   deleteEntry,
+  logout,
   back,
   yes,
   no,
@@ -59,6 +65,7 @@ class ContextualVoiceCommandParser {
   static const _confirmationContexts = {
     VoiceInteractionContext.scanConfirmation,
     VoiceInteractionContext.historyDeleteConfirmation,
+    VoiceInteractionContext.logoutConfirmation,
     VoiceInteractionContext.reportSendConfirmation,
   };
 
@@ -79,12 +86,15 @@ class ContextualVoiceCommandParser {
       if (_isExact(normalized, const ['iptal', 'vazgec'])) {
         return _exact(input, ContextualVoiceAction.cancel);
       }
-    } else if (_isExact(normalized, const ['evet', 'hayir', 'iptal'])) {
+    } else if (_isExact(normalized, const ['evet', 'hayir'])) {
       return ContextualVoiceIntent(
         rawText: input,
         rejectionReason:
             'Bu komut yalnızca etkin bir onay sorusunda kullanılabilir.',
       );
+    }
+    if (_isExact(normalized, const ['iptal', 'vazgec'])) {
+      return _exact(input, ContextualVoiceAction.cancel);
     }
 
     final exact = _exactForContext(normalized, input, context);
@@ -152,7 +162,8 @@ class ContextualVoiceCommandParser {
     if (portion != null &&
         {
           VoiceInteractionContext.portionEditing,
-          VoiceInteractionContext.scanConfirmation
+          VoiceInteractionContext.scanConfirmation,
+          VoiceInteractionContext.history,
         }.contains(context)) {
       final grams = double.tryParse(portion.group(1)!.replaceAll(',', '.'));
       if (grams != null && grams.isFinite && grams > 0 && grams <= 2000) {
@@ -173,6 +184,18 @@ class ContextualVoiceCommandParser {
         _allowed(ContextualVoiceAction.today, context)) {
       return _exact(raw, ContextualVoiceAction.today);
     }
+    if (_isExact(value, const ['kaydi dinle', 'bu kaydi dinle']) &&
+        context == VoiceInteractionContext.history) {
+      return _exact(raw, ContextualVoiceAction.listenEntry);
+    }
+    if (_isExact(value, const ['kaydi duzelt', 'bu kaydi duzelt']) &&
+        context == VoiceInteractionContext.history) {
+      return _exact(raw, ContextualVoiceAction.editEntry);
+    }
+    if (_isExact(value, const ['ogunu degistir', 'ogun turunu degistir']) &&
+        context == VoiceInteractionContext.history) {
+      return _exact(raw, ContextualVoiceAction.changeMeal);
+    }
     if (_isExact(value, const ['rapor gonder', 'diyetisyene rapor gonder']) &&
         context == VoiceInteractionContext.reportConsent) {
       return _exact(
@@ -186,6 +209,14 @@ class ContextualVoiceCommandParser {
       return _exact(
         raw,
         ContextualVoiceAction.deleteEntry,
+        requiresSecondConfirmation: true,
+      );
+    }
+    if (_isExact(value, const ['cikis yap', 'oturumu kapat']) &&
+        context == VoiceInteractionContext.settings) {
+      return _exact(
+        raw,
+        ContextualVoiceAction.logout,
         requiresSecondConfirmation: true,
       );
     }

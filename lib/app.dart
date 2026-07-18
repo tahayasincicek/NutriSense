@@ -176,44 +176,73 @@ class _AppShellState extends ConsumerState<AppShell> {
   Widget build(BuildContext context) {
     final currentIndex = ref.watch(currentTabProvider);
     final theme = Theme.of(context);
+    final accessibility = ref.read(accessibilityServiceProvider);
 
     return Scaffold(
       // IndexedStack: tüm sekmelerin state'ini korur, her seferinde rebuild etmez
-      body: Stack(
+      body: Column(
         children: [
-          IndexedStack(
-            index: currentIndex,
-            children: [
-              const FoodScanScreen(),
-              FoodHistoryScreen(onScanRequested: () => _onTabChanged(0)),
-              const DietitianScreen(),
-              const SettingsScreen(),
-            ],
-          ),
-          if (_voiceStatus != null)
-            Positioned(
-              left: 16,
-              right: 16,
-              bottom: 16,
-              child: Semantics(
+          ValueListenableBuilder<String?>(
+            valueListenable: accessibility.ttsFailureListenable,
+            builder: (context, failure, _) {
+              if (failure == null) return const SizedBox.shrink();
+              return Semantics(
                 liveRegion: true,
-                label: _voiceStatus,
-                child: Material(
-                  color: theme.colorScheme.inverseSurface,
-                  borderRadius: BorderRadius.circular(12),
-                  child: Padding(
-                    padding: const EdgeInsets.all(12),
-                    child: Text(
-                      _voiceStatus!,
-                      key: const Key('global_voice_status'),
-                      style: TextStyle(
-                        color: theme.colorScheme.onInverseSurface,
+                container: true,
+                label: 'Sesli okuma kullanılamıyor. $failure',
+                child: MaterialBanner(
+                  key: const Key('tts_failure_banner'),
+                  content: Text(failure),
+                  leading: const Icon(Icons.volume_off_outlined),
+                  actions: [
+                    TextButton(
+                      onPressed: () => _onTabChanged(3),
+                      child: const Text('Ayarları Aç'),
+                    ),
+                  ],
+                ),
+              );
+            },
+          ),
+          Expanded(
+            child: Stack(
+              children: [
+                IndexedStack(
+                  index: currentIndex,
+                  children: [
+                    const FoodScanScreen(),
+                    FoodHistoryScreen(onScanRequested: () => _onTabChanged(0)),
+                    const DietitianScreen(),
+                    const SettingsScreen(),
+                  ],
+                ),
+                if (_voiceStatus != null)
+                  Positioned(
+                    left: 16,
+                    right: 16,
+                    bottom: 16,
+                    child: Semantics(
+                      liveRegion: true,
+                      label: _voiceStatus,
+                      child: Material(
+                        color: theme.colorScheme.inverseSurface,
+                        borderRadius: BorderRadius.circular(12),
+                        child: Padding(
+                          padding: const EdgeInsets.all(12),
+                          child: Text(
+                            _voiceStatus!,
+                            key: const Key('global_voice_status'),
+                            style: TextStyle(
+                              color: theme.colorScheme.onInverseSurface,
+                            ),
+                          ),
+                        ),
                       ),
                     ),
                   ),
-                ),
-              ),
+              ],
             ),
+          ),
         ],
       ),
 
@@ -317,7 +346,9 @@ class _NavigationIcon extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           AnimatedContainer(
-            duration: const Duration(milliseconds: 180),
+            duration: MediaQuery.disableAnimationsOf(context)
+                ? Duration.zero
+                : const Duration(milliseconds: 180),
             width: selected ? 32 : 0,
             height: 2,
             decoration: BoxDecoration(
