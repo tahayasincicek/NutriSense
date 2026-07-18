@@ -96,13 +96,14 @@ Amaç: Kullanıcı bugünkü kayıtlarını bulur ve sahip olduğu kaydı yönet
 2. Loading, data ve offline-cache durumlarının birbirinden ayırt edilebilir olduğunu doğrula.
 3. Günlük özetini dinle.
 4. Bir kaydı tek anlamlı semantik cümle olarak oku; alt ikonların aynı içeriği tekrarlamadığını doğrula.
-5. Porsiyonu ve öğün türünü dokunma/ekran okuyucu yoluyla değiştir.
+5. Kayıt kartındaki sesli eylem düğmesine basıp “kaydı dinle”, “kaydı düzelt”, “öğünü değiştir” ve “porsiyon 150 gram” yollarını ayrı ayrı doğrula; yalnız seçili kayıt değişmeli.
 6. Kaydı silmeyi seç; açık onay olmadan silinmemeli.
-7. “kaydı sil” benzeri fuzzy/gürültülü komut söyle; silme gerçekleşmemeli.
-8. Silmeyi iptal et, sonra açık onayla sentetik kaydı sil.
-9. Başka sentetik kullanıcıyla giriş yap ve ilk kullanıcının kaydının görünmediğini doğrula.
+7. Sesli eylemde “kaydı sil” de; ilk komut yalnız ikinci onayı açmalı, kayıt durmalıdır.
+8. İkinci dinlemede “evett” gibi fuzzy/gürültülü komut söyle; silme gerçekleşmemeli. Sonra “hayır” ile iptal et.
+9. Komutu yeniden başlat, ayrı ve tam “evet” ile sentetik kaydı sil; “Geri al” eylemini doğrula.
+10. Başka sentetik kullanıcıyla giriş yap ve ilk kullanıcının kaydının görünmediğini doğrula.
 
-Geçme ölçütü: Özet ve kayıtlar anlaşılır; düzeltme/silme güvenli çalışır; kullanıcı izolasyonu korunur. Not: sesle silme UI bağlantısı tamamlanana kadar bu görev yalnız ekran okuyucu + dokunma yoluyla geçebilir.
+Geçme ölçütü: Özet ve kayıtlar anlaşılır; yalnız seçili kayıt değişir; sesli/dokunmatik düzeltme ve çift onaylı silme güvenli çalışır; kullanıcı izolasyonu korunur.
 
 ## Görev 4 — Diyetisyen atama ve onay
 
@@ -148,7 +149,9 @@ Amaç: Kullanıcı araştırma formunu ve tercihleri yönetir, oturumu güvenle 
 5. Reduce motion açıkken geçiş animasyonlarının azaltıldığını doğrula.
 6. Ayarlar sekmesinde konuşma hızı, haptic ve yüksek kontrast kontrollerinin ad/rol/değerini doğrula.
 7. Türkçe TTS sesi olmayan cihaz/emülatör koşulunda kullanıcıya anlaşılır fallback sağlanıp sağlanmadığını kaydet.
-8. Çıkış yap; geri ile korumalı AppShell'e dönülemediğini ve yerel hassas önbelleğin temizlendiğini doğrula.
+8. Ayarlar mikrofonunda “çıkış yap” de; ilk komutun yalnız ikinci onayı açtığını doğrula.
+9. İkinci dinlemede önce “evett” de; oturum kapanmamalı. Ardından yeniden başlatıp tam “evet” de.
+10. Geri ile korumalı AppShell'e dönülemediğini ve yerel hassas önbelleğin temizlendiğini doğrula. Aynı görevi dokunmatik “Çıkış Yap” alternatifiyle tekrar et.
 
 Geçme ölçütü: Zorunlu soruların tamamı erişilebilir; mikrofon olmadan alternatif vardır; ayarlar anlaşılır; çıkış oturumu atomik kapatır.
 
