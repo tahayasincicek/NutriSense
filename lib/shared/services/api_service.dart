@@ -680,6 +680,9 @@ class ApiService {
 
   Future<ApiResult<SendToDietitianResult>> sendToDietitian({
     required bool consent,
+    required List<String> channels,
+    required String consentContextHash,
+    required String idempotencyKey,
     String reportType = 'weekly',
     DateTime? fromDate,
     DateTime? toDate,
@@ -701,10 +704,57 @@ class ApiService {
             'user_id': currentUserId,
             'report_type': reportType,
             'consent': consent,
+            'channels': channels,
+            'consent_context_hash': consentContextHash,
             if (fromDate != null) 'from_date': _date(fromDate),
             if (toDate != null) 'to_date': _date(toDate),
             if (message != null) 'message': message,
           },
+          cancelToken: cancelToken,
+          options: Options(headers: {'Idempotency-Key': idempotencyKey}),
+        );
+        return SendToDietitianResult.fromJson(response.data ?? const {});
+      });
+
+  Future<ApiResult<DietitianReportPreview>> previewDietitianReport({
+    required List<String> channels,
+    String reportType = 'weekly',
+    DateTime? fromDate,
+    DateTime? toDate,
+    String? message,
+    CancelToken? cancelToken,
+  }) =>
+      _safeCall(() async {
+        final currentUserId = userId;
+        if (currentUserId == null) {
+          throw const ApiFailure(
+            code: 'AUTH_REQUIRED',
+            message: 'Rapor önizlemek için oturum açılmalıdır.',
+            kind: ApiFailureKind.unauthorized,
+          );
+        }
+        final response = await _dio.post<Map<String, dynamic>>(
+          '/dietitian-reports/preview',
+          data: {
+            'user_id': currentUserId,
+            'report_type': reportType,
+            'channels': channels,
+            if (fromDate != null) 'from_date': _date(fromDate),
+            if (toDate != null) 'to_date': _date(toDate),
+            if (message != null) 'message': message,
+          },
+          cancelToken: cancelToken,
+        );
+        return DietitianReportPreview.fromJson(response.data ?? const {});
+      });
+
+  Future<ApiResult<SendToDietitianResult>> retryDietitianReport({
+    required String reportId,
+    CancelToken? cancelToken,
+  }) =>
+      _safeCall(() async {
+        final response = await _dio.post<Map<String, dynamic>>(
+          '/dietitian-reports/$reportId/retry',
           cancelToken: cancelToken,
         );
         return SendToDietitianResult.fromJson(response.data ?? const {});

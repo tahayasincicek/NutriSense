@@ -63,6 +63,31 @@ void main() {
       expect(history.hasMore, isFalse);
     });
 
+    test('rapor önizleme ve partial failure fixturelarını kayıpsız parse eder',
+        () {
+      final preview = DietitianReportPreview.fromJson(
+        _fixture('dietitian_report_preview_success.json'),
+      );
+      final delivery = SendToDietitianResult.fromJson(
+        _fixture('dietitian_report_partial_failed.json'),
+      );
+
+      expect(preview.recordCount, 3);
+      expect(preview.recipients['email'], contains('@nutrisense.invalid'));
+      expect(preview.consentContextHash, hasLength(64));
+      expect(delivery.status, 'partial_failed');
+      expect(
+          delivery.channels
+              .singleWhere((item) => item.channel == 'email')
+              .isSent,
+          isTrue);
+      expect(
+          delivery.channels
+              .singleWhere((item) => item.channel == 'sms')
+              .canRetry,
+          isTrue);
+    });
+
     test('auth token fixture rotation sürelerini parse eder', () {
       final auth = AuthTokenResult.fromJson(
         _fixture('auth_tokens_success.json'),
@@ -210,9 +235,12 @@ void main() {
       'dietitian_name': 'Test Diyetisyen',
       'email_verified': true,
       'phone_verified': false,
+      'email_masked': 't***@example.test',
+      'phone_masked': null,
     });
     expect(assignment.isApproved, isTrue);
     expect(assignment.hasVerifiedContact, isTrue);
+    expect(assignment.emailMasked, 't***@example.test');
   });
 
   test('timeout TTS başlatmadan tipli ağ hatasına dönüşür', () {

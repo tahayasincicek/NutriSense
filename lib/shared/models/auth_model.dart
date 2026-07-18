@@ -26,6 +26,8 @@ class DietitianAssignmentInfo {
   final String dietitianName;
   final bool emailVerified;
   final bool phoneVerified;
+  final String? emailMasked;
+  final String? phoneMasked;
 
   const DietitianAssignmentInfo({
     required this.assignmentId,
@@ -34,6 +36,8 @@ class DietitianAssignmentInfo {
     required this.dietitianName,
     required this.emailVerified,
     required this.phoneVerified,
+    this.emailMasked,
+    this.phoneMasked,
   });
 
   bool get isApproved => status == 'approved';
@@ -47,5 +51,7 @@ class DietitianAssignmentInfo {
         dietitianName: json['dietitian_name'] as String? ?? '',
         emailVerified: json['email_verified'] as bool? ?? false,
         phoneVerified: json['phone_verified'] as bool? ?? false,
+        emailMasked: json['email_masked'] as String?,
+        phoneMasked: json['phone_masked'] as String?,
       );
 }

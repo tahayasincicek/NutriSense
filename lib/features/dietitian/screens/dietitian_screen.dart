@@ -5,6 +5,7 @@ import '../../../core/utils/accessibility_utils.dart';
 import '../../../shared/models/auth_model.dart';
 import '../../../shared/services/api_service.dart';
 import '../../../shared/widgets/accessible_button.dart';
+import 'send_report_wizard.dart';
 
 class DietitianScreen extends ConsumerStatefulWidget {
   const DietitianScreen({super.key});
@@ -17,7 +18,6 @@ class _DietitianScreenState extends ConsumerState<DietitianScreen> {
   final _email = TextEditingController();
   DietitianAssignmentInfo? _assignment;
   bool _loading = true;
-  bool _consent = false;
   String? _error;
 
   ApiService get _api => ref.read(apiServiceProvider);
@@ -129,9 +129,9 @@ class _DietitianScreenState extends ConsumerState<DietitianScreen> {
             const SizedBox(height: 8),
             Text(
               'Doğrulanmış iletişim: '
-              '${assignment.emailVerified ? "e-posta" : ""}'
+              '${assignment.emailVerified ? "e-posta ${assignment.emailMasked ?? "***"}" : ""}'
               '${assignment.emailVerified && assignment.phoneVerified ? ", " : ""}'
-              '${assignment.phoneVerified ? "telefon" : ""}',
+              '${assignment.phoneVerified ? "telefon ${assignment.phoneMasked ?? "***"}" : ""}',
             ),
             const SizedBox(height: 20),
             if (!approved) ...[
@@ -143,20 +143,10 @@ class _DietitianScreenState extends ConsumerState<DietitianScreen> {
               const SizedBox(height: 12),
             ],
             if (approved) ...[
-              CheckboxListTile(
-                contentPadding: EdgeInsets.zero,
-                value: _consent,
-                onChanged: (value) => setState(() => _consent = value ?? false),
-                title: const Text(
-                  'Haftalık beslenme raporumu bu diyetisyenle paylaşmayı onaylıyorum.',
-                ),
-                controlAffinity: ListTileControlAffinity.leading,
-              ),
-              const SizedBox(height: 8),
               AccessibleButton(
-                label: 'Onaylı Raporu Gönder',
+                label: 'Raporu Önizle ve Gönder',
                 icon: Icons.send_outlined,
-                onPressed: _consent ? _sendReport : null,
+                onPressed: _sendReport,
               ),
               const SizedBox(height: 12),
             ],
@@ -212,7 +202,6 @@ class _DietitianScreenState extends ConsumerState<DietitianScreen> {
     if (result.isSuccess) {
       setState(() {
         _assignment = null;
-        _consent = false;
       });
       AccessibilityUtils.announceSuccess('Diyetisyen ataması iptal edildi.');
     } else {
@@ -221,17 +210,11 @@ class _DietitianScreenState extends ConsumerState<DietitianScreen> {
   }
 
   Future<void> _sendReport() async {
-    final result = await _api.sendToDietitian(consent: true);
-    if (!mounted) return;
-    setState(() => _consent = false);
-    if (result.isSuccess) {
-      final message = result.data?.message ?? 'Onaylanan rapor gönderildi.';
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text(message)));
-      AccessibilityUtils.announceSuccess(message);
-    } else {
-      _showError(result.errorMessage ?? 'Rapor gönderilemedi.');
-    }
+    await Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => SendReportWizard(assignment: _assignment!),
+      ),
+    );
   }
 
   void _showError(String message) {

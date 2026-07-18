@@ -658,6 +658,9 @@ class SendToDietitianResult {
   final bool sentViaEmail;
   final bool sentViaSms;
   final String dietitianName;
+  final String status;
+  final List<ChannelDeliveryResult> channels;
+  final bool duplicate;
   final String message;
 
   const SendToDietitianResult({
@@ -666,6 +669,9 @@ class SendToDietitianResult {
     required this.sentViaEmail,
     required this.sentViaSms,
     required this.dietitianName,
+    required this.status,
+    required this.channels,
+    required this.duplicate,
     required this.message,
   });
 
@@ -676,9 +682,98 @@ class SendToDietitianResult {
       sentViaEmail: json['sent_via_email'] ?? false,
       sentViaSms: json['sent_via_sms'] ?? false,
       dietitianName: json['dietitian_name'] ?? '',
+      status: json['status'] ?? 'failed',
+      channels: (json['channels'] as List? ?? const [])
+          .map((item) => ChannelDeliveryResult.fromJson(
+                Map<String, dynamic>.from(item as Map),
+              ))
+          .toList(),
+      duplicate: json['duplicate'] ?? false,
       message: json['message'] ?? '',
     );
   }
+}
+
+class ChannelDeliveryResult {
+  const ChannelDeliveryResult({
+    required this.channel,
+    required this.status,
+    required this.destinationMasked,
+    required this.attemptCount,
+    required this.maxAttempts,
+    this.providerStatus,
+    this.errorCode,
+  });
+
+  final String channel;
+  final String status;
+  final String destinationMasked;
+  final int attemptCount;
+  final int maxAttempts;
+  final String? providerStatus;
+  final String? errorCode;
+
+  bool get isSent => status == 'sent';
+  bool get canRetry => status == 'failed' && attemptCount < maxAttempts;
+  String get channelLabel => channel == 'email' ? 'E-posta' : 'SMS';
+
+  factory ChannelDeliveryResult.fromJson(Map<String, dynamic> json) =>
+      ChannelDeliveryResult(
+        channel: json['channel'] ?? '',
+        status: json['status'] ?? 'failed',
+        destinationMasked: json['destination_masked'] ?? '***',
+        attemptCount: json['attempt_count'] ?? 0,
+        maxAttempts: json['max_attempts'] ?? 3,
+        providerStatus: json['provider_status'],
+        errorCode: json['error_code'],
+      );
+}
+
+class DietitianReportPreview {
+  const DietitianReportPreview({
+    required this.reportType,
+    required this.fromDate,
+    required this.toDate,
+    required this.recordCount,
+    required this.totalCalories,
+    required this.averageDailyCalories,
+    required this.estimatedPortionCount,
+    required this.dietitianName,
+    required this.recipients,
+    required this.channels,
+    required this.consentContextHash,
+    required this.accessibilitySummary,
+  });
+
+  final String reportType;
+  final DateTime fromDate;
+  final DateTime toDate;
+  final int recordCount;
+  final double totalCalories;
+  final double averageDailyCalories;
+  final int estimatedPortionCount;
+  final String dietitianName;
+  final Map<String, String> recipients;
+  final List<String> channels;
+  final String consentContextHash;
+  final String accessibilitySummary;
+
+  factory DietitianReportPreview.fromJson(Map<String, dynamic> json) =>
+      DietitianReportPreview(
+        reportType: json['report_type'] ?? '',
+        fromDate: DateTime.parse(json['from_date']),
+        toDate: DateTime.parse(json['to_date']),
+        recordCount: json['record_count'] ?? 0,
+        totalCalories: (json['total_calories'] as num?)?.toDouble() ?? 0,
+        averageDailyCalories:
+            (json['average_daily_calories'] as num?)?.toDouble() ?? 0,
+        estimatedPortionCount: json['estimated_portion_count'] ?? 0,
+        dietitianName: json['dietitian_name'] ?? '',
+        recipients: Map<String, String>.from(json['recipients'] ?? const {}),
+        channels: List<String>.from(json['channels'] ?? const []),
+        consentContextHash: json['consent_context_hash'] ?? '',
+        accessibilitySummary: json['accessibility_summary'] ?? '',
+      );
 }
 
 /// JWT token yanıtı

@@ -1,26 +1,13 @@
-// =============================================================================
-// lib/features/dietitian/screens/send_report_wizard.dart
-// NutriSense — Diyetisyene Rapor Gönderme Sihirbazı
-//
-// 4 adımlı onay akışı (Wizard pattern):
-//   1. Tarih aralığı seçimi
-//   2. Özet önizleme (sesli okuma)
-//   3. Onay ("Emin misiniz?")
-//   4. Gönderim + sonuç
-//
-// Tüm adımlar sesli etiketlenmiş ve TTS ile okunur.
-// =============================================================================
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:uuid/uuid.dart';
 
-import '../../../core/constants/app_strings.dart';
-import '../../../core/theme/app_theme.dart';
+import '../../../shared/models/auth_model.dart';
+import '../../../shared/models/food_analysis_model.dart';
 import '../../../shared/services/accessibility_service.dart';
 import '../../../shared/services/api_service.dart';
 import '../../../shared/widgets/accessible_button.dart';
 
-/// Rapor türü seçenekleri
 enum ReportRange {
   daily('Günlük', 'daily', 1),
   weekly('Haftalık', 'weekly', 7),
@@ -33,597 +20,482 @@ enum ReportRange {
 }
 
 class SendReportWizard extends ConsumerStatefulWidget {
-  const SendReportWizard({super.key});
+  const SendReportWizard({required this.assignment, super.key});
+
+  final DietitianAssignmentInfo assignment;
 
   @override
   ConsumerState<SendReportWizard> createState() => _SendReportWizardState();
 }
 
 class _SendReportWizardState extends ConsumerState<SendReportWizard> {
-  late AccessibilityService _accessibility;
-  late ApiService _apiService;
-
-  // ── Wizard durumu ──
-  int _currentStep = 0;
-  ReportRange _selectedRange = ReportRange.weekly;
-  String? _userMessage;
-  bool _isSending = false;
-  bool _isSent = false;
-  String _resultMessage = '';
-
-  // Hesaplanan tarihler
-  late DateTime _fromDate;
+  final _noteController = TextEditingController();
+  final _uuid = const Uuid();
+  late final AccessibilityService _accessibility;
+  ReportRange _range = ReportRange.weekly;
   late DateTime _toDate;
+  late DateTime _fromDate;
+  late Set<String> _channels;
+  int _step = 0;
+  bool _loadingPreview = false;
+  bool _sending = false;
+  bool _explicitConsent = false;
+  String? _error;
+  String? _idempotencyKey;
+  DietitianReportPreview? _preview;
+  SendToDietitianResult? _result;
+
+  ApiService get _api => ref.read(apiServiceProvider);
 
   @override
   void initState() {
     super.initState();
     _accessibility = ref.read(accessibilityServiceProvider);
-    _apiService = ref.read(apiServiceProvider);
-
     _toDate = DateTime.now();
-    _fromDate = _toDate.subtract(Duration(days: _selectedRange.days));
-
-    // Ekran duyurusu
+    _setRangeDates();
+    _channels = {
+      if (widget.assignment.emailVerified) 'email',
+      if (!widget.assignment.emailVerified && widget.assignment.phoneVerified)
+        'sms',
+    };
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _accessibility.speak(
-        'Diyetisyene rapor gönderme sihirbazı. '
-        'İlk adım: tarih aralığını seçin.',
+        'Diyetisyen raporu. Önce dönem ve doğrulanmış gönderim kanallarını seçin.',
         priority: TtsPriority.high,
       );
     });
   }
 
+  void _setRangeDates() {
+    _fromDate = DateTime(
+      _toDate.year,
+      _toDate.month,
+      _toDate.day,
+    ).subtract(Duration(days: _range.days - 1));
+  }
+
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Rapor Gönder'),
-        leading: Semantics(
-          label: 'Geri dön',
-          button: true,
-          child: IconButton(
-            icon: const Icon(Icons.arrow_back),
-            onPressed: () {
-              if (_currentStep > 0 && !_isSent) {
-                _goBack();
-              } else {
-                Navigator.of(context).pop();
-              }
-            },
-          ),
+        title: const Text('Raporu Önizle ve Gönder'),
+        leading: IconButton(
+          tooltip: _step > 0 && _step < 3 ? 'Önceki adıma dön' : 'Kapat',
+          onPressed: _step > 0 && _step < 3
+              ? () => setState(() => _step -= 1)
+              : () => Navigator.pop(context),
+          icon: const Icon(Icons.arrow_back),
         ),
       ),
-      body: Column(
-        children: [
-          // ── İlerleme göstergesi ──
-          _buildStepIndicator(theme),
-
-          // ── Adım içeriği ──
-          Expanded(
-            child: AnimatedSwitcher(
-              duration: const Duration(milliseconds: 300),
-              child: _buildCurrentStep(theme),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  // ═══════════════════════════════════════════════════════════════════════════
-  // İLERLEME GÖSTERGESİ
-  // ═══════════════════════════════════════════════════════════════════════════
-
-  Widget _buildStepIndicator(ThemeData theme) {
-    final steps = ['Tarih', 'Önizleme', 'Onay', 'Gönderim'];
-
-    return Semantics(
-      label:
-          'Adım ${_currentStep + 1} / ${steps.length}: ${steps[_currentStep]}',
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-        child: Row(
-          children: List.generate(steps.length, (i) {
-            final isActive = i == _currentStep;
-            final isDone = i < _currentStep;
-
-            return Expanded(
-              child: Row(
-                children: [
-                  // Numara dairesi
-                  Container(
-                    width: 32,
-                    height: 32,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: isDone
-                          ? AppTheme.primaryColor
-                          : isActive
-                              ? AppTheme.primaryColor
-                              : Colors.grey[300],
+      body: SafeArea(
+        child: Column(
+          children: [
+            _StepIndicator(step: _step),
+            if (_error != null)
+              Semantics(
+                liveRegion: true,
+                child: MaterialBanner(
+                  content: Text(_error!),
+                  actions: [
+                    TextButton(
+                      onPressed: () => setState(() => _error = null),
+                      child: const Text('Kapat'),
                     ),
-                    child: Center(
-                      child: isDone
-                          ? const Icon(Icons.check,
-                              color: Colors.white, size: 18)
-                          : Text(
-                              '${i + 1}',
-                              style: TextStyle(
-                                color:
-                                    isActive ? Colors.white : Colors.grey[600],
-                                fontWeight: FontWeight.w700,
-                                fontSize: 14,
-                              ),
-                            ),
-                    ),
-                  ),
-                  // Bağlantı çizgisi
-                  if (i < steps.length - 1)
-                    Expanded(
-                      child: Container(
-                        height: 2,
-                        color:
-                            isDone ? AppTheme.primaryColor : Colors.grey[300],
-                      ),
-                    ),
-                ],
-              ),
-            );
-          }),
-        ),
-      ),
-    );
-  }
-
-  // ═══════════════════════════════════════════════════════════════════════════
-  // ADIM İÇERİKLERİ
-  // ═══════════════════════════════════════════════════════════════════════════
-
-  Widget _buildCurrentStep(ThemeData theme) {
-    return switch (_currentStep) {
-      0 => _buildStep1DateSelection(theme),
-      1 => _buildStep2Preview(theme),
-      2 => _buildStep3Confirmation(theme),
-      3 => _buildStep4Result(theme),
-      _ => const SizedBox.shrink(),
-    };
-  }
-
-  // ── ADIM 1: Tarih aralığı seçimi ──
-  Widget _buildStep1DateSelection(ThemeData theme) {
-    return Padding(
-      key: const ValueKey('step1'),
-      padding: const EdgeInsets.all(24),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Semantics(
-            header: true,
-            child: Text(
-              'Hangi tarih aralığını göndermek istiyorsunuz?',
-              style: theme.textTheme.headlineSmall?.copyWith(
-                fontWeight: FontWeight.w700,
-                fontSize: 22,
-              ),
-            ),
-          ),
-          const SizedBox(height: 24),
-
-          // Rapor türü seçim kartları
-          ...ReportRange.values.map((range) {
-            final isActive = _selectedRange == range;
-            final fromDt = _toDate.subtract(Duration(days: range.days));
-            final label = '${fromDt.day}.${fromDt.month}.${fromDt.year} — '
-                '${_toDate.day}.${_toDate.month}.${_toDate.year}';
-
-            return Semantics(
-              label: '${range.label} rapor. $label. '
-                  '${isActive ? "Seçili." : "Seçmek için dokunun."}',
-              selected: isActive,
-              button: true,
-              child: GestureDetector(
-                onTap: () {
-                  setState(() {
-                    _selectedRange = range;
-                    _fromDate = fromDt;
-                  });
-                  _accessibility.speak(
-                    '${range.label} rapor seçildi. $label',
-                    priority: TtsPriority.normal,
-                  );
-                  _accessibility.lightHaptic();
-                },
-                child: AnimatedContainer(
-                  duration: const Duration(milliseconds: 200),
-                  margin: const EdgeInsets.only(bottom: 12),
-                  padding: const EdgeInsets.all(20),
-                  decoration: BoxDecoration(
-                    color: isActive
-                        ? AppTheme.primaryColor.withOpacity(0.1)
-                        : Colors.grey[100],
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(
-                      color:
-                          isActive ? AppTheme.primaryColor : Colors.grey[300]!,
-                      width: isActive ? 2 : 1,
-                    ),
-                  ),
-                  child: Row(
-                    children: [
-                      Icon(
-                        isActive
-                            ? Icons.radio_button_checked
-                            : Icons.radio_button_off,
-                        color:
-                            isActive ? AppTheme.primaryColor : Colors.grey[400],
-                        size: 28,
-                      ),
-                      const SizedBox(width: 16),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              range.label,
-                              style: TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.w700,
-                                color: isActive
-                                    ? AppTheme.primaryColor
-                                    : Colors.black87,
-                              ),
-                            ),
-                            const SizedBox(height: 4),
-                            Text(label,
-                                style: TextStyle(color: Colors.grey[600])),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
+                  ],
                 ),
               ),
-            );
-          }),
-
-          // Not alanı
-          const SizedBox(height: 16),
-          TextField(
-            decoration: InputDecoration(
-              labelText: 'Diyetisyeninize not (opsiyonel)',
-              hintText: 'Eklemek istediğiniz bir mesaj...',
-              border:
-                  OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-            ),
-            maxLines: 2,
-            onChanged: (v) => _userMessage = v.isEmpty ? null : v,
-          ),
-
-          const Spacer(),
-          _buildNavigationButtons(showBack: false),
-        ],
-      ),
-    );
-  }
-
-  // ── ADIM 2: Önizleme ──
-  Widget _buildStep2Preview(ThemeData theme) {
-    final summary = '${_selectedRange.label} rapor. '
-        '${_fromDate.day}.${_fromDate.month}.${_fromDate.year} — '
-        '${_toDate.day}.${_toDate.month}.${_toDate.year}. ';
-
-    return Padding(
-      key: const ValueKey('step2'),
-      padding: const EdgeInsets.all(24),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Semantics(
-            header: true,
-            child: Text(
-              'Rapor Önizlemesi',
-              style: theme.textTheme.headlineSmall?.copyWith(
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-          ),
-          const SizedBox(height: 20),
-
-          // Özet kartı
-          Container(
-            padding: const EdgeInsets.all(20),
-            decoration: BoxDecoration(
-              color: AppTheme.primaryColor.withOpacity(0.08),
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: AppTheme.primaryColor.withOpacity(0.2)),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _buildInfoRow(
-                    Icons.date_range, 'Rapor Türü', _selectedRange.label),
-                const SizedBox(height: 12),
-                _buildInfoRow(Icons.calendar_today, 'Başlangıç',
-                    '${_fromDate.day}.${_fromDate.month}.${_fromDate.year}'),
-                const SizedBox(height: 12),
-                _buildInfoRow(Icons.calendar_today, 'Bitiş',
-                    '${_toDate.day}.${_toDate.month}.${_toDate.year}'),
-                if (_userMessage != null) ...[
-                  const SizedBox(height: 12),
-                  _buildInfoRow(Icons.message, 'Not', _userMessage!),
-                ],
-              ],
-            ),
-          ),
-          const SizedBox(height: 20),
-
-          // Sesli okuma butonu
-          Semantics(
-            label: 'Rapor özetini sesli oku',
-            button: true,
-            child: OutlinedButton.icon(
-              onPressed: () {
-                _accessibility.speak(summary, priority: TtsPriority.high);
-              },
-              icon: const Icon(Icons.volume_up),
-              label: const Text('Sesli Oku', style: TextStyle(fontSize: 16)),
-              style: OutlinedButton.styleFrom(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
-              ),
-            ),
-          ),
-
-          const Spacer(),
-          _buildNavigationButtons(showBack: true),
-        ],
-      ),
-    );
-  }
-
-  // ── ADIM 3: Onay ──
-  Widget _buildStep3Confirmation(ThemeData theme) {
-    return Padding(
-      key: const ValueKey('step3'),
-      padding: const EdgeInsets.all(24),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const Icon(Icons.send_rounded,
-              size: 80, color: AppTheme.primaryColor),
-          const SizedBox(height: 24),
-          Semantics(
-            header: true,
-            child: Text(
-              'Göndermek istediğinizden emin misiniz?',
-              style: theme.textTheme.headlineSmall?.copyWith(
-                fontWeight: FontWeight.w700,
-              ),
-              textAlign: TextAlign.center,
-            ),
-          ),
-          const SizedBox(height: 12),
-          Text(
-            '${_selectedRange.label} beslenme raporunuz diyetisyeninize '
-            'e-posta ve SMS ile iletilecektir.',
-            style: theme.textTheme.bodyLarge?.copyWith(color: Colors.grey[600]),
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 48),
-
-          // Evet / Hayır butonları
-          Row(
-            children: [
-              Expanded(
-                child: AccessibleButton(
-                  label: 'Hayır, Vazgeç',
-                  semanticLabel: 'Gönderme işlemini iptal et ve geri dön',
-                  icon: Icons.close,
-                  type: AccessibleButtonType.outlined,
-                  onPressed: _goBack,
-                ),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: AccessibleButton(
-                  label: 'Evet, Gönder',
-                  semanticLabel: 'Raporu diyetisyene gönder',
-                  icon: Icons.send,
-                  type: AccessibleButtonType.filled,
-                  onPressed: _sendReport,
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  // ── ADIM 4: Sonuç ──
-  Widget _buildStep4Result(ThemeData theme) {
-    return Padding(
-      key: const ValueKey('step4'),
-      padding: const EdgeInsets.all(24),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          if (_isSending) ...[
-            const CircularProgressIndicator(color: AppTheme.primaryColor),
-            const SizedBox(height: 24),
-            const Text(
-              'Rapor gönderiliyor...',
-              style: TextStyle(fontSize: 18),
-            ),
-          ] else ...[
-            Icon(
-              _isSent ? Icons.check_circle : Icons.error_outline,
-              size: 80,
-              color: _isSent ? AppTheme.primaryColor : Colors.red[400],
-            ),
-            const SizedBox(height: 24),
-            Text(
-              _isSent ? 'Rapor Gönderildi!' : 'Gönderim Başarısız',
-              style: theme.textTheme.headlineSmall?.copyWith(
-                fontWeight: FontWeight.w700,
-                color: _isSent ? AppTheme.primaryColor : Colors.red[400],
-              ),
-            ),
-            const SizedBox(height: 12),
-            Text(
-              _resultMessage,
-              style: theme.textTheme.bodyLarge,
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 48),
-            AccessibleButton(
-              label: _isSent ? 'Tamam' : 'Tekrar Dene',
-              semanticLabel:
-                  _isSent ? 'Ekranı kapat' : 'Rapor gönderimini tekrar dene',
-              icon: _isSent ? Icons.check : Icons.refresh,
-              type: AccessibleButtonType.filled,
-              onPressed: () {
-                if (_isSent) {
-                  Navigator.of(context).pop();
-                } else {
-                  setState(() => _currentStep = 2);
-                }
-              },
-            ),
+            Expanded(child: _buildStep()),
           ],
-        ],
+        ),
       ),
     );
   }
 
-  // ═══════════════════════════════════════════════════════════════════════════
-  // YARDIMCI WİDGET'LAR
-  // ═══════════════════════════════════════════════════════════════════════════
+  Widget _buildStep() => switch (_step) {
+        0 => _selectionStep(),
+        1 => _previewStep(),
+        2 => _consentStep(),
+        _ => _resultStep(),
+      };
 
-  Widget _buildInfoRow(IconData icon, String label, String value) {
-    return Row(
+  Widget _selectionStep() {
+    return ListView(
+      key: const Key('report_selection_step'),
+      padding: const EdgeInsets.all(20),
       children: [
-        Icon(icon, size: 20, color: AppTheme.primaryColor),
-        const SizedBox(width: 12),
-        Text('$label: ',
-            style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 15)),
-        Expanded(
-          child: Text(value,
-              style: const TextStyle(fontSize: 15, color: Colors.black87)),
+        Text('Dönem ve kanallar',
+            style: Theme.of(context).textTheme.headlineSmall),
+        const SizedBox(height: 8),
+        Text(
+          'Alıcı ${widget.assignment.dietitianName}. İletişim bilgileri güvenlik için maskelenmiştir.',
+        ),
+        const SizedBox(height: 16),
+        SegmentedButton<ReportRange>(
+          key: const Key('report_range_selector'),
+          segments: ReportRange.values
+              .map((range) => ButtonSegment(
+                    value: range,
+                    label: Text(range.label),
+                  ))
+              .toList(),
+          selected: {_range},
+          onSelectionChanged: (selection) {
+            setState(() {
+              _range = selection.single;
+              _setRangeDates();
+              _invalidatePreview();
+            });
+          },
+        ),
+        const Divider(),
+        CheckboxListTile(
+          key: const Key('report_channel_email'),
+          value: _channels.contains('email'),
+          onChanged: widget.assignment.emailVerified
+              ? (value) => _toggleChannel('email', value ?? false)
+              : null,
+          title: const Text('E-posta'),
+          subtitle: Text(widget.assignment.emailVerified
+              ? widget.assignment.emailMasked ?? 'Maskeli adres'
+              : 'E-posta doğrulanmamış'),
+        ),
+        CheckboxListTile(
+          key: const Key('report_channel_sms'),
+          value: _channels.contains('sms'),
+          onChanged: widget.assignment.phoneVerified
+              ? (value) => _toggleChannel('sms', value ?? false)
+              : null,
+          title: const Text('SMS — yalnız kısa güvenli özet'),
+          subtitle: Text(widget.assignment.phoneVerified
+              ? widget.assignment.phoneMasked ?? 'Maskeli telefon'
+              : 'Telefon doğrulanmamış'),
+        ),
+        const Text(
+          'SMS içinde besin adları, kaloriler veya tam günlük gönderilmez. '
+          'Ayrıntılar yalnız seçilen e-posta kanalında yer alır.',
+        ),
+        const SizedBox(height: 16),
+        TextField(
+          key: const Key('report_note'),
+          controller: _noteController,
+          maxLength: 500,
+          maxLines: 3,
+          decoration: const InputDecoration(
+            labelText: 'Diyetisyene not (isteğe bağlı)',
+            helperText: 'Kişisel veya gereksiz hassas bilgi yazmayın.',
+          ),
+          onChanged: (_) => _invalidatePreview(),
+        ),
+        const SizedBox(height: 20),
+        AccessibleButton(
+          key: const Key('report_preview_button'),
+          label: _loadingPreview
+              ? 'Önizleme hazırlanıyor'
+              : 'Gerçek Kayıtları Önizle',
+          icon: Icons.preview_outlined,
+          onPressed: _loadingPreview ? null : _loadPreview,
         ),
       ],
     );
   }
 
-  Widget _buildNavigationButtons({required bool showBack}) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 16),
-      child: Row(
-        children: [
-          if (showBack) ...[
-            Expanded(
-              child: AccessibleButton(
-                label: 'Geri',
-                semanticLabel: 'Önceki adıma dön',
-                icon: Icons.arrow_back,
-                type: AccessibleButtonType.outlined,
-                onPressed: _goBack,
+  Widget _previewStep() {
+    final preview = _preview!;
+    return ListView(
+      key: const Key('report_preview_step'),
+      padding: const EdgeInsets.all(20),
+      children: [
+        Semantics(
+          label: preview.accessibilitySummary,
+          container: true,
+          child: ExcludeSemantics(
+            child: Card(
+              child: Padding(
+                padding: const EdgeInsets.all(18),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('Erişilebilir gönderim özeti',
+                        style: Theme.of(context).textTheme.titleLarge),
+                    const SizedBox(height: 12),
+                    Text('Alıcı: ${preview.dietitianName}'),
+                    for (final channel in preview.channels)
+                      Text('${_channelLabel(channel)}: '
+                          '${preview.recipients[channel]}'),
+                    Text('Dönem: ${_date(preview.fromDate)} – '
+                        '${_date(preview.toDate)}'),
+                    Text('${preview.recordCount} kullanıcı onaylı kayıt'),
+                    Text(
+                        'Toplam ${preview.totalCalories.toStringAsFixed(0)} kcal; '
+                        'günlük ortalama '
+                        '${preview.averageDailyCalories.toStringAsFixed(0)} kcal'),
+                    Text('${preview.estimatedPortionCount} tahmini porsiyon'),
+                    const SizedBox(height: 8),
+                    const Text(
+                        'Tahmini beslenme bilgisidir; tıbbi tavsiye değildir.'),
+                  ],
+                ),
               ),
             ),
-            const SizedBox(width: 16),
-          ],
-          Expanded(
-            child: AccessibleButton(
-              label: 'İleri',
-              semanticLabel: 'Sonraki adıma geç',
-              icon: Icons.arrow_forward,
-              type: AccessibleButtonType.filled,
-              onPressed: _goNext,
-            ),
           ),
-        ],
-      ),
+        ),
+        const SizedBox(height: 16),
+        OutlinedButton.icon(
+          key: const Key('report_listen_preview'),
+          onPressed: () => _accessibility.speak(
+            preview.accessibilitySummary,
+            priority: TtsPriority.high,
+          ),
+          icon: const Icon(Icons.volume_up),
+          label: const Text('Özeti Dinle'),
+        ),
+        const SizedBox(height: 20),
+        Row(
+          children: [
+            Expanded(
+              child: OutlinedButton(
+                onPressed: () => setState(() => _step = 0),
+                child: const Text('Değiştir'),
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: FilledButton(
+                key: const Key('report_continue_to_consent'),
+                onPressed: () => setState(() => _step = 2),
+                child: const Text('Onaya Geç'),
+              ),
+            ),
+          ],
+        ),
+      ],
     );
   }
 
-  // ═══════════════════════════════════════════════════════════════════════════
-  // NAVİGASYON
-  // ═══════════════════════════════════════════════════════════════════════════
-
-  void _goNext() {
-    if (_currentStep >= 3) return;
-    setState(() => _currentStep++);
-
-    final announcements = [
-      '', // 0 dan 1'e
-      'Rapor önizlemesi. Bilgileri kontrol edin ve devam edin.',
-      'Son adım. Göndermek istediğinizden emin misiniz?',
-      'Gönderiliyor.',
-    ];
-
-    if (_currentStep < announcements.length) {
-      _accessibility.speak(
-        announcements[_currentStep],
-        priority: TtsPriority.high,
-      );
-    }
-    _accessibility.lightHaptic();
+  Widget _consentStep() {
+    final preview = _preview!;
+    return ListView(
+      key: const Key('report_consent_step'),
+      padding: const EdgeInsets.all(20),
+      children: [
+        Text('Her gönderim için açık onay',
+            style: Theme.of(context).textTheme.headlineSmall),
+        const SizedBox(height: 12),
+        Text(preview.accessibilitySummary),
+        const SizedBox(height: 16),
+        CheckboxListTile(
+          key: const Key('report_explicit_consent'),
+          value: _explicitConsent,
+          onChanged: _sending
+              ? null
+              : (value) => setState(() => _explicitConsent = value ?? false),
+          title: const Text(
+            'Yukarıdaki dönem, kayıt sayısı, alıcı ve kanallarla paylaşımı '
+            'bu gönderim için açıkça onaylıyorum.',
+          ),
+          controlAffinity: ListTileControlAffinity.leading,
+        ),
+        const SizedBox(height: 20),
+        AccessibleButton(
+          key: const Key('report_send_button'),
+          label: _sending ? 'Gönderim işleniyor' : 'Onayla ve Güvenli Gönder',
+          icon: Icons.send_outlined,
+          onPressed: !_explicitConsent || _sending ? null : _send,
+        ),
+      ],
+    );
   }
 
-  void _goBack() {
-    if (_currentStep <= 0) return;
-    setState(() => _currentStep--);
-    _accessibility.speak('Önceki adıma dönüldü.', priority: TtsPriority.normal);
-    _accessibility.lightHaptic();
+  Widget _resultStep() {
+    final result = _result;
+    final complete = result?.status == 'sent';
+    final partial = result?.status == 'partial_failed';
+    return ListView(
+      key: const Key('report_result_step'),
+      padding: const EdgeInsets.all(24),
+      children: [
+        Icon(
+          complete
+              ? Icons.check_circle
+              : partial
+                  ? Icons.warning_amber_rounded
+                  : Icons.error_outline,
+          size: 72,
+          color: complete
+              ? Colors.green
+              : partial
+                  ? Colors.orange
+                  : Colors.red,
+        ),
+        const SizedBox(height: 16),
+        Semantics(
+          liveRegion: true,
+          child: Text(
+            result?.message ?? _error ?? 'Gönderim başlatılamadı.',
+            textAlign: TextAlign.center,
+            style: Theme.of(context).textTheme.titleMedium,
+          ),
+        ),
+        const SizedBox(height: 16),
+        if (result != null)
+          for (final delivery in result.channels)
+            ListTile(
+              leading: Icon(delivery.isSent ? Icons.check : Icons.close),
+              title: Text('${delivery.channelLabel}: ${delivery.status}'),
+              subtitle: Text('${delivery.destinationMasked}; '
+                  'deneme ${delivery.attemptCount}/${delivery.maxAttempts}'
+                  '${delivery.errorCode == null ? '' : '; ${delivery.errorCode}'}'),
+            ),
+        const Text(
+          '“Gönderildi”, sağlayıcının mesajı kabul ettiğini gösterir; '
+          'alıcının okuduğunu veya nihai teslimi kanıtlamaz.',
+        ),
+        const SizedBox(height: 24),
+        if (result?.channels.any((item) => item.canRetry) ?? false)
+          AccessibleButton(
+            key: const Key('report_retry_button'),
+            label: 'Başarısız Kanalları Yeniden Dene',
+            icon: Icons.refresh,
+            onPressed: _sending ? null : _retry,
+          ),
+        const SizedBox(height: 12),
+        OutlinedButton(
+          onPressed: () => Navigator.pop(context),
+          child: const Text('Kapat'),
+        ),
+      ],
+    );
   }
 
-  // ═══════════════════════════════════════════════════════════════════════════
-  // GÖNDERİM
-  // ═══════════════════════════════════════════════════════════════════════════
-
-  Future<void> _sendReport() async {
+  void _toggleChannel(String channel, bool selected) {
     setState(() {
-      _currentStep = 3;
-      _isSending = true;
+      if (selected) {
+        _channels.add(channel);
+      } else {
+        _channels.remove(channel);
+      }
+      _invalidatePreview();
     });
+  }
 
-    _accessibility.speak(
-      'Raporunuz gönderiliyor, lütfen bekleyin.',
-      priority: TtsPriority.high,
-    );
+  void _invalidatePreview() {
+    _preview = null;
+    _idempotencyKey = null;
+    _explicitConsent = false;
+  }
 
-    final result = await _apiService.sendToDietitian(
-      consent: true,
-      reportType: _selectedRange.apiValue,
+  Future<void> _loadPreview() async {
+    if (_channels.isEmpty) {
+      _showError('En az bir doğrulanmış gönderim kanalı seçin.');
+      return;
+    }
+    setState(() {
+      _loadingPreview = true;
+      _error = null;
+    });
+    final result = await _api.previewDietitianReport(
+      channels: _channels.toList(),
+      reportType: _range.apiValue,
       fromDate: _fromDate,
       toDate: _toDate,
-      message: _userMessage,
+      message: _noteController.text.trim().isEmpty
+          ? null
+          : _noteController.text.trim(),
     );
-
+    if (!mounted) return;
     setState(() {
-      _isSending = false;
-      _isSent = result.isSuccess;
-      _resultMessage = result.isSuccess
-          ? result.data?.message ??
-              AppStrings.dietitianReportSent('diyetisyeninize')
-          : result.errorMessage ?? AppStrings.dietitianReportFailed;
+      _loadingPreview = false;
+      if (result.isSuccess && result.data != null) {
+        _preview = result.data;
+        _idempotencyKey = _uuid.v4();
+        _step = 1;
+      } else {
+        _error = result.errorMessage ?? 'Rapor önizlemesi hazırlanamadı.';
+      }
     });
-
-    if (_isSent) {
+    if (_preview != null) {
       _accessibility.speak(
-        _resultMessage,
+        _preview!.accessibilitySummary,
         priority: TtsPriority.high,
       );
-      _accessibility.successHaptic();
-    } else {
-      _accessibility.speak(
-        _resultMessage,
-        priority: TtsPriority.critical,
-      );
-      _accessibility.errorHaptic();
     }
+  }
+
+  Future<void> _send() async {
+    if (_preview == null || _idempotencyKey == null || _sending) return;
+    setState(() {
+      _sending = true;
+      _error = null;
+    });
+    final result = await _api.sendToDietitian(
+      consent: true,
+      channels: _preview!.channels,
+      consentContextHash: _preview!.consentContextHash,
+      idempotencyKey: _idempotencyKey!,
+      reportType: _range.apiValue,
+      fromDate: _fromDate,
+      toDate: _toDate,
+      message: _noteController.text.trim().isEmpty
+          ? null
+          : _noteController.text.trim(),
+    );
+    if (!mounted) return;
+    setState(() {
+      _sending = false;
+      _explicitConsent = false;
+      if (result.isSuccess && result.data != null) {
+        _result = result.data;
+      } else {
+        _error = result.errorMessage ?? 'Gönderim başlatılamadı.';
+      }
+      _step = 3;
+    });
+    final spoken = _result?.message ?? _error!;
+    _accessibility.speak(spoken, priority: TtsPriority.high);
+  }
+
+  Future<void> _retry() async {
+    final reportId = _result?.reportId;
+    if (reportId == null || _sending) return;
+    setState(() => _sending = true);
+    final retried = await _api.retryDietitianReport(reportId: reportId);
+    if (!mounted) return;
+    setState(() {
+      _sending = false;
+      if (retried.isSuccess && retried.data != null) {
+        _result = retried.data;
+      } else {
+        _error = retried.errorMessage ?? 'Yeniden deneme başlatılamadı.';
+      }
+    });
+  }
+
+  void _showError(String message) {
+    setState(() => _error = message);
+    _accessibility.speak(message, priority: TtsPriority.critical);
+  }
+
+  String _channelLabel(String value) => value == 'email' ? 'E-posta' : 'SMS';
+  String _date(DateTime value) => '${value.day.toString().padLeft(2, '0')}.'
+      '${value.month.toString().padLeft(2, '0')}.${value.year}';
+
+  @override
+  void dispose() {
+    _noteController.dispose();
+    super.dispose();
+  }
+}
+
+class _StepIndicator extends StatelessWidget {
+  const _StepIndicator({required this.step});
+  final int step;
+
+  @override
+  Widget build(BuildContext context) {
+    const labels = ['Seçim', 'Önizleme', 'Onay', 'Sonuç'];
+    return Semantics(
+      label: 'Adım ${step + 1} / 4: ${labels[step]}',
+      child: LinearProgressIndicator(value: (step + 1) / 4),
+    );
   }
 }
