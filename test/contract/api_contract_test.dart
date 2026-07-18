@@ -30,6 +30,10 @@ void main() {
       expect(result.candidates.single.foodNameTr, 'Elma');
       expect(result.recognitionSource, 'google_vision');
       expect(result.nutritionSource, 'nutritionix');
+      expect(result.canonicalFoodId, 'food.apple');
+      expect(result.nutritionReliability, 'verified_provider');
+      expect(result.provenance?.sourceItemId, 'fixture:apple');
+      expect(result.portionOptions.single.unit, 'adet');
     });
 
     test('düşük güven yanıtı kullanıcı onayı gerektirir', () {
@@ -38,6 +42,9 @@ void main() {
       );
       expect(result.confidence, 0.42);
       expect(result.needsConfirmation, isTrue);
+      expect(result.canConfirm, isFalse);
+      expect(result.totalCalories, 0);
+      expect(result.provenance, isNull);
     });
 
     test('geçmiş fixture alanlarını ve ISO-8601 zamanı parse eder', () {
@@ -71,6 +78,21 @@ void main() {
       fixture['confidence'] = 93;
       expect(
         () => FoodAnalysisResult.fromJson(fixture),
+        throwsFormatException,
+      );
+    });
+
+    test('NaN ve sonsuz besin değerlerini sözleşme ihlali olarak reddeder', () {
+      final nanFixture = _fixture('food_analysis_success.json')
+        ..['total_calories'] = double.nan;
+      final infiniteFixture = _fixture('food_analysis_success.json')
+        ..['portion_grams'] = double.infinity;
+      expect(
+        () => FoodAnalysisResult.fromJson(nanFixture),
+        throwsFormatException,
+      );
+      expect(
+        () => FoodAnalysisResult.fromJson(infiniteFixture),
         throwsFormatException,
       );
     });
@@ -194,6 +216,38 @@ void main() {
     ));
     expect(failure.code, 'TIMEOUT');
     expect(failure.kind, ApiFailureKind.timeout);
+  });
+
+  test('porsiyon güncellemesi değer, birim ve yöntemi birlikte gönderir',
+      () async {
+    Map<String, dynamic>? sent;
+    final apiDio = Dio(BaseOptions(baseUrl: 'https://contract.test/api/v1'))
+      ..httpClientAdapter = _FakeAdapter((request) async {
+        sent = request.data as Map<String, dynamic>;
+        final response = _fixture('food_analysis_success.json')
+          ..['portion_grams'] = 100
+          ..['portion_value'] = 100
+          ..['portion_method'] = 'user_voice'
+          ..['portion_is_estimate'] = false
+          ..['total_calories'] = 52;
+        return _jsonResponse(200, response);
+      });
+    final api = ApiService(
+      dio: apiDio,
+      tokenStore: _MemoryTokenStore(null),
+    );
+    final result = await api.updateFoodPortion(
+      analysisId: '550e8400-e29b-41d4-a716-446655440000',
+      portionValue: 100,
+      portionUnit: 'gram',
+      portionMethod: 'user_voice',
+    );
+
+    expect(result.isSuccess, isTrue);
+    expect(sent?['portion_value'], 100);
+    expect(sent?['portion_unit'], 'gram');
+    expect(sent?['portion_method'], 'user_voice');
+    expect(result.data?.portionIsEstimate, isFalse);
   });
 }
 

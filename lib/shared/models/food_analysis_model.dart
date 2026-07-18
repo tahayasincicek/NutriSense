@@ -59,14 +59,93 @@ class FoodCandidate {
       );
 }
 
+class NutritionProvenance {
+  final String source;
+  final String sourceItemId;
+  final String locale;
+  final DateTime retrievedAt;
+  final String servingUnit;
+  final double servingGrams;
+  final String licenseName;
+  final String attribution;
+
+  const NutritionProvenance({
+    required this.source,
+    required this.sourceItemId,
+    required this.locale,
+    required this.retrievedAt,
+    required this.servingUnit,
+    required this.servingGrams,
+    required this.licenseName,
+    required this.attribution,
+  });
+
+  factory NutritionProvenance.fromJson(Map<String, dynamic> json) =>
+      NutritionProvenance(
+        source: _requiredString(json, 'source'),
+        sourceItemId: _requiredString(json, 'source_item_id'),
+        locale: _requiredString(json, 'locale'),
+        retrievedAt: DateTime.parse(_requiredString(json, 'retrieved_at')),
+        servingUnit: _requiredString(json, 'serving_unit'),
+        servingGrams: _positive(json['serving_grams'], 'serving_grams'),
+        licenseName: _requiredString(json, 'license_name'),
+        attribution: _requiredString(json, 'attribution'),
+      );
+
+  Map<String, dynamic> toJson() => {
+        'source': source,
+        'source_item_id': sourceItemId,
+        'locale': locale,
+        'retrieved_at': retrievedAt.toUtc().toIso8601String(),
+        'serving_unit': servingUnit,
+        'serving_grams': servingGrams,
+        'license_name': licenseName,
+        'attribution': attribution,
+      };
+}
+
+class PortionOption {
+  final String unit;
+  final double gramsPerUnit;
+  final String sourceItemId;
+  final String sourceName;
+
+  const PortionOption({
+    required this.unit,
+    required this.gramsPerUnit,
+    required this.sourceItemId,
+    required this.sourceName,
+  });
+
+  factory PortionOption.fromJson(Map<String, dynamic> json) => PortionOption(
+        unit: _requiredString(json, 'unit'),
+        gramsPerUnit: _positive(json['grams_per_unit'], 'grams_per_unit'),
+        sourceItemId: _requiredString(json, 'source_item_id'),
+        sourceName: _requiredString(json, 'source_name'),
+      );
+
+  Map<String, dynamic> toJson() => {
+        'unit': unit,
+        'grams_per_unit': gramsPerUnit,
+        'source_item_id': sourceItemId,
+        'source_name': sourceName,
+      };
+}
+
 /// POST /api/v1/analyze-food yanıtı
 class FoodAnalysisResult {
   final String analysisId;
   final String? logId;
   final String foodName;
   final String foodNameTr;
+  final String canonicalFoodId;
+  final String normalizationVersion;
   final double caloriesPer100g;
   final double portionGrams;
+  final double portionValue;
+  final String portionUnit;
+  final String portionMethod;
+  final bool portionIsEstimate;
   final double totalCalories;
   final double confidence;
   final NutrientData nutrients;
@@ -74,6 +153,12 @@ class FoodAnalysisResult {
   final String recognitionSource;
   final String nutritionSource;
   final String nutritionStatus;
+  final String nutritionReliability;
+  final NutritionProvenance? provenance;
+  final List<PortionOption> portionOptions;
+  final double macroCalories;
+  final double macroCalorieDelta;
+  final double macroCalorieDeltaPercent;
   final List<FoodCandidate> candidates;
   final bool needsConfirmation;
   final bool canConfirm;
@@ -84,8 +169,14 @@ class FoodAnalysisResult {
     this.logId,
     required this.foodName,
     required this.foodNameTr,
+    required this.canonicalFoodId,
+    required this.normalizationVersion,
     required this.caloriesPer100g,
     required this.portionGrams,
+    required this.portionValue,
+    required this.portionUnit,
+    required this.portionMethod,
+    required this.portionIsEstimate,
     required this.totalCalories,
     required this.confidence,
     required this.nutrients,
@@ -93,6 +184,12 @@ class FoodAnalysisResult {
     required this.recognitionSource,
     required this.nutritionSource,
     required this.nutritionStatus,
+    required this.nutritionReliability,
+    required this.provenance,
+    required this.portionOptions,
+    required this.macroCalories,
+    required this.macroCalorieDelta,
+    required this.macroCalorieDeltaPercent,
     required this.candidates,
     required this.needsConfirmation,
     required this.canConfirm,
@@ -105,15 +202,39 @@ class FoodAnalysisResult {
       logId: json['log_id'] as String?,
       foodName: _requiredString(json, 'food_name'),
       foodNameTr: _requiredString(json, 'food_name_tr'),
-      caloriesPer100g: (json['calories_per_100g'] as num?)?.toDouble() ?? 0,
-      portionGrams: (json['portion_grams'] as num?)?.toDouble() ?? 0,
-      totalCalories: (json['total_calories'] as num?)?.toDouble() ?? 0,
+      canonicalFoodId: _requiredString(json, 'canonical_food_id'),
+      normalizationVersion: _requiredString(json, 'normalization_version'),
+      caloriesPer100g:
+          _nonNegativeOrZero(json['calories_per_100g'], 'calories_per_100g'),
+      portionGrams: _nonNegativeOrZero(json['portion_grams'], 'portion_grams'),
+      portionValue: _nonNegativeOrZero(json['portion_value'], 'portion_value'),
+      portionUnit: json['portion_unit'] as String? ?? '',
+      portionMethod: json['portion_method'] as String? ?? '',
+      portionIsEstimate: json['portion_is_estimate'] as bool? ?? true,
+      totalCalories:
+          _nonNegativeOrZero(json['total_calories'], 'total_calories'),
       confidence: _confidence(json['confidence']),
       nutrients: NutrientData.fromJson(_mapOrEmpty(json['nutrients'])),
       mealType: json['meal_type'] ?? 'atistirmalik',
       recognitionSource: json['recognition_source'] as String? ?? 'unknown',
       nutritionSource: json['nutrition_source'] as String? ?? 'unknown',
       nutritionStatus: json['nutrition_status'] as String? ?? 'not_found',
+      nutritionReliability:
+          json['nutrition_reliability'] as String? ?? 'not_found',
+      provenance: json['provenance'] is Map<String, dynamic>
+          ? NutritionProvenance.fromJson(
+              json['provenance'] as Map<String, dynamic>)
+          : null,
+      portionOptions: (json['portion_options'] as List<dynamic>? ?? const [])
+          .whereType<Map<String, dynamic>>()
+          .map(PortionOption.fromJson)
+          .toList(growable: false),
+      macroCalories:
+          _nonNegativeOrZero(json['macro_calories'], 'macro_calories'),
+      macroCalorieDelta:
+          _finiteOrZero(json['macro_calorie_delta'], 'macro_calorie_delta'),
+      macroCalorieDeltaPercent: _nonNegativeOrZero(
+          json['macro_calorie_delta_percent'], 'macro_calorie_delta_percent'),
       candidates: (json['candidates'] as List<dynamic>? ?? const [])
           .whereType<Map<String, dynamic>>()
           .take(3)
@@ -130,8 +251,14 @@ class FoodAnalysisResult {
         'log_id': logId,
         'food_name': foodName,
         'food_name_tr': foodNameTr,
+        'canonical_food_id': canonicalFoodId,
+        'normalization_version': normalizationVersion,
         'calories_per_100g': caloriesPer100g,
         'portion_grams': portionGrams,
+        'portion_value': portionValue,
+        'portion_unit': portionUnit,
+        'portion_method': portionMethod,
+        'portion_is_estimate': portionIsEstimate,
         'total_calories': totalCalories,
         'confidence': confidence,
         'nutrients': nutrients.toJson(),
@@ -139,6 +266,13 @@ class FoodAnalysisResult {
         'recognition_source': recognitionSource,
         'nutrition_source': nutritionSource,
         'nutrition_status': nutritionStatus,
+        'nutrition_reliability': nutritionReliability,
+        'provenance': provenance?.toJson(),
+        'portion_options':
+            portionOptions.map((option) => option.toJson()).toList(),
+        'macro_calories': macroCalories,
+        'macro_calorie_delta': macroCalorieDelta,
+        'macro_calorie_delta_percent': macroCalorieDeltaPercent,
         'candidates': candidates
             .map((candidate) => {
                   'food_name': candidate.foodName,
@@ -191,6 +325,26 @@ double _confidence(dynamic value) {
     throw const FormatException('confidence 0..1 aralığında olmalıdır');
   }
   return confidence;
+}
+
+double _finiteOrZero(dynamic value, String field) {
+  if (value == null) return 0;
+  if (value is! num || !value.toDouble().isFinite) {
+    throw FormatException('$field sonlu bir sayı olmalıdır');
+  }
+  return value.toDouble();
+}
+
+double _nonNegativeOrZero(dynamic value, String field) {
+  final result = _finiteOrZero(value, field);
+  if (result < 0) throw FormatException('$field negatif olamaz');
+  return result;
+}
+
+double _positive(dynamic value, String field) {
+  final result = _finiteOrZero(value, field);
+  if (result <= 0) throw FormatException('$field sıfırdan büyük olmalıdır');
+  return result;
 }
 
 /// Yemek geçmişi — tek besin kaydı

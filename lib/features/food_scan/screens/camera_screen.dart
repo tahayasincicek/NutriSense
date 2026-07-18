@@ -21,6 +21,8 @@ import '../models/camera_state.dart';
 import '../services/image_preprocessing.dart';
 import '../services/offline_recognizer.dart';
 import '../services/recognition_policy.dart';
+import '../services/turkish_portion_parser.dart';
+import '../widgets/accessible_portion_selector.dart';
 
 final availableCamerasProvider = FutureProvider<List<CameraDescription>>((ref) {
   return availableCameras();
@@ -50,6 +52,7 @@ class _CameraScreenState extends ConsumerState<CameraScreen>
   bool _initialized = false;
   bool _singleFlight = false;
   bool _saving = false;
+  bool _portionUpdating = false;
   bool _disposed = false;
   int _generation = 0;
   DateTime? _lastQualityWarningAt;
@@ -307,7 +310,9 @@ class _CameraScreenState extends ConsumerState<CameraScreen>
           ? 'Besin değeri yerel ve doğrulanmamış kaynaktan geliyor.'
           : 'Besin değeri kaynağı ${result.nutritionSource}.';
       await _tts.speak(
-        '${result.foodNameTr} bulundu. Yaklaşık ${result.totalCalories.toStringAsFixed(0)} kalori. $nutritionNote Doğruysa onaylayın, değilse düzeltin.',
+        '${result.foodNameTr} bulundu. Yaklaşık ${result.totalCalories.toStringAsFixed(0)} kalori. '
+        'Tahmini ${result.portionGrams.toStringAsFixed(0)} gram; değiştirmek ister misiniz? '
+        '$nutritionNote Doğruysa onaylayın, değilse düzeltin.',
       );
     } else {
       final names = _policy
@@ -341,11 +346,22 @@ class _CameraScreenState extends ConsumerState<CameraScreen>
     }
     _saving = true;
     setState(() {});
+    final hasUserPortion = !analysis.portionIsEstimate;
+    final correctedWithPortion = correctedName != null && hasUserPortion;
     final result = await ref.read(apiServiceProvider).decideFoodAnalysis(
           analysisId: analysis.analysisId,
           action: correctedName == null ? 'confirm' : 'correct',
           correctedFoodName: correctedName,
           correctedFoodNameTr: correctedNameTr,
+          portionValue: hasUserPortion
+              ? (correctedWithPortion
+                  ? analysis.portionGrams
+                  : analysis.portionValue)
+              : null,
+          portionUnit: hasUserPortion
+              ? (correctedWithPortion ? 'gram' : analysis.portionUnit)
+              : null,
+          portionMethod: hasUserPortion ? 'user_selected' : null,
           cancelToken: _requestCancelToken,
         );
     _saving = false;
@@ -365,6 +381,119 @@ class _CameraScreenState extends ConsumerState<CameraScreen>
     } else {
       await _tts.speakError(result.errorMessage ?? 'Kayıt oluşturulamadı.');
     }
+  }
+
+  Future<void> _updatePortion(
+    double value,
+    String unit, {
+    String method = 'user_selected',
+  }) async {
+    final analysis = ref.read(cameraStateProvider).analysis;
+    if (analysis == null || _portionUpdating || _saving) return;
+    _portionUpdating = true;
+    if (mounted) setState(() {});
+    final result = await ref.read(apiServiceProvider).updateFoodPortion(
+          analysisId: analysis.analysisId,
+          portionValue: value,
+          portionUnit: unit,
+          portionMethod: method,
+          cancelToken: _requestCancelToken,
+        );
+    _portionUpdating = false;
+    if (!mounted) return;
+    setState(() {});
+    if (!result.isSuccess || result.data == null) {
+      await _tts.speakError(
+        result.errorMessage ?? 'Porsiyon yeniden hesaplanamadı.',
+      );
+      return;
+    }
+    final updated = result.data!;
+    ref.read(cameraStateProvider.notifier).setAnalysis(
+          updated,
+          medium: _policy.classify(updated) == RecognitionBand.medium,
+        );
+    await _tts.speak(updated.ttsText);
+  }
+
+  Future<PortionInput?> _showPortionDialog({double initialGrams = 100}) async {
+    final controller = TextEditingController(
+      text: initialGrams.toStringAsFixed(0),
+    );
+    final result = await showDialog<PortionInput>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Porsiyonu gram olarak girin'),
+        content: TextField(
+          controller: controller,
+          autofocus: true,
+          keyboardType: const TextInputType.numberWithOptions(decimal: true),
+          decoration: const InputDecoration(
+            labelText: 'Gram',
+            hintText: 'Örnek: 150',
+            helperText: '0 ile 2000 gram arasında olmalıdır.',
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('İptal'),
+          ),
+          FilledButton(
+            onPressed: () {
+              final value = double.tryParse(
+                controller.text.trim().replaceAll(',', '.'),
+              );
+              if (value == null ||
+                  !value.isFinite ||
+                  value <= 0 ||
+                  value > 2000) {
+                return;
+              }
+              Navigator.pop(
+                context,
+                PortionInput(value: value, unit: 'gram'),
+              );
+            },
+            child: const Text('Uygula'),
+          ),
+        ],
+      ),
+    );
+    controller.dispose();
+    return result;
+  }
+
+  Future<void> _editPortion() async {
+    final analysis = ref.read(cameraStateProvider).analysis;
+    if (analysis == null) return;
+    final input = await _showPortionDialog(initialGrams: analysis.portionGrams);
+    if (input != null) await _updatePortion(input.value, input.unit);
+  }
+
+  Future<void> _listenForPortion() async {
+    await _tts.speak(
+      'Porsiyonu birimiyle söyleyin. Örnek: yüz elli gram veya iki dilim.',
+    );
+    await _stt.startListening(
+      listenFor: const Duration(seconds: 8),
+      onResult: (result) {
+        if (!result.isFinal) return;
+        final input = parseTurkishPortion(result.text);
+        if (input == null) {
+          unawaited(_tts.speakError(
+            'Porsiyon anlaşılamadı. Gram, adet, dilim veya kase ile tekrar söyleyin.',
+          ));
+          return;
+        }
+        unawaited(_updatePortion(
+          input.value,
+          input.unit,
+          method: 'user_voice',
+        ));
+      },
+      onError: (message) => _tts.speakError(message),
+    );
   }
 
   Future<void> _reject() async {
@@ -431,11 +560,15 @@ class _CameraScreenState extends ConsumerState<CameraScreen>
       );
       return;
     }
+    final portion = await _showPortionDialog(initialGrams: 100);
+    if (portion == null || !mounted) return;
     _captureId ??= _uuid.v4();
     final result = await ref.read(apiServiceProvider).createManualFoodLog(
           captureId: _captureId!,
           foodName: value.toLowerCase().replaceAll(' ', '_'),
           foodNameTr: value,
+          portionValue: portion.value,
+          portionMethod: 'user_selected',
           cancelToken: _requestCancelToken,
         );
     if (!mounted) return;
@@ -629,15 +762,31 @@ class _CameraScreenState extends ConsumerState<CameraScreen>
                 style: const TextStyle(color: Colors.white),
               ),
               Text(
-                result.nutritionStatus == 'unverified'
-                    ? 'Besin değeri: doğrulanmamış yerel kaynak'
-                    : 'Besin değeri kaynağı: ${result.nutritionSource}',
+                result.nutritionReliability == 'verified_provider'
+                    ? 'Besin verisi: doğrulanmış sağlayıcı (${result.nutritionSource})'
+                    : result.nutritionReliability == 'verified_local'
+                        ? 'Besin verisi: doğrulanmış yerel kaynak'
+                        : 'Besin verisi doğrulanamadı',
                 style: const TextStyle(color: Colors.amberAccent),
               ),
               if (result.canConfirm)
-                Text(
-                  'Yaklaşık ${result.totalCalories.toStringAsFixed(0)} kcal',
-                  style: const TextStyle(color: Colors.white, fontSize: 22),
+                Column(
+                  children: [
+                    Text(
+                      'Yaklaşık ${result.totalCalories.toStringAsFixed(0)} kcal',
+                      style: const TextStyle(color: Colors.white, fontSize: 22),
+                    ),
+                    Text(
+                      '${result.portionGrams.toStringAsFixed(0)} g '
+                      '(${result.portionIsEstimate ? 'kaynak önerisi' : 'kullanıcı seçimi'})',
+                      style: const TextStyle(color: Colors.white70),
+                    ),
+                    const Text(
+                      'Tahmini bilgi; tıbbi teşhis veya kişiselleştirilmiş tedavi değildir.',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(color: Colors.white70, fontSize: 12),
+                    ),
+                  ],
                 ),
             ],
           ),
@@ -654,6 +803,17 @@ class _CameraScreenState extends ConsumerState<CameraScreen>
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
+          if (analysis?.canConfirm == true) ...[
+            AccessiblePortionSelector(
+              result: analysis!,
+              enabled: !_saving,
+              loading: _portionUpdating,
+              onSelected: (value, unit) => _updatePortion(value, unit),
+              onManual: _editPortion,
+              onVoice: _listenForPortion,
+            ),
+            const SizedBox(height: 8),
+          ],
           if (state.status == CameraStatus.confirmationRequired)
             Wrap(
               spacing: 8,

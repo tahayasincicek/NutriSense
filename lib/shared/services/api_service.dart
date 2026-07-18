@@ -535,6 +535,9 @@ class ApiService {
     required String action,
     String? correctedFoodName,
     String? correctedFoodNameTr,
+    double? portionValue,
+    String? portionUnit,
+    String? portionMethod,
     CancelToken? cancelToken,
   }) =>
       _safeCall(() async {
@@ -546,10 +549,33 @@ class ApiService {
               'corrected_food_name': correctedFoodName,
             if (correctedFoodNameTr != null)
               'corrected_food_name_tr': correctedFoodNameTr,
+            if (portionValue != null) 'portion_value': portionValue,
+            if (portionUnit != null) 'portion_unit': portionUnit,
+            if (portionMethod != null) 'portion_method': portionMethod,
           },
           cancelToken: cancelToken,
         );
         return FoodAnalysisDecisionResult.fromJson(response.data ?? const {});
+      });
+
+  Future<ApiResult<FoodAnalysisResult>> updateFoodPortion({
+    required String analysisId,
+    required double portionValue,
+    required String portionUnit,
+    required String portionMethod,
+    CancelToken? cancelToken,
+  }) =>
+      _safeCall(() async {
+        final response = await _dio.post<Map<String, dynamic>>(
+          '/food-analysis/$analysisId/portion',
+          data: {
+            'portion_value': portionValue,
+            'portion_unit': portionUnit,
+            'portion_method': portionMethod,
+          },
+          cancelToken: cancelToken,
+        );
+        return FoodAnalysisResult.fromJson(response.data ?? const {});
       });
 
   Future<ApiResult<FoodAnalysisDecisionResult>> createManualFoodLog({
@@ -557,6 +583,8 @@ class ApiService {
     required String foodName,
     String? foodNameTr,
     String mealType = 'atistirmalik',
+    double portionValue = 100,
+    String portionMethod = 'user_selected',
     CancelToken? cancelToken,
   }) =>
       _safeCall(() async {
@@ -568,6 +596,9 @@ class ApiService {
             'food_name_tr': foodNameTr,
             'meal_type': mealType,
             'confirmed': true,
+            'portion_value': portionValue,
+            'portion_unit': 'gram',
+            'portion_method': portionMethod,
           },
           cancelToken: cancelToken,
         );
