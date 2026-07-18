@@ -33,6 +33,9 @@ services:
       DATABASE_URL: mysql+pymysql://${DB_USER}:${DB_PASSWORD}@db:3306/${DB_NAME}?charset=utf8mb4
       SMTP_HOST: mailpit
       SMTP_PORT: 1025
+      SMTP_USE_TLS: "false"
+      SMTP_START_TLS: "false"
+      NOTIFICATION_MODE: sandbox
     ports:
       - "127.0.0.1:8000:8000"
     depends_on:

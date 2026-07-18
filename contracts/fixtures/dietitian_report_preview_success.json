@@ -1,0 +1,17 @@
+{
+  "report_type": "weekly",
+  "from_date": "2026-07-12",
+  "to_date": "2026-07-18",
+  "record_count": 3,
+  "total_calories": 780.0,
+  "average_daily_calories": 111.4,
+  "estimated_portion_count": 2,
+  "dietitian_name": "Sandbox Diyetisyen",
+  "recipients": {
+    "email": "s****************@nutrisense.invalid",
+    "sms": "+*******0006"
+  },
+  "channels": ["email", "sms"],
+  "consent_context_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "accessibility_summary": "2026-07-12 ile 2026-07-18 arasındaki 3 onaylı kayıt, Sandbox Diyetisyen adlı diyetisyene maskeli kanallarla gönderilecek."
+}

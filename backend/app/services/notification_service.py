@@ -1,278 +1,201 @@
-# ==============================================================================
-# backend/app/services/notification_service.py
-# NutriSense — Bildirim Servisi (E-posta + SMS)
-#
-# Diyetisyene rapor gönderme:
-#   - HTML e-posta şablonu (Jinja2)
-#   - Twilio SMS
-#   - Aiosmtplib async e-posta
-# ==============================================================================
+"""Privacy-preserving SMTP/Twilio channel adapters.
 
+Provider acceptance is persisted as ``sent``; it is not presented as proof of
+human delivery. Provider secrets and unmasked destinations are never logged.
+"""
+
+from __future__ import annotations
+
+import inspect
 import logging
-from typing import Optional
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
+from email.utils import make_msgid
+from html import escape
+from typing import Awaitable, Callable
 
 import aiosmtplib
-from email.mime.text import MIMEText
-from email.mime.multipart import MIMEMultipart
-from jinja2 import Template
 from twilio.rest import Client as TwilioClient
 
-from ..config import get_settings
+from ..config import Settings, get_settings
 
 logger = logging.getLogger(__name__)
-settings = get_settings()
 
 
-# ═══════════════════════════════════════════════════════════════════════════════
-# HTML E-POSTA ŞABLONU
-# ═══════════════════════════════════════════════════════════════════════════════
+class ChannelDeliveryError(RuntimeError):
+    def __init__(self, code: str, *, retryable: bool):
+        super().__init__(code)
+        self.code = code
+        self.retryable = retryable
 
-REPORT_EMAIL_TEMPLATE = Template("""
-<!DOCTYPE html>
-<html lang="tr">
-<head>
-    <meta charset="UTF-8">
-    <style>
-        body { font-family: 'Segoe UI', Arial, sans-serif; background: #f5f5f5;
-               margin: 0; padding: 20px; }
-        .container { max-width: 600px; margin: 0 auto; background: white;
-                     border-radius: 12px; overflow: hidden;
-                     box-shadow: 0 2px 12px rgba(0,0,0,0.1); }
-        .header { background: linear-gradient(135deg, #1B5E20, #2E7D32);
-                  color: white; padding: 24px; text-align: center; }
-        .header h1 { margin: 0; font-size: 24px; }
-        .header p { margin: 8px 0 0; opacity: 0.9; }
-        .content { padding: 24px; }
-        .summary-card { background: #E8F5E9; border-radius: 8px;
-                       padding: 16px; margin-bottom: 16px; }
-        .summary-card h3 { margin: 0 0 8px; color: #1B5E20; }
-        .stat { display: inline-block; width: 45%; margin: 8px 0; }
-        .stat-value { font-size: 28px; font-weight: 700; color: #1B5E20; }
-        .stat-label { font-size: 12px; color: #666; }
-        table { width: 100%; border-collapse: collapse; margin: 16px 0; }
-        th { background: #1B5E20; color: white; padding: 10px; text-align: left;
-             font-size: 13px; }
-        td { padding: 10px; border-bottom: 1px solid #eee; font-size: 13px; }
-        tr:nth-child(even) { background: #f9f9f9; }
-        .footer { text-align: center; padding: 16px; color: #999;
-                  font-size: 12px; border-top: 1px solid #eee; }
-        .note { background: #FFF3E0; border-left: 4px solid #FF9800;
-                padding: 12px; margin: 16px 0; border-radius: 4px; }
-    </style>
-</head>
-<body>
-<div class="container">
-    <div class="header">
-        <h1>🍽️ NutriSense Beslenme Raporu</h1>
-        <p>{{ patient_name }} — {{ report_type_tr }} Rapor</p>
-        <p>{{ from_date }} — {{ to_date }}</p>
-    </div>
-    <div class="content">
-        <div class="summary-card">
-            <h3>📊 Özet</h3>
-            <div class="stat">
-                <div class="stat-value">{{ total_calories|round|int }}</div>
-                <div class="stat-label">Toplam Kalori (kcal)</div>
-            </div>
-            <div class="stat">
-                <div class="stat-value">{{ avg_daily_calories|round|int }}</div>
-                <div class="stat-label">Günlük Ortalama</div>
-            </div>
-            <div class="stat">
-                <div class="stat-value">{{ total_meals }}</div>
-                <div class="stat-label">Toplam Öğün</div>
-            </div>
-            <div class="stat">
-                <div class="stat-value">{{ total_days }}</div>
-                <div class="stat-label">Gün Sayısı</div>
-            </div>
-        </div>
 
-        {% if daily_breakdown %}
-        <h3>📅 Günlük Dağılım</h3>
-        <table>
-            <thead>
-                <tr>
-                    <th>Tarih</th>
-                    <th>Kalori</th>
-                    <th>Protein</th>
-                    <th>Karb.</th>
-                    <th>Yağ</th>
-                    <th>Öğün</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for day in daily_breakdown %}
-                <tr>
-                    <td>{{ day.date }}</td>
-                    <td>{{ day.calories|round|int }} kcal</td>
-                    <td>{{ day.protein|round(1) }}g</td>
-                    <td>{{ day.carbs|round(1) }}g</td>
-                    <td>{{ day.fat|round(1) }}g</td>
-                    <td>{{ day.meal_count }}</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-        {% endif %}
-
-        {% if patient_message %}
-        <div class="note">
-            <strong>💬 Hasta Notu:</strong><br>
-            {{ patient_message }}
-        </div>
-        {% endif %}
-    </div>
-    <div class="footer">
-        NutriSense — Görme Engelliler İçin Akıllı Besin Takibi<br>
-        Bu rapor otomatik olarak oluşturulmuştur.
-    </div>
-</div>
-</body>
-</html>
-""")
+EmailTransport = Callable[[MIMEMultipart, str], Awaitable[dict]]
+SmsTransport = Callable[[str, str], dict | Awaitable[dict]]
 
 
 class NotificationService:
-    """E-posta ve SMS bildirim servisi."""
-
-    def __init__(self):
-        # Twilio
-        if settings.twilio_account_sid and settings.twilio_auth_token:
-            self._twilio = TwilioClient(
-                settings.twilio_account_sid,
-                settings.twilio_auth_token,
-            )
-            self._sms_available = True
-        else:
-            self._twilio = None
-            self._sms_available = False
-            logger.warning("Twilio yapılandırılmamış — SMS devre dışı")
-
-        # SMTP
-        self._email_available = bool(
-            settings.smtp_user and settings.smtp_password
-        )
-        if not self._email_available:
-            logger.warning("SMTP yapılandırılmamış — e-posta devre dışı")
-
-    async def send_dietitian_report(
+    def __init__(
         self,
-        dietitian_email: Optional[str],
-        dietitian_phone: Optional[str],
-        dietitian_name: str,
-        patient_name: str,
+        *,
+        settings_override: Settings | None = None,
+        email_transport: EmailTransport | None = None,
+        sms_transport: SmsTransport | None = None,
+    ) -> None:
+        self.settings = settings_override or get_settings()
+        self._email_transport = email_transport or self._smtp_send
+        self._sms_transport = sms_transport or self._twilio_send
+
+    async def send_channel(
+        self,
+        *,
+        channel: str,
+        destination: str,
         report_data: dict,
     ) -> dict:
-        """
-        Diyetisyene beslenme raporu gönderir.
-
-        Returns:
-            {"email_sent": bool, "sms_sent": bool, "errors": [...]}
-        """
-        result = {"email_sent": False, "sms_sent": False, "errors": []}
-
-        # ── E-posta ──
-        if self._email_available and dietitian_email:
-            try:
-                await self._send_email_report(
-                    to_email=dietitian_email,
-                    dietitian_name=dietitian_name,
-                    patient_name=patient_name,
-                    report_data=report_data,
-                )
-                result["email_sent"] = True
-                logger.info(f"Rapor e-postası gönderildi: {dietitian_email}")
-            except Exception as e:
-                error_msg = f"E-posta gönderilemedi: {str(e)}"
-                result["errors"].append(error_msg)
-                logger.error(error_msg)
-
-        # ── SMS ──
-        if self._sms_available and dietitian_phone:
-            try:
-                self._send_sms(
-                    to_phone=dietitian_phone,
-                    patient_name=patient_name,
-                    report_data=report_data,
-                )
-                result["sms_sent"] = True
-                logger.info(f"Rapor SMS'i gönderildi: {dietitian_phone}")
-            except Exception as e:
-                error_msg = f"SMS gönderilemedi: {str(e)}"
-                result["errors"].append(error_msg)
-                logger.error(error_msg)
-
-        return result
-
-    async def _send_email_report(
-        self,
-        to_email: str,
-        dietitian_name: str,
-        patient_name: str,
-        report_data: dict,
-    ):
-        """HTML e-posta raporunu gönderir."""
-        # Rapor türü Türkçe
-        report_type_map = {
-            "daily": "Günlük", "weekly": "Haftalık", "monthly": "Aylık"
+        self._assert_mode_and_allowlist(channel, destination)
+        try:
+            if channel == "email":
+                message = build_report_email(report_data, self.settings)
+                message["To"] = destination
+                result = await self._email_transport(message, destination)
+            elif channel == "sms":
+                body = build_safe_sms(report_data)
+                result = self._sms_transport(body, destination)
+                if inspect.isawaitable(result):
+                    result = await result
+            else:
+                raise ChannelDeliveryError("UNSUPPORTED_CHANNEL", retryable=False)
+        except ChannelDeliveryError:
+            raise
+        except (TimeoutError, ConnectionError):
+            raise ChannelDeliveryError("PROVIDER_TEMPORARY_FAILURE", retryable=True)
+        except Exception:
+            logger.exception("Bildirim sağlayıcısı redakte edilmiş bir hatayla başarısız oldu.")
+            raise ChannelDeliveryError("PROVIDER_REJECTED", retryable=False)
+        return {
+            "provider_message_id": str(result.get("provider_message_id", "")) or None,
+            "provider_status": str(result.get("provider_status", "accepted")),
         }
 
-        html = REPORT_EMAIL_TEMPLATE.render(
-            patient_name=patient_name,
-            report_type_tr=report_type_map.get(
-                report_data.get("report_type", "weekly"), "Haftalık"
-            ),
-            from_date=report_data.get("from_date", ""),
-            to_date=report_data.get("to_date", ""),
-            total_calories=report_data.get("total_calories", 0),
-            avg_daily_calories=report_data.get("avg_daily_calories", 0),
-            total_meals=report_data.get("total_meals", 0),
-            total_days=report_data.get("total_days", 0),
-            daily_breakdown=report_data.get("daily_breakdown", []),
-            patient_message=report_data.get("message"),
+    def _assert_mode_and_allowlist(self, channel: str, destination: str) -> None:
+        mode = self.settings.notification_mode.lower()
+        if mode not in {"sandbox", "production"}:
+            raise ChannelDeliveryError("CHANNEL_DISABLED", retryable=False)
+        if mode == "sandbox":
+            allowed = (
+                self.settings.sandbox_email_allowlist
+                if channel == "email"
+                else self.settings.sandbox_phone_allowlist
+            )
+            candidate = destination.lower() if channel == "email" else destination
+            if candidate not in allowed:
+                raise ChannelDeliveryError("RECIPIENT_NOT_ALLOWLISTED", retryable=False)
+
+    async def _smtp_send(self, message: MIMEMultipart, destination: str) -> dict:
+        if not self.settings.smtp_host or not self.settings.smtp_from_email:
+            raise ChannelDeliveryError("EMAIL_NOT_CONFIGURED", retryable=False)
+        kwargs = {
+            "hostname": self.settings.smtp_host,
+            "port": self.settings.smtp_port,
+            "use_tls": self.settings.smtp_use_tls,
+            "start_tls": self.settings.smtp_start_tls,
+        }
+        if self.settings.smtp_user:
+            kwargs["username"] = self.settings.smtp_user
+        if self.settings.smtp_password:
+            kwargs["password"] = self.settings.smtp_password
+        await aiosmtplib.send(message, **kwargs)
+        return {
+            "provider_message_id": message["Message-ID"],
+            "provider_status": "accepted",
+        }
+
+    def _twilio_send(self, body: str, destination: str) -> dict:
+        if not (
+            self.settings.twilio_account_sid
+            and self.settings.twilio_auth_token
+            and self.settings.twilio_phone_number
+        ):
+            raise ChannelDeliveryError("SMS_NOT_CONFIGURED", retryable=False)
+        client = TwilioClient(
+            self.settings.twilio_account_sid,
+            self.settings.twilio_auth_token,
         )
-
-        msg = MIMEMultipart("alternative")
-        msg["From"] = f"{settings.smtp_from_name} <{settings.smtp_from_email}>"
-        msg["To"] = to_email
-        msg["Subject"] = (
-            f"NutriSense — {patient_name} Beslenme Raporu "
-            f"({report_data.get('from_date', '')})"
-        )
-        msg.attach(MIMEText(html, "html", "utf-8"))
-
-        await aiosmtplib.send(
-            msg,
-            hostname=settings.smtp_host,
-            port=settings.smtp_port,
-            username=settings.smtp_user,
-            password=settings.smtp_password,
-            use_tls=False,
-            start_tls=True,
-        )
-
-    def _send_sms(
-        self,
-        to_phone: str,
-        patient_name: str,
-        report_data: dict,
-    ):
-        """Twilio ile SMS gönderir."""
-        total_cal = report_data.get("total_calories", 0)
-        days = report_data.get("total_days", 0)
-        avg_cal = total_cal / max(days, 1)
-
-        body = (
-            f"NutriSense Rapor: {patient_name}\n"
-            f"Dönem: {report_data.get('from_date')} - {report_data.get('to_date')}\n"
-            f"Toplam: {total_cal:.0f} kcal ({days} gün)\n"
-            f"Günlük ort: {avg_cal:.0f} kcal\n"
-            f"Detay için e-postanızı kontrol edin."
-        )
-
-        self._twilio.messages.create(
+        message = client.messages.create(
             body=body,
-            from_=settings.twilio_phone_number,
-            to=to_phone,
+            from_=self.settings.twilio_phone_number,
+            to=destination,
         )
+        return {
+            "provider_message_id": message.sid,
+            "provider_status": getattr(message, "status", "accepted"),
+        }
+
+
+def build_report_email(report: dict, settings: Settings) -> MIMEMultipart:
+    report_label = {
+        "daily": "Günlük", "weekly": "Haftalık", "monthly": "Aylık",
+    }.get(report["report_type"], "Beslenme")
+    rows = "".join(
+        "<tr>"
+        f"<td>{escape(record['food_name_tr'])}</td>"
+        f"<td>{record['portion_grams']:.0f} g"
+        f"{' (tahmini)' if record['portion_is_estimate'] else ''}</td>"
+        f"<td>{record['total_calories']:.0f} kcal</td>"
+        f"<td>{escape(record['logged_at'])}</td>"
+        f"<td>{escape(record['recognition_source'])}</td>"
+        "</tr>"
+        for record in report["records"]
+    )
+    source_text = ", ".join(report["source_explanations"]) or "belirtilmemiş"
+    note = (
+        f"<p><strong>Kullanıcı notu:</strong> {escape(report['message'])}</p>"
+        if report.get("message") else ""
+    )
+    html = f"""<!doctype html><html lang="tr"><body>
+<main><h1>NutriSense {report_label} Beslenme Raporu</h1>
+<p><strong>Dönem:</strong> {report['from_date']} – {report['to_date']}</p>
+<p><strong>Onaylı kayıt:</strong> {report['record_count']} | <strong>Toplam:</strong>
+{report['total_calories']:.0f} kcal | <strong>Günlük ortalama:</strong>
+{report['average_daily_calories']:.0f} kcal</p>
+<p><strong>Veri kaynakları:</strong> {escape(source_text)}. Görüntü tanıma güveni ile
+beslenme verisinin güvenilirliği aynı ölçü değildir.</p>
+<table><caption>Kullanıcı tarafından onaylanan besin kayıtları</caption>
+<thead><tr><th>Besin</th><th>Porsiyon</th><th>Kalori</th><th>Zaman</th><th>Tanıma kaynağı</th></tr></thead>
+<tbody>{rows}</tbody></table>{note}
+<p><strong>Uyarı:</strong> {escape(report['disclaimer'])}
+{report['estimated_portion_count']} kayıtta porsiyon tahminidir.</p>
+</main></body></html>"""
+    plain_records = "\n".join(
+        f"- {item['food_name_tr']}; {item['portion_grams']:.0f} g"
+        f"{' (tahmini)' if item['portion_is_estimate'] else ''}; "
+        f"{item['total_calories']:.0f} kcal; {item['logged_at']}; "
+        f"kaynak {item['recognition_source']}"
+        for item in report["records"]
+    )
+    plain = (
+        f"NutriSense {report_label} Beslenme Raporu\n"
+        f"Dönem: {report['from_date']} - {report['to_date']}\n"
+        f"Onaylı kayıt: {report['record_count']}\n"
+        f"Toplam: {report['total_calories']:.0f} kcal\n"
+        f"Günlük ortalama: {report['average_daily_calories']:.0f} kcal\n"
+        f"Kaynak açıklaması: {source_text}.\n\nKayıtlar:\n{plain_records}\n\n"
+        f"{report['disclaimer']} {report['estimated_portion_count']} kayıtta "
+        "porsiyon tahminidir."
+    )
+    message = MIMEMultipart("alternative")
+    message["From"] = f"{settings.smtp_from_name} <{settings.smtp_from_email}>"
+    message["Subject"] = f"NutriSense — {report_label} Beslenme Raporu"
+    message["Message-ID"] = make_msgid(domain="nutrisense.invalid")
+    message.attach(MIMEText(plain, "plain", "utf-8"))
+    message.attach(MIMEText(html, "html", "utf-8"))
+    return message
+
+
+def build_safe_sms(report: dict) -> str:
+    return (
+        f"NutriSense: {report['from_date']} - {report['to_date']} dönemine ait "
+        f"{report['record_count']} onaylı kayıt için paylaşım özeti hazırlandı. "
+        "Ayrıntılı beslenme günlüğü SMS içinde paylaşılmadı. "
+        "Bu bilgi tıbbi tavsiye değildir."
+    )

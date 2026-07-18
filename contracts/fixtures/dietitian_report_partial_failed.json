@@ -1,0 +1,30 @@
+{
+  "success": false,
+  "report_id": "cccccccc-cccc-4ccc-8ccc-cccccccccccc",
+  "sent_via_email": true,
+  "sent_via_sms": false,
+  "dietitian_name": "Sandbox Diyetisyen",
+  "status": "partial_failed",
+  "duplicate": false,
+  "message": "Bazı kanallar kabul edildi, bazıları başarısız oldu. Kanal ayrıntılarını kontrol edin.",
+  "channels": [
+    {
+      "channel": "email",
+      "status": "sent",
+      "destination_masked": "s****************@nutrisense.invalid",
+      "attempt_count": 1,
+      "max_attempts": 3,
+      "provider_status": "accepted",
+      "error_code": null
+    },
+    {
+      "channel": "sms",
+      "status": "failed",
+      "destination_masked": "+*******0006",
+      "attempt_count": 1,
+      "max_attempts": 3,
+      "provider_status": null,
+      "error_code": "SMS_TEMPORARY"
+    }
+  ]
+}

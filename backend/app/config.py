@@ -60,12 +60,17 @@ class Settings(BaseSettings):
     twilio_account_sid: str = ""
     twilio_auth_token: str = ""
     twilio_phone_number: str = ""
+    notification_mode: str = "disabled"
+    notification_sandbox_email_allowlist: str = ""
+    notification_sandbox_phone_allowlist: str = ""
     smtp_host: str = "smtp.gmail.com"
     smtp_port: int = 587
     smtp_user: str = ""
     smtp_password: str = ""
     smtp_from_name: str = "NutriSense"
     smtp_from_email: str = ""
+    smtp_use_tls: bool = False
+    smtp_start_tls: bool = True
 
     cors_origins: str = "http://localhost:3000"
     research_export_token: str = ""
@@ -95,6 +100,20 @@ class Settings(BaseSettings):
     def cors_origins_list(self) -> list[str]:
         return [origin.strip() for origin in self.cors_origins.split(",") if origin.strip()]
 
+    @property
+    def sandbox_email_allowlist(self) -> set[str]:
+        return {
+            value.strip().lower() for value in
+            self.notification_sandbox_email_allowlist.split(",") if value.strip()
+        }
+
+    @property
+    def sandbox_phone_allowlist(self) -> set[str]:
+        return {
+            value.strip() for value in
+            self.notification_sandbox_phone_allowlist.split(",") if value.strip()
+        }
+
     def validate_security(self) -> None:
         environment = self.app_environment.lower()
         url = make_url(self.database_url)
@@ -114,6 +133,13 @@ class Settings(BaseSettings):
                 raise RuntimeError("Production veritabanı parolası boş olamaz.")
             if "database_url" not in self.model_fields_set:
                 raise RuntimeError("Production DATABASE_URL açıkça tanımlanmalıdır.")
+            if self.notification_mode == "production":
+                if not self.smtp_user or not self.smtp_password:
+                    raise RuntimeError("Production SMTP kimlik bilgileri secret store'dan gelmelidir.")
+                if not self.smtp_from_email:
+                    raise RuntimeError("Production SMTP gönderici adresi tanımlanmalıdır.")
+            if self.notification_mode == "sandbox":
+                raise RuntimeError("Production sandbox bildirim modunda başlatılamaz.")
 
         if environment == "test":
             self.validate_test_database_safety()

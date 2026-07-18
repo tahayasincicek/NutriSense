@@ -48,6 +48,61 @@
         "title": "Body_analyze_food_api_v1_analyze_food_post",
         "type": "object"
       },
+      "ChannelDeliveryResponse": {
+        "properties": {
+          "attempt_count": {
+            "title": "Attempt Count",
+            "type": "integer"
+          },
+          "channel": {
+            "title": "Channel",
+            "type": "string"
+          },
+          "destination_masked": {
+            "title": "Destination Masked",
+            "type": "string"
+          },
+          "error_code": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Error Code"
+          },
+          "max_attempts": {
+            "title": "Max Attempts",
+            "type": "integer"
+          },
+          "provider_status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Provider Status"
+          },
+          "status": {
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "channel",
+          "status",
+          "destination_masked",
+          "attempt_count",
+          "max_attempts"
+        ],
+        "title": "ChannelDeliveryResponse",
+        "type": "object"
+      },
       "DailyLogResponse": {
         "description": "Günlük besin özeti.",
         "properties": {
@@ -144,9 +199,31 @@
             "title": "Dietitian Name",
             "type": "string"
           },
+          "email_masked": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Email Masked"
+          },
           "email_verified": {
             "title": "Email Verified",
             "type": "boolean"
+          },
+          "phone_masked": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Phone Masked"
           },
           "phone_verified": {
             "title": "Phone Verified",
@@ -166,6 +243,219 @@
           "phone_verified"
         ],
         "title": "DietitianAssignmentResponse",
+        "type": "object"
+      },
+      "DietitianReportHistoryItem": {
+        "properties": {
+          "channels": {
+            "items": {
+              "$ref": "#/components/schemas/ChannelDeliveryResponse"
+            },
+            "title": "Channels",
+            "type": "array"
+          },
+          "completed_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Completed At"
+          },
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "from_date": {
+            "format": "date",
+            "title": "From Date",
+            "type": "string"
+          },
+          "record_count": {
+            "title": "Record Count",
+            "type": "integer"
+          },
+          "report_id": {
+            "format": "uuid",
+            "title": "Report Id",
+            "type": "string"
+          },
+          "report_type": {
+            "title": "Report Type",
+            "type": "string"
+          },
+          "status": {
+            "title": "Status",
+            "type": "string"
+          },
+          "to_date": {
+            "format": "date",
+            "title": "To Date",
+            "type": "string"
+          }
+        },
+        "required": [
+          "report_id",
+          "report_type",
+          "from_date",
+          "to_date",
+          "record_count",
+          "status",
+          "created_at",
+          "channels"
+        ],
+        "title": "DietitianReportHistoryItem",
+        "type": "object"
+      },
+      "DietitianReportPreviewRequest": {
+        "properties": {
+          "channels": {
+            "items": {
+              "enum": [
+                "email",
+                "sms"
+              ],
+              "type": "string"
+            },
+            "maxItems": 2,
+            "minItems": 1,
+            "title": "Channels",
+            "type": "array"
+          },
+          "from_date": {
+            "anyOf": [
+              {
+                "format": "date",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "From Date"
+          },
+          "message": {
+            "anyOf": [
+              {
+                "maxLength": 500,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Message"
+          },
+          "report_type": {
+            "default": "weekly",
+            "pattern": "^(daily|weekly|monthly)$",
+            "title": "Report Type",
+            "type": "string"
+          },
+          "to_date": {
+            "anyOf": [
+              {
+                "format": "date",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "To Date"
+          },
+          "user_id": {
+            "format": "uuid",
+            "title": "User Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "user_id",
+          "channels"
+        ],
+        "title": "DietitianReportPreviewRequest",
+        "type": "object"
+      },
+      "DietitianReportPreviewResponse": {
+        "properties": {
+          "accessibility_summary": {
+            "title": "Accessibility Summary",
+            "type": "string"
+          },
+          "average_daily_calories": {
+            "title": "Average Daily Calories",
+            "type": "number"
+          },
+          "channels": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Channels",
+            "type": "array"
+          },
+          "consent_context_hash": {
+            "title": "Consent Context Hash",
+            "type": "string"
+          },
+          "dietitian_name": {
+            "title": "Dietitian Name",
+            "type": "string"
+          },
+          "estimated_portion_count": {
+            "title": "Estimated Portion Count",
+            "type": "integer"
+          },
+          "from_date": {
+            "format": "date",
+            "title": "From Date",
+            "type": "string"
+          },
+          "recipients": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "title": "Recipients",
+            "type": "object"
+          },
+          "record_count": {
+            "title": "Record Count",
+            "type": "integer"
+          },
+          "report_type": {
+            "title": "Report Type",
+            "type": "string"
+          },
+          "to_date": {
+            "format": "date",
+            "title": "To Date",
+            "type": "string"
+          },
+          "total_calories": {
+            "title": "Total Calories",
+            "type": "number"
+          }
+        },
+        "required": [
+          "report_type",
+          "from_date",
+          "to_date",
+          "record_count",
+          "total_calories",
+          "average_daily_calories",
+          "estimated_portion_count",
+          "dietitian_name",
+          "recipients",
+          "channels",
+          "consent_context_hash",
+          "accessibility_summary"
+        ],
+        "title": "DietitianReportPreviewResponse",
         "type": "object"
       },
       "ErrorDetail": {
@@ -1243,11 +1533,30 @@
       "SendToDietitianRequest": {
         "description": "POST /api/v1/send-to-dietitian istek gövdesi.",
         "properties": {
+          "channels": {
+            "items": {
+              "enum": [
+                "email",
+                "sms"
+              ],
+              "type": "string"
+            },
+            "maxItems": 2,
+            "minItems": 1,
+            "title": "Channels",
+            "type": "array"
+          },
           "consent": {
             "const": true,
             "description": "Kullanıcının bu rapor gönderimine verdiği açık onay",
             "title": "Consent",
             "type": "boolean"
+          },
+          "consent_context_hash": {
+            "maxLength": 64,
+            "minLength": 64,
+            "title": "Consent Context Hash",
+            "type": "string"
           },
           "from_date": {
             "anyOf": [
@@ -1299,6 +1608,8 @@
         },
         "required": [
           "user_id",
+          "channels",
+          "consent_context_hash",
           "consent"
         ],
         "title": "SendToDietitianRequest",
@@ -1307,9 +1618,21 @@
       "SendToDietitianResponse": {
         "description": "POST /api/v1/send-to-dietitian yanıt gövdesi.",
         "properties": {
+          "channels": {
+            "items": {
+              "$ref": "#/components/schemas/ChannelDeliveryResponse"
+            },
+            "title": "Channels",
+            "type": "array"
+          },
           "dietitian_name": {
             "title": "Dietitian Name",
             "type": "string"
+          },
+          "duplicate": {
+            "default": false,
+            "title": "Duplicate",
+            "type": "boolean"
           },
           "message": {
             "title": "Message",
@@ -1328,6 +1651,10 @@
             "title": "Sent Via Sms",
             "type": "boolean"
           },
+          "status": {
+            "title": "Status",
+            "type": "string"
+          },
           "success": {
             "title": "Success",
             "type": "boolean"
@@ -1339,6 +1666,8 @@
           "sent_via_email",
           "sent_via_sms",
           "dietitian_name",
+          "status",
+          "channels",
           "message"
         ],
         "title": "SendToDietitianResponse",
@@ -2185,6 +2514,129 @@
         ]
       }
     },
+    "/api/v1/dietitian-reports": {
+      "get": {
+        "operationId": "dietitian_report_history_api_v1_dietitian_reports_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/DietitianReportHistoryItem"
+                  },
+                  "title": "Response Dietitian Report History Api V1 Dietitian Reports Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Dietitian Report History",
+        "tags": [
+          "NutriSense API"
+        ]
+      }
+    },
+    "/api/v1/dietitian-reports/preview": {
+      "post": {
+        "operationId": "preview_dietitian_report_api_v1_dietitian_reports_preview_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DietitianReportPreviewRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DietitianReportPreviewResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Preview Dietitian Report",
+        "tags": [
+          "NutriSense API"
+        ]
+      }
+    },
+    "/api/v1/dietitian-reports/{report_id}/retry": {
+      "post": {
+        "operationId": "retry_dietitian_report_api_v1_dietitian_reports__report_id__retry_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "report_id",
+            "required": true,
+            "schema": {
+              "title": "Report Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SendToDietitianResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Retry Dietitian Report",
+        "tags": [
+          "NutriSense API"
+        ]
+      }
+    },
     "/api/v1/dietitians/assignment": {
       "get": {
         "operationId": "get_dietitian_assignment_api_v1_dietitians_assignment_get",
@@ -2772,25 +3224,17 @@
     },
     "/api/v1/send-to-dietitian": {
       "post": {
-        "description": "Belirlenen tarih aralığındaki besin kayıtlarını e-posta ve SMS ile diyetisyene gönderir.",
         "operationId": "send_to_dietitian_api_v1_send_to_dietitian_post",
         "parameters": [
           {
             "in": "header",
             "name": "Idempotency-Key",
-            "required": false,
+            "required": true,
             "schema": {
-              "anyOf": [
-                {
-                  "maxLength": 128,
-                  "minLength": 8,
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Idempotency-Key"
+              "maxLength": 128,
+              "minLength": 16,
+              "title": "Idempotency-Key",
+              "type": "string"
             }
           }
         ],
@@ -2831,7 +3275,7 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Beslenme raporunu diyetisyene gönder",
+        "summary": "Onaylanmış rapor gönderimini güvenli outbox üzerinden başlat",
         "tags": [
           "NutriSense API"
         ]

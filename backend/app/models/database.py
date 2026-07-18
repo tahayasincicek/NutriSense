@@ -165,6 +165,13 @@ class ConsentRecord(Base):
     consent_type = Column(String(64), nullable=False)
     policy_version = Column(String(32), nullable=False)
     granted = Column(Boolean, nullable=False)
+    context_hash = Column(String(64), nullable=True, index=True)
+    channels_json = Column(JSON, nullable=True)
+    record_count = Column(Integer, nullable=True)
+    date_from = Column(Date, nullable=True)
+    date_to = Column(Date, nullable=True)
+    recipient_masked = Column(JSON, nullable=True)
+    request_id = Column(String(64), nullable=True, index=True)
     granted_at = Column(UTCDateTime, default=utc_now, nullable=False)
     revoked_at = Column(UTCDateTime, nullable=True)
 
@@ -264,16 +271,26 @@ class DietitianReport(Base):
     user_id = Column(UUIDString, ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
     dietitian_id = Column(UUIDString, ForeignKey("dietitians.id", ondelete="RESTRICT"), nullable=False)
     idempotency_key = Column(String(128), nullable=False)
+    request_id = Column(String(64), nullable=True, index=True)
+    consent_context_hash = Column(String(64), nullable=False)
+    channels_json = Column(JSON, nullable=False, default=list)
+    recipient_snapshot_json = Column(JSON, nullable=False, default=dict)
+    payload_json = Column(JSON, nullable=False, default=dict)
     report_type = Column(Enum("daily", "weekly", "monthly", name="report_type_enum"), default="weekly", nullable=False)
     date_from = Column(Date, nullable=False)
     date_to = Column(Date, nullable=False)
     total_calories = Column(Float, default=0.0, nullable=False)
     total_meals = Column(Integer, default=0, nullable=False)
-    status = Column(Enum("pending", "sent", "failed", name="report_status_enum"), default="pending", nullable=False)
+    record_count = Column(Integer, default=0, nullable=False)
+    status = Column(Enum(
+        "queued", "sending", "sent", "partial_failed", "failed",
+        name="report_status_enum",
+    ), default="queued", nullable=False)
     sent_via_email = Column(Boolean, default=False, nullable=False)
     sent_via_sms = Column(Boolean, default=False, nullable=False)
     created_at = Column(UTCDateTime, default=utc_now, nullable=False)
     sent_at = Column(UTCDateTime, nullable=True)
+    completed_at = Column(UTCDateTime, nullable=True)
     __table_args__ = (UniqueConstraint("user_id", "idempotency_key", name="uq_report_user_idempotency"),)
 
 
@@ -283,10 +300,20 @@ class NotificationDelivery(Base):
     id = Column(UUIDString, primary_key=True, default=lambda: str(uuid.uuid4()))
     report_id = Column(UUIDString, ForeignKey("dietitian_reports.id", ondelete="CASCADE"), nullable=False, index=True)
     channel = Column(Enum("email", "sms", name="notification_channel_enum"), nullable=False)
-    status = Column(Enum("sent", "failed", "skipped", name="notification_status_enum"), nullable=False)
+    status = Column(Enum(
+        "queued", "sending", "sent", "failed", "skipped",
+        name="notification_status_enum",
+    ), default="queued", nullable=False)
     provider_message_id = Column(String(255), nullable=True)
+    provider_status = Column(String(64), nullable=True)
     error_code = Column(String(64), nullable=True)
-    attempted_at = Column(UTCDateTime, default=utc_now, nullable=False)
+    error_message = Column(String(255), nullable=True)
+    destination_masked = Column(String(255), nullable=False)
+    attempt_count = Column(Integer, default=0, nullable=False)
+    max_attempts = Column(Integer, default=3, nullable=False)
+    next_attempt_at = Column(UTCDateTime, nullable=True, index=True)
+    attempted_at = Column(UTCDateTime, nullable=True)
+    sent_at = Column(UTCDateTime, nullable=True)
     __table_args__ = (UniqueConstraint("report_id", "channel", name="uq_report_delivery_channel"),)
 
 

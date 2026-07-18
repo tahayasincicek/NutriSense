@@ -319,10 +319,64 @@ class SendToDietitianRequest(BaseModel):
     from_date: Optional[date] = None
     to_date: Optional[date] = None
     message: Optional[str] = Field(None, max_length=500)
+    channels: list[Literal["email", "sms"]] = Field(
+        ..., min_length=1, max_length=2,
+    )
+    consent_context_hash: str = Field(..., min_length=64, max_length=64)
     consent: Literal[True] = Field(
         ...,
         description="Kullanıcının bu rapor gönderimine verdiği açık onay",
     )
+
+    @field_validator("channels")
+    @classmethod
+    def unique_channels(cls, value: list[str]) -> list[str]:
+        if len(value) != len(set(value)):
+            raise ValueError("Aynı gönderim kanalı birden fazla seçilemez.")
+        return value
+
+
+class DietitianReportPreviewRequest(BaseModel):
+    user_id: UUID
+    report_type: str = Field(default="weekly", pattern=r"^(daily|weekly|monthly)$")
+    from_date: Optional[date] = None
+    to_date: Optional[date] = None
+    message: Optional[str] = Field(None, max_length=500)
+    channels: list[Literal["email", "sms"]] = Field(
+        ..., min_length=1, max_length=2,
+    )
+
+    @field_validator("channels")
+    @classmethod
+    def unique_preview_channels(cls, value: list[str]) -> list[str]:
+        if len(value) != len(set(value)):
+            raise ValueError("Aynı gönderim kanalı birden fazla seçilemez.")
+        return value
+
+
+class DietitianReportPreviewResponse(BaseModel):
+    report_type: str
+    from_date: date
+    to_date: date
+    record_count: int
+    total_calories: float
+    average_daily_calories: float
+    estimated_portion_count: int
+    dietitian_name: str
+    recipients: dict[str, str]
+    channels: list[str]
+    consent_context_hash: str
+    accessibility_summary: str
+
+
+class ChannelDeliveryResponse(BaseModel):
+    channel: str
+    status: str
+    destination_masked: str
+    attempt_count: int
+    max_attempts: int
+    provider_status: Optional[str] = None
+    error_code: Optional[str] = None
 
 
 class SendToDietitianResponse(BaseModel):
@@ -332,7 +386,22 @@ class SendToDietitianResponse(BaseModel):
     sent_via_email: bool
     sent_via_sms: bool
     dietitian_name: str
+    status: str
+    channels: list[ChannelDeliveryResponse]
+    duplicate: bool = False
     message: str  # Türkçe durum mesajı
+
+
+class DietitianReportHistoryItem(BaseModel):
+    report_id: UUID
+    report_type: str
+    from_date: date
+    to_date: date
+    record_count: int
+    status: str
+    created_at: datetime
+    completed_at: Optional[datetime] = None
+    channels: list[ChannelDeliveryResponse]
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -386,6 +455,8 @@ class DietitianAssignmentResponse(BaseModel):
     dietitian_name: str
     email_verified: bool
     phone_verified: bool
+    email_masked: Optional[str] = None
+    phone_masked: Optional[str] = None
 
 
 class TokenResponse(BaseModel):

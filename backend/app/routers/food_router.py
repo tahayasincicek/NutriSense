@@ -42,6 +42,8 @@ from ..models.schemas import (
     FoodHistoryResponse, DailyLogResponse, FoodLogDeleteResponse, FoodLogItem,
     FoodLogUpdateRequest, MealSummary,
     SendToDietitianRequest, SendToDietitianResponse,
+    ChannelDeliveryResponse, DietitianReportHistoryItem,
+    DietitianReportPreviewRequest, DietitianReportPreviewResponse,
     AccountDeletionRequest, DietitianAssignmentRequest,
     DietitianAssignmentResponse, LogoutRequest, RefreshTokenRequest,
     UserCreate, UserLogin, UserResponse, TokenResponse,
@@ -51,6 +53,10 @@ from ..domain.nutrition import (
     NutritionDomainError, NutrientsPer100g, UnitConversion,
     calculate_nutrition, portion_to_grams,
 )
+from ..domain.report_delivery import (
+    ReportDeliveryError, accessibility_summary, build_report_payload,
+    consent_context_hash, mask_email, mask_phone, resolve_report_dates,
+)
 from ..middleware.auth import (
     get_current_user, hash_password, verify_password,
     issue_token_pair, revoke_refresh_token, rotate_refresh_token,
@@ -59,7 +65,9 @@ from ..services.google_vision_service import (
     GoogleVisionService, VisionAPIError, FoodNotFoundError,
 )
 from ..services.nutritionix_service import NutritionixService
-from ..services.notification_service import NotificationService
+from ..services.notification_service import (
+    ChannelDeliveryError, NotificationService,
+)
 from ..config import get_settings
 
 logger = logging.getLogger(__name__)
@@ -1207,6 +1215,8 @@ async def get_dietitian_assignment(
         dietitian_name=dietitian.full_name,
         email_verified=dietitian.email_verified,
         phone_verified=dietitian.phone_verified,
+        email_masked=mask_email(dietitian.email) if dietitian.email_verified else None,
+        phone_masked=mask_phone(dietitian.phone) if dietitian.phone_verified else None,
     )
 
 
@@ -1255,6 +1265,8 @@ async def request_dietitian_assignment(
         dietitian_name=dietitian.full_name,
         email_verified=dietitian.email_verified,
         phone_verified=dietitian.phone_verified,
+        email_masked=mask_email(dietitian.email) if dietitian.email_verified else None,
+        phone_masked=mask_phone(dietitian.phone) if dietitian.phone_verified else None,
     )
 
 
@@ -1292,6 +1304,8 @@ async def approve_dietitian_assignment(
         dietitian_name=dietitian.full_name,
         email_verified=dietitian.email_verified,
         phone_verified=dietitian.phone_verified,
+        email_masked=mask_email(dietitian.email) if dietitian.email_verified else None,
+        phone_masked=mask_phone(dietitian.phone) if dietitian.phone_verified else None,
     )
 
 
@@ -1319,235 +1333,378 @@ async def cancel_dietitian_assignment(
     return None
 
 
-@router.post(
-    "/send-to-dietitian",
-    response_model=SendToDietitianResponse,
-    summary="Beslenme raporunu diyetisyene gönder",
-    description="Belirlenen tarih aralığındaki besin kayıtlarını e-posta ve SMS ile diyetisyene gönderir.",
-)
-async def send_to_dietitian(
-    request: SendToDietitianRequest,
-    idempotency_key: Optional[str] = Header(
-        default=None,
-        alias="Idempotency-Key",
-        min_length=8,
-        max_length=128,
-    ),
-    db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
-):
-    """Diyetisyene beslenme raporu gönderir."""
-    # Yetki kontrolü
-    if str(current_user.id) != str(request.user_id):
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Bu işlem için yetkiniz yok.",
-        )
-
-    # Diyetisyen kontrolü
+def _approved_report_relationship(db: Session, current_user: User):
     if not current_user.dietitian_id:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Henüz bir diyetisyen atanmamış. "
-                   "Lütfen ayarlardan diyetisyen bilgilerinizi ekleyin.",
-        )
-
+        raise HTTPException(404, "Henüz onaylı bir diyetisyen atanmamış.")
     dietitian = db.query(Dietitian).filter(
-        Dietitian.id == current_user.dietitian_id
+        Dietitian.id == current_user.dietitian_id,
+        Dietitian.is_active.is_(True),
     ).first()
-
-    if not dietitian:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Diyetisyen kaydı bulunamadı.",
-        )
-
     assignment = db.query(DietitianAssignment).filter(
         DietitianAssignment.user_id == current_user.id,
-        DietitianAssignment.dietitian_id == dietitian.id,
+        DietitianAssignment.dietitian_id == current_user.dietitian_id,
         DietitianAssignment.status == "approved",
     ).first()
-    if assignment is None:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Rapor paylaşımı için onaylı diyetisyen ataması gerekli.",
-        )
-    if not dietitian.email_verified and not dietitian.phone_verified:
-        raise HTTPException(
-            status_code=status.HTTP_409_CONFLICT,
-            detail="Diyetisyen iletişim bilgileri doğrulanmamış.",
-        )
+    if dietitian is None or assignment is None:
+        raise HTTPException(403, "Rapor paylaşımı için onaylı diyetisyen ilişkisi gerekli.")
+    return dietitian, assignment
 
-    # Tarih aralığı
-    to_dt = request.to_date or istanbul_date()
-    if request.report_type == "daily":
-        from_dt = request.from_date or to_dt
-    elif request.report_type == "weekly":
-        from_dt = request.from_date or (to_dt - timedelta(days=7))
-    else:
-        from_dt = request.from_date or (to_dt - timedelta(days=30))
 
-    canonical_key = idempotency_key or hashlib.sha256(
-        (
-            f"{current_user.id}|{dietitian.id}|{request.report_type}|"
-            f"{from_dt.isoformat()}|{to_dt.isoformat()}|{request.message or ''}"
-        ).encode("utf-8")
-    ).hexdigest()
-    existing_report = db.query(DietitianReport).filter(
-        DietitianReport.user_id == current_user.id,
-        DietitianReport.idempotency_key == canonical_key,
-    ).first()
-    if existing_report is not None:
-        return SendToDietitianResponse(
-            success=existing_report.status == "sent",
-            report_id=existing_report.id,
-            sent_via_email=existing_report.sent_via_email,
-            sent_via_sms=existing_report.sent_via_sms,
-            dietitian_name=dietitian.full_name,
-            message=(
-                "Bu gönderim isteği daha önce işlendi."
-                if existing_report.status != "pending"
-                else "Bu gönderim isteği halen işleniyor."
-            ),
+def _report_payload(db, current_user, request):
+    if str(current_user.id) != str(request.user_id):
+        raise HTTPException(403, "Bu işlem için yetkiniz yok.")
+    dietitian, assignment = _approved_report_relationship(db, current_user)
+    try:
+        from_dt, to_dt = resolve_report_dates(
+            request.report_type, request.from_date, request.to_date,
+            today=istanbul_date(),
         )
-
-    # Kayıtları çek
-    logs = (
-        db.query(FoodLog)
-        .filter(
-            FoodLog.user_id == str(request.user_id),
+        logs = db.query(FoodLog).filter(
+            FoodLog.user_id == current_user.id,
             FoodLog.log_date >= from_dt,
             FoodLog.log_date <= to_dt,
             FoodLog.deleted_at.is_(None),
             FoodLog.is_user_confirmed.is_(True),
+        ).order_by(FoodLog.log_date, FoodLog.logged_at).all()
+        payload = build_report_payload(
+            user=current_user,
+            dietitian=dietitian,
+            assignment=assignment,
+            report_type=request.report_type,
+            from_date=from_dt,
+            to_date=to_dt,
+            channels=request.channels,
+            logs=logs,
+            message=getattr(request, "message", None),
         )
-        .order_by(FoodLog.log_date, FoodLog.logged_at)
-        .all()
+    except ReportDeliveryError as error:
+        raise HTTPException(422, str(error)) from error
+    return dietitian, assignment, payload
+
+
+def _delivery_response(delivery: NotificationDelivery) -> ChannelDeliveryResponse:
+    return ChannelDeliveryResponse(
+        channel=delivery.channel,
+        status=delivery.status,
+        destination_masked=delivery.destination_masked,
+        attempt_count=delivery.attempt_count,
+        max_attempts=delivery.max_attempts,
+        provider_status=delivery.provider_status,
+        error_code=delivery.error_code,
     )
 
-    # Rapor verisi hazırla
-    total_cal = sum(l.total_calories for l in logs)
-    total_days = max((to_dt - from_dt).days + 1, 1)
 
-    daily_map = defaultdict(list)
-    for l in logs:
-        daily_map[l.log_date].append(l)
+def _report_message(report: DietitianReport) -> str:
+    if report.status == "sent":
+        return "Seçilen kanallar sağlayıcı tarafından kabul edildi; nihai teslim ayrıca doğrulanmalıdır."
+    if report.status == "partial_failed":
+        return "Bazı kanallar kabul edildi, bazıları başarısız oldu. Kanal ayrıntılarını kontrol edin."
+    if report.status in {"queued", "sending"}:
+        return "Gönderim güvenli kuyruğa alındı ve işleniyor."
+    return "Hiçbir kanal gönderilemedi. Uygun kanallar güvenli biçimde yeniden denenebilir."
 
-    daily_breakdown = []
-    for d in sorted(daily_map.keys()):
-        day_logs = daily_map[d]
-        daily_breakdown.append({
-            "date": d.strftime("%d.%m.%Y"),
-            "calories": float(sum(l.total_calories for l in day_logs)),
-            "protein": float(sum(l.protein for l in day_logs)),
-            "carbs": float(sum(l.carbs for l in day_logs)),
-            "fat": float(sum(l.fat for l in day_logs)),
-            "meal_count": len(day_logs),
-        })
 
-    report_data = {
-        "report_type": request.report_type,
-        "from_date": from_dt.strftime("%d.%m.%Y"),
-        "to_date": to_dt.strftime("%d.%m.%Y"),
-        "total_calories": float(total_cal),
-        "avg_daily_calories": float(total_cal / total_days),
-        "total_meals": len(logs),
-        "total_days": total_days,
-        "daily_breakdown": daily_breakdown,
-        "message": request.message,
-    }
+def _report_response(
+    db: Session,
+    report: DietitianReport,
+    dietitian: Dietitian,
+    *,
+    duplicate: bool = False,
+) -> SendToDietitianResponse:
+    deliveries = db.query(NotificationDelivery).filter(
+        NotificationDelivery.report_id == report.id,
+    ).order_by(NotificationDelivery.channel).all()
+    return SendToDietitianResponse(
+        success=report.status == "sent",
+        report_id=report.id,
+        sent_via_email=any(
+            item.channel == "email" and item.status == "sent" for item in deliveries
+        ),
+        sent_via_sms=any(
+            item.channel == "sms" and item.status == "sent" for item in deliveries
+        ),
+        dietitian_name=dietitian.full_name,
+        status=report.status,
+        channels=[_delivery_response(item) for item in deliveries],
+        duplicate=duplicate,
+        message=_report_message(report),
+    )
 
-    # Sağlayıcı çağrısından önce idempotency kaydını kalıcılaştır. Böylece DB
-    # sonucu yazılamasa dahi aynı anahtarlı retry ikinci mesajı göndermez.
+
+async def _process_report_outbox(
+    db: Session,
+    report: DietitianReport,
+    dietitian: Dietitian,
+) -> None:
+    deliveries = db.query(NotificationDelivery).filter(
+        NotificationDelivery.report_id == report.id,
+        NotificationDelivery.status.in_(["queued", "failed"]),
+        NotificationDelivery.attempt_count < NotificationDelivery.max_attempts,
+    ).all()
+    if not deliveries:
+        return
+    report.status = "sending"
+    db.commit()
+    destinations = {"email": dietitian.email, "sms": dietitian.phone}
+    for delivery in deliveries:
+        destination = destinations.get(delivery.channel)
+        expected_mask = (
+            mask_email(destination) if delivery.channel == "email" and destination
+            else mask_phone(destination) if destination else None
+        )
+        if destination is None or expected_mask != delivery.destination_masked:
+            delivery.status = "failed"
+            delivery.error_code = "RECIPIENT_CHANGED"
+            delivery.error_message = "Doğrulanmış alıcı önizlemeden sonra değişti."
+            delivery.attempt_count = delivery.max_attempts
+            continue
+        delivery.status = "sending"
+        delivery.attempt_count += 1
+        delivery.attempted_at = utc_now()
+        delivery.error_code = None
+        delivery.error_message = None
+        db.commit()
+        try:
+            result = await notification_service.send_channel(
+                channel=delivery.channel,
+                destination=destination,
+                report_data=report.payload_json,
+            )
+        except ChannelDeliveryError as error:
+            delivery.status = "failed"
+            delivery.error_code = error.code
+            delivery.error_message = "Sağlayıcı kanalı kabul etmedi."
+            if error.retryable and delivery.attempt_count < delivery.max_attempts:
+                delivery.next_attempt_at = utc_now() + timedelta(
+                    seconds=30 * (2 ** (delivery.attempt_count - 1)),
+                )
+            else:
+                delivery.next_attempt_at = None
+        else:
+            delivery.status = "sent"
+            delivery.provider_message_id = result["provider_message_id"]
+            delivery.provider_status = result["provider_status"]
+            delivery.sent_at = utc_now()
+            delivery.next_attempt_at = None
+        db.commit()
+    deliveries = db.query(NotificationDelivery).filter(
+        NotificationDelivery.report_id == report.id,
+    ).all()
+    sent_count = sum(item.status == "sent" for item in deliveries)
+    failed_count = sum(item.status == "failed" for item in deliveries)
+    if sent_count == len(deliveries):
+        report.status = "sent"
+        report.sent_at = utc_now()
+    elif sent_count and failed_count:
+        report.status = "partial_failed"
+    elif failed_count == len(deliveries):
+        report.status = "failed"
+    else:
+        report.status = "queued"
+    report.sent_via_email = any(
+        item.channel == "email" and item.status == "sent" for item in deliveries
+    )
+    report.sent_via_sms = any(
+        item.channel == "sms" and item.status == "sent" for item in deliveries
+    )
+    report.completed_at = utc_now() if report.status in {
+        "sent", "partial_failed", "failed",
+    } else None
+    db.add(AuthAuditLog(
+        user_id=report.user_id,
+        event="dietitian_report_delivery_processed",
+        success=sent_count > 0,
+        reason=report.status,
+        metadata_json={
+            "report_id": str(report.id),
+            "channels": [item.channel for item in deliveries],
+            "channel_statuses": {
+                item.channel: item.status for item in deliveries
+            },
+        },
+    ))
+    db.commit()
+
+
+@router.post(
+    "/dietitian-reports/preview",
+    response_model=DietitianReportPreviewResponse,
+)
+async def preview_dietitian_report(
+    request: DietitianReportPreviewRequest,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    dietitian, _assignment, payload = _report_payload(db, current_user, request)
+    digest = consent_context_hash(payload)
+    return DietitianReportPreviewResponse(
+        report_type=payload["report_type"],
+        from_date=payload["from_date"],
+        to_date=payload["to_date"],
+        record_count=payload["record_count"],
+        total_calories=payload["total_calories"],
+        average_daily_calories=payload["average_daily_calories"],
+        estimated_portion_count=payload["estimated_portion_count"],
+        dietitian_name=dietitian.full_name,
+        recipients=payload["recipients"],
+        channels=payload["channels"],
+        consent_context_hash=digest,
+        accessibility_summary=accessibility_summary(payload),
+    )
+
+
+@router.post(
+    "/send-to-dietitian",
+    response_model=SendToDietitianResponse,
+    summary="Onaylanmış rapor gönderimini güvenli outbox üzerinden başlat",
+)
+async def send_to_dietitian(
+    request: SendToDietitianRequest,
+    http_request: Request,
+    idempotency_key: str = Header(
+        ..., alias="Idempotency-Key", min_length=16, max_length=128,
+    ),
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    dietitian, assignment, payload = _report_payload(db, current_user, request)
+    digest = consent_context_hash(payload)
+    if digest != request.consent_context_hash:
+        raise HTTPException(
+            409,
+            "Rapor önizlemeden sonra değişti. Lütfen yeni önizlemeyi onaylayın.",
+        )
+    existing = db.query(DietitianReport).filter(
+        DietitianReport.user_id == current_user.id,
+        DietitianReport.idempotency_key == idempotency_key,
+    ).first()
+    if existing is not None:
+        if existing.consent_context_hash != digest:
+            raise HTTPException(409, "Idempotency anahtarı farklı bir raporda kullanılmış.")
+        return _report_response(db, existing, dietitian, duplicate=True)
+    request_id = getattr(http_request.state, "request_id", None)
     report = DietitianReport(
         id=str(uuid.uuid4()),
         user_id=current_user.id,
         dietitian_id=dietitian.id,
-        idempotency_key=canonical_key,
-        report_type=request.report_type,
-        date_from=from_dt,
-        date_to=to_dt,
-        total_calories=total_cal,
-        total_meals=len(logs),
-        status="pending",
+        idempotency_key=idempotency_key,
+        request_id=request_id,
+        consent_context_hash=digest,
+        channels_json=payload["channels"],
+        recipient_snapshot_json=payload["recipients"],
+        payload_json=payload,
+        report_type=payload["report_type"],
+        date_from=date.fromisoformat(payload["from_date"]),
+        date_to=date.fromisoformat(payload["to_date"]),
+        total_calories=payload["total_calories"],
+        total_meals=payload["record_count"],
+        record_count=payload["record_count"],
+        status="queued",
     )
     consent = ConsentRecord(
         user_id=current_user.id,
         assignment_id=assignment.id,
         consent_type="dietitian_report_share",
-        policy_version="report-share-v1",
+        policy_version="report-share-v2",
         granted=True,
+        context_hash=digest,
+        channels_json=payload["channels"],
+        record_count=payload["record_count"],
+        date_from=date.fromisoformat(payload["from_date"]),
+        date_to=date.fromisoformat(payload["to_date"]),
+        recipient_masked=payload["recipients"],
+        request_id=request_id,
     )
-    try:
-        db.add_all([report, consent])
-        db.commit()
-    except Exception:
-        db.rollback()
-        logger.exception("Rapor gönderim isteği kaydedilemedi.")
-        raise HTTPException(
-            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail="Rapor gönderim isteği güvenli biçimde başlatılamadı.",
+    deliveries = [
+        NotificationDelivery(
+            report_id=report.id,
+            channel=channel,
+            status="queued",
+            destination_masked=payload["recipients"][channel],
+            attempt_count=0,
+            max_attempts=3,
         )
-
-    # E-posta + SMS gönder
-    send_result = await notification_service.send_dietitian_report(
-        dietitian_email=dietitian.email if dietitian.email_verified else None,
-        dietitian_phone=(dietitian.phone if dietitian.phone_verified else None),
-        dietitian_name=dietitian.full_name,
-        patient_name=current_user.full_name,
-        report_data=report_data,
-    )
-
-    report.sent_via_email = send_result["email_sent"]
-    report.sent_via_sms = send_result["sms_sent"]
-    report.status = "sent" if send_result["email_sent"] or send_result["sms_sent"] else "failed"
-    report.sent_at = utc_now() if report.status == "sent" else None
-    if dietitian.email_verified:
-        db.add(
-            NotificationDelivery(
-                report_id=report.id,
-                channel="email",
-                status="sent" if send_result["email_sent"] else "failed",
-            )
-        )
-    if dietitian.phone_verified:
-        db.add(
-            NotificationDelivery(
-                report_id=report.id,
-                channel="sms",
-                status="sent" if send_result["sms_sent"] else "failed",
-            )
-        )
+        for channel in payload["channels"]
+    ]
+    db.add_all([report, consent, *deliveries, AuthAuditLog(
+        user_id=current_user.id,
+        event="dietitian_report_consent_granted",
+        success=True,
+        reason="explicit_per_send_consent",
+        metadata_json={
+            "report_id": str(report.id), "context_hash": digest,
+            "record_count": payload["record_count"],
+            "channels": payload["channels"],
+            "recipients": payload["recipients"],
+        },
+    )])
     try:
         db.commit()
     except Exception:
         db.rollback()
-        logger.exception("Sağlayıcı sonucu kaydedilemedi; idempotency kaydı pending kaldı.")
-        raise HTTPException(
-            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail="Gönderim sonucu doğrulanamadı; aynı anahtarla tekrar mesaj gönderilmeyecek.",
-        )
+        raise HTTPException(503, "Gönderim isteği güvenli kuyruğa alınamadı.")
+    await _process_report_outbox(db, report, dietitian)
+    return _report_response(db, report, dietitian)
 
-    # Status mesajı
-    channels = []
-    if send_result["email_sent"]:
-        channels.append("e-posta")
-    if send_result["sms_sent"]:
-        channels.append("SMS")
 
-    if channels:
-        msg = f"Rapor {' ve '.join(channels)} ile {dietitian.full_name}'a gönderildi."
-    else:
-        msg = "Rapor gönderilemedi. Lütfen daha sonra tekrar deneyin."
+@router.post(
+    "/dietitian-reports/{report_id}/retry",
+    response_model=SendToDietitianResponse,
+)
+async def retry_dietitian_report(
+    report_id: str,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    report = db.query(DietitianReport).filter(
+        DietitianReport.id == report_id,
+        DietitianReport.user_id == current_user.id,
+    ).first()
+    if report is None:
+        raise HTTPException(404, "Rapor bulunamadı.")
+    dietitian, _assignment = _approved_report_relationship(db, current_user)
+    deliveries = db.query(NotificationDelivery).filter(
+        NotificationDelivery.report_id == report.id,
+        NotificationDelivery.status == "failed",
+        NotificationDelivery.attempt_count < NotificationDelivery.max_attempts,
+    ).all()
+    if not deliveries:
+        raise HTTPException(409, "Yeniden denenebilir başarısız kanal yok.")
+    now = utc_now()
+    if any(item.next_attempt_at and item.next_attempt_at > now for item in deliveries):
+        raise HTTPException(409, "Güvenli yeniden deneme süresi henüz dolmadı.")
+    await _process_report_outbox(db, report, dietitian)
+    return _report_response(db, report, dietitian)
 
-    return SendToDietitianResponse(
-        success=bool(channels),
-        report_id=report.id,
-        sent_via_email=send_result["email_sent"],
-        sent_via_sms=send_result["sms_sent"],
-        dietitian_name=dietitian.full_name,
-        message=msg,
-    )
+
+@router.get(
+    "/dietitian-reports",
+    response_model=list[DietitianReportHistoryItem],
+)
+async def dietitian_report_history(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    reports = db.query(DietitianReport).filter(
+        DietitianReport.user_id == current_user.id,
+    ).order_by(DietitianReport.created_at.desc()).limit(50).all()
+    result = []
+    for report in reports:
+        deliveries = db.query(NotificationDelivery).filter(
+            NotificationDelivery.report_id == report.id,
+        ).order_by(NotificationDelivery.channel).all()
+        result.append(DietitianReportHistoryItem(
+            report_id=report.id,
+            report_type=report.report_type,
+            from_date=report.date_from,
+            to_date=report.date_to,
+            record_count=report.record_count,
+            status=report.status,
+            created_at=report.created_at,
+            completed_at=report.completed_at,
+            channels=[_delivery_response(item) for item in deliveries],
+        ))
+    return result
 
 
 # ═══════════════════════════════════════════════════════════════════════════════

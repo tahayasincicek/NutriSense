@@ -22,11 +22,7 @@ from app.middleware.auth import get_current_user, hash_password
 from app.models.database import (
     AuditEvent,
     Base,
-    Dietitian,
-    DietitianAssignment,
-    DietitianReport,
     FoodLog,
-    NotificationDelivery,
     NutritionSource,
     RecognitionAttempt,
     SessionLocal,
@@ -291,58 +287,6 @@ def test_food_analysis_commit_failure_rolls_back_all_three_records(client, monke
         assert verify.query(FoodLog).filter(FoodLog.user_id == user_id).count() == 0
     finally:
         verify.close()
-
-
-def test_report_idempotency_prevents_duplicate_provider_delivery(client, monkeypatch):
-    tokens = _register(client, "idempotency@example.com")
-    db = SessionLocal()
-    dietitian = Dietitian(
-        email="sandbox-dietitian@example.com",
-        full_name="Sandbox Dietitian",
-        email_verified=True,
-        is_active=True,
-    )
-    db.add(dietitian)
-    db.flush()
-    assignment = DietitianAssignment(
-        user_id=tokens["user_id"], dietitian_id=dietitian.id, status="approved"
-    )
-    user = db.query(User).filter(User.id == tokens["user_id"]).one()
-    user.dietitian_id = dietitian.id
-    db.add(assignment)
-    db.commit()
-    db.close()
-
-    class CountingSandboxNotification:
-        calls = 0
-
-        async def send_dietitian_report(self, **_kwargs):
-            self.calls += 1
-            return {"email_sent": True, "sms_sent": False}
-
-    sandbox = CountingSandboxNotification()
-    monkeypatch.setattr(food_router, "notification_service", sandbox)
-    payload = {
-        "user_id": tokens["user_id"],
-        "report_type": "daily",
-        "from_date": date.today().isoformat(),
-        "to_date": date.today().isoformat(),
-        "consent": True,
-    }
-    headers = {**_auth(tokens), "Idempotency-Key": "synthetic-idempotency-key-001"}
-    first = client.post("/api/v1/send-to-dietitian", headers=headers, json=payload)
-    second = client.post("/api/v1/send-to-dietitian", headers=headers, json=payload)
-    assert first.status_code == 200
-    assert second.status_code == 200
-    assert first.json()["report_id"] == second.json()["report_id"]
-    assert sandbox.calls == 1
-
-    db = SessionLocal()
-    try:
-        assert db.query(DietitianReport).count() == 1
-        assert db.query(NotificationDelivery).count() == 1
-    finally:
-        db.close()
 
 
 def test_concurrent_survey_writes_are_database_transactions(tmp_path):

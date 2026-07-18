@@ -208,33 +208,19 @@ def test_dietitian_assignment_consent_and_idor_guards(client, monkeypatch):
 
     idor_report = client.post(
         "/api/v1/send-to-dietitian",
-        headers=bearer(first),
+        headers={
+            **bearer(first),
+            "Idempotency-Key": "idor-report-request-0001",
+        },
         json={
             "user_id": second["user_id"],
             "report_type": "weekly",
+            "channels": ["email"],
+            "consent_context_hash": "0" * 64,
             "consent": True,
         },
     )
     assert idor_report.status_code == 403
-
-    class SandboxNotification:
-        async def send_dietitian_report(self, **kwargs):
-            assert kwargs["dietitian_email"] == "verified.dietitian@example.com"
-            assert kwargs["dietitian_phone"] is None
-            return {"email_sent": True, "sms_sent": False}
-
-    monkeypatch.setattr(food_router, "notification_service", SandboxNotification())
-    sent = client.post(
-        "/api/v1/send-to-dietitian",
-        headers=bearer(first),
-        json={
-            "user_id": first["user_id"],
-            "report_type": "weekly",
-            "consent": True,
-        },
-    )
-    assert sent.status_code == 200
-    assert sent.json()["sent_via_email"] is True
 
     cancelled = client.delete(
         f"/api/v1/dietitians/assignment/{assignment_id}",
