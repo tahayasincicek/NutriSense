@@ -70,6 +70,10 @@ class Settings(BaseSettings):
     cors_origins: str = "http://localhost:3000"
     research_export_token: str = ""
     migration_check_enabled: bool = True
+    max_analysis_image_bytes: int = 5 * 1024 * 1024
+    max_analysis_image_pixels: int = 20_000_000
+    vision_timeout_seconds: float = 15.0
+    analysis_rate_limit_per_minute: int = 20
 
     model_config = SettingsConfigDict(
         env_file=".env",

@@ -1,5 +1,6 @@
 {
-  "log_id": "7d64bffd-1804-49a8-a9ee-4d276a38132d",
+  "analysis_id": "7d64bffd-1804-49a8-a9ee-4d276a38132d",
+  "log_id": null,
   "food_name": "dish",
   "food_name_tr": "Yemek",
   "confidence": 0.42,
@@ -15,6 +16,9 @@
   "meal_type": "atistirmalik",
   "recognition_source": "google_vision",
   "nutrition_source": "not_found",
+  "nutrition_status": "not_found",
+  "candidates": [],
   "needs_confirmation": true,
+  "can_confirm": false,
   "tts_text": "Yemek kesin olarak tanınamadı. Lütfen sonucu onaylayın."
 }

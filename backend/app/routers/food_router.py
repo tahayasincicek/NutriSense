@@ -9,12 +9,14 @@
 # POST /api/v1/auth/login       — Giriş (JWT token)
 # ==============================================================================
 
+import asyncio
 import base64
 import hashlib
 import io
 import json
 import logging
 import uuid
+import warnings
 from datetime import date, timedelta, datetime
 from typing import Annotated, Optional
 from collections import defaultdict
@@ -23,7 +25,7 @@ from fastapi import (
     APIRouter, Depends, File, Form, Header, HTTPException, Query, Request,
     UploadFile, status,
 )
-from PIL import Image, UnidentifiedImageError
+from PIL import Image, ImageOps, UnidentifiedImageError
 from sqlalchemy.orm import Session
 from sqlalchemy import func
 
@@ -33,7 +35,8 @@ from ..models.database import (
     RecognitionAttempt, RefreshToken, User, get_db, utc_now, utc_today,
 )
 from ..models.schemas import (
-    FoodAnalysisResponse, NutrientData,
+    FoodAnalysisResponse, FoodCandidate, FoodAnalysisDecisionRequest,
+    FoodAnalysisDecisionResponse, ManualFoodLogRequest, NutrientData,
     FoodHistoryResponse, DailyLogResponse, FoodLogItem, MealSummary,
     SendToDietitianRequest, SendToDietitianResponse,
     AccountDeletionRequest, DietitianAssignmentRequest,
@@ -83,11 +86,16 @@ FOOD_NAME_TR = {
     "yumurta": "Yumurta", "tavuk": "Tavuk",
 }
 
-MAX_IMAGE_BYTES = 5 * 1024 * 1024
 ALLOWED_IMAGE_MIME_TYPES = {"image/jpeg", "image/png", "image/webp"}
+IMAGE_FORMAT_TO_MIME = {
+    "JPEG": "image/jpeg",
+    "PNG": "image/png",
+    "WEBP": "image/webp",
+}
 LOGIN_WINDOW_SECONDS = 15 * 60
 LOGIN_MAX_FAILURES = 5
 _login_failures: dict[str, list[datetime]] = defaultdict(list)
+_analysis_requests: dict[str, list[datetime]] = defaultdict(list)
 
 
 def _login_key(request: Request, email: str) -> tuple[str, str]:
@@ -125,34 +133,81 @@ async def _sanitized_image_base64(upload: UploadFile) -> str:
             detail="Yalnızca JPEG, PNG veya WebP görüntü yüklenebilir.",
         )
 
-    raw = await upload.read(MAX_IMAGE_BYTES + 1)
+    raw = await upload.read(settings.max_analysis_image_bytes + 1)
     await upload.close()
     if not raw:
         raise HTTPException(
             status_code=422,
             detail="Görüntü dosyası boş.",
         )
-    if len(raw) > MAX_IMAGE_BYTES:
+    if len(raw) > settings.max_analysis_image_bytes:
         raise HTTPException(
-            status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
-            detail="Görüntü en fazla 5 MB olabilir.",
+            status_code=status.HTTP_413_CONTENT_TOO_LARGE,
+            detail=(
+                "Görüntü en fazla "
+                f"{settings.max_analysis_image_bytes // (1024 * 1024)} MB olabilir."
+            ),
         )
 
     try:
-        with Image.open(io.BytesIO(raw)) as decoded:
-            decoded.verify()
-        with Image.open(io.BytesIO(raw)) as decoded:
-            image = decoded.convert("RGB")
+        with warnings.catch_warnings():
+            warnings.simplefilter("error", Image.DecompressionBombWarning)
+            with Image.open(io.BytesIO(raw)) as decoded:
+                detected_mime = IMAGE_FORMAT_TO_MIME.get(decoded.format or "")
+                if detected_mime is None or detected_mime != upload.content_type:
+                    raise HTTPException(
+                        status_code=status.HTTP_415_UNSUPPORTED_MEDIA_TYPE,
+                        detail="Dosya içeriği bildirilen görüntü türüyle eşleşmiyor.",
+                    )
+                if decoded.width * decoded.height > settings.max_analysis_image_pixels:
+                    raise HTTPException(
+                        status_code=status.HTTP_413_CONTENT_TOO_LARGE,
+                        detail="Görüntü piksel boyutu güvenli sınırı aşıyor.",
+                    )
+                decoded.verify()
+            with Image.open(io.BytesIO(raw)) as decoded:
+                image = ImageOps.exif_transpose(decoded).convert("RGB")
             image.thumbnail((2048, 2048))
             sanitized = io.BytesIO()
             image.save(sanitized, format="JPEG", quality=90, optimize=True)
-    except (UnidentifiedImageError, OSError, ValueError):
+    except HTTPException:
+        raise
+    except (
+        Image.DecompressionBombError,
+        Image.DecompressionBombWarning,
+        UnidentifiedImageError,
+        OSError,
+        ValueError,
+    ):
         raise HTTPException(
             status_code=422,
             detail="Görüntü dosyası bozuk veya desteklenmeyen biçimde.",
         )
 
     return base64.b64encode(sanitized.getvalue()).decode("ascii")
+
+
+def _enforce_analysis_rate_limit(request: Request, user_id: str) -> None:
+    now = utc_now()
+    cutoff = now - timedelta(minutes=1)
+    ip = request.client.host if request.client else "unknown"
+    key = f"{user_id}:{ip}"
+    recent = [value for value in _analysis_requests[key] if value > cutoff]
+    if len(recent) >= settings.analysis_rate_limit_per_minute:
+        raise HTTPException(
+            status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+            detail="Çok fazla görüntü analizi istendi. Lütfen kısa süre bekleyin.",
+        )
+    recent.append(now)
+    _analysis_requests[key] = recent
+
+
+def _nutrition_status(source: str) -> str:
+    if source == "not_found":
+        return "not_found"
+    if source == "local_db":
+        return "unverified"
+    return "available"
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -171,13 +226,14 @@ async def _sanitized_image_base64(upload: UploadFile) -> str:
     description=(
         "Multipart görüntüyü MIME/boyut doğrulaması ve EXIF temizliği sonrası "
         "Google Vision API ile analiz eder, "
-        "besin adını tanır, Nutritionix'ten kalori bilgisini çeker ve "
-        "sonucu MySQL'e kaydeder."
+        "besin adını tanır ve Nutritionix'ten kalori bilgisini çeker. "
+        "Yemek günlüğü yalnız ayrı karar endpointinde kullanıcı onayıyla oluşur."
     ),
 )
 async def analyze_food(
     image: Annotated[UploadFile, File(description="JPEG, PNG veya WebP; en fazla 5 MB")],
     http_request: Request,
+    capture_id: Annotated[uuid.UUID, Form(description="İstemcinin tek çekim UUID'si")],
     meal_type: Annotated[
         str,
         Form(pattern=r"^(kahvalti|ogle|aksam|atistirmalik)$"),
@@ -192,14 +248,26 @@ async def analyze_food(
     1. Multipart görüntü doğrulama/EXIF temizleme → Google Vision API
     2. Etiketleri besin ismine dönüştür
     3. Nutritionix API'den kalori + besin değerlerini çek
-    4. Sonucu MySQL'e kaydet
-    5. Yanıtı döndür (TTS uyumlu Türkçe metin dahil)
+    4. Görüntüyü saklamadan onay bekleyen analiz kaydı oluştur
+    5. Yanıtı döndür; food_logs tablosuna bu aşamada yazma
     """
+    capture_key = str(capture_id)
+    existing = db.query(RecognitionAttempt).filter(
+        RecognitionAttempt.user_id == current_user.id,
+        RecognitionAttempt.capture_id == capture_key,
+    ).first()
+    if existing is not None and existing.analysis_payload:
+        return FoodAnalysisResponse.model_validate(existing.analysis_payload)
+
+    _enforce_analysis_rate_limit(http_request, current_user.id)
     image_base64 = await _sanitized_image_base64(image)
 
     # ── 1. Google Vision ile görüntü analizi ──
     try:
-        vision_result = await vision_service.analyze_image(image_base64)
+        vision_result = await asyncio.wait_for(
+            vision_service.analyze_image(image_base64),
+            timeout=settings.vision_timeout_seconds,
+        )
     except FoodNotFoundError:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -211,6 +279,11 @@ async def analyze_food(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
             detail="Görüntü analiz servisi şu an kullanılamıyor. "
                    "Lütfen birkaç dakika sonra tekrar deneyin.",
+        )
+    except asyncio.TimeoutError:
+        raise HTTPException(
+            status_code=status.HTTP_504_GATEWAY_TIMEOUT,
+            detail="Görüntü analiz servisi zaman aşımına uğradı. Lütfen tekrar deneyin.",
         )
 
     food_name = vision_result["food_name"]
@@ -228,68 +301,63 @@ async def analyze_food(
         food_name, food_name.replace("_", " ").title()
     )
 
-    # ── 4. Recognition + nutrition provenance + food log tek transaction ──
+    # ── 4. Onay bekleyen analiz: görüntü ve base64 saklanmaz ──
+    candidate_rows = []
+    seen_candidates = set()
+    raw_candidates = vision_result.get("candidates") or [
+        {"food_name": food_name, "confidence": confidence}
+    ]
+    for candidate in raw_candidates:
+        candidate_name = candidate.get("food_name")
+        if not candidate_name or candidate_name in seen_candidates:
+            continue
+        seen_candidates.add(candidate_name)
+        candidate_rows.append(FoodCandidate(
+            food_name=candidate_name,
+            food_name_tr=FOOD_NAME_TR.get(
+                candidate_name, candidate_name.replace("_", " ").title()
+            ),
+            confidence=float(candidate.get("confidence", 0)),
+        ))
+        if len(candidate_rows) == 3:
+            break
+
+    nutrition_provider = nutrition.get("source", "unknown")
+    nutrition_status = _nutrition_status(nutrition_provider)
+    can_confirm = (
+        nutrition_status != "not_found"
+        and float(nutrition.get("total_calories", 0)) > 0
+        and confidence >= 0.60
+    )
     recognition_attempt = RecognitionAttempt(
         id=str(uuid.uuid4()),
         user_id=current_user.id,
         provider="google_vision",
+        capture_id=capture_key,
         status="succeeded",
         food_name=food_name,
         confidence=confidence,
         request_id=getattr(http_request.state, "request_id", None),
+        expires_at=utc_now() + timedelta(minutes=30),
     )
-    nutrition_source = NutritionSource(
-        id=str(uuid.uuid4()),
-        provider=nutrition.get("source", "unknown"),
-        external_reference=nutrition.get("external_reference"),
-        food_name=food_name,
-        calories_per_100g=nutrition["calories_per_100g"],
-        payload_checksum=hashlib.sha256(
-            json.dumps(nutrition, sort_keys=True, default=str).encode("utf-8")
-        ).hexdigest(),
-    )
-    log_entry = FoodLog(
-        id=str(uuid.uuid4()),
-        user_id=current_user.id,
-        recognition_attempt_id=recognition_attempt.id,
-        nutrition_source_id=nutrition_source.id,
-        food_name=food_name,
-        food_name_tr=food_name_tr,
-        calories_per_100g=nutrition["calories_per_100g"],
-        estimated_portion_g=nutrition["estimated_portion_g"],
-        total_calories=nutrition["total_calories"],
-        protein=nutrition["nutrients"]["protein"],
-        carbs=nutrition["nutrients"]["carb"],
-        fat=nutrition["nutrients"]["fat"],
-        fiber=nutrition["nutrients"].get("fiber", 0),
-        confidence=confidence,
-        meal_type=meal_type,
-        recognition_source="google_vision",
-        log_date=utc_today(),
-    )
-    try:
-        db.add_all([recognition_attempt, nutrition_source, log_entry])
-        db.commit()
-        db.refresh(log_entry)
-    except Exception:
-        db.rollback()
-        logger.exception("Besin analizi transaction'ı geri alındı.")
-        raise HTTPException(
-            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail="Besin analizi güvenli biçimde kaydedilemedi.",
+    if confidence >= 0.85 and can_confirm:
+        tts_text = (
+            f"{food_name_tr} bulundu. Yaklaşık "
+            f"{nutrition['total_calories']:.0f} kalori. "
+            "Kaydetmeden önce sonucu onaylayın."
+        )
+    elif confidence >= 0.60:
+        names = ", ".join(item.food_name_tr for item in candidate_rows)
+        tts_text = f"Sonuç kesin değil. Olası seçenekler: {names}. Lütfen seçin."
+    else:
+        tts_text = (
+            "Yiyecek güvenilir biçimde tanınamadı. "
+            "Yeniden fotoğraf çekin veya manuel aramayı kullanın."
         )
 
-    # ── 5. TTS metin ──
-    tts_text = (
-        f"{food_name_tr} tanındı. "
-        f"{nutrition['estimated_portion_g']:.0f} gram, "
-        f"{nutrition['total_calories']:.0f} kalori. "
-        f"{nutrition['nutrients']['protein']:.0f} gram protein, "
-        f"{nutrition['nutrients']['carb']:.0f} gram karbonhidrat, "
-        f"{nutrition['nutrients']['fat']:.0f} gram yağ."
-    )
-
-    return FoodAnalysisResponse(
+    response = FoodAnalysisResponse(
+        analysis_id=recognition_attempt.id,
+        log_id=None,
         food_name=food_name,
         food_name_tr=food_name_tr,
         calories_per_100g=nutrition["calories_per_100g"],
@@ -303,11 +371,246 @@ async def analyze_food(
             fiber=nutrition["nutrients"].get("fiber", 0),
         ),
         meal_type=meal_type,
-        log_id=log_entry.id,
         recognition_source="google_vision",
-        nutrition_source=nutrition.get("source", "unknown"),
-        needs_confirmation=confidence < 0.85,
+        nutrition_source=nutrition_provider,
+        nutrition_status=nutrition_status,
+        candidates=candidate_rows,
+        needs_confirmation=True,
+        can_confirm=can_confirm,
         tts_text=tts_text,
+    )
+    recognition_attempt.analysis_payload = response.model_dump(mode="json")
+    try:
+        db.add(recognition_attempt)
+        db.commit()
+    except Exception:
+        db.rollback()
+        logger.exception("Onay bekleyen analiz kaydı oluşturulamadı.")
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="Besin analizi güvenli biçimde başlatılamadı.",
+        )
+    return response
+
+
+@router.post(
+    "/food-analysis/{analysis_id}/decision",
+    response_model=FoodAnalysisDecisionResponse,
+    summary="Analizi onayla, düzelt veya reddet",
+)
+async def decide_food_analysis(
+    analysis_id: str,
+    request: FoodAnalysisDecisionRequest,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    attempt = db.query(RecognitionAttempt).filter(
+        RecognitionAttempt.id == analysis_id,
+        RecognitionAttempt.user_id == current_user.id,
+    ).with_for_update().first()
+    if attempt is None or not attempt.analysis_payload:
+        raise HTTPException(status_code=404, detail="Analiz bulunamadı.")
+
+    existing_log = db.query(FoodLog).filter(
+        FoodLog.recognition_attempt_id == attempt.id
+    ).first()
+    if existing_log is not None:
+        return FoodAnalysisDecisionResponse(
+            analysis_id=attempt.id,
+            log_id=existing_log.id,
+            status="already_saved",
+            message="Bu çekim daha önce kaydedildi.",
+        )
+    if attempt.decision == "rejected":
+        return FoodAnalysisDecisionResponse(
+            analysis_id=attempt.id,
+            status="rejected",
+            message="Bu analiz daha önce reddedildi.",
+        )
+    if attempt.expires_at is not None and attempt.expires_at < utc_now():
+        raise HTTPException(status_code=410, detail="Analiz onay süresi doldu.")
+    if request.action == "reject":
+        attempt.decision = "rejected"
+        attempt.decided_at = utc_now()
+        db.commit()
+        return FoodAnalysisDecisionResponse(
+            analysis_id=attempt.id,
+            status="rejected",
+            message="Sonuç kaydedilmedi.",
+        )
+
+    payload = dict(attempt.analysis_payload)
+    recognition_source = payload["recognition_source"]
+    if request.action == "correct":
+        food_name = request.corrected_food_name
+        food_name_tr = request.corrected_food_name_tr or FOOD_NAME_TR.get(
+            food_name, food_name.replace("_", " ").title()
+        )
+        nutrition = await nutrition_service.get_nutrition(food_name)
+        recognition_source = "manual"
+    else:
+        if not payload.get("can_confirm"):
+            raise HTTPException(
+                status_code=422,
+                detail="Bu sonuç güvenli biçimde onaylanamaz; yeniden çekin veya düzeltin.",
+            )
+        food_name = payload["food_name"]
+        food_name_tr = payload["food_name_tr"]
+        nutrition = {
+            "calories_per_100g": payload["calories_per_100g"],
+            "estimated_portion_g": payload["portion_grams"],
+            "total_calories": payload["total_calories"],
+            "nutrients": {
+                "protein": payload["nutrients"]["protein"],
+                "carb": payload["nutrients"]["carbs"],
+                "fat": payload["nutrients"]["fat"],
+                "fiber": payload["nutrients"]["fiber"],
+            },
+            "source": payload["nutrition_source"],
+        }
+
+    if nutrition.get("source") == "not_found" or nutrition.get("total_calories", 0) <= 0:
+        raise HTTPException(
+            status_code=422,
+            detail="Besin değeri doğrulanamadığı için kayıt oluşturulmadı.",
+        )
+    nutrition_source = NutritionSource(
+        id=str(uuid.uuid4()),
+        provider=nutrition.get("source", "unknown"),
+        external_reference=nutrition.get("external_reference"),
+        food_name=food_name,
+        calories_per_100g=nutrition["calories_per_100g"],
+        payload_checksum=hashlib.sha256(
+            json.dumps(nutrition, sort_keys=True, default=str).encode("utf-8")
+        ).hexdigest(),
+    )
+    log_entry = FoodLog(
+        id=str(uuid.uuid4()),
+        user_id=current_user.id,
+        recognition_attempt_id=attempt.id,
+        nutrition_source_id=nutrition_source.id,
+        food_name=food_name,
+        food_name_tr=food_name_tr,
+        calories_per_100g=nutrition["calories_per_100g"],
+        estimated_portion_g=nutrition["estimated_portion_g"],
+        total_calories=nutrition["total_calories"],
+        protein=nutrition["nutrients"]["protein"],
+        carbs=nutrition["nutrients"]["carb"],
+        fat=nutrition["nutrients"]["fat"],
+        fiber=nutrition["nutrients"].get("fiber", 0),
+        confidence=float(payload["confidence"]),
+        meal_type=payload["meal_type"],
+        recognition_source=recognition_source,
+        log_date=utc_today(),
+    )
+    attempt.decision = "corrected" if request.action == "correct" else "confirmed"
+    attempt.decided_at = utc_now()
+    try:
+        db.add_all([nutrition_source, log_entry])
+        db.commit()
+    except Exception:
+        db.rollback()
+        logger.exception("Onaylı besin kaydı transaction'ı geri alındı.")
+        raise HTTPException(
+            status_code=503,
+            detail="Onaylı kayıt güvenli biçimde oluşturulamadı.",
+        )
+    return FoodAnalysisDecisionResponse(
+        analysis_id=attempt.id,
+        log_id=log_entry.id,
+        status="corrected" if request.action == "correct" else "confirmed",
+        message="Yemek geçmişine kaydedildi.",
+    )
+
+
+@router.post(
+    "/food-log/manual",
+    response_model=FoodAnalysisDecisionResponse,
+    summary="Kullanıcı onaylı manuel yemek kaydı",
+)
+async def create_manual_food_log(
+    request: ManualFoodLogRequest,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    capture_key = str(request.capture_id)
+    existing_attempt = db.query(RecognitionAttempt).filter(
+        RecognitionAttempt.user_id == current_user.id,
+        RecognitionAttempt.capture_id == capture_key,
+    ).first()
+    if existing_attempt is not None:
+        existing_log = db.query(FoodLog).filter(
+            FoodLog.recognition_attempt_id == existing_attempt.id
+        ).first()
+        if existing_log is not None:
+            return FoodAnalysisDecisionResponse(
+                analysis_id=existing_attempt.id,
+                log_id=existing_log.id,
+                status="already_saved",
+                message="Bu manuel kayıt daha önce oluşturuldu.",
+            )
+        raise HTTPException(status_code=409, detail="Bu çekim kimliği başka analizde kullanıldı.")
+
+    nutrition = await nutrition_service.get_nutrition(request.food_name)
+    if nutrition.get("source") == "not_found" or nutrition.get("total_calories", 0) <= 0:
+        raise HTTPException(
+            status_code=422,
+            detail="Besin değeri bulunamadığı için manuel kayıt oluşturulmadı.",
+        )
+    attempt = RecognitionAttempt(
+        id=str(uuid.uuid4()),
+        user_id=current_user.id,
+        provider="manual",
+        capture_id=capture_key,
+        status="succeeded",
+        food_name=request.food_name,
+        confidence=None,
+        decision="confirmed",
+        decided_at=utc_now(),
+    )
+    nutrition_source = NutritionSource(
+        id=str(uuid.uuid4()),
+        provider=nutrition.get("source", "unknown"),
+        food_name=request.food_name,
+        calories_per_100g=nutrition["calories_per_100g"],
+        payload_checksum=hashlib.sha256(
+            json.dumps(nutrition, sort_keys=True, default=str).encode("utf-8")
+        ).hexdigest(),
+    )
+    food_name_tr = request.food_name_tr or FOOD_NAME_TR.get(
+        request.food_name, request.food_name.replace("_", " ").title()
+    )
+    log_entry = FoodLog(
+        id=str(uuid.uuid4()),
+        user_id=current_user.id,
+        recognition_attempt_id=attempt.id,
+        nutrition_source_id=nutrition_source.id,
+        food_name=request.food_name,
+        food_name_tr=food_name_tr,
+        calories_per_100g=nutrition["calories_per_100g"],
+        estimated_portion_g=nutrition["estimated_portion_g"],
+        total_calories=nutrition["total_calories"],
+        protein=nutrition["nutrients"]["protein"],
+        carbs=nutrition["nutrients"]["carb"],
+        fat=nutrition["nutrients"]["fat"],
+        fiber=nutrition["nutrients"].get("fiber", 0),
+        confidence=0.0,
+        meal_type=request.meal_type,
+        recognition_source="manual",
+        log_date=utc_today(),
+    )
+    try:
+        db.add_all([attempt, nutrition_source, log_entry])
+        db.commit()
+    except Exception:
+        db.rollback()
+        logger.exception("Manuel yemek kaydı transaction'ı geri alındı.")
+        raise HTTPException(status_code=503, detail="Manuel kayıt oluşturulamadı.")
+    return FoodAnalysisDecisionResponse(
+        analysis_id=attempt.id,
+        log_id=log_entry.id,
+        status="confirmed",
+        message="Manuel yemek geçmişine kaydedildi.",
     )
 
 

@@ -161,12 +161,20 @@ class RecognitionAttempt(Base):
     id = Column(UUIDString, primary_key=True, default=lambda: str(uuid.uuid4()))
     user_id = Column(UUIDString, ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
     provider = Column(String(64), nullable=False)
+    capture_id = Column(UUIDString, nullable=True)
     status = Column(Enum("succeeded", "failed", name="recognition_status_enum"), nullable=False)
     food_name = Column(String(255), nullable=True)
     confidence = Column(Float, nullable=True)
     request_id = Column(String(64), nullable=True, index=True)
     error_code = Column(String(64), nullable=True)
+    analysis_payload = Column(JSON, nullable=True)
+    decision = Column(String(16), nullable=True)
+    expires_at = Column(UTCDateTime, nullable=True)
+    decided_at = Column(UTCDateTime, nullable=True)
     created_at = Column(UTCDateTime, default=utc_now, nullable=False, index=True)
+    __table_args__ = (
+        UniqueConstraint("user_id", "capture_id", name="uq_recognition_user_capture"),
+    )
 
 
 class NutritionSource(Base):

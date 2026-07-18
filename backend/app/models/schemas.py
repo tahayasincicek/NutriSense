@@ -10,7 +10,9 @@ from datetime import datetime, date
 from typing import Any, Literal, Optional
 from uuid import UUID
 
-from pydantic import BaseModel, ConfigDict, EmailStr, Field, field_validator
+from pydantic import (
+    BaseModel, ConfigDict, EmailStr, Field, field_validator, model_validator,
+)
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -25,9 +27,21 @@ class NutrientData(BaseModel):
     fiber: float = Field(0.0, ge=0, description="Lif (g)")
 
 
+class FoodCandidate(BaseModel):
+    """Modelin sıralı adaylarından biri; besin güveniyle kalori kaynağını karıştırmaz."""
+
+    food_name: str
+    food_name_tr: str
+    confidence: float = Field(..., ge=0, le=1.0)
+
+
 class FoodAnalysisResponse(BaseModel):
     """Multipart POST /api/v1/analyze-food yanıt gövdesi."""
-    log_id: UUID = Field(..., description="Kayıt UUID")
+    analysis_id: UUID = Field(..., description="Onay bekleyen analiz UUID")
+    log_id: Optional[UUID] = Field(
+        None,
+        description="Analiz aşamasında null; yalnız karar endpointi günlük kaydı üretir",
+    )
     food_name: str = Field(..., description="Dil bağımsız kanonik besin anahtarı")
     food_name_tr: str = Field(..., description="Besin adı (Türkçe)")
     confidence: float = Field(..., ge=0, le=1.0)
@@ -38,14 +52,18 @@ class FoodAnalysisResponse(BaseModel):
     meal_type: str
     recognition_source: str
     nutrition_source: str
+    nutrition_status: Literal["available", "unverified", "not_found"]
+    candidates: list[FoodCandidate] = Field(default_factory=list, max_length=3)
     needs_confirmation: bool
+    can_confirm: bool
     tts_text: str = Field(..., description="TTS ile okunacak metin")
 
     model_config = ConfigDict(
         extra="ignore",
         json_schema_extra={
             "example": {
-                "log_id": "550e8400-e29b-41d4-a716-446655440000",
+                "analysis_id": "550e8400-e29b-41d4-a716-446655440000",
+                "log_id": None,
                 "food_name": "elma",
                 "food_name_tr": "Elma",
                 "confidence": 0.93,
@@ -61,11 +79,74 @@ class FoodAnalysisResponse(BaseModel):
                 "meal_type": "atistirmalik",
                 "recognition_source": "google_vision",
                 "nutrition_source": "nutritionix",
-                "needs_confirmation": False,
-                "tts_text": "Elma tanındı. 150 gram, 78 kalori.",
+                "nutrition_status": "available",
+                "candidates": [
+                    {"food_name": "elma", "food_name_tr": "Elma", "confidence": 0.93}
+                ],
+                "needs_confirmation": True,
+                "can_confirm": True,
+                "tts_text": "Elma bulundu. Kaydetmeden önce sonucu onaylayın.",
             }
         },
     )
+
+
+class FoodAnalysisDecisionRequest(BaseModel):
+    action: Literal["confirm", "correct", "reject"]
+    corrected_food_name: Optional[str] = Field(None, min_length=2, max_length=120)
+    corrected_food_name_tr: Optional[str] = Field(None, min_length=2, max_length=120)
+
+    @field_validator("corrected_food_name")
+    @classmethod
+    def normalize_food_key(cls, value: Optional[str]) -> Optional[str]:
+        if value is None:
+            return None
+        normalized = value.strip().lower().replace(" ", "_")
+        if not normalized.replace("_", "").isalnum():
+            raise ValueError("Düzeltilen besin adı yalnız harf, rakam ve boşluk içerebilir.")
+        return normalized
+
+    @field_validator("corrected_food_name_tr")
+    @classmethod
+    def strip_display_name(cls, value: Optional[str]) -> Optional[str]:
+        return value.strip() if value is not None else None
+
+    @model_validator(mode="after")
+    def validate_correction_fields(self):
+        if self.action == "correct" and not self.corrected_food_name:
+            raise ValueError("Düzeltme için corrected_food_name zorunludur.")
+        if self.action != "correct" and (
+            self.corrected_food_name is not None
+            or self.corrected_food_name_tr is not None
+        ):
+            raise ValueError("Düzeltme alanları yalnız correct işleminde gönderilebilir.")
+        return self
+
+
+class FoodAnalysisDecisionResponse(BaseModel):
+    analysis_id: UUID
+    log_id: Optional[UUID] = None
+    status: Literal["confirmed", "corrected", "rejected", "already_saved"]
+    message: str
+
+
+class ManualFoodLogRequest(BaseModel):
+    capture_id: UUID
+    food_name: str = Field(..., min_length=2, max_length=120)
+    food_name_tr: Optional[str] = Field(None, min_length=2, max_length=120)
+    meal_type: str = Field(
+        default="atistirmalik",
+        pattern=r"^(kahvalti|ogle|aksam|atistirmalik)$",
+    )
+    confirmed: Literal[True]
+
+    @field_validator("food_name")
+    @classmethod
+    def normalize_manual_food_key(cls, value: str) -> str:
+        normalized = value.strip().lower().replace(" ", "_")
+        if not normalized.replace("_", "").isalnum():
+            raise ValueError("Besin adı yalnız harf, rakam ve boşluk içerebilir.")
+        return normalized
 
 
 # ═══════════════════════════════════════════════════════════════════════════════

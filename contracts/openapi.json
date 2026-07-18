@@ -22,6 +22,12 @@
       },
       "Body_analyze_food_api_v1_analyze_food_post": {
         "properties": {
+          "capture_id": {
+            "description": "İstemcinin tek çekim UUID'si",
+            "format": "uuid",
+            "title": "Capture Id",
+            "type": "string"
+          },
           "image": {
             "contentMediaType": "application/octet-stream",
             "description": "JPEG, PNG veya WebP; en fazla 5 MB",
@@ -36,7 +42,8 @@
           }
         },
         "required": [
-          "image"
+          "image",
+          "capture_id"
         ],
         "title": "Body_analyze_food_api_v1_analyze_food_post",
         "type": "object"
@@ -206,16 +213,110 @@
         "title": "ErrorResponse",
         "type": "object"
       },
+      "FoodAnalysisDecisionRequest": {
+        "properties": {
+          "action": {
+            "enum": [
+              "confirm",
+              "correct",
+              "reject"
+            ],
+            "title": "Action",
+            "type": "string"
+          },
+          "corrected_food_name": {
+            "anyOf": [
+              {
+                "maxLength": 120,
+                "minLength": 2,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Corrected Food Name"
+          },
+          "corrected_food_name_tr": {
+            "anyOf": [
+              {
+                "maxLength": 120,
+                "minLength": 2,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Corrected Food Name Tr"
+          }
+        },
+        "required": [
+          "action"
+        ],
+        "title": "FoodAnalysisDecisionRequest",
+        "type": "object"
+      },
+      "FoodAnalysisDecisionResponse": {
+        "properties": {
+          "analysis_id": {
+            "format": "uuid",
+            "title": "Analysis Id",
+            "type": "string"
+          },
+          "log_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Log Id"
+          },
+          "message": {
+            "title": "Message",
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "confirmed",
+              "corrected",
+              "rejected",
+              "already_saved"
+            ],
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "analysis_id",
+          "status",
+          "message"
+        ],
+        "title": "FoodAnalysisDecisionResponse",
+        "type": "object"
+      },
       "FoodAnalysisResponse": {
         "description": "Multipart POST /api/v1/analyze-food yanıt gövdesi.",
         "example": {
+          "analysis_id": "550e8400-e29b-41d4-a716-446655440000",
           "calories_per_100g": 52.0,
+          "can_confirm": true,
+          "candidates": [
+            {
+              "confidence": 0.93,
+              "food_name": "elma",
+              "food_name_tr": "Elma"
+            }
+          ],
           "confidence": 0.93,
           "food_name": "elma",
           "food_name_tr": "Elma",
-          "log_id": "550e8400-e29b-41d4-a716-446655440000",
           "meal_type": "atistirmalik",
-          "needs_confirmation": false,
+          "needs_confirmation": true,
           "nutrients": {
             "carbs": 20.7,
             "fat": 0.3,
@@ -223,16 +324,35 @@
             "protein": 0.4
           },
           "nutrition_source": "nutritionix",
+          "nutrition_status": "available",
           "portion_grams": 150.0,
           "recognition_source": "google_vision",
           "total_calories": 78.0,
-          "tts_text": "Elma tanındı. 150 gram, 78 kalori."
+          "tts_text": "Elma bulundu. Kaydetmeden önce sonucu onaylayın."
         },
         "properties": {
+          "analysis_id": {
+            "description": "Onay bekleyen analiz UUID",
+            "format": "uuid",
+            "title": "Analysis Id",
+            "type": "string"
+          },
           "calories_per_100g": {
             "minimum": 0.0,
             "title": "Calories Per 100G",
             "type": "number"
+          },
+          "can_confirm": {
+            "title": "Can Confirm",
+            "type": "boolean"
+          },
+          "candidates": {
+            "items": {
+              "$ref": "#/components/schemas/FoodCandidate"
+            },
+            "maxItems": 3,
+            "title": "Candidates",
+            "type": "array"
           },
           "confidence": {
             "maximum": 1.0,
@@ -251,10 +371,17 @@
             "type": "string"
           },
           "log_id": {
-            "description": "Kayıt UUID",
-            "format": "uuid",
-            "title": "Log Id",
-            "type": "string"
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Analiz aşamasında null; yalnız karar endpointi günlük kaydı üretir",
+            "title": "Log Id"
           },
           "meal_type": {
             "title": "Meal Type",
@@ -269,6 +396,15 @@
           },
           "nutrition_source": {
             "title": "Nutrition Source",
+            "type": "string"
+          },
+          "nutrition_status": {
+            "enum": [
+              "available",
+              "unverified",
+              "not_found"
+            ],
+            "title": "Nutrition Status",
             "type": "string"
           },
           "portion_grams": {
@@ -292,7 +428,7 @@
           }
         },
         "required": [
-          "log_id",
+          "analysis_id",
           "food_name",
           "food_name_tr",
           "confidence",
@@ -303,10 +439,38 @@
           "meal_type",
           "recognition_source",
           "nutrition_source",
+          "nutrition_status",
           "needs_confirmation",
+          "can_confirm",
           "tts_text"
         ],
         "title": "FoodAnalysisResponse",
+        "type": "object"
+      },
+      "FoodCandidate": {
+        "description": "Modelin sıralı adaylarından biri; besin güveniyle kalori kaynağını karıştırmaz.",
+        "properties": {
+          "confidence": {
+            "maximum": 1.0,
+            "minimum": 0.0,
+            "title": "Confidence",
+            "type": "number"
+          },
+          "food_name": {
+            "title": "Food Name",
+            "type": "string"
+          },
+          "food_name_tr": {
+            "title": "Food Name Tr",
+            "type": "string"
+          }
+        },
+        "required": [
+          "food_name",
+          "food_name_tr",
+          "confidence"
+        ],
+        "title": "FoodCandidate",
         "type": "object"
       },
       "FoodHistoryResponse": {
@@ -440,6 +604,52 @@
           "refresh_token"
         ],
         "title": "LogoutRequest",
+        "type": "object"
+      },
+      "ManualFoodLogRequest": {
+        "properties": {
+          "capture_id": {
+            "format": "uuid",
+            "title": "Capture Id",
+            "type": "string"
+          },
+          "confirmed": {
+            "const": true,
+            "title": "Confirmed",
+            "type": "boolean"
+          },
+          "food_name": {
+            "maxLength": 120,
+            "minLength": 2,
+            "title": "Food Name",
+            "type": "string"
+          },
+          "food_name_tr": {
+            "anyOf": [
+              {
+                "maxLength": 120,
+                "minLength": 2,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Food Name Tr"
+          },
+          "meal_type": {
+            "default": "atistirmalik",
+            "pattern": "^(kahvalti|ogle|aksam|atistirmalik)$",
+            "title": "Meal Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "capture_id",
+          "food_name",
+          "confirmed"
+        ],
+        "title": "ManualFoodLogRequest",
         "type": "object"
       },
       "MealSummary": {
@@ -1212,7 +1422,7 @@
     },
     "/api/v1/analyze-food": {
       "post": {
-        "description": "Multipart görüntüyü MIME/boyut doğrulaması ve EXIF temizliği sonrası Google Vision API ile analiz eder, besin adını tanır, Nutritionix'ten kalori bilgisini çeker ve sonucu MySQL'e kaydeder.",
+        "description": "Multipart görüntüyü MIME/boyut doğrulaması ve EXIF temizliği sonrası Google Vision API ile analiz eder, besin adını tanır ve Nutritionix'ten kalori bilgisini çeker. Yemek günlüğü yalnız ayrı karar endpointinde kullanıcı onayıyla oluşur.",
         "operationId": "analyze_food_api_v1_analyze_food_post",
         "requestBody": {
           "content": {
@@ -1631,6 +1841,63 @@
         ]
       }
     },
+    "/api/v1/food-analysis/{analysis_id}/decision": {
+      "post": {
+        "operationId": "decide_food_analysis_api_v1_food_analysis__analysis_id__decision_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "analysis_id",
+            "required": true,
+            "schema": {
+              "title": "Analysis Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FoodAnalysisDecisionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FoodAnalysisDecisionResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Analizi onayla, düzelt veya reddet",
+        "tags": [
+          "NutriSense API"
+        ]
+      }
+    },
     "/api/v1/food-history/{user_id}": {
       "get": {
         "description": "Belirtilen tarih aralığında kullanıcının yemek kayıtlarını döner.",
@@ -1712,6 +1979,52 @@
           }
         ],
         "summary": "Yemek geçmişi sorgulama",
+        "tags": [
+          "NutriSense API"
+        ]
+      }
+    },
+    "/api/v1/food-log/manual": {
+      "post": {
+        "operationId": "create_manual_food_log_api_v1_food_log_manual_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ManualFoodLogRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FoodAnalysisDecisionResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Kullanıcı onaylı manuel yemek kaydı",
         "tags": [
           "NutriSense API"
         ]

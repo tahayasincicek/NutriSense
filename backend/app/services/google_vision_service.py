@@ -7,6 +7,7 @@
 # Tanınamayan görüntüler için fallback mantığı.
 # ==============================================================================
 
+import asyncio
 import base64
 import logging
 
@@ -124,9 +125,8 @@ class GoogleVisionService:
             image = vision.Image(content=image_bytes)
 
             # ── Label Detection ──
-            label_response = self.client.label_detection(
-                image=image,
-                max_results=15,
+            label_response, localization_response = await asyncio.to_thread(
+                self._request_annotations, image
             )
 
             if label_response.error.message:
@@ -142,12 +142,6 @@ class GoogleVisionService:
                 }
                 for label in label_response.label_annotations
             ]
-
-            # ── Object Localization ──
-            localization_response = self.client.object_localization(
-                image=image,
-                max_results=5,
-            )
 
             objects = [
                 {
@@ -176,6 +170,21 @@ class GoogleVisionService:
             logger.error(f"Vision API çağrısı başarısız: {e}")
             raise VisionAPIError(f"Görüntü analizi başarısız: {str(e)}")
 
+    def _request_annotations(self, image):
+        """Blocking Google client calls run outside the FastAPI event loop."""
+        timeout = settings.vision_timeout_seconds
+        label_response = self.client.label_detection(
+            image=image,
+            max_results=15,
+            timeout=timeout,
+        )
+        localization_response = self.client.object_localization(
+            image=image,
+            max_results=5,
+            timeout=timeout,
+        )
+        return label_response, localization_response
+
     def _map_labels_to_food(
         self, labels: list[dict], objects: list[dict]
     ) -> dict:
@@ -191,10 +200,15 @@ class GoogleVisionService:
         best_food = None
         best_confidence = 0.0
         bounding_box = None
+        candidate_scores: dict[str, float] = {}
 
         # 1. Object detection'dan ara (daha spesifik)
         for obj in objects:
             mapped = FOOD_LABEL_MAP.get(obj["name"])
+            if mapped:
+                candidate_scores[mapped] = max(
+                    candidate_scores.get(mapped, 0.0), float(obj["score"])
+                )
             if mapped and obj["score"] > best_confidence:
                 best_food = mapped
                 best_confidence = obj["score"]
@@ -203,6 +217,10 @@ class GoogleVisionService:
         # 2. Label detection'dan ara
         for label in labels:
             mapped = FOOD_LABEL_MAP.get(label["name"])
+            if mapped:
+                candidate_scores[mapped] = max(
+                    candidate_scores.get(mapped, 0.0), float(label["score"])
+                )
             if mapped and label["score"] > best_confidence:
                 best_food = mapped
                 best_confidence = label["score"]
@@ -214,11 +232,18 @@ class GoogleVisionService:
         )
 
         if best_food:
+            candidates = [
+                {"food_name": name, "confidence": round(score, 4)}
+                for name, score in sorted(
+                    candidate_scores.items(), key=lambda item: item[1], reverse=True
+                )[:3]
+            ]
             return {
                 "food_name": best_food,
                 "confidence": round(best_confidence, 4),
                 "is_food": True,
                 "bounding_box": bounding_box,
+                "candidates": candidates,
             }
 
         if is_food:
@@ -231,6 +256,7 @@ class GoogleVisionService:
                 "is_food": True,
                 "bounding_box": bounding_box,
                 "needs_manual_mapping": True,
+                "candidates": [],
             }
 
         # 4. Besin değil

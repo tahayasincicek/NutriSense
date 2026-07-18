@@ -1,5 +1,6 @@
 {
-  "log_id": "550e8400-e29b-41d4-a716-446655440000",
+  "analysis_id": "550e8400-e29b-41d4-a716-446655440000",
+  "log_id": null,
   "food_name": "elma",
   "food_name_tr": "Elma",
   "confidence": 0.93,
@@ -15,7 +16,12 @@
   "meal_type": "atistirmalik",
   "recognition_source": "google_vision",
   "nutrition_source": "nutritionix",
-  "needs_confirmation": false,
-  "tts_text": "Elma tanındı. 150 gram, 78 kalori.",
+  "nutrition_status": "available",
+  "candidates": [
+    {"food_name": "elma", "food_name_tr": "Elma", "confidence": 0.93}
+  ],
+  "needs_confirmation": true,
+  "can_confirm": true,
+  "tts_text": "Elma bulundu. Kaydetmeden önce sonucu onaylayın.",
   "contract_forward_compatibility_probe": "ignored-by-mobile"
 }

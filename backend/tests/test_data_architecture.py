@@ -249,6 +249,10 @@ def test_food_analysis_commit_failure_rolls_back_all_three_records(client, monke
     response = client.post(
         "/api/v1/analyze-food",
         files={"image": ("food.jpg", _jpeg_bytes(), "image/jpeg")},
+        data={
+            "meal_type": "atistirmalik",
+            "capture_id": "1f7856f5-9ab5-46ec-a6cb-b8d9807fe0df",
+        },
     )
     assert response.status_code == 503
     failing_session.close()
