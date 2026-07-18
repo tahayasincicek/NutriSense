@@ -236,10 +236,10 @@ def portion_to_grams(
     conversions: Mapping[tuple[str, str], UnitConversion],
 ) -> Decimal:
     amount = to_decimal(value, "portion_value")
-    if amount <= 0 or amount > Decimal("20"):
-        raise NutritionDomainError("Birim adedi 0 ile 20 arasında olmalıdır.")
     if unit == "gram":
         return validate_portion_grams(amount)
+    if amount <= 0 or amount > Decimal("20"):
+        raise NutritionDomainError("Birim adedi 0 ile 20 arasında olmalıdır.")
     conversion = conversions.get((canonical_food_id, unit))
     if conversion is None:
         raise NutritionDomainError(

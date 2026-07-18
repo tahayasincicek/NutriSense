@@ -14,6 +14,7 @@ from sqlalchemy import (
     ForeignKey,
     Index,
     Integer,
+    Numeric,
     String,
     Text,
     UniqueConstraint,
@@ -183,8 +184,16 @@ class NutritionSource(Base):
     id = Column(UUIDString, primary_key=True, default=lambda: str(uuid.uuid4()))
     provider = Column(String(64), nullable=False)
     external_reference = Column(String(255), nullable=True)
+    canonical_food_id = Column(String(255), default="food.legacy.unmapped", nullable=False)
+    source_item_id = Column(String(255), default="legacy-unverified", nullable=False)
+    locale = Column(String(16), default="und", nullable=False)
+    serving_unit = Column(String(64), default="gram", nullable=False)
+    serving_grams = Column(Numeric(14, 6), default=100, nullable=False)
+    license_name = Column(String(255), default="UNVERIFIED LEGACY", nullable=False)
+    attribution = Column(Text, default="Legacy record; source unavailable", nullable=False)
+    normalization_version = Column(String(64), default="legacy-unmapped", nullable=False)
     food_name = Column(String(255), nullable=False)
-    calories_per_100g = Column(Float, nullable=False)
+    calories_per_100g = Column(Numeric(14, 6), nullable=False)
     payload_checksum = Column(String(64), nullable=True)
     retrieved_at = Column(UTCDateTime, default=utc_now, nullable=False)
 
@@ -198,13 +207,21 @@ class FoodLog(Base):
     nutrition_source_id = Column(UUIDString, ForeignKey("nutrition_sources.id", ondelete="RESTRICT"), nullable=True)
     food_name = Column(String(255), nullable=False)
     food_name_tr = Column(String(255), nullable=False)
-    calories_per_100g = Column(Float, nullable=False)
-    estimated_portion_g = Column(Float, nullable=False)
-    total_calories = Column(Float, nullable=False)
-    protein = Column(Float, default=0.0, nullable=False)
-    carbs = Column(Float, default=0.0, nullable=False)
-    fat = Column(Float, default=0.0, nullable=False)
-    fiber = Column(Float, default=0.0, nullable=False)
+    canonical_food_id = Column(String(255), default="food.legacy.unmapped", nullable=False)
+    calories_per_100g = Column(Numeric(14, 6), nullable=False)
+    estimated_portion_g = Column(Numeric(14, 6), nullable=False)
+    portion_value = Column(Numeric(14, 6), default=100, nullable=False)
+    portion_unit = Column(String(16), default="gram", nullable=False)
+    portion_method = Column(String(32), default="legacy_unknown", nullable=False)
+    portion_is_estimate = Column(Boolean, default=True, nullable=False)
+    total_calories = Column(Numeric(14, 6), nullable=False)
+    protein = Column(Numeric(14, 6), default=0, nullable=False)
+    carbs = Column(Numeric(14, 6), default=0, nullable=False)
+    fat = Column(Numeric(14, 6), default=0, nullable=False)
+    fiber = Column(Numeric(14, 6), default=0, nullable=False)
+    macro_calories = Column(Numeric(14, 6), default=0, nullable=False)
+    macro_calorie_delta = Column(Numeric(14, 6), default=0, nullable=False)
+    nutrition_reliability = Column(String(32), default="unverified", nullable=False)
     confidence = Column(Float, default=0.0, nullable=False)
     meal_type = Column(Enum("kahvalti", "ogle", "aksam", "atistirmalik", name="meal_type_enum"), default="atistirmalik", nullable=False)
     recognition_source = Column(Enum("google_vision", "tflite", "manual", name="recognition_source_enum"), default="google_vision", nullable=False)

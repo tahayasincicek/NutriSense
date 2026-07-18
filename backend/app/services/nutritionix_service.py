@@ -137,6 +137,7 @@ class NutritionixService:
             source_locale=input_locale,
             retrieved_at=retrieved_at,
             serving_unit=str(api_food.get("serving_unit") or "serving"),
+            serving_quantity=api_food.get("serving_qty", 1),
             license_name=NUTRITIONIX_LICENSE,
             attribution=NUTRITIONIX_ATTRIBUTION,
         )
@@ -188,6 +189,7 @@ class NutritionixService:
             source_locale=data.get("locale", "tr-TR"),
             retrieved_at=source_info["retrieved_at"],
             serving_unit=data.get("serving_unit", "gram"),
+            serving_quantity=data.get("serving_quantity", 1),
             license_name=source_info["license"],
             attribution=source_info["attribution"],
         )
@@ -196,8 +198,22 @@ class NutritionixService:
     def _result_dict(
         *, canonical, profile, calculation, default_portion, portion_method,
         source, source_item_id, source_locale, retrieved_at, serving_unit,
-        license_name, attribution,
+        serving_quantity, license_name, attribution,
     ) -> dict:
+        unit_aliases = {
+            "medium": "adet", "small": "adet", "large": "adet",
+            "item": "adet", "piece": "adet", "slice": "dilim", "bowl": "kase",
+        }
+        converted_unit = unit_aliases.get(str(serving_unit).lower())
+        conversions = []
+        quantity = Decimal(str(serving_quantity or 1))
+        if converted_unit and quantity > 0:
+            conversions.append({
+                "unit": converted_unit,
+                "grams_per_unit": float(Decimal(str(default_portion)) / quantity),
+                "source_item_id": source_item_id,
+                "source_name": attribution,
+            })
         return {
             "available": True,
             "canonical_food_id": canonical.canonical_food_id,
@@ -218,6 +234,12 @@ class NutritionixService:
                 "fat": float(calculation.fat),
                 "fiber": float(calculation.fiber),
             },
+            "nutrients_per_100g": {
+                "protein": float(profile.protein),
+                "carb": float(profile.carbs),
+                "fat": float(profile.fat),
+                "fiber": float(profile.fiber),
+            },
             "macro_calories": float(calculation.macro_calories),
             "macro_calorie_delta": float(calculation.macro_calorie_delta),
             "macro_calorie_delta_percent": float(calculation.macro_calorie_delta_percent),
@@ -233,6 +255,7 @@ class NutritionixService:
                 "license_name": license_name,
                 "attribution": attribution,
             },
+            "portion_conversions": conversions,
         }
 
     @staticmethod

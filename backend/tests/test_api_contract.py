@@ -9,7 +9,9 @@ from PIL import Image
 
 from app.main import app
 from app.middleware.auth import issue_token_pair
-from app.models.database import FoodLog, RecognitionAttempt, SessionLocal, User
+from app.models.database import (
+    FoodLog, NutritionSource, RecognitionAttempt, SessionLocal, User,
+)
 from app.models.schemas import ErrorResponse, FoodAnalysisResponse
 from app.routers import food_router
 from app.middleware.auth import get_current_user
@@ -33,6 +35,49 @@ def png_bytes() -> bytes:
     output = io.BytesIO()
     Image.new("RGB", (8, 8), color=(20, 200, 20)).save(output, "PNG")
     return output.getvalue()
+
+
+def traceable_nutrition(
+    *, calories_per_100g=52.0, portion_grams=150.0,
+    protein=0.4, carb=20.7, fat=0.3, fiber=3.6,
+    food_name="apple", food_name_tr="Elma",
+):
+    scale = portion_grams / 100
+    macro_calories = protein * 4 + carb * 4 + fat * 9
+    total_calories = calories_per_100g * scale
+    return {
+        "available": True,
+        "canonical_food_id": f"food.{food_name}",
+        "food_name": food_name,
+        "food_name_tr": food_name_tr,
+        "normalization_version": "tr-en-canonical-v1",
+        "calories_per_100g": calories_per_100g,
+        "default_portion_g": portion_grams,
+        "estimated_portion_g": portion_grams,
+        "portion_value": portion_grams,
+        "portion_unit": "gram",
+        "portion_method": "source_default",
+        "portion_is_estimate": True,
+        "total_calories": total_calories,
+        "nutrients": {"protein": protein, "carb": carb, "fat": fat, "fiber": fiber},
+        "nutrients_per_100g": {
+            "protein": protein / scale, "carb": carb / scale,
+            "fat": fat / scale, "fiber": fiber / scale,
+        },
+        "macro_calories": macro_calories,
+        "macro_calorie_delta": macro_calories - total_calories,
+        "macro_calorie_delta_percent": abs(macro_calories - total_calories) / total_calories * 100,
+        "source": "nutritionix",
+        "nutrition_reliability": "verified_provider",
+        "provenance": {
+            "source": "nutritionix", "source_item_id": f"fixture:{food_name}",
+            "locale": "en-US", "retrieved_at": "2026-07-18T00:00:00+00:00",
+            "serving_unit": "gram", "serving_grams": portion_grams,
+            "license_name": "Synthetic test fixture",
+            "attribution": "Not a live nutrition claim",
+        },
+        "portion_conversions": [],
+    }
 
 
 def test_shared_success_fixtures_validate_against_pydantic():
@@ -146,19 +191,8 @@ def test_multipart_food_analysis_matches_shared_fixture_shape(client, monkeypatc
             return {"food_name": "elma", "confidence": 0.93}
 
     class SuccessfulNutrition:
-        async def get_nutrition(self, _):
-            return {
-                "calories_per_100g": 52.0,
-                "estimated_portion_g": 150.0,
-                "total_calories": 78.0,
-                "nutrients": {
-                    "protein": 0.4,
-                    "carb": 20.7,
-                    "fat": 0.3,
-                    "fiber": 3.6,
-                },
-                "source": "nutritionix",
-            }
+        async def get_nutrition(self, *_args, **_kwargs):
+            return traceable_nutrition()
 
     user_id = "9e4e5356-b491-4575-a9dd-c5abbc777fe9"
     db = SessionLocal()
@@ -200,6 +234,28 @@ def test_multipart_food_analysis_matches_shared_fixture_shape(client, monkeypatc
     finally:
         db.close()
 
+    portion = client.post(
+        f"/api/v1/food-analysis/{parsed.analysis_id}/portion",
+        json={
+            "portion_value": 100,
+            "portion_unit": "gram",
+            "portion_method": "user_selected",
+        },
+    )
+    assert portion.status_code == 200
+    assert portion.json()["portion_grams"] == 100
+    assert portion.json()["total_calories"] == pytest.approx(52)
+    assert portion.json()["portion_is_estimate"] is False
+    invalid_portion = client.post(
+        f"/api/v1/food-analysis/{parsed.analysis_id}/portion",
+        json={
+            "portion_value": 0,
+            "portion_unit": "gram",
+            "portion_method": "user_selected",
+        },
+    )
+    assert invalid_portion.status_code == 422
+
     app.dependency_overrides[get_current_user] = lambda: SimpleNamespace(
         id="2f6d0f8e-45fe-4775-aea5-0be957e462be"
     )
@@ -227,7 +283,13 @@ def test_multipart_food_analysis_matches_shared_fixture_shape(client, monkeypatc
     assert duplicate.json()["log_id"] == decision.json()["log_id"]
     db = SessionLocal()
     try:
-        assert db.query(FoodLog).count() == 1
+        log = db.query(FoodLog).one()
+        source = db.query(NutritionSource).one()
+        assert float(log.estimated_portion_g) == 100
+        assert log.portion_method == "user_selected"
+        assert log.canonical_food_id == "food.apple"
+        assert source.source_item_id == "fixture:apple"
+        assert source.license_name == "Synthetic test fixture"
     finally:
         db.close()
 
@@ -296,13 +358,16 @@ def test_low_confidence_zero_calorie_cannot_be_saved_and_can_be_rejected(
             return {"food_name": "dish", "confidence": 0.42, "candidates": []}
 
     class MissingNutrition:
-        async def get_nutrition(self, _):
+        async def get_nutrition(self, *_args, **_kwargs):
             return {
-                "calories_per_100g": 0.0,
-                "estimated_portion_g": 100.0,
-                "total_calories": 0.0,
-                "nutrients": {"protein": 0, "carb": 0, "fat": 0, "fiber": 0},
+                "available": False,
+                "canonical_food_id": "food.unmapped.en.dish",
+                "food_name": "dish",
+                "food_name_tr": "Yemek",
+                "normalization_version": "tr-en-canonical-v1",
                 "source": "not_found",
+                "nutrition_reliability": "not_found",
+                "provenance": None,
             }
 
     user_id = "9e4e5356-b491-4575-a9dd-c5abbc777fe9"
@@ -349,14 +414,12 @@ def test_low_confidence_zero_calorie_cannot_be_saved_and_can_be_rejected(
 
 def test_manual_capture_id_is_idempotent(client, monkeypatch):
     class ManualNutrition:
-        async def get_nutrition(self, _):
-            return {
-                "calories_per_100g": 100.0,
-                "estimated_portion_g": 80.0,
-                "total_calories": 80.0,
-                "nutrients": {"protein": 3, "carb": 10, "fat": 2, "fiber": 1},
-                "source": "nutritionix",
-            }
+        async def get_nutrition(self, *_args, **_kwargs):
+            return traceable_nutrition(
+                calories_per_100g=100, portion_grams=100,
+                protein=3, carb=10, fat=2, fiber=1,
+                food_name="simit", food_name_tr="Simit",
+            )
 
     user_id = "9e4e5356-b491-4575-a9dd-c5abbc777fe9"
     db = SessionLocal()

@@ -35,6 +35,24 @@ class FoodCandidate(BaseModel):
     confidence: float = Field(..., ge=0, le=1.0)
 
 
+class NutritionProvenanceData(BaseModel):
+    source: str
+    source_item_id: str
+    locale: str
+    retrieved_at: datetime
+    serving_unit: str
+    serving_grams: float = Field(..., gt=0, le=2000, allow_inf_nan=False)
+    license_name: str
+    attribution: str
+
+
+class PortionOption(BaseModel):
+    unit: Literal["adet", "dilim", "kase"]
+    grams_per_unit: float = Field(..., gt=0, le=2000, allow_inf_nan=False)
+    source_item_id: str
+    source_name: str
+
+
 class FoodAnalysisResponse(BaseModel):
     """Multipart POST /api/v1/analyze-food yanıt gövdesi."""
     analysis_id: UUID = Field(..., description="Onay bekleyen analiz UUID")
@@ -44,15 +62,30 @@ class FoodAnalysisResponse(BaseModel):
     )
     food_name: str = Field(..., description="Dil bağımsız kanonik besin anahtarı")
     food_name_tr: str = Field(..., description="Besin adı (Türkçe)")
+    canonical_food_id: str
+    normalization_version: str
     confidence: float = Field(..., ge=0, le=1.0)
-    portion_grams: float = Field(..., ge=0)
-    calories_per_100g: float = Field(..., ge=0)
-    total_calories: float = Field(..., ge=0)
-    nutrients: NutrientData
+    portion_grams: Optional[float] = Field(None, gt=0, le=2000, allow_inf_nan=False)
+    portion_value: Optional[float] = Field(None, gt=0, allow_inf_nan=False)
+    portion_unit: Optional[Literal["gram", "adet", "dilim", "kase"]] = None
+    portion_method: Optional[Literal["source_default", "user_selected", "user_voice"]] = None
+    portion_is_estimate: bool = True
+    calories_per_100g: Optional[float] = Field(None, gt=0, allow_inf_nan=False)
+    total_calories: Optional[float] = Field(None, gt=0, allow_inf_nan=False)
+    nutrients: Optional[NutrientData] = None
+    nutrients_per_100g: Optional[NutrientData] = None
+    macro_calories: Optional[float] = Field(None, ge=0, allow_inf_nan=False)
+    macro_calorie_delta: Optional[float] = Field(None, allow_inf_nan=False)
+    macro_calorie_delta_percent: Optional[float] = Field(None, ge=0, allow_inf_nan=False)
     meal_type: str
     recognition_source: str
     nutrition_source: str
     nutrition_status: Literal["available", "unverified", "not_found"]
+    nutrition_reliability: Literal[
+        "verified_provider", "verified_local", "user_entered", "unverified", "not_found"
+    ]
+    provenance: Optional[NutritionProvenanceData] = None
+    portion_options: list[PortionOption] = Field(default_factory=list)
     candidates: list[FoodCandidate] = Field(default_factory=list, max_length=3)
     needs_confirmation: bool
     can_confirm: bool
@@ -95,6 +128,9 @@ class FoodAnalysisDecisionRequest(BaseModel):
     action: Literal["confirm", "correct", "reject"]
     corrected_food_name: Optional[str] = Field(None, min_length=2, max_length=120)
     corrected_food_name_tr: Optional[str] = Field(None, min_length=2, max_length=120)
+    portion_value: Optional[float] = Field(None, gt=0, allow_inf_nan=False)
+    portion_unit: Optional[Literal["gram", "adet", "dilim", "kase"]] = None
+    portion_method: Optional[Literal["user_selected", "user_voice"]] = None
 
     @field_validator("corrected_food_name")
     @classmethod
@@ -120,6 +156,28 @@ class FoodAnalysisDecisionRequest(BaseModel):
             or self.corrected_food_name_tr is not None
         ):
             raise ValueError("Düzeltme alanları yalnız correct işleminde gönderilebilir.")
+        portion_fields = (self.portion_value, self.portion_unit, self.portion_method)
+        if any(value is not None for value in portion_fields) and not all(
+            value is not None for value in portion_fields
+        ):
+            raise ValueError("Porsiyon değeri, birimi ve yöntemi birlikte gönderilmelidir.")
+        if self.portion_unit == "gram" and self.portion_value is not None and self.portion_value > 2000:
+            raise ValueError("Gram porsiyonu 2000 değerini aşamaz.")
+        if self.portion_unit != "gram" and self.portion_value is not None and self.portion_value > 20:
+            raise ValueError("Birim adedi 20 değerini aşamaz.")
+        return self
+
+
+class FoodPortionRequest(BaseModel):
+    portion_value: float = Field(..., gt=0, allow_inf_nan=False)
+    portion_unit: Literal["gram", "adet", "dilim", "kase"]
+    portion_method: Literal["user_selected", "user_voice"]
+
+    @model_validator(mode="after")
+    def validate_portion_limit(self):
+        limit = 2000 if self.portion_unit == "gram" else 20
+        if self.portion_value > limit:
+            raise ValueError(f"Porsiyon {limit} değerini aşamaz.")
         return self
 
 
@@ -139,6 +197,9 @@ class ManualFoodLogRequest(BaseModel):
         pattern=r"^(kahvalti|ogle|aksam|atistirmalik)$",
     )
     confirmed: Literal[True]
+    portion_value: float = Field(default=100, gt=0, le=2000, allow_inf_nan=False)
+    portion_unit: Literal["gram"] = "gram"
+    portion_method: Literal["user_selected", "user_voice"] = "user_selected"
 
     @field_validator("food_name")
     @classmethod

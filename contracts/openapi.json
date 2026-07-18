@@ -249,6 +249,50 @@
               }
             ],
             "title": "Corrected Food Name Tr"
+          },
+          "portion_method": {
+            "anyOf": [
+              {
+                "enum": [
+                  "user_selected",
+                  "user_voice"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Portion Method"
+          },
+          "portion_unit": {
+            "anyOf": [
+              {
+                "enum": [
+                  "gram",
+                  "adet",
+                  "dilim",
+                  "kase"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Portion Unit"
+          },
+          "portion_value": {
+            "anyOf": [
+              {
+                "exclusiveMinimum": 0.0,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Portion Value"
           }
         },
         "required": [
@@ -338,9 +382,16 @@
             "type": "string"
           },
           "calories_per_100g": {
-            "minimum": 0.0,
-            "title": "Calories Per 100G",
-            "type": "number"
+            "anyOf": [
+              {
+                "exclusiveMinimum": 0.0,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Calories Per 100G"
           },
           "can_confirm": {
             "title": "Can Confirm",
@@ -353,6 +404,10 @@
             "maxItems": 3,
             "title": "Candidates",
             "type": "array"
+          },
+          "canonical_food_id": {
+            "title": "Canonical Food Id",
+            "type": "string"
           },
           "confidence": {
             "maximum": 1.0,
@@ -383,6 +438,41 @@
             "description": "Analiz aşamasında null; yalnız karar endpointi günlük kaydı üretir",
             "title": "Log Id"
           },
+          "macro_calorie_delta": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Macro Calorie Delta"
+          },
+          "macro_calorie_delta_percent": {
+            "anyOf": [
+              {
+                "minimum": 0.0,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Macro Calorie Delta Percent"
+          },
+          "macro_calories": {
+            "anyOf": [
+              {
+                "minimum": 0.0,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Macro Calories"
+          },
           "meal_type": {
             "title": "Meal Type",
             "type": "string"
@@ -391,8 +481,40 @@
             "title": "Needs Confirmation",
             "type": "boolean"
           },
+          "normalization_version": {
+            "title": "Normalization Version",
+            "type": "string"
+          },
           "nutrients": {
-            "$ref": "#/components/schemas/NutrientData"
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/NutrientData"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "nutrients_per_100g": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/NutrientData"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "nutrition_reliability": {
+            "enum": [
+              "verified_provider",
+              "verified_local",
+              "user_entered",
+              "unverified",
+              "not_found"
+            ],
+            "title": "Nutrition Reliability",
+            "type": "string"
           },
           "nutrition_source": {
             "title": "Nutrition Source",
@@ -408,18 +530,100 @@
             "type": "string"
           },
           "portion_grams": {
-            "minimum": 0.0,
-            "title": "Portion Grams",
-            "type": "number"
+            "anyOf": [
+              {
+                "exclusiveMinimum": 0.0,
+                "maximum": 2000.0,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Portion Grams"
+          },
+          "portion_is_estimate": {
+            "default": true,
+            "title": "Portion Is Estimate",
+            "type": "boolean"
+          },
+          "portion_method": {
+            "anyOf": [
+              {
+                "enum": [
+                  "source_default",
+                  "user_selected",
+                  "user_voice"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Portion Method"
+          },
+          "portion_options": {
+            "items": {
+              "$ref": "#/components/schemas/PortionOption"
+            },
+            "title": "Portion Options",
+            "type": "array"
+          },
+          "portion_unit": {
+            "anyOf": [
+              {
+                "enum": [
+                  "gram",
+                  "adet",
+                  "dilim",
+                  "kase"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Portion Unit"
+          },
+          "portion_value": {
+            "anyOf": [
+              {
+                "exclusiveMinimum": 0.0,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Portion Value"
+          },
+          "provenance": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/NutritionProvenanceData"
+              },
+              {
+                "type": "null"
+              }
+            ]
           },
           "recognition_source": {
             "title": "Recognition Source",
             "type": "string"
           },
           "total_calories": {
-            "minimum": 0.0,
-            "title": "Total Calories",
-            "type": "number"
+            "anyOf": [
+              {
+                "exclusiveMinimum": 0.0,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Total Calories"
           },
           "tts_text": {
             "description": "TTS ile okunacak metin",
@@ -431,15 +635,14 @@
           "analysis_id",
           "food_name",
           "food_name_tr",
+          "canonical_food_id",
+          "normalization_version",
           "confidence",
-          "portion_grams",
-          "calories_per_100g",
-          "total_calories",
-          "nutrients",
           "meal_type",
           "recognition_source",
           "nutrition_source",
           "nutrition_status",
+          "nutrition_reliability",
           "needs_confirmation",
           "can_confirm",
           "tts_text"
@@ -578,6 +781,40 @@
         "title": "FoodLogItem",
         "type": "object"
       },
+      "FoodPortionRequest": {
+        "properties": {
+          "portion_method": {
+            "enum": [
+              "user_selected",
+              "user_voice"
+            ],
+            "title": "Portion Method",
+            "type": "string"
+          },
+          "portion_unit": {
+            "enum": [
+              "gram",
+              "adet",
+              "dilim",
+              "kase"
+            ],
+            "title": "Portion Unit",
+            "type": "string"
+          },
+          "portion_value": {
+            "exclusiveMinimum": 0.0,
+            "title": "Portion Value",
+            "type": "number"
+          }
+        },
+        "required": [
+          "portion_value",
+          "portion_unit",
+          "portion_method"
+        ],
+        "title": "FoodPortionRequest",
+        "type": "object"
+      },
       "HTTPValidationError": {
         "properties": {
           "detail": {
@@ -642,6 +879,28 @@
             "pattern": "^(kahvalti|ogle|aksam|atistirmalik)$",
             "title": "Meal Type",
             "type": "string"
+          },
+          "portion_method": {
+            "default": "user_selected",
+            "enum": [
+              "user_selected",
+              "user_voice"
+            ],
+            "title": "Portion Method",
+            "type": "string"
+          },
+          "portion_unit": {
+            "const": "gram",
+            "default": "gram",
+            "title": "Portion Unit",
+            "type": "string"
+          },
+          "portion_value": {
+            "default": 100,
+            "exclusiveMinimum": 0.0,
+            "maximum": 2000.0,
+            "title": "Portion Value",
+            "type": "number"
           }
         },
         "required": [
@@ -714,6 +973,92 @@
           }
         },
         "title": "NutrientData",
+        "type": "object"
+      },
+      "NutritionProvenanceData": {
+        "properties": {
+          "attribution": {
+            "title": "Attribution",
+            "type": "string"
+          },
+          "license_name": {
+            "title": "License Name",
+            "type": "string"
+          },
+          "locale": {
+            "title": "Locale",
+            "type": "string"
+          },
+          "retrieved_at": {
+            "format": "date-time",
+            "title": "Retrieved At",
+            "type": "string"
+          },
+          "serving_grams": {
+            "exclusiveMinimum": 0.0,
+            "maximum": 2000.0,
+            "title": "Serving Grams",
+            "type": "number"
+          },
+          "serving_unit": {
+            "title": "Serving Unit",
+            "type": "string"
+          },
+          "source": {
+            "title": "Source",
+            "type": "string"
+          },
+          "source_item_id": {
+            "title": "Source Item Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "source",
+          "source_item_id",
+          "locale",
+          "retrieved_at",
+          "serving_unit",
+          "serving_grams",
+          "license_name",
+          "attribution"
+        ],
+        "title": "NutritionProvenanceData",
+        "type": "object"
+      },
+      "PortionOption": {
+        "properties": {
+          "grams_per_unit": {
+            "exclusiveMinimum": 0.0,
+            "maximum": 2000.0,
+            "title": "Grams Per Unit",
+            "type": "number"
+          },
+          "source_item_id": {
+            "title": "Source Item Id",
+            "type": "string"
+          },
+          "source_name": {
+            "title": "Source Name",
+            "type": "string"
+          },
+          "unit": {
+            "enum": [
+              "adet",
+              "dilim",
+              "kase"
+            ],
+            "title": "Unit",
+            "type": "string"
+          }
+        },
+        "required": [
+          "unit",
+          "grams_per_unit",
+          "source_item_id",
+          "source_name"
+        ],
+        "title": "PortionOption",
         "type": "object"
       },
       "RefreshTokenRequest": {
@@ -1893,6 +2238,63 @@
           }
         ],
         "summary": "Analizi onayla, düzelt veya reddet",
+        "tags": [
+          "NutriSense API"
+        ]
+      }
+    },
+    "/api/v1/food-analysis/{analysis_id}/portion": {
+      "post": {
+        "operationId": "update_food_analysis_portion_api_v1_food_analysis__analysis_id__portion_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "analysis_id",
+            "required": true,
+            "schema": {
+              "title": "Analysis Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FoodPortionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FoodAnalysisResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Onay bekleyen analiz porsiyonunu yeniden hesapla",
         "tags": [
           "NutriSense API"
         ]

@@ -52,6 +52,39 @@ def _jpeg_bytes() -> bytes:
     return output.getvalue()
 
 
+def _traceable_test_nutrition():
+    return {
+        "available": True,
+        "canonical_food_id": "food.apple",
+        "food_name": "apple",
+        "food_name_tr": "Elma",
+        "normalization_version": "tr-en-canonical-v1",
+        "calories_per_100g": 52.0,
+        "default_portion_g": 100.0,
+        "estimated_portion_g": 100.0,
+        "portion_value": 100.0,
+        "portion_unit": "gram",
+        "portion_method": "source_default",
+        "portion_is_estimate": True,
+        "total_calories": 52.0,
+        "nutrients": {"protein": 0.3, "carb": 14.0, "fat": 0.2, "fiber": 2.4},
+        "nutrients_per_100g": {"protein": 0.3, "carb": 14.0, "fat": 0.2, "fiber": 2.4},
+        "macro_calories": 59.0,
+        "macro_calorie_delta": 7.0,
+        "macro_calorie_delta_percent": 13.461538,
+        "source": "other_verified",
+        "nutrition_reliability": "verified_provider",
+        "provenance": {
+            "source": "other_verified", "source_item_id": "fixture:apple",
+            "locale": "en-US", "retrieved_at": "2026-07-18T00:00:00+00:00",
+            "serving_unit": "gram", "serving_grams": 100.0,
+            "license_name": "Synthetic test fixture",
+            "attribution": "Not a live nutrition claim",
+        },
+        "portion_conversions": [],
+    }
+
+
 def _register(client, email: str) -> dict:
     response = client.post(
         "/api/v1/auth/register",
@@ -212,14 +245,8 @@ def test_food_analysis_commit_failure_rolls_back_all_three_records(client, monke
             return {"food_name": "elma", "confidence": 0.95}
 
     class SuccessfulNutrition:
-        async def get_nutrition(self, _name):
-            return {
-                "calories_per_100g": 52.0,
-                "estimated_portion_g": 100.0,
-                "total_calories": 52.0,
-                "nutrients": {"protein": 0.3, "carb": 14.0, "fat": 0.2, "fiber": 2.4},
-                "source": "test-provider",
-            }
+        async def get_nutrition(self, *_args, **_kwargs):
+            return _traceable_test_nutrition()
 
     setup = SessionLocal()
     user = User(

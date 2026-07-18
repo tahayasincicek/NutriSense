@@ -18,6 +18,7 @@ import logging
 import uuid
 import warnings
 from datetime import date, timedelta, datetime
+from decimal import Decimal
 from typing import Annotated, Optional
 from collections import defaultdict
 
@@ -36,13 +37,18 @@ from ..models.database import (
 )
 from ..models.schemas import (
     FoodAnalysisResponse, FoodCandidate, FoodAnalysisDecisionRequest,
-    FoodAnalysisDecisionResponse, ManualFoodLogRequest, NutrientData,
+    FoodAnalysisDecisionResponse, FoodPortionRequest, ManualFoodLogRequest,
+    NutrientData,
     FoodHistoryResponse, DailyLogResponse, FoodLogItem, MealSummary,
     SendToDietitianRequest, SendToDietitianResponse,
     AccountDeletionRequest, DietitianAssignmentRequest,
     DietitianAssignmentResponse, LogoutRequest, RefreshTokenRequest,
     UserCreate, UserLogin, UserResponse, TokenResponse,
     ErrorResponse,
+)
+from ..domain.nutrition import (
+    NutritionDomainError, NutrientsPer100g, UnitConversion,
+    calculate_nutrition, portion_to_grams,
 )
 from ..middleware.auth import (
     get_current_user, hash_password, verify_password,
@@ -202,12 +208,120 @@ def _enforce_analysis_rate_limit(request: Request, user_id: str) -> None:
     _analysis_requests[key] = recent
 
 
-def _nutrition_status(source: str) -> str:
-    if source == "not_found":
+def _nutrition_status(nutrition: dict) -> str:
+    source = nutrition.get("source", "not_found")
+    if not nutrition.get("available", source != "not_found"):
         return "not_found"
-    if source == "local_db":
+    if nutrition.get("nutrition_reliability") == "unverified":
         return "unverified"
     return "available"
+
+
+def _nutrition_is_traceable(nutrition: dict) -> bool:
+    return (
+        nutrition.get("available") is True
+        and nutrition.get("nutrition_reliability")
+        in {"verified_provider", "verified_local", "user_entered"}
+        and nutrition.get("provenance") is not None
+        and float(nutrition.get("total_calories") or 0) > 0
+    )
+
+
+def _per_100g_profile(nutrition: dict) -> NutrientsPer100g:
+    per_100g = nutrition.get("nutrients_per_100g")
+    if not per_100g:
+        raise NutritionDomainError("100 gram başına makro besin profili eksik.")
+    return NutrientsPer100g(
+        calories=nutrition["calories_per_100g"],
+        protein=per_100g.get("protein", 0),
+        carbs=per_100g.get("carb", per_100g.get("carbs", 0)),
+        fat=per_100g.get("fat", 0),
+        fiber=per_100g.get("fiber", 0),
+    )
+
+
+def _apply_portion(
+    nutrition: dict,
+    *,
+    portion_value: float,
+    portion_unit: str,
+    portion_method: str,
+) -> dict:
+    conversions = {}
+    for row in nutrition.get("portion_conversions", []):
+        conversion = UnitConversion(
+            canonical_food_id=nutrition["canonical_food_id"],
+            unit=row["unit"],
+            grams_per_unit=Decimal(str(row["grams_per_unit"])),
+            source_item_id=row["source_item_id"],
+            source_name=row["source_name"],
+        )
+        conversions[(conversion.canonical_food_id, conversion.unit)] = conversion
+    grams = portion_to_grams(
+        value=portion_value,
+        unit=portion_unit,
+        canonical_food_id=nutrition["canonical_food_id"],
+        conversions=conversions,
+    )
+    result = calculate_nutrition(_per_100g_profile(nutrition), grams)
+    updated = dict(nutrition)
+    updated.update({
+        "estimated_portion_g": float(result.portion_grams),
+        "portion_value": portion_value,
+        "portion_unit": portion_unit,
+        "portion_method": portion_method,
+        "portion_is_estimate": False,
+        "total_calories": float(result.calories),
+        "nutrients": {
+            "protein": float(result.protein),
+            "carb": float(result.carbs),
+            "fat": float(result.fat),
+            "fiber": float(result.fiber),
+        },
+        "macro_calories": float(result.macro_calories),
+        "macro_calorie_delta": float(result.macro_calorie_delta),
+        "macro_calorie_delta_percent": float(result.macro_calorie_delta_percent),
+    })
+    return updated
+
+
+def _nutrition_from_analysis_payload(payload: dict) -> dict:
+    nutrients = payload.get("nutrients") or {}
+    per_100g = payload.get("nutrients_per_100g") or {}
+    return {
+        "available": payload.get("can_confirm", False),
+        "canonical_food_id": payload["canonical_food_id"],
+        "food_name": payload["food_name"],
+        "food_name_tr": payload["food_name_tr"],
+        "normalization_version": payload["normalization_version"],
+        "calories_per_100g": payload.get("calories_per_100g"),
+        "default_portion_g": payload.get("portion_grams"),
+        "estimated_portion_g": payload.get("portion_grams"),
+        "portion_value": payload.get("portion_value"),
+        "portion_unit": payload.get("portion_unit"),
+        "portion_method": payload.get("portion_method"),
+        "portion_is_estimate": payload.get("portion_is_estimate", True),
+        "total_calories": payload.get("total_calories"),
+        "nutrients": {
+            "protein": nutrients.get("protein", 0),
+            "carb": nutrients.get("carbs", 0),
+            "fat": nutrients.get("fat", 0),
+            "fiber": nutrients.get("fiber", 0),
+        },
+        "nutrients_per_100g": {
+            "protein": per_100g.get("protein", 0),
+            "carb": per_100g.get("carbs", 0),
+            "fat": per_100g.get("fat", 0),
+            "fiber": per_100g.get("fiber", 0),
+        },
+        "macro_calories": payload.get("macro_calories"),
+        "macro_calorie_delta": payload.get("macro_calorie_delta"),
+        "macro_calorie_delta_percent": payload.get("macro_calorie_delta_percent"),
+        "source": payload["nutrition_source"],
+        "nutrition_reliability": payload["nutrition_reliability"],
+        "provenance": payload.get("provenance"),
+        "portion_conversions": payload.get("portion_options", []),
+    }
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -294,7 +408,9 @@ async def analyze_food(
         nutrition = await nutrition_service.get_nutrition(food_name)
     except Exception as e:
         logger.error(f"Nutritionix hatası: {e}")
-        nutrition = nutrition_service._query_local_db(food_name, portion_grams=None)
+        nutrition = nutrition_service._query_local_db(
+            food_name, portion_grams=None, input_locale="en-US"
+        )
 
     # ── 3. Türkçe isim ──
     food_name_tr = FOOD_NAME_TR.get(
@@ -322,13 +438,12 @@ async def analyze_food(
         if len(candidate_rows) == 3:
             break
 
-    nutrition_provider = nutrition.get("source", "unknown")
-    nutrition_status = _nutrition_status(nutrition_provider)
-    can_confirm = (
-        nutrition_status != "not_found"
-        and float(nutrition.get("total_calories", 0)) > 0
-        and confidence >= 0.60
-    )
+    nutrition_provider = nutrition.get("source", "not_found")
+    nutrition_status = _nutrition_status(nutrition)
+    traceable = _nutrition_is_traceable(nutrition)
+    can_confirm = traceable and confidence >= 0.60
+    food_name = nutrition.get("food_name", food_name)
+    food_name_tr = nutrition.get("food_name_tr", food_name_tr)
     recognition_attempt = RecognitionAttempt(
         id=str(uuid.uuid4()),
         user_id=current_user.id,
@@ -344,7 +459,13 @@ async def analyze_food(
         tts_text = (
             f"{food_name_tr} bulundu. Yaklaşık "
             f"{nutrition['total_calories']:.0f} kalori. "
-            "Kaydetmeden önce sonucu onaylayın."
+            f"Tahmini {nutrition['estimated_portion_g']:.0f} gram; "
+            "değiştirmek ister misiniz? Kaydetmeden önce sonucu onaylayın."
+        )
+    elif not traceable:
+        tts_text = (
+            "Besin değeri doğrulanamadı; sıfır kalorili kayıt oluşturulmadı. "
+            "Manuel arama veya düzeltme kullanın."
         )
     elif confidence >= 0.60:
         names = ", ".join(item.food_name_tr for item in candidate_rows)
@@ -360,20 +481,38 @@ async def analyze_food(
         log_id=None,
         food_name=food_name,
         food_name_tr=food_name_tr,
-        calories_per_100g=nutrition["calories_per_100g"],
-        portion_grams=nutrition["estimated_portion_g"],
-        total_calories=nutrition["total_calories"],
+        canonical_food_id=nutrition["canonical_food_id"],
+        normalization_version=nutrition["normalization_version"],
+        calories_per_100g=nutrition.get("calories_per_100g"),
+        portion_grams=nutrition.get("estimated_portion_g"),
+        portion_value=nutrition.get("portion_value"),
+        portion_unit=nutrition.get("portion_unit"),
+        portion_method=nutrition.get("portion_method"),
+        portion_is_estimate=nutrition.get("portion_is_estimate", True),
+        total_calories=nutrition.get("total_calories"),
         confidence=round(confidence, 2),
         nutrients=NutrientData(
             protein=nutrition["nutrients"]["protein"],
             carbs=nutrition["nutrients"]["carb"],
             fat=nutrition["nutrients"]["fat"],
             fiber=nutrition["nutrients"].get("fiber", 0),
-        ),
+        ) if traceable else None,
+        nutrients_per_100g=NutrientData(
+            protein=nutrition["nutrients_per_100g"]["protein"],
+            carbs=nutrition["nutrients_per_100g"]["carb"],
+            fat=nutrition["nutrients_per_100g"]["fat"],
+            fiber=nutrition["nutrients_per_100g"].get("fiber", 0),
+        ) if traceable else None,
+        macro_calories=nutrition.get("macro_calories"),
+        macro_calorie_delta=nutrition.get("macro_calorie_delta"),
+        macro_calorie_delta_percent=nutrition.get("macro_calorie_delta_percent"),
         meal_type=meal_type,
         recognition_source="google_vision",
         nutrition_source=nutrition_provider,
         nutrition_status=nutrition_status,
+        nutrition_reliability=nutrition.get("nutrition_reliability", "not_found"),
+        provenance=nutrition.get("provenance"),
+        portion_options=nutrition.get("portion_conversions", []),
         candidates=candidate_rows,
         needs_confirmation=True,
         can_confirm=can_confirm,
@@ -391,6 +530,71 @@ async def analyze_food(
             detail="Besin analizi güvenli biçimde başlatılamadı.",
         )
     return response
+
+
+@router.post(
+    "/food-analysis/{analysis_id}/portion",
+    response_model=FoodAnalysisResponse,
+    summary="Onay bekleyen analiz porsiyonunu yeniden hesapla",
+)
+async def update_food_analysis_portion(
+    analysis_id: str,
+    request: FoodPortionRequest,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    attempt = db.query(RecognitionAttempt).filter(
+        RecognitionAttempt.id == analysis_id,
+        RecognitionAttempt.user_id == current_user.id,
+    ).with_for_update().first()
+    if attempt is None or not attempt.analysis_payload:
+        raise HTTPException(status_code=404, detail="Analiz bulunamadı.")
+    if attempt.decision is not None:
+        raise HTTPException(status_code=409, detail="Karar verilmiş analiz değiştirilemez.")
+    if attempt.expires_at is not None and attempt.expires_at < utc_now():
+        raise HTTPException(status_code=410, detail="Analiz onay süresi doldu.")
+
+    payload = dict(attempt.analysis_payload)
+    nutrition = _nutrition_from_analysis_payload(payload)
+    if not _nutrition_is_traceable(nutrition):
+        raise HTTPException(
+            status_code=422,
+            detail="Besin kaynağı doğrulanmadığı için porsiyon hesaplanamaz.",
+        )
+    try:
+        nutrition = _apply_portion(
+            nutrition,
+            portion_value=request.portion_value,
+            portion_unit=request.portion_unit,
+            portion_method=request.portion_method,
+        )
+    except NutritionDomainError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+
+    payload.update({
+        "portion_grams": nutrition["estimated_portion_g"],
+        "portion_value": nutrition["portion_value"],
+        "portion_unit": nutrition["portion_unit"],
+        "portion_method": nutrition["portion_method"],
+        "portion_is_estimate": False,
+        "total_calories": nutrition["total_calories"],
+        "nutrients": {
+            "protein": nutrition["nutrients"]["protein"],
+            "carbs": nutrition["nutrients"]["carb"],
+            "fat": nutrition["nutrients"]["fat"],
+            "fiber": nutrition["nutrients"]["fiber"],
+        },
+        "macro_calories": nutrition["macro_calories"],
+        "macro_calorie_delta": nutrition["macro_calorie_delta"],
+        "macro_calorie_delta_percent": nutrition["macro_calorie_delta_percent"],
+        "tts_text": (
+            f"{payload['food_name_tr']}, {nutrition['estimated_portion_g']:.0f} gram, "
+            f"yaklaşık {nutrition['total_calories']:.0f} kalori. Onaylıyor musunuz?"
+        ),
+    })
+    attempt.analysis_payload = payload
+    db.commit()
+    return FoodAnalysisResponse.model_validate(payload)
 
 
 @router.post(
@@ -442,11 +646,14 @@ async def decide_food_analysis(
     payload = dict(attempt.analysis_payload)
     recognition_source = payload["recognition_source"]
     if request.action == "correct":
-        food_name = request.corrected_food_name
-        food_name_tr = request.corrected_food_name_tr or FOOD_NAME_TR.get(
-            food_name, food_name.replace("_", " ").title()
+        queried_name = request.corrected_food_name
+        nutrition = await nutrition_service.get_nutrition(
+            queried_name, input_locale="tr-TR"
         )
-        nutrition = await nutrition_service.get_nutrition(food_name)
+        food_name = nutrition.get("food_name", queried_name)
+        food_name_tr = request.corrected_food_name_tr or nutrition.get(
+            "food_name_tr", queried_name.replace("_", " ").title()
+        )
         recognition_source = "manual"
     else:
         if not payload.get("can_confirm"):
@@ -456,28 +663,40 @@ async def decide_food_analysis(
             )
         food_name = payload["food_name"]
         food_name_tr = payload["food_name_tr"]
-        nutrition = {
-            "calories_per_100g": payload["calories_per_100g"],
-            "estimated_portion_g": payload["portion_grams"],
-            "total_calories": payload["total_calories"],
-            "nutrients": {
-                "protein": payload["nutrients"]["protein"],
-                "carb": payload["nutrients"]["carbs"],
-                "fat": payload["nutrients"]["fat"],
-                "fiber": payload["nutrients"]["fiber"],
-            },
-            "source": payload["nutrition_source"],
-        }
+        nutrition = _nutrition_from_analysis_payload(payload)
 
-    if nutrition.get("source") == "not_found" or nutrition.get("total_calories", 0) <= 0:
+    if request.portion_value is not None:
+        try:
+            nutrition = _apply_portion(
+                nutrition,
+                portion_value=request.portion_value,
+                portion_unit=request.portion_unit,
+                portion_method=request.portion_method,
+            )
+        except NutritionDomainError as exc:
+            raise HTTPException(status_code=422, detail=str(exc)) from exc
+
+    if not _nutrition_is_traceable(nutrition):
         raise HTTPException(
             status_code=422,
             detail="Besin değeri doğrulanamadığı için kayıt oluşturulmadı.",
         )
+    provenance = nutrition["provenance"]
     nutrition_source = NutritionSource(
         id=str(uuid.uuid4()),
-        provider=nutrition.get("source", "unknown"),
-        external_reference=nutrition.get("external_reference"),
+        provider=nutrition["source"],
+        external_reference=provenance["source_item_id"],
+        canonical_food_id=nutrition["canonical_food_id"],
+        source_item_id=provenance["source_item_id"],
+        locale=provenance["locale"],
+        serving_unit=provenance["serving_unit"],
+        serving_grams=provenance["serving_grams"],
+        license_name=provenance["license_name"],
+        attribution=provenance["attribution"],
+        normalization_version=nutrition["normalization_version"],
+        retrieved_at=datetime.fromisoformat(
+            provenance["retrieved_at"].replace("Z", "+00:00")
+        ),
         food_name=food_name,
         calories_per_100g=nutrition["calories_per_100g"],
         payload_checksum=hashlib.sha256(
@@ -491,13 +710,21 @@ async def decide_food_analysis(
         nutrition_source_id=nutrition_source.id,
         food_name=food_name,
         food_name_tr=food_name_tr,
+        canonical_food_id=nutrition["canonical_food_id"],
         calories_per_100g=nutrition["calories_per_100g"],
         estimated_portion_g=nutrition["estimated_portion_g"],
+        portion_value=nutrition["portion_value"],
+        portion_unit=nutrition["portion_unit"],
+        portion_method=nutrition["portion_method"],
+        portion_is_estimate=nutrition["portion_is_estimate"],
         total_calories=nutrition["total_calories"],
         protein=nutrition["nutrients"]["protein"],
         carbs=nutrition["nutrients"]["carb"],
         fat=nutrition["nutrients"]["fat"],
         fiber=nutrition["nutrients"].get("fiber", 0),
+        macro_calories=nutrition["macro_calories"],
+        macro_calorie_delta=nutrition["macro_calorie_delta"],
+        nutrition_reliability=nutrition["nutrition_reliability"],
         confidence=float(payload["confidence"]),
         meal_type=payload["meal_type"],
         recognition_source=recognition_source,
@@ -551,8 +778,12 @@ async def create_manual_food_log(
             )
         raise HTTPException(status_code=409, detail="Bu çekim kimliği başka analizde kullanıldı.")
 
-    nutrition = await nutrition_service.get_nutrition(request.food_name)
-    if nutrition.get("source") == "not_found" or nutrition.get("total_calories", 0) <= 0:
+    nutrition = await nutrition_service.get_nutrition(
+        request.food_name,
+        portion_grams=request.portion_value,
+        input_locale="tr-TR",
+    )
+    if not _nutrition_is_traceable(nutrition):
         raise HTTPException(
             status_code=422,
             detail="Besin değeri bulunamadığı için manuel kayıt oluşturulmadı.",
@@ -563,37 +794,57 @@ async def create_manual_food_log(
         provider="manual",
         capture_id=capture_key,
         status="succeeded",
-        food_name=request.food_name,
+        food_name=nutrition.get("food_name", request.food_name),
         confidence=None,
         decision="confirmed",
         decided_at=utc_now(),
     )
     nutrition_source = NutritionSource(
         id=str(uuid.uuid4()),
-        provider=nutrition.get("source", "unknown"),
-        food_name=request.food_name,
+        provider=nutrition["source"],
+        external_reference=nutrition["provenance"]["source_item_id"],
+        canonical_food_id=nutrition["canonical_food_id"],
+        source_item_id=nutrition["provenance"]["source_item_id"],
+        locale=nutrition["provenance"]["locale"],
+        serving_unit=nutrition["provenance"]["serving_unit"],
+        serving_grams=nutrition["provenance"]["serving_grams"],
+        license_name=nutrition["provenance"]["license_name"],
+        attribution=nutrition["provenance"]["attribution"],
+        normalization_version=nutrition["normalization_version"],
+        retrieved_at=datetime.fromisoformat(
+            nutrition["provenance"]["retrieved_at"].replace("Z", "+00:00")
+        ),
+        food_name=nutrition.get("food_name", request.food_name),
         calories_per_100g=nutrition["calories_per_100g"],
         payload_checksum=hashlib.sha256(
             json.dumps(nutrition, sort_keys=True, default=str).encode("utf-8")
         ).hexdigest(),
     )
-    food_name_tr = request.food_name_tr or FOOD_NAME_TR.get(
-        request.food_name, request.food_name.replace("_", " ").title()
+    food_name_tr = request.food_name_tr or nutrition.get(
+        "food_name_tr", request.food_name.replace("_", " ").title()
     )
     log_entry = FoodLog(
         id=str(uuid.uuid4()),
         user_id=current_user.id,
         recognition_attempt_id=attempt.id,
         nutrition_source_id=nutrition_source.id,
-        food_name=request.food_name,
+        food_name=nutrition.get("food_name", request.food_name),
         food_name_tr=food_name_tr,
+        canonical_food_id=nutrition["canonical_food_id"],
         calories_per_100g=nutrition["calories_per_100g"],
         estimated_portion_g=nutrition["estimated_portion_g"],
+        portion_value=nutrition["portion_value"],
+        portion_unit=nutrition["portion_unit"],
+        portion_method=nutrition["portion_method"],
+        portion_is_estimate=nutrition["portion_is_estimate"],
         total_calories=nutrition["total_calories"],
         protein=nutrition["nutrients"]["protein"],
         carbs=nutrition["nutrients"]["carb"],
         fat=nutrition["nutrients"]["fat"],
         fiber=nutrition["nutrients"].get("fiber", 0),
+        macro_calories=nutrition["macro_calories"],
+        macro_calorie_delta=nutrition["macro_calorie_delta"],
+        nutrition_reliability=nutrition["nutrition_reliability"],
         confidence=0.0,
         meal_type=request.meal_type,
         recognition_source="manual",
@@ -663,7 +914,7 @@ async def get_food_history(
         daily_map[log.log_date].append(log)
 
     daily_logs = []
-    total_calories = 0.0
+    total_calories = Decimal("0")
 
     for log_date in sorted(daily_map.keys(), reverse=True):
         day_logs = daily_map[log_date]
@@ -710,7 +961,7 @@ async def get_food_history(
             total_calories=round(day_cal, 1),
             calorie_target=current_user.daily_calorie_target,
             remaining_calories=round(
-                current_user.daily_calorie_target - day_cal, 1
+                Decimal(str(current_user.daily_calorie_target)) - day_cal, 1
             ),
             total_protein=round(day_protein, 1),
             total_carbs=round(day_carbs, 1),
@@ -991,10 +1242,10 @@ async def send_to_dietitian(
         day_logs = daily_map[d]
         daily_breakdown.append({
             "date": d.strftime("%d.%m.%Y"),
-            "calories": sum(l.total_calories for l in day_logs),
-            "protein": sum(l.protein for l in day_logs),
-            "carbs": sum(l.carbs for l in day_logs),
-            "fat": sum(l.fat for l in day_logs),
+            "calories": float(sum(l.total_calories for l in day_logs)),
+            "protein": float(sum(l.protein for l in day_logs)),
+            "carbs": float(sum(l.carbs for l in day_logs)),
+            "fat": float(sum(l.fat for l in day_logs)),
             "meal_count": len(day_logs),
         })
 
@@ -1002,8 +1253,8 @@ async def send_to_dietitian(
         "report_type": request.report_type,
         "from_date": from_dt.strftime("%d.%m.%Y"),
         "to_date": to_dt.strftime("%d.%m.%Y"),
-        "total_calories": total_cal,
-        "avg_daily_calories": total_cal / total_days,
+        "total_calories": float(total_cal),
+        "avg_daily_calories": float(total_cal / total_days),
         "total_meals": len(logs),
         "total_days": total_days,
         "daily_breakdown": daily_breakdown,

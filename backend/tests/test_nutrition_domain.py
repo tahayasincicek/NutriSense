@@ -85,6 +85,12 @@ def test_non_gram_unit_requires_food_specific_sourced_conversion():
         )
 
 
+def test_gram_portion_uses_safe_gram_limit_not_unit_count_limit():
+    assert portion_to_grams(
+        value=150, unit="gram", canonical_food_id="food.apple", conversions={}
+    ) == Decimal("150")
+
+
 def test_provenance_rejects_missing_license_or_naive_timestamp():
     with pytest.raises(NutritionDomainError):
         NutritionProvenance(

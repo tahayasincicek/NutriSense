@@ -3,8 +3,14 @@
   "log_id": null,
   "food_name": "elma",
   "food_name_tr": "Elma",
+  "canonical_food_id": "food.apple",
+  "normalization_version": "tr-en-canonical-v1",
   "confidence": 0.93,
   "portion_grams": 150.0,
+  "portion_value": 150.0,
+  "portion_unit": "gram",
+  "portion_method": "source_default",
+  "portion_is_estimate": true,
   "calories_per_100g": 52.0,
   "total_calories": 78.0,
   "nutrients": {
@@ -13,10 +19,38 @@
     "fat": 0.3,
     "fiber": 3.6
   },
+  "nutrients_per_100g": {
+    "protein": 0.266667,
+    "carbs": 13.8,
+    "fat": 0.2,
+    "fiber": 2.4
+  },
+  "macro_calories": 87.06,
+  "macro_calorie_delta": 9.06,
+  "macro_calorie_delta_percent": 11.615385,
   "meal_type": "atistirmalik",
   "recognition_source": "google_vision",
   "nutrition_source": "nutritionix",
   "nutrition_status": "available",
+  "nutrition_reliability": "verified_provider",
+  "provenance": {
+    "source": "nutritionix",
+    "source_item_id": "fixture:apple",
+    "locale": "en-US",
+    "retrieved_at": "2026-07-18T00:00:00Z",
+    "serving_unit": "medium",
+    "serving_grams": 150.0,
+    "license_name": "Synthetic contract fixture",
+    "attribution": "Not a live nutrition claim"
+  },
+  "portion_options": [
+    {
+      "unit": "adet",
+      "grams_per_unit": 150.0,
+      "source_item_id": "fixture:apple",
+      "source_name": "Synthetic contract fixture"
+    }
+  ],
   "candidates": [
     {"food_name": "elma", "food_name_tr": "Elma", "confidence": 0.93}
   ],
