@@ -1,7 +1,9 @@
 # NutriSense beslenme verisi metodolojisi
 
-Sürüm: 1.0  
-Erişim ve doğrulama tarihi: 18 Temmuz 2026  
+Sürüm: 1.0
+
+Erişim ve doğrulama tarihi: 18 Temmuz 2026
+
 Kapsam kimliği: `nutrisense-mvp-tr-10-v1`
 
 ## 1. Kapsam ve sorumluluk sınırı
