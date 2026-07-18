@@ -608,6 +608,8 @@ class ApiService {
   Future<ApiResult<FoodHistoryResult>> getFoodHistory({
     DateTime? fromDate,
     DateTime? toDate,
+    int page = 1,
+    int pageSize = 7,
     CancelToken? cancelToken,
   }) =>
       _safeCall(() async {
@@ -624,10 +626,56 @@ class ApiService {
           queryParameters: {
             if (fromDate != null) 'from_date': _date(fromDate),
             if (toDate != null) 'to_date': _date(toDate),
+            'page': page,
+            'page_size': pageSize,
           },
           cancelToken: cancelToken,
         );
         return FoodHistoryResult.fromJson(response.data ?? const {});
+      });
+
+  Future<ApiResult<FoodLogEntry>> updateFoodLog({
+    required String logId,
+    String? foodNameTr,
+    double? portionGrams,
+    String? mealType,
+    CancelToken? cancelToken,
+  }) =>
+      _safeCall(() async {
+        final response = await _dio.patch<Map<String, dynamic>>(
+          '/food-logs/$logId',
+          data: {
+            if (foodNameTr != null) 'food_name_tr': foodNameTr,
+            if (portionGrams != null) 'portion_g': portionGrams,
+            if (mealType != null) 'meal_type': mealType,
+          },
+          cancelToken: cancelToken,
+        );
+        return FoodLogEntry.fromJson(response.data ?? const {});
+      });
+
+  Future<ApiResult<Map<String, dynamic>>> deleteFoodLog({
+    required String logId,
+    CancelToken? cancelToken,
+  }) =>
+      _safeCall(() async {
+        final response = await _dio.delete<Map<String, dynamic>>(
+          '/food-logs/$logId',
+          cancelToken: cancelToken,
+        );
+        return response.data ?? const {};
+      });
+
+  Future<ApiResult<Map<String, dynamic>>> restoreFoodLog({
+    required String logId,
+    CancelToken? cancelToken,
+  }) =>
+      _safeCall(() async {
+        final response = await _dio.post<Map<String, dynamic>>(
+          '/food-logs/$logId/restore',
+          cancelToken: cancelToken,
+        );
+        return response.data ?? const {};
       });
 
   Future<ApiResult<SendToDietitianResult>> sendToDietitian({

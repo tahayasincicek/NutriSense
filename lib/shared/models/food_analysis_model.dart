@@ -352,23 +352,47 @@ class FoodLogEntry {
   final String id;
   final String foodName;
   final String foodNameTr;
+  final String canonicalFoodId;
   final double calories;
+  final double caloriesPer100g;
   final double portionG;
+  final double portionValue;
+  final String portionUnit;
+  final String portionMethod;
+  final bool portionIsEstimate;
   final String mealType;
   final double confidence;
+  final String recognitionSource;
+  final String nutritionSource;
+  final String nutritionReliability;
+  final bool isCorrected;
+  final bool isUserConfirmed;
   final NutrientData nutrients;
   final DateTime loggedAt;
+  final DateTime updatedAt;
 
   const FoodLogEntry({
     required this.id,
     required this.foodName,
     required this.foodNameTr,
+    required this.canonicalFoodId,
     required this.calories,
+    required this.caloriesPer100g,
     required this.portionG,
+    required this.portionValue,
+    required this.portionUnit,
+    required this.portionMethod,
+    required this.portionIsEstimate,
     required this.mealType,
     required this.confidence,
+    required this.recognitionSource,
+    required this.nutritionSource,
+    required this.nutritionReliability,
+    required this.isCorrected,
+    required this.isUserConfirmed,
     required this.nutrients,
     required this.loggedAt,
+    required this.updatedAt,
   });
 
   factory FoodLogEntry.fromJson(Map<String, dynamic> json) {
@@ -376,14 +400,96 @@ class FoodLogEntry {
       id: json['id'] ?? '',
       foodName: json['food_name'] ?? '',
       foodNameTr: json['food_name_tr'] ?? '',
+      canonicalFoodId: json['canonical_food_id'] ?? '',
       calories: (json['calories'] as num?)?.toDouble() ?? 0,
+      caloriesPer100g: (json['calories_per_100g'] as num?)?.toDouble() ?? 0,
       portionG: (json['portion_g'] as num?)?.toDouble() ?? 0,
+      portionValue: (json['portion_value'] as num?)?.toDouble() ??
+          (json['portion_g'] as num?)?.toDouble() ??
+          0,
+      portionUnit: json['portion_unit'] ?? 'gram',
+      portionMethod: json['portion_method'] ?? 'legacy_unknown',
+      portionIsEstimate: json['portion_is_estimate'] ?? true,
       mealType: json['meal_type'] ?? '',
       confidence: (json['confidence'] as num?)?.toDouble() ?? 0,
+      recognitionSource: json['recognition_source'] ?? 'unavailable',
+      nutritionSource: json['nutrition_source'] ?? 'unavailable',
+      nutritionReliability: json['nutrition_reliability'] ?? 'unverified',
+      isCorrected: json['is_corrected'] ?? false,
+      isUserConfirmed: json['is_user_confirmed'] ?? false,
       nutrients: NutrientData.fromJson(_mapOrEmpty(json['nutrients'])),
       loggedAt: DateTime.tryParse(json['logged_at'] ?? '') ?? DateTime.now(),
+      updatedAt: DateTime.tryParse(json['updated_at'] ?? '') ??
+          DateTime.tryParse(json['logged_at'] ?? '') ??
+          DateTime.now(),
     );
   }
+
+  Map<String, dynamic> toJson() => {
+        'id': id,
+        'food_name': foodName,
+        'food_name_tr': foodNameTr,
+        'canonical_food_id': canonicalFoodId,
+        'calories': calories,
+        'calories_per_100g': caloriesPer100g,
+        'portion_g': portionG,
+        'portion_value': portionValue,
+        'portion_unit': portionUnit,
+        'portion_method': portionMethod,
+        'portion_is_estimate': portionIsEstimate,
+        'meal_type': mealType,
+        'confidence': confidence,
+        'recognition_source': recognitionSource,
+        'nutrition_source': nutritionSource,
+        'nutrition_reliability': nutritionReliability,
+        'is_corrected': isCorrected,
+        'is_user_confirmed': isUserConfirmed,
+        'nutrients': nutrients.toJson(),
+        'logged_at': loggedAt.toUtc().toIso8601String(),
+        'updated_at': updatedAt.toUtc().toIso8601String(),
+      };
+
+  String get mealTypeTr => switch (mealType) {
+        'kahvalti' => 'Kahvaltı',
+        'ogle' => 'Öğle',
+        'aksam' => 'Akşam',
+        _ => 'Atıştırmalık',
+      };
+
+  String get recognitionSourceTr => switch (recognitionSource) {
+        'google_vision' => 'çevrim içi görüntü tanıma',
+        'tflite' => 'çevrim dışı cihaz modeli',
+        'manual' => 'kullanıcı girişi',
+        _ => 'kaynak belirtilmemiş',
+      };
+
+  String get statusLabel => isCorrected
+      ? 'Düzeltilmiş'
+      : portionIsEstimate
+          ? 'Tahmini porsiyon'
+          : 'Kullanıcı onaylı';
+
+  String get portionLabel => portionUnit == 'gram'
+      ? '${portionG.toStringAsFixed(0)} gram'
+      : '${portionValue.toStringAsFixed(0)} $portionUnit';
+
+  DateTime get localLoggedAt => loggedAt.toLocal();
+
+  String get localDateTimeLabel {
+    final local = localLoggedAt;
+    return '${local.day.toString().padLeft(2, '0')}.'
+        '${local.month.toString().padLeft(2, '0')}.${local.year}, '
+        '${local.hour.toString().padLeft(2, '0')}:'
+        '${local.minute.toString().padLeft(2, '0')}';
+  }
+
+  String get semanticLabel => '$foodNameTr, $portionLabel, '
+      '${calories.toStringAsFixed(0)} kalori, '
+      '${nutrients.protein.toStringAsFixed(1)} gram protein, '
+      '${nutrients.carbs.toStringAsFixed(1)} gram karbonhidrat, '
+      '${nutrients.fat.toStringAsFixed(1)} gram yağ, '
+      '$mealTypeTr öğünü, $localDateTimeLabel, '
+      '$recognitionSourceTr, $statusLabel.';
 }
 
 /// Öğün bazlı özet
@@ -408,6 +514,13 @@ class MealSummaryData {
       foodCount: json['food_count'] ?? 0,
     );
   }
+
+  Map<String, dynamic> toJson() => {
+        'meal_type': mealType,
+        'meal_type_tr': mealTypeTr,
+        'total_calories': totalCalories,
+        'food_count': foodCount,
+      };
 }
 
 /// Günlük besin özeti
@@ -456,6 +569,19 @@ class DailyLog {
           [],
     );
   }
+
+  Map<String, dynamic> toJson() => {
+        'date': date.toIso8601String().split('T').first,
+        'total_calories': totalCalories,
+        'calorie_target': calorieTarget,
+        'remaining_calories': remainingCalories,
+        'total_protein': totalProtein,
+        'total_carbs': totalCarbs,
+        'total_fat': totalFat,
+        'meal_count': mealCount,
+        'meals': meals.map((meal) => meal.toJson()).toList(),
+        'foods': foods.map((food) => food.toJson()).toList(),
+      };
 }
 
 /// GET /api/v1/food-history yanıtı
@@ -466,6 +592,11 @@ class FoodHistoryResult {
   final int totalDays;
   final double averageDailyCalories;
   final double totalCalories;
+  final int totalLogCount;
+  final int totalDateCount;
+  final int page;
+  final int pageSize;
+  final bool hasMore;
   final List<DailyLog> dailyLogs;
 
   const FoodHistoryResult({
@@ -475,6 +606,11 @@ class FoodHistoryResult {
     required this.totalDays,
     required this.averageDailyCalories,
     required this.totalCalories,
+    required this.totalLogCount,
+    required this.totalDateCount,
+    required this.page,
+    required this.pageSize,
+    required this.hasMore,
     required this.dailyLogs,
   });
 
@@ -487,12 +623,32 @@ class FoodHistoryResult {
       averageDailyCalories:
           (json['average_daily_calories'] as num?)?.toDouble() ?? 0,
       totalCalories: (json['total_calories'] as num?)?.toDouble() ?? 0,
+      totalLogCount: json['total_log_count'] ?? 0,
+      totalDateCount: json['total_date_count'] ?? 0,
+      page: json['page'] ?? 1,
+      pageSize: json['page_size'] ?? 7,
+      hasMore: json['has_more'] ?? false,
       dailyLogs: (json['daily_logs'] as List?)
               ?.map((d) => DailyLog.fromJson(d))
               .toList() ??
           [],
     );
   }
+
+  Map<String, dynamic> toJson() => {
+        'user_id': userId,
+        'from_date': fromDate.toIso8601String().split('T').first,
+        'to_date': toDate.toIso8601String().split('T').first,
+        'total_days': totalDays,
+        'average_daily_calories': averageDailyCalories,
+        'total_calories': totalCalories,
+        'total_log_count': totalLogCount,
+        'total_date_count': totalDateCount,
+        'page': page,
+        'page_size': pageSize,
+        'has_more': hasMore,
+        'daily_logs': dailyLogs.map((day) => day.toJson()).toList(),
+      };
 }
 
 /// POST /api/v1/send-to-dietitian yanıtı

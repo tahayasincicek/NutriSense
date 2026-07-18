@@ -17,6 +17,7 @@ import '../../../shared/services/api_service.dart';
 import '../../../shared/services/stt_service.dart';
 import '../../../shared/services/tts_service.dart';
 import '../../../shared/widgets/accessible_button.dart';
+import '../../history/state/history_controller.dart';
 import '../models/camera_state.dart';
 import '../services/image_preprocessing.dart';
 import '../services/offline_recognizer.dart';
@@ -376,6 +377,7 @@ class _CameraScreenState extends ConsumerState<CameraScreen>
             result.data!.logId!,
             corrected: correctedName != null,
           );
+      unawaited(ref.read(historyControllerProvider.notifier).refresh());
       await _tts.speak('Yemek geçmişine kaydedildi.');
       await AccessibilityUtils.successHaptic();
     } else {
@@ -574,6 +576,7 @@ class _CameraScreenState extends ConsumerState<CameraScreen>
     if (!mounted) return;
     if (result.isSuccess && result.data?.logId != null) {
       ref.read(cameraStateProvider.notifier).setSaved(result.data!.logId!);
+      unawaited(ref.read(historyControllerProvider.notifier).refresh());
       await _tts.speak('Manuel yemek geçmişine kaydedildi.');
     } else {
       await _tts.speakError(

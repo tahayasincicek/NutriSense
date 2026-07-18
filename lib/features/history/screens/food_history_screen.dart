@@ -1,624 +1,653 @@
-// =============================================================================
-// lib/features/history/screens/food_history_screen.dart
-// NutriSense — Besin Geçmişi Ekranı
-//
-// Günlük/haftalık/aylık görünüm.
-// Erişilebilirlik: Semantics + TTS okuma + swipe-to-delete.
-// Boş durum mesajı, günlük özet kartı, makro dağılımı.
-// =============================================================================
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter/semantics.dart';
 
-import '../../../core/constants/app_strings.dart';
 import '../../../core/theme/app_theme.dart';
-import '../../../shared/models/food_history_model.dart';
+import '../../../shared/models/food_analysis_model.dart';
 import '../../../shared/services/accessibility_service.dart';
-import '../../../shared/services/api_service.dart';
 import '../../../shared/services/navigation_announcer.dart';
-
-/// Zaman aralığı filtresi
-enum HistoryPeriod {
-  daily('Günlük', 1),
-  weekly('Haftalık', 7),
-  monthly('Aylık', 30);
-
-  const HistoryPeriod(this.label, this.days);
-  final String label;
-  final int days;
-}
+import '../state/history_controller.dart';
 
 class FoodHistoryScreen extends ConsumerStatefulWidget {
-  const FoodHistoryScreen({super.key});
+  const FoodHistoryScreen({super.key, this.onScanRequested});
+
+  final VoidCallback? onScanRequested;
 
   @override
   ConsumerState<FoodHistoryScreen> createState() => _FoodHistoryScreenState();
 }
 
 class _FoodHistoryScreenState extends ConsumerState<FoodHistoryScreen> {
-  late AccessibilityService _accessibility;
-  late ApiService _apiService;
-  late NavigationAnnouncer _announcer;
-
-  HistoryPeriod _period = HistoryPeriod.weekly;
-  List<DailyNutrition> _dailyLogs = [];
-  bool _isLoading = true;
-  String? _errorMessage;
+  late final AccessibilityService _accessibility;
+  late final NavigationAnnouncer _announcer;
 
   @override
   void initState() {
     super.initState();
     _accessibility = ref.read(accessibilityServiceProvider);
-    _apiService = ref.read(apiServiceProvider);
     _announcer = ref.read(navigationAnnouncerProvider);
-
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _announcer.announceScreen(AppScreen.history);
-      _loadHistory();
+      ref.read(historyControllerProvider.notifier).load();
     });
-  }
-
-  Future<void> _loadHistory() async {
-    setState(() {
-      _isLoading = true;
-      _errorMessage = null;
-    });
-
-    final now = DateTime.now();
-    final fromDate = now.subtract(Duration(days: _period.days));
-
-    final result = await _apiService.getFoodHistory(
-      fromDate: fromDate,
-      toDate: now,
-    );
-
-    if (result.isSuccess && result.data != null) {
-      final history = result.data!;
-      setState(() {
-        _dailyLogs = history.dailyLogs
-            .map((d) => DailyNutrition.fromJson({
-                  'date': d.date.toIso8601String(),
-                  'total_calories': d.totalCalories,
-                  'calorie_target': d.calorieTarget,
-                  'total_protein': d.totalProtein,
-                  'total_carbs': d.totalCarbs,
-                  'total_fat': d.totalFat,
-                  'foods': d.foods
-                      .map((f) => {
-                            'id': f.id,
-                            'food_name': f.foodName,
-                            'food_name_tr': f.foodNameTr,
-                            'calories': f.calories,
-                            'portion_g': f.portionG,
-                            'meal_type': f.mealType,
-                            'confidence': f.confidence,
-                            'logged_at': f.loggedAt.toIso8601String(),
-                            'nutrients': {
-                              'protein': f.nutrients.protein,
-                              'carb': f.nutrients.carbs,
-                              'fat': f.nutrients.fat,
-                            },
-                          })
-                      .toList(),
-                }))
-            .toList();
-        _isLoading = false;
-      });
-
-      // Boş durum sesli bildirimi
-      if (_dailyLogs.isEmpty) {
-        _accessibility.speak(
-          AppStrings.noFoodToday,
-          priority: TtsPriority.normal,
-        );
-      }
-    } else {
-      setState(() {
-        _errorMessage = result.errorMessage;
-        _isLoading = false;
-      });
-    }
   }
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
+    final state = ref.watch(historyControllerProvider);
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Besin Geçmişi'),
+        title: const Text('Beslenme Günlüğü'),
         actions: [
-          // Sesli özet butonu
           Semantics(
-            label: 'Geçmişi sesli oku',
+            label: 'Erişilebilir tarih seçiciyi aç',
             button: true,
             child: IconButton(
+              key: const Key('history_date_picker'),
+              icon: const Icon(Icons.calendar_month),
+              tooltip: 'Tarih seç',
+              onPressed: _pickDate,
+            ),
+          ),
+          Semantics(
+            label: 'Günlük özetini sesli dinle',
+            button: true,
+            child: IconButton(
+              key: const Key('history_speak_summary'),
               icon: const Icon(Icons.record_voice_over),
-              onPressed: _speakSummary,
-              tooltip: 'Sesli Özet',
+              tooltip: 'Özeti dinle',
+              onPressed: state.hasData ? () => _speakSummary(state) : null,
             ),
           ),
         ],
       ),
       body: Column(
         children: [
-          // ── Dönem seçici ──
-          _buildPeriodSelector(theme),
-
-          // ── İçerik ──
-          Expanded(
-            child: _isLoading
-                ? _buildLoadingState()
-                : _errorMessage != null
-                    ? _buildErrorState(theme)
-                    : _dailyLogs.isEmpty
-                        ? _buildEmptyState(theme)
-                        : _buildHistoryList(theme),
+          _PeriodSelector(
+            selected: state.period,
+            onSelected: (period) =>
+                ref.read(historyControllerProvider.notifier).setPeriod(period),
           ),
+          Expanded(child: _buildContent(state)),
         ],
       ),
     );
   }
 
-  // ═══════════════════════════════════════════════════════════════════════════
-  // DÖNEM SEÇİCİ
-  // ═══════════════════════════════════════════════════════════════════════════
-
-  Widget _buildPeriodSelector(ThemeData theme) {
-    return Semantics(
-      label: 'Zaman aralığı seçici. Şu an ${_period.label} seçili.',
-      child: Container(
-        margin: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: Colors.grey[200],
-          borderRadius: BorderRadius.circular(12),
+  Widget _buildContent(HistoryState state) {
+    if (state.authRequired) return _buildAuthRequired();
+    if (state.status == HistoryStatus.initial ||
+        (state.status == HistoryStatus.loading && !state.hasData)) {
+      return Center(
+        child: Semantics(
+          label: 'Beslenme geçmişi yükleniyor',
+          liveRegion: true,
+          child: const CircularProgressIndicator(),
         ),
-        child: Row(
-          children: HistoryPeriod.values.map((period) {
-            final isActive = _period == period;
-            return Expanded(
-              child: Semantics(
-                label: '${period.label}${isActive ? ", seçili" : ""}',
-                button: true,
-                selected: isActive,
-                child: GestureDetector(
-                  onTap: () {
-                    setState(() => _period = period);
-                    _loadHistory();
-                    _accessibility.speak(
-                      '${period.label} görünüme geçildi.',
-                      priority: TtsPriority.normal,
-                    );
-                    _accessibility.lightHaptic();
-                  },
-                  child: AnimatedContainer(
-                    duration: const Duration(milliseconds: 200),
-                    padding: const EdgeInsets.symmetric(vertical: 14),
-                    decoration: BoxDecoration(
-                      color:
-                          isActive ? AppTheme.primaryColor : Colors.transparent,
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Text(
-                      period.label,
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w700,
-                        color: isActive ? Colors.white : Colors.black87,
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            );
-          }).toList(),
-        ),
-      ),
-    );
+      );
+    }
+    if (state.status == HistoryStatus.error && !state.hasData) {
+      return _buildError(state);
+    }
+    if (state.status == HistoryStatus.empty) return _buildEmpty();
+    return _buildHistory(state);
   }
 
-  // ═══════════════════════════════════════════════════════════════════════════
-  // YÜKLEME / HATA / BOŞ DURUMLAR
-  // ═══════════════════════════════════════════════════════════════════════════
-
-  Widget _buildLoadingState() {
-    return const Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          CircularProgressIndicator(color: AppTheme.primaryColor),
-          SizedBox(height: 16),
-          Text('Geçmiş yükleniyor...', style: TextStyle(fontSize: 16)),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildErrorState(ThemeData theme) {
+  Widget _buildAuthRequired() {
     return Center(
-      child: Semantics(
-        label: 'Hata: $_errorMessage. Tekrar denemek için butona basın.',
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.error_outline, size: 64, color: Colors.red[400]),
-            const SizedBox(height: 16),
-            Text(
-              _errorMessage ?? 'Bir hata oluştu',
-              style: theme.textTheme.bodyLarge,
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 24),
-            ElevatedButton.icon(
-              onPressed: _loadHistory,
-              icon: const Icon(Icons.refresh),
-              label: const Text('Tekrar Dene'),
-            ),
-          ],
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Semantics(
+          liveRegion: true,
+          label: 'Oturum gerekli. Giriş ekranına yönlendiriliyorsunuz.',
+          child: const Text(
+            'Beslenme günlüğünü görmek için oturum açın.',
+            textAlign: TextAlign.center,
+          ),
         ),
       ),
     );
   }
 
-  Widget _buildEmptyState(ThemeData theme) {
+  Widget _buildError(HistoryState state) {
     return Center(
-      child: Semantics(
-        label: AppStrings.noFoodToday,
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.restaurant_menu, size: 80, color: Colors.grey[400]),
-            const SizedBox(height: 20),
-            Text(
-              'Henüz besin kaydı yok',
-              style: theme.textTheme.headlineSmall?.copyWith(
-                fontWeight: FontWeight.w600,
-                color: Colors.grey[600],
-              ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'Besin taramak için ana sayfaya dönün.',
-              style:
-                  theme.textTheme.bodyLarge?.copyWith(color: Colors.grey[500]),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  // ═══════════════════════════════════════════════════════════════════════════
-  // GEÇMİŞ LİSTESİ
-  // ═══════════════════════════════════════════════════════════════════════════
-
-  Widget _buildHistoryList(ThemeData theme) {
-    return RefreshIndicator(
-      onRefresh: _loadHistory,
-      child: ListView.builder(
-        padding: const EdgeInsets.only(bottom: 80),
-        itemCount: _dailyLogs.length,
-        itemBuilder: (context, index) {
-          final day = _dailyLogs[index];
-          return Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Semantics(
+          liveRegion: true,
+          label: 'Geçmiş yüklenemedi. ${state.message}',
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
             children: [
-              // Günlük özet kartı
-              _buildDailySummaryCard(day, theme),
-
-              // Yemek listesi
-              ...day.entries.map((entry) => _buildFoodEntryTile(entry, theme)),
-
-              if (index < _dailyLogs.length - 1)
-                const Divider(height: 32, thickness: 2),
+              const Icon(Icons.cloud_off, size: 64),
+              const SizedBox(height: 16),
+              Text(state.message ?? 'Geçmiş yüklenemedi.'),
+              const SizedBox(height: 16),
+              ElevatedButton.icon(
+                key: const Key('history_retry'),
+                onPressed: () =>
+                    ref.read(historyControllerProvider.notifier).load(),
+                icon: const Icon(Icons.refresh),
+                label: const Text('Tekrar dene'),
+              ),
             ],
-          );
-        },
+          ),
+        ),
       ),
     );
   }
 
-  // ═══════════════════════════════════════════════════════════════════════════
-  // GÜNLÜK ÖZET KARTI
-  // ═══════════════════════════════════════════════════════════════════════════
-
-  Widget _buildDailySummaryCard(DailyNutrition day, ThemeData theme) {
-    final pct = day.targetPercent.clamp(0, 150).toDouble();
-    final progressColor = pct > 100
-        ? Colors.red[400]!
-        : pct > 80
-            ? Colors.orange[400]!
-            : AppTheme.primaryColor;
-
-    return Semantics(
-      label: day.ttsText,
-      child: Container(
-        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        padding: const EdgeInsets.all(20),
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            colors: [AppTheme.primaryColor, AppTheme.primaryDark],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
+  Widget _buildEmpty() {
+    return Center(
+      child: Semantics(
+        liveRegion: true,
+        label:
+            'Seçilen dönemde onaylı besin kaydı yok. Besin taramaya geçebilirsiniz.',
+        child: ExcludeSemantics(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(Icons.restaurant_menu, size: 72),
+              const SizedBox(height: 16),
+              const Text('Seçilen dönemde kayıt yok'),
+              const SizedBox(height: 8),
+              const Text('Onayladığınız taramalar burada görünür.'),
+              const SizedBox(height: 20),
+              ElevatedButton.icon(
+                key: const Key('history_scan_action'),
+                onPressed: widget.onScanRequested,
+                icon: const Icon(Icons.camera_alt),
+                label: const Text('Besin tara'),
+              ),
+            ],
           ),
-          borderRadius: BorderRadius.circular(16),
-          boxShadow: [
-            BoxShadow(
-              color: AppTheme.primaryColor.withOpacity(0.3),
-              blurRadius: 12,
-              offset: const Offset(0, 4),
-            ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildHistory(HistoryState state) {
+    final history = state.history!;
+    return RefreshIndicator(
+      onRefresh: ref.read(historyControllerProvider.notifier).refresh,
+      child: ListView(
+        key: const Key('history_list'),
+        physics: const AlwaysScrollableScrollPhysics(),
+        padding: const EdgeInsets.only(bottom: 96),
+        children: [
+          if (state.isOffline) _OfflineBanner(state: state),
+          if (state.isRefreshing) const LinearProgressIndicator(),
+          _PeriodSummary(history: history, period: state.period),
+          for (final day in history.dailyLogs) ...[
+            _DailySummaryCard(day: day),
+            for (final entry in day.foods)
+              _FoodLogCard(
+                entry: entry,
+                onListen: () => _accessibility.speak(
+                  entry.semanticLabel,
+                  priority: TtsPriority.normal,
+                ),
+                onEdit: () => _showEditDialog(entry),
+                onChangeMeal: () => _showMealDialog(entry),
+                onDelete: () => _confirmAndDelete(entry),
+              ),
           ],
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Tarih başlığı
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  day.dateTr,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 18,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-                GestureDetector(
-                  onTap: () => _accessibility.speak(
-                    day.ttsText,
-                    priority: TtsPriority.high,
-                  ),
-                  child: const Icon(
-                    Icons.volume_up,
-                    color: Colors.white70,
-                    size: 24,
-                  ),
-                ),
-              ],
+          if (history.hasMore)
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: OutlinedButton.icon(
+                key: const Key('history_load_more'),
+                onPressed: state.isRefreshing
+                    ? null
+                    : ref.read(historyControllerProvider.notifier).loadMore,
+                icon: const Icon(Icons.expand_more),
+                label: const Text('Daha eski günleri yükle'),
+              ),
             ),
-            const SizedBox(height: 16),
-
-            // Kalori ilerleme çubuğu
-            Row(
-              children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        '${day.totalCalories.toStringAsFixed(0)} / ${day.targetCalories.toStringAsFixed(0)} kcal',
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 24,
-                          fontWeight: FontWeight.w800,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      ClipRRect(
-                        borderRadius: BorderRadius.circular(6),
-                        child: LinearProgressIndicator(
-                          value: (pct / 100).clamp(0.0, 1.5),
-                          minHeight: 10,
-                          backgroundColor: Colors.white24,
-                          valueColor: AlwaysStoppedAnimation(progressColor),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(width: 16),
-                // Yüzde göstergesi
-                Container(
-                  width: 60,
-                  height: 60,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: Colors.white24,
-                  ),
-                  child: Center(
-                    child: Text(
-                      '%${pct.toStringAsFixed(0)}',
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 16,
-                        fontWeight: FontWeight.w800,
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
-
-            // Makro dağılımı
-            Row(
-              children: [
-                _buildMacroChip(
-                    'P', day.macroBreakdown.protein, Colors.blue[200]!),
-                const SizedBox(width: 8),
-                _buildMacroChip(
-                    'K', day.macroBreakdown.carb, Colors.amber[200]!),
-                const SizedBox(width: 8),
-                _buildMacroChip('Y', day.macroBreakdown.fat, Colors.red[200]!),
-                const Spacer(),
-                Text(
-                  '${day.mealCount} öğün',
-                  style: const TextStyle(color: Colors.white70, fontSize: 14),
-                ),
-              ],
-            ),
-          ],
-        ),
+        ],
       ),
     );
   }
 
-  Widget _buildMacroChip(String label, double value, Color color) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-      decoration: BoxDecoration(
-        color: color.withOpacity(0.25),
-        borderRadius: BorderRadius.circular(20),
-      ),
-      child: Text(
-        '$label: ${value.toStringAsFixed(0)}g',
-        style: TextStyle(
-          color: color,
-          fontSize: 13,
-          fontWeight: FontWeight.w700,
-        ),
-      ),
+  Future<void> _pickDate() async {
+    final now = DateTime.now();
+    final state = ref.read(historyControllerProvider);
+    final selected = await showDatePicker(
+      context: context,
+      initialDate: state.anchorDate ?? now,
+      firstDate: DateTime(now.year - 2),
+      lastDate: now,
+      helpText: 'Günlük kayıt tarihini seçin',
+      cancelText: 'İptal',
+      confirmText: 'Seç',
     );
+    if (selected != null && mounted) {
+      await ref.read(historyControllerProvider.notifier).selectDate(selected);
+    }
   }
 
-  // ═══════════════════════════════════════════════════════════════════════════
-  // YEMEK KAYDI SATIRI (SWİPE-TO-DELETE)
-  // ═══════════════════════════════════════════════════════════════════════════
-
-  Widget _buildFoodEntryTile(FoodEntry entry, ThemeData theme) {
-    return Semantics(
-      label: entry.ttsText,
-      customSemanticsActions: {
-        const CustomSemanticsAction(label: 'Sil'): () {
-          _confirmDelete(entry);
-        },
-      },
-      child: Dismissible(
-        key: Key(entry.id),
-        direction: DismissDirection.endToStart,
-        background: Container(
-          alignment: Alignment.centerRight,
-          padding: const EdgeInsets.only(right: 24),
-          color: Colors.red[400],
-          child: Semantics(
-            label: '${entry.foodNameTr} kaydını sil',
-            child: const Icon(Icons.delete, color: Colors.white, size: 28),
-          ),
-        ),
-        confirmDismiss: (_) => _confirmDelete(entry),
-        child: InkWell(
-          onTap: () {
-            // Dokunulduğunda sesli oku
-            _accessibility.speak(entry.ttsText, priority: TtsPriority.normal);
-            _accessibility.lightHaptic();
-          },
-          child: Container(
-            margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: theme.cardColor,
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: Colors.grey[200]!),
-            ),
-            child: Row(
-              children: [
-                // Öğün ikonu
-                Container(
-                  width: 48,
-                  height: 48,
-                  decoration: BoxDecoration(
-                    color: _mealColor(entry.mealType).withOpacity(0.15),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Icon(
-                    _mealIcon(entry.mealType),
-                    color: _mealColor(entry.mealType),
-                    size: 24,
-                  ),
-                ),
-                const SizedBox(width: 16),
-
-                // Besin bilgisi
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        entry.foodNameTr,
-                        style: theme.textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.w700,
-                          fontSize: 17,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        '${entry.portionGrams.toStringAsFixed(0)}g • '
-                        '${entry.mealType.displayName}',
-                        style: TextStyle(color: Colors.grey[600], fontSize: 13),
-                      ),
-                    ],
-                  ),
-                ),
-
-                // Kalori + saat
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    Text(
-                      '${entry.totalCalories.toStringAsFixed(0)} kcal',
-                      style: theme.textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.w800,
-                        color: AppTheme.primaryColor,
-                        fontSize: 17,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      entry.timeText,
-                      style: TextStyle(color: Colors.grey[500], fontSize: 13),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  // ═══════════════════════════════════════════════════════════════════════════
-  // YARDIMCILAR
-  // ═══════════════════════════════════════════════════════════════════════════
-
-  Future<bool> _confirmDelete(FoodEntry entry) async {
+  void _speakSummary(HistoryState state) {
+    final history = state.history!;
     _accessibility.speak(
-      '${entry.foodNameTr} kaydını silmek istediğinizden emin misiniz? '
-      'Onaylamak için sağa kaydırmaya devam edin.',
+      '${state.period.label} özet. ${history.totalLogCount} onaylı kayıt. '
+      'Toplam ${history.totalCalories.toStringAsFixed(0)} kalori. '
+      'Günlük ortalama ${history.averageDailyCalories.toStringAsFixed(0)} kalori. '
+      'Değerler tahminidir ve tıbbi öneri değildir.',
       priority: TtsPriority.high,
     );
-    _accessibility.mediumHaptic();
-    return true; // Gerçek uygulamada dialog gösterilebilir
   }
 
-  void _speakSummary() {
-    if (_dailyLogs.isEmpty) {
-      _accessibility.speak(AppStrings.noFoodToday,
-          priority: TtsPriority.normal);
+  Future<void> _showEditDialog(FoodLogEntry entry) async {
+    final name = TextEditingController(text: entry.foodNameTr);
+    final portion =
+        TextEditingController(text: entry.portionG.toStringAsFixed(0));
+    var mealType = entry.mealType;
+    final submitted = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => StatefulBuilder(
+        builder: (context, setDialogState) => AlertDialog(
+          title: Text('${entry.foodNameTr} kaydını düzelt'),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Text(
+                  'Besin adı etiketi düzeltilir; besin kaynağı sessizce değiştirilmez.',
+                ),
+                const SizedBox(height: 12),
+                TextField(
+                  key: const Key('history_edit_name'),
+                  controller: name,
+                  decoration:
+                      const InputDecoration(labelText: 'Türkçe besin adı'),
+                ),
+                TextField(
+                  key: const Key('history_edit_portion'),
+                  controller: portion,
+                  keyboardType:
+                      const TextInputType.numberWithOptions(decimal: true),
+                  decoration:
+                      const InputDecoration(labelText: 'Onaylı porsiyon, gram'),
+                ),
+                DropdownButtonFormField<String>(
+                  key: const Key('history_edit_meal'),
+                  initialValue: mealType,
+                  decoration: const InputDecoration(labelText: 'Öğün türü'),
+                  items: _mealItems,
+                  onChanged: (value) => setDialogState(() => mealType = value!),
+                ),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(dialogContext, false),
+              child: const Text('İptal'),
+            ),
+            FilledButton(
+              key: const Key('history_edit_save'),
+              onPressed: () => Navigator.pop(dialogContext, true),
+              child: const Text('Kaydet'),
+            ),
+          ],
+        ),
+      ),
+    );
+    if (submitted != true || !mounted) return;
+    final grams = double.tryParse(portion.text.replaceAll(',', '.'));
+    if (grams == null || !grams.isFinite || grams <= 0 || grams > 2000) {
+      _showMessage('Porsiyon 0 ile 2000 gram arasında olmalıdır.');
       return;
     }
-
-    final today = _dailyLogs.isNotEmpty ? _dailyLogs.first : null;
-    if (today != null) {
-      _accessibility.speak(today.ttsText, priority: TtsPriority.high);
-    }
+    final result =
+        await ref.read(historyControllerProvider.notifier).updateEntry(
+              logId: entry.id,
+              foodNameTr: name.text.trim(),
+              portionGrams: grams,
+              mealType: mealType,
+            );
+    if (mounted) _showMessage(result.message);
   }
 
-  IconData _mealIcon(MealType meal) => switch (meal) {
-        MealType.kahvalti => Icons.free_breakfast,
-        MealType.ogle => Icons.lunch_dining,
-        MealType.aksam => Icons.dinner_dining,
-        MealType.atistirmalik => Icons.cookie,
-      };
+  Future<void> _showMealDialog(FoodLogEntry entry) async {
+    final meal = await showDialog<String>(
+      context: context,
+      builder: (dialogContext) => SimpleDialog(
+        title: const Text('Öğün türünü seçin'),
+        children: _mealItems
+            .map((item) => SimpleDialogOption(
+                  onPressed: () => Navigator.pop(dialogContext, item.value),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 8),
+                    child: Text((item.child as Text).data!),
+                  ),
+                ))
+            .toList(),
+      ),
+    );
+    if (meal == null || !mounted) return;
+    final result =
+        await ref.read(historyControllerProvider.notifier).updateEntry(
+              logId: entry.id,
+              mealType: meal,
+            );
+    if (mounted) _showMessage(result.message);
+  }
 
-  Color _mealColor(MealType meal) => switch (meal) {
-        MealType.kahvalti => Colors.orange,
-        MealType.ogle => Colors.green,
-        MealType.aksam => Colors.indigo,
-        MealType.atistirmalik => Colors.pink,
-      };
+  Future<void> _confirmAndDelete(FoodLogEntry entry) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('Kaydı sil'),
+        content: Text(
+          '${entry.foodNameTr} kaydını silmek istiyor musunuz? İşlem kısa süre içinde geri alınabilir.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext, false),
+            child: const Text('Vazgeç'),
+          ),
+          FilledButton(
+            key: const Key('history_delete_confirm'),
+            onPressed: () => Navigator.pop(dialogContext, true),
+            child: const Text('Sil'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true || !mounted) return;
+    final result = await ref
+        .read(historyControllerProvider.notifier)
+        .deleteEntry(entry.id);
+    if (!mounted) return;
+    if (!result.isSuccess) {
+      _showMessage(result.message);
+      return;
+    }
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: const Text('Kayıt silindi.'),
+        action: SnackBarAction(
+          label: 'Geri al',
+          onPressed: () async {
+            final restored = await ref
+                .read(historyControllerProvider.notifier)
+                .restoreEntry(entry.id);
+            if (mounted) _showMessage(restored.message);
+          },
+        ),
+      ),
+    );
+  }
+
+  void _showMessage(String message) {
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(SnackBar(content: Text(message)));
+    _accessibility.speak(message, priority: TtsPriority.normal);
+  }
+}
+
+const _mealItems = [
+  DropdownMenuItem(value: 'kahvalti', child: Text('Kahvaltı')),
+  DropdownMenuItem(value: 'ogle', child: Text('Öğle')),
+  DropdownMenuItem(value: 'aksam', child: Text('Akşam')),
+  DropdownMenuItem(value: 'atistirmalik', child: Text('Atıştırmalık')),
+];
+
+class _PeriodSelector extends StatelessWidget {
+  const _PeriodSelector({required this.selected, required this.onSelected});
+
+  final HistoryPeriod selected;
+  final ValueChanged<HistoryPeriod> onSelected;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(12),
+      child: Row(
+        children: HistoryPeriod.values
+            .map((period) => Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 3),
+                    child: Semantics(
+                      selected: selected == period,
+                      button: true,
+                      label: '${period.label} görünüm',
+                      child: ChoiceChip(
+                        label: Text(period.label),
+                        selected: selected == period,
+                        onSelected: (_) => onSelected(period),
+                      ),
+                    ),
+                  ),
+                ))
+            .toList(),
+      ),
+    );
+  }
+}
+
+class _OfflineBanner extends StatelessWidget {
+  const _OfflineBanner({required this.state});
+
+  final HistoryState state;
+
+  @override
+  Widget build(BuildContext context) {
+    final cachedAt = state.cachedAt?.toLocal();
+    final time = cachedAt == null
+        ? ''
+        : ' Son güncelleme ${cachedAt.hour.toString().padLeft(2, '0')}:'
+            '${cachedAt.minute.toString().padLeft(2, '0')}.';
+    return Semantics(
+      liveRegion: true,
+      label: 'Çevrim dışı önbellek gösteriliyor.$time',
+      child: Container(
+        color: Colors.amber.shade100,
+        padding: const EdgeInsets.all(12),
+        child: Row(
+          children: [
+            const Icon(Icons.cloud_off),
+            const SizedBox(width: 8),
+            Expanded(child: Text('Çevrim dışı kayıtlar gösteriliyor.$time')),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _PeriodSummary extends StatelessWidget {
+  const _PeriodSummary({required this.history, required this.period});
+
+  final FoodHistoryResult history;
+  final HistoryPeriod period;
+
+  @override
+  Widget build(BuildContext context) {
+    final label =
+        '${period.label} özet: ${history.totalLogCount} onaylı kayıt, '
+        'toplam ${history.totalCalories.toStringAsFixed(0)} kalori, '
+        'günlük ortalama ${history.averageDailyCalories.toStringAsFixed(0)} kalori. '
+        'Besin değerleri tahminidir; tıbbi öneri değildir.';
+    return Semantics(
+      label: label,
+      container: true,
+      child: ExcludeSemantics(
+        child: Card(
+          margin: const EdgeInsets.fromLTRB(16, 4, 16, 8),
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('${period.label} takip özeti',
+                    style: Theme.of(context).textTheme.titleMedium),
+                const SizedBox(height: 8),
+                Text('${history.totalLogCount} kayıt • '
+                    '${history.totalCalories.toStringAsFixed(0)} kcal'),
+                Text('Günlük ortalama '
+                    '${history.averageDailyCalories.toStringAsFixed(0)} kcal'),
+                const Text('Tahmini bilgi; tıbbi öneri değildir.'),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _DailySummaryCard extends StatelessWidget {
+  const _DailySummaryCard({required this.day});
+
+  final DailyLog day;
+
+  @override
+  Widget build(BuildContext context) {
+    final targetText = day.calorieTarget > 0
+        ? day.remainingCalories >= 0
+            ? 'Kullanıcının takip hedefinde '
+                '${day.remainingCalories.toStringAsFixed(0)} kcal alan kaldı.'
+            : 'Kullanıcının takip hedefinin '
+                '${day.remainingCalories.abs().toStringAsFixed(0)} kcal üzerinde. '
+                'Bu tıbbi değerlendirme değildir.'
+        : 'Kişisel takip hedefi belirlenmemiş.';
+    final date = '${day.date.day.toString().padLeft(2, '0')}.'
+        '${day.date.month.toString().padLeft(2, '0')}.${day.date.year}';
+    final semantics = '$date özeti. ${day.mealCount} kayıt, '
+        '${day.totalCalories.toStringAsFixed(0)} kalori, '
+        '${day.totalProtein.toStringAsFixed(1)} gram protein, '
+        '${day.totalCarbs.toStringAsFixed(1)} gram karbonhidrat, '
+        '${day.totalFat.toStringAsFixed(1)} gram yağ. $targetText';
+    return Semantics(
+      label: semantics,
+      container: true,
+      child: ExcludeSemantics(
+        child: Container(
+          margin: const EdgeInsets.fromLTRB(16, 12, 16, 6),
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: AppTheme.primaryColor,
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(date, style: const TextStyle(color: Colors.white)),
+              const SizedBox(height: 8),
+              Text(
+                  '${day.totalCalories.toStringAsFixed(0)} kcal • '
+                  '${day.mealCount} kayıt',
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                  )),
+              Text(
+                  'P ${day.totalProtein.toStringAsFixed(1)} g • '
+                  'K ${day.totalCarbs.toStringAsFixed(1)} g • '
+                  'Y ${day.totalFat.toStringAsFixed(1)} g',
+                  style: const TextStyle(color: Colors.white)),
+              const SizedBox(height: 8),
+              Text(targetText, style: const TextStyle(color: Colors.white)),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _FoodLogCard extends StatelessWidget {
+  const _FoodLogCard({
+    required this.entry,
+    required this.onListen,
+    required this.onEdit,
+    required this.onChangeMeal,
+    required this.onDelete,
+  });
+
+  final FoodLogEntry entry;
+  final VoidCallback onListen;
+  final VoidCallback onEdit;
+  final VoidCallback onChangeMeal;
+  final VoidCallback onDelete;
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      key: Key('food_log_${entry.id}'),
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 5),
+      child: Padding(
+        padding: const EdgeInsets.all(12),
+        child: Column(
+          children: [
+            Semantics(
+              label: entry.semanticLabel,
+              container: true,
+              child: ExcludeSemantics(
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Icon(Icons.restaurant, size: 34),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(entry.foodNameTr,
+                              style: Theme.of(context).textTheme.titleMedium),
+                          Text('${entry.portionLabel} • ${entry.mealTypeTr}'),
+                          Text(
+                              '${entry.nutrients.protein.toStringAsFixed(1)} g protein • '
+                              '${entry.nutrients.carbs.toStringAsFixed(1)} g karbonhidrat • '
+                              '${entry.nutrients.fat.toStringAsFixed(1)} g yağ'),
+                          Text('${entry.localDateTimeLabel} • '
+                              '${entry.recognitionSourceTr}'),
+                          Text(entry.statusLabel),
+                        ],
+                      ),
+                    ),
+                    Text('${entry.calories.toStringAsFixed(0)} kcal'),
+                  ],
+                ),
+              ),
+            ),
+            const Divider(),
+            Wrap(
+              alignment: WrapAlignment.spaceEvenly,
+              spacing: 4,
+              children: [
+                IconButton(
+                  key: Key('listen_${entry.id}'),
+                  tooltip: '${entry.foodNameTr} kaydını dinle',
+                  onPressed: onListen,
+                  icon: const Icon(Icons.volume_up),
+                ),
+                IconButton(
+                  key: Key('edit_${entry.id}'),
+                  tooltip: '${entry.foodNameTr} kaydını düzelt',
+                  onPressed: onEdit,
+                  icon: const Icon(Icons.edit),
+                ),
+                IconButton(
+                  key: Key('meal_${entry.id}'),
+                  tooltip: '${entry.foodNameTr} öğün türünü değiştir',
+                  onPressed: onChangeMeal,
+                  icon: const Icon(Icons.schedule),
+                ),
+                IconButton(
+                  key: Key('delete_${entry.id}'),
+                  tooltip: '${entry.foodNameTr} kaydını sil',
+                  onPressed: onDelete,
+                  icon: const Icon(Icons.delete_outline),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 }

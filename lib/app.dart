@@ -15,7 +15,7 @@ import 'core/utils/accessibility_utils.dart';
 import 'shared/services/tts_service.dart';
 import 'shared/services/voice_command_service.dart';
 import 'features/food_scan/screens/food_scan_screen.dart';
-import 'features/history/screens/history_screen.dart';
+import 'features/history/screens/food_history_screen.dart';
 import 'features/dietitian/screens/dietitian_screen.dart';
 import 'features/settings/screens/settings_screen.dart';
 
@@ -32,13 +32,6 @@ class AppShell extends ConsumerStatefulWidget {
 
 class _AppShellState extends ConsumerState<AppShell> {
   // Sekmeler — lazy olarak oluşturulur (IndexedStack sayesinde state korunur)
-  final List<Widget> _screens = const [
-    FoodScanScreen(),
-    HistoryScreen(),
-    DietitianScreen(),
-    SettingsScreen(),
-  ];
-
   // Sekme bilgileri
   static const List<_TabInfo> _tabs = [
     _TabInfo(
@@ -128,8 +121,9 @@ class _AppShellState extends ConsumerState<AppShell> {
   /// Sekme değişikliğini yönetir — TTS + Haptic + State güncelleme
   void _onTabChanged(int index) {
     final currentIndex = ref.read(currentTabProvider);
-    if (index == currentIndex)
+    if (index == currentIndex) {
       return; // Aynı sekmeye tekrar basılmasını engelle
+    }
 
     // Haptic feedback
     AccessibilityUtils.lightHaptic();
@@ -156,7 +150,12 @@ class _AppShellState extends ConsumerState<AppShell> {
       // IndexedStack: tüm sekmelerin state'ini korur, her seferinde rebuild etmez
       body: IndexedStack(
         index: currentIndex,
-        children: _screens,
+        children: [
+          const FoodScanScreen(),
+          FoodHistoryScreen(onScanRequested: () => _onTabChanged(0)),
+          const DietitianScreen(),
+          const SettingsScreen(),
+        ],
       ),
 
       // BottomNavigationBar — erişilebilir, büyük ikonlar, semantik etiketli
