@@ -164,6 +164,35 @@ def calculate_nutrition(
 
 
 _ALIASES: Mapping[tuple[str, str], tuple[str, str, str]] = {
+    ("baklava", "en"): ("food.baklava", "baklava", "Baklava"),
+    ("baklava", "tr"): ("food.baklava", "baklava", "Baklava"),
+    ("hamburger", "en"): ("food.hamburger", "hamburger", "Hamburger"),
+    ("hamburger", "tr"): ("food.hamburger", "hamburger", "Hamburger"),
+    ("pizza", "en"): ("food.pizza", "pizza", "Pizza"),
+    ("pizza", "tr"): ("food.pizza", "pizza", "Pizza"),
+    ("omelette", "en"): ("food.omelette", "omelette", "Omlet"),
+    ("omelet", "en"): ("food.omelette", "omelette", "Omlet"),
+    ("omlet", "tr"): ("food.omelette", "omelette", "Omlet"),
+    ("french_fries", "en"): (
+        "food.french_fries", "french_fries", "Patates kızartması"
+    ),
+    ("patates_kizartmasi", "tr"): (
+        "food.french_fries", "french_fries", "Patates kızartması"
+    ),
+    ("simit", "en"): ("food.simit", "simit", "Simit"),
+    ("simit", "tr"): ("food.simit", "simit", "Simit"),
+    ("lahmacun", "en"): ("food.lahmacun", "lahmacun", "Lahmacun"),
+    ("lahmacun", "tr"): ("food.lahmacun", "lahmacun", "Lahmacun"),
+    ("manti", "en"): ("food.manti", "manti", "Mantı"),
+    ("manti", "tr"): ("food.manti", "manti", "Mantı"),
+    ("lentil_soup", "en"): (
+        "food.mercimek_corbasi", "lentil_soup", "Mercimek çorbası"
+    ),
+    ("mercimek_corbasi", "tr"): (
+        "food.mercimek_corbasi", "lentil_soup", "Mercimek çorbası"
+    ),
+    ("menemen", "en"): ("food.menemen", "menemen", "Menemen"),
+    ("menemen", "tr"): ("food.menemen", "menemen", "Menemen"),
     ("pasta", "en"): ("food.pasta", "pasta", "Makarna"),
     ("pasta", "tr"): ("food.cake", "cake", "Pasta"),
     ("makarna", "tr"): ("food.pasta", "pasta", "Makarna"),
@@ -182,7 +211,11 @@ _ALIASES: Mapping[tuple[str, str], tuple[str, str, str]] = {
 
 
 def _slug(value: str) -> str:
-    normalized = unicodedata.normalize("NFKD", value.strip().lower())
+    # U+0131 LATIN SMALL LETTER DOTLESS I does not decompose under NFKD.
+    # Transliterate it explicitly so Turkish names remain stable canonical keys.
+    normalized = unicodedata.normalize(
+        "NFKD", value.strip().lower().translate(str.maketrans({"ı": "i"}))
+    )
     ascii_text = "".join(ch for ch in normalized if not unicodedata.combining(ch))
     return re.sub(r"[^a-z0-9]+", "_", ascii_text).strip("_")
 
