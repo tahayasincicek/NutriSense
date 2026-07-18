@@ -47,10 +47,9 @@ class _FoodScanScreenState extends ConsumerState<FoodScanScreen> {
             child: DecoratedBox(
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                gradient: LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [Color(0xFFE9DCC9), Color(0xFF9EB7A7)],
+                color: Color(0xFFF0F0F0),
+                border: Border.fromBorderSide(
+                  BorderSide(color: Color(0xFFD8D8D8), width: 0.8),
                 ),
               ),
               child: Icon(
@@ -207,43 +206,47 @@ class _ScanHero extends StatelessWidget {
           borderRadius: BorderRadius.circular(AppTheme.cardRadius),
           child: Ink(
             decoration: BoxDecoration(
+              color: const Color(0xFFE7E7E5),
               borderRadius: BorderRadius.circular(AppTheme.cardRadius),
-              gradient: const LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [Color(0xFF315B49), AppTheme.primaryDark],
-              ),
+              border: Border.all(color: const Color(0xFFD8D8D8), width: 0.8),
             ),
             child: ClipRRect(
               borderRadius: BorderRadius.circular(AppTheme.cardRadius),
               child: Stack(
                 children: [
-                  const Positioned(
-                    right: -35,
-                    top: -40,
-                    child: _DecorativePlate(size: 170),
-                  ),
-                  const Positioned(
-                    right: 52,
-                    bottom: -44,
-                    child: _DecorativePlate(size: 126, opacity: 0.08),
+                  const Positioned.fill(child: _CameraBackdrop()),
+                  const Positioned.fill(
+                    child: DecoratedBox(
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                          stops: [0.38, 1],
+                          colors: [Colors.transparent, Color(0xCC000000)],
+                        ),
+                      ),
+                    ),
                   ),
                   Padding(
                     padding: const EdgeInsets.all(22),
                     child: ExcludeSemantics(
                       child: ConstrainedBox(
-                        constraints: const BoxConstraints(minHeight: 210),
+                        constraints: const BoxConstraints(minHeight: 238),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Align(
                               alignment: Alignment.topRight,
                               child: Container(
-                                width: 52,
-                                height: 52,
-                                decoration: const BoxDecoration(
+                                width: 48,
+                                height: 48,
+                                decoration: BoxDecoration(
                                   color: Colors.white,
                                   shape: BoxShape.circle,
+                                  border: Border.all(
+                                    color: const Color(0xFFD8D8D8),
+                                    width: 0.8,
+                                  ),
                                 ),
                                 child: const Icon(
                                   Icons.camera_alt_rounded,
@@ -252,26 +255,23 @@ class _ScanHero extends StatelessWidget {
                                 ),
                               ),
                             ),
-                            const SizedBox(height: 42),
+                            const SizedBox(height: 82),
                             Container(
                               padding: const EdgeInsets.symmetric(
                                 horizontal: 10,
                                 vertical: 5,
                               ),
                               decoration: BoxDecoration(
-                                color: Colors.white.withValues(alpha: 0.16),
-                                borderRadius: BorderRadius.circular(999),
-                                border: Border.all(
-                                  color: Colors.white.withValues(alpha: 0.28),
-                                ),
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(4),
                               ),
                               child: const Text(
                                 'KAMERA İLE',
                                 style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w700,
-                                  letterSpacing: 0.8,
+                                  color: Colors.black,
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w600,
+                                  letterSpacing: 0.2,
                                 ),
                               ),
                             ),
@@ -304,23 +304,32 @@ class _ScanHero extends StatelessWidget {
   }
 }
 
-class _DecorativePlate extends StatelessWidget {
-  const _DecorativePlate({required this.size, this.opacity = 0.12});
-
-  final double size;
-  final double opacity;
+class _CameraBackdrop extends StatelessWidget {
+  const _CameraBackdrop();
 
   @override
-  Widget build(BuildContext context) => Container(
-        width: size,
-        height: size,
-        decoration: BoxDecoration(
-          color: Colors.white.withValues(alpha: opacity),
-          shape: BoxShape.circle,
-          border: Border.all(
-            width: 18,
-            color: Colors.white.withValues(alpha: opacity * 0.7),
-          ),
+  Widget build(BuildContext context) => ExcludeSemantics(
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+            Container(
+              width: 150,
+              height: 150,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: Colors.white.withValues(alpha: 0.52),
+                border: Border.all(
+                  color: Colors.black.withValues(alpha: 0.08),
+                  width: 1,
+                ),
+              ),
+            ),
+            Icon(
+              Icons.restaurant_menu_rounded,
+              size: 72,
+              color: Colors.black.withValues(alpha: 0.18),
+            ),
+          ],
         ),
       );
 }

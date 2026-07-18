@@ -130,7 +130,6 @@ class AccessibleButton extends StatelessWidget {
                   label,
                   textAlign: TextAlign.center,
                   softWrap: true,
-                  style: theme.textTheme.labelLarge,
                 ),
               ),
             ],
