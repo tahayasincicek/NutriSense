@@ -8,6 +8,7 @@
 
 import 'package:flutter/material.dart';
 import '../../core/constants/app_constants.dart';
+import '../../core/theme/app_theme.dart';
 import '../../core/utils/accessibility_utils.dart';
 
 /// Erişilebilir kart — besin kartları, geçmiş kayıtları vb. için kullanılır.
@@ -70,7 +71,7 @@ class AccessibleCard extends StatelessWidget {
                 }
               : null,
           onLongPress: onLongPress,
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(AppTheme.cardRadius),
           child: Padding(
             padding: padding ?? const EdgeInsets.all(16),
             child: Row(
@@ -107,8 +108,7 @@ class AccessibleCard extends StatelessWidget {
                           child: Text(
                             subtitle!,
                             style: theme.textTheme.bodyMedium?.copyWith(
-                              color:
-                                  theme.colorScheme.onSurface.withOpacity(0.7),
+                              color: theme.colorScheme.onSurfaceVariant,
                             ),
                             maxLines: 2,
                             overflow: TextOverflow.ellipsis,

@@ -63,9 +63,14 @@ dev_dependencies:
 flutter:
   uses-material-design: true
 
+  fonts:
+    - family: Inter
+      fonts:
+        - asset: assets/fonts/InterVariable.ttf
+        - asset: assets/fonts/InterVariable-Italic.ttf
+          style: italic
+
   # Boş images/icons/sounds/models klasörleri bilinçli olarak bundle edilmez.
   # Gerçek model eklenmeden assets/models deklarasyonu yapılmamalıdır.
-  # assets/fonts altındaki yerel fontlar da tema tarafından kullanılmadığı için
-  # APK'ya eklenmez; sistem fontu deterministik ve ek indirme olmadan kullanılır.
 
 

@@ -237,16 +237,16 @@ class _AppShellState extends ConsumerState<AppShell> {
               return BottomNavigationBarItem(
                 icon: Semantics(
                   label: tab.semanticLabel,
-                  child: Padding(
-                    padding: const EdgeInsets.all(4),
-                    child: Icon(tab.icon),
+                  child: _NavigationIcon(
+                    icon: tab.icon,
+                    selected: false,
                   ),
                 ),
                 activeIcon: Semantics(
                   label: '${tab.label} sekmesi, seçili',
-                  child: Padding(
-                    padding: const EdgeInsets.all(4),
-                    child: Icon(tab.activeIcon),
+                  child: _NavigationIcon(
+                    icon: tab.activeIcon,
+                    selected: true,
                   ),
                 ),
                 label: tab.label,
@@ -264,18 +264,18 @@ class _AppShellState extends ConsumerState<AppShell> {
             : 'Sesli komut butonu. Mikrofona konuşarak komut verin.',
         hint: 'Çift dokunarak sesli komutu başlatın',
         button: true,
-        child: FloatingActionButton.large(
+        child: FloatingActionButton(
           onPressed: _startVoiceCommand,
           heroTag: 'voice_command_fab',
           child: Icon(
             _listeningState == ListeningState.listening
                 ? Icons.mic
                 : Icons.mic_none,
-            size: 36,
+            size: 28,
           ),
         ),
       ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
     );
   }
 
@@ -300,4 +300,35 @@ class _TabInfo {
     required this.semanticLabel,
     required this.ttsAnnouncement,
   });
+}
+
+class _NavigationIcon extends StatelessWidget {
+  const _NavigationIcon({required this.icon, required this.selected});
+
+  final IconData icon;
+  final bool selected;
+
+  @override
+  Widget build(BuildContext context) {
+    final color = Theme.of(context).colorScheme.onSurface;
+    return SizedBox(
+      height: 38,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          AnimatedContainer(
+            duration: const Duration(milliseconds: 180),
+            width: selected ? 32 : 0,
+            height: 2,
+            decoration: BoxDecoration(
+              color: selected ? color : Colors.transparent,
+              borderRadius: BorderRadius.circular(99),
+            ),
+          ),
+          const SizedBox(height: 7),
+          Icon(icon),
+        ],
+      ),
+    );
+  }
 }
