@@ -230,7 +230,9 @@ class _SurveyScreenState extends ConsumerState<SurveyScreen> {
           child: GestureDetector(
             onTap: () => _setAnswer(question.id, value, label),
             child: AnimatedContainer(
-              duration: const Duration(milliseconds: 200),
+              duration: MediaQuery.disableAnimationsOf(context)
+                  ? Duration.zero
+                  : const Duration(milliseconds: 200),
               margin: const EdgeInsets.only(bottom: 10),
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
               decoration: BoxDecoration(
@@ -303,7 +305,9 @@ class _SurveyScreenState extends ConsumerState<SurveyScreen> {
           child: GestureDetector(
             onTap: () => _setAnswer(question.id, opt, opt),
             child: AnimatedContainer(
-              duration: const Duration(milliseconds: 200),
+              duration: MediaQuery.disableAnimationsOf(context)
+                  ? Duration.zero
+                  : const Duration(milliseconds: 200),
               margin: const EdgeInsets.only(bottom: 10),
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
               decoration: BoxDecoration(
@@ -373,7 +377,9 @@ class _SurveyScreenState extends ConsumerState<SurveyScreen> {
             child: GestureDetector(
               onTap: () => _setAnswer(question.id, opt, opt),
               child: AnimatedContainer(
-                duration: const Duration(milliseconds: 200),
+                duration: MediaQuery.disableAnimationsOf(context)
+                    ? Duration.zero
+                    : const Duration(milliseconds: 200),
                 margin: const EdgeInsets.symmetric(horizontal: 4),
                 padding: const EdgeInsets.symmetric(vertical: 20),
                 decoration: BoxDecoration(
@@ -494,7 +500,9 @@ class _SurveyScreenState extends ConsumerState<SurveyScreen> {
                   padding: const EdgeInsets.symmetric(horizontal: 6),
                   child: AnimatedScale(
                     scale: value == current ? 1.2 : 1.0,
-                    duration: const Duration(milliseconds: 200),
+                    duration: MediaQuery.disableAnimationsOf(context)
+                        ? Duration.zero
+                        : const Duration(milliseconds: 200),
                     child: Icon(
                       isActive
                           ? Icons.star_rounded

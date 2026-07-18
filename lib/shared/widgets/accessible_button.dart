@@ -2,7 +2,7 @@
 // lib/shared/widgets/accessible_button.dart
 // NutriSense — Erişilebilir Buton Widget'ı
 //
-// WCAG uyumlu, büyük dokunma alanı, semantik etiket, haptic feedback
+// WCAG hedeflerini gözeten büyük dokunma alanı, semantik etiket, haptic feedback
 // ve TTS geri bildirimi olan özel buton.
 // =============================================================================
 
@@ -88,9 +88,11 @@ class AccessibleButton extends StatelessWidget {
       hint: semanticHint ?? 'Etkinleştirmek için çift dokunun',
       button: true,
       enabled: onPressed != null && !isLoading,
-      child: SizedBox(
-        width: fullWidth ? double.infinity : null,
-        height: A11yConstants.minTouchTarget + 8, // 56dp
+      child: ConstrainedBox(
+        constraints: BoxConstraints(
+          minWidth: fullWidth ? double.infinity : A11yConstants.minTouchTarget,
+          minHeight: A11yConstants.minTouchTarget + 8,
+        ),
         child: _buildButton(context, theme),
       ),
     );
@@ -127,7 +129,7 @@ class AccessibleButton extends StatelessWidget {
                 child: Text(
                   label,
                   textAlign: TextAlign.center,
-                  overflow: TextOverflow.ellipsis,
+                  softWrap: true,
                   style: const TextStyle(
                       fontSize: 18, fontWeight: FontWeight.w600),
                 ),

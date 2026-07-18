@@ -63,6 +63,8 @@ void main() {
 
     await tester.tap(find.byKey(const Key('report_continue_to_consent')));
     await tester.pumpAndSettle();
+    expect(
+        find.byKey(const Key('report_voice_command_button')), findsOneWidget);
     final sendButton = find.byKey(const Key('report_send_button'));
     expect(tester.widget<AccessibleButton>(sendButton).onPressed, isNull);
 
@@ -83,9 +85,26 @@ void main() {
     expect(find.text('SMS: failed'), findsOneWidget);
     expect(find.textContaining('nihai teslimi kanıtlamaz'), findsOneWidget);
   });
+
+  testWidgets(
+      'gerçek rapor wizard yüzde 200 metinde kritik kontrolleri taşırmaz',
+      (tester) async {
+    tester.view.devicePixelRatio = 1;
+    tester.view.physicalSize = const Size(800, 500);
+    addTearDown(() {
+      tester.view.resetPhysicalSize();
+      tester.view.resetDevicePixelRatio();
+    });
+
+    await tester.pumpWidget(_app(_ReportAdapter(), textScale: 2));
+    await tester.pumpAndSettle();
+
+    expect(tester.takeException(), isNull);
+    expect(find.byKey(const Key('report_selection_step')), findsOneWidget);
+  });
 }
 
-Widget _app(_ReportAdapter adapter) {
+Widget _app(_ReportAdapter adapter, {double textScale = 1}) {
   final dio = Dio(BaseOptions(baseUrl: 'https://contract.test/api/v1'))
     ..httpClientAdapter = adapter;
   final api = ApiService(
@@ -99,8 +118,14 @@ Widget _app(_ReportAdapter adapter) {
         _SilentAccessibilityService(),
       ),
     ],
-    child: const MaterialApp(
-      home: SendReportWizard(assignment: _assignment),
+    child: MaterialApp(
+      builder: (context, child) => MediaQuery(
+        data: MediaQuery.of(context).copyWith(
+          textScaler: TextScaler.linear(textScale),
+        ),
+        child: child!,
+      ),
+      home: const SendReportWizard(assignment: _assignment),
     ),
   );
 }
@@ -110,6 +135,7 @@ class _SilentAccessibilityService extends AccessibilityService {
   Future<void> speak(
     String text, {
     TtsPriority priority = TtsPriority.normal,
+    bool allowWhileScreenReaderActive = false,
   }) async {}
 }
 
