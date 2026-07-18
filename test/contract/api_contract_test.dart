@@ -51,9 +51,16 @@ void main() {
       final history = FoodHistoryResult.fromJson(
         _fixture('food_history_success.json'),
       );
-      expect(history.dailyLogs.single.foods.single.foodNameTr, 'Elma');
-      expect(history.dailyLogs.single.foods.single.loggedAt.isUtc, isTrue);
-      expect(history.dailyLogs.single.foods.single.nutrients.carbs, 20.7);
+      final food = history.dailyLogs.single.foods.single;
+      expect(food.foodNameTr, 'Elma');
+      expect(food.loggedAt.isUtc, isTrue);
+      expect(food.nutrients.carbs, 20.7);
+      expect(food.canonicalFoodId, 'food.apple');
+      expect(food.recognitionSource, 'google_vision');
+      expect(food.isUserConfirmed, isTrue);
+      expect(history.page, 1);
+      expect(history.pageSize, 7);
+      expect(history.hasMore, isFalse);
     });
 
     test('auth token fixture rotation sürelerini parse eder', () {

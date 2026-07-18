@@ -1,139 +1,340 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
-import 'dart:typed_data';
 
-import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:nutrisense/core/theme/app_theme.dart';
+import 'package:nutrisense/features/history/data/history_cache_store.dart';
+import 'package:nutrisense/features/history/data/history_repository.dart';
 import 'package:nutrisense/features/history/screens/food_history_screen.dart';
+import 'package:nutrisense/features/history/state/history_controller.dart';
+import 'package:nutrisense/shared/models/food_analysis_model.dart';
 import 'package:nutrisense/shared/services/api_service.dart';
 
+const _userId = '9e4e5356-b491-4575-a9dd-c5abbc777fe9';
+const _logId = '550e8400-e29b-41d4-a716-446655440000';
+
 void main() {
-  group('FoodHistoryScreen gerçek ürün widget testleri', () {
-    testWidgets('kanonik API boş geçmiş döndürdüğünde boş durum görünür',
-        (tester) async {
-      final payload = _fixture()..['daily_logs'] = <dynamic>[];
-      await tester.pumpWidget(_app(payload));
-      await _load(tester);
+  group('FoodHistoryScreen kanonik ürün widget testleri', () {
+    testWidgets('yüklenirken açık loading durumu gösterir', (tester) async {
+      final repository = _FakeHistoryRepository(_fixtureHistory())
+        ..fetchGate = Completer<void>();
 
-      expect(find.text('Henüz besin kaydı yok'), findsOneWidget);
-      expect(
-          find.text('Besin taramak için ana sayfaya dönün.'), findsOneWidget);
-      expect(find.byIcon(Icons.restaurant_menu), findsOneWidget);
+      await tester.pumpWidget(_app(repository));
+      await tester.pump();
+
+      expect(find.byType(CircularProgressIndicator), findsOneWidget);
+      expect(repository.fetchCount, 1);
     });
 
-    testWidgets('ürün ekranındaki dönem seçici üç kanonik seçeneği gösterir',
+    testWidgets('boş durum tarama eylemini gerçek callbacke bağlar',
         (tester) async {
-      await tester.pumpWidget(_app(_fixture()));
+      var scanRequested = false;
+      final repository = _FakeHistoryRepository(_emptyHistory());
+
+      await tester.pumpWidget(
+        _app(repository, onScanRequested: () => scanRequested = true),
+      );
       await _load(tester);
 
-      expect(find.text('Günlük'), findsOneWidget);
-      expect(find.text('Haftalık'), findsOneWidget);
-      expect(find.text('Aylık'), findsOneWidget);
+      expect(find.text('Seçilen dönemde kayıt yok'), findsOneWidget);
+      await tester.tap(find.byKey(const Key('history_scan_action')));
+      expect(scanRequested, isTrue);
     });
 
-    testWidgets('paylaşılan contract fixture besin ve özet bilgilerine dönüşür',
+    testWidgets('fixture kaydı, özet, kaynak ve durum bilgilerini gösterir',
         (tester) async {
-      await tester.pumpWidget(_app(_fixture()));
+      await tester.pumpWidget(_app(_FakeHistoryRepository(_fixtureHistory())));
       await _load(tester);
 
       expect(find.text('Elma'), findsOneWidget);
       expect(find.text('78 kcal'), findsOneWidget);
-      expect(find.text('150g • Atıştırmalık'), findsOneWidget);
-      expect(find.text('10:30'), findsOneWidget);
-      expect(find.text('78 / 2000 kcal'), findsOneWidget);
-      expect(find.text('1 öğün'), findsOneWidget);
+      expect(find.text('150 gram • Atıştırmalık'), findsOneWidget);
+      expect(find.textContaining('çevrim içi görüntü tanıma'), findsOneWidget);
+      expect(find.text('Kullanıcı onaylı'), findsOneWidget);
+      expect(find.textContaining('1 kayıt • 78 kcal'), findsOneWidget);
     });
 
-    testWidgets('ürün satırının semantik etiketi besin bağlamını içerir',
+    testWidgets('başarısız istek açık hata ve yeniden dene eylemi gösterir',
         (tester) async {
-      await tester.pumpWidget(_app(_fixture()));
+      final repository = _FakeHistoryRepository(_fixtureHistory())
+        ..fetchFailure = _connectionFailure;
+
+      await tester.pumpWidget(_app(repository));
+      await _load(tester);
+
+      expect(find.text('Ağ bağlantısı kurulamadı.'), findsOneWidget);
+      expect(find.byKey(const Key('history_retry')), findsOneWidget);
+    });
+
+    testWidgets('ağ yokken kullanıcıya ait şifreli cache durumunu gösterir',
+        (tester) async {
+      final history = _fixtureHistory();
+      final repository = _FakeHistoryRepository(history)
+        ..fetchFailure = _connectionFailure
+        ..cache = HistoryCacheSnapshot(
+          history: history,
+          cachedAt: DateTime.utc(2026, 7, 18, 8),
+        );
+
+      await tester.pumpWidget(_app(repository));
+      await _load(tester);
+
+      expect(find.textContaining('Çevrim dışı kayıtlar gösteriliyor'),
+          findsOneWidget);
+      expect(find.text('Elma'), findsOneWidget);
+    });
+
+    testWidgets('oturum yoksa repository çağrılmaz', (tester) async {
+      final repository = _FakeHistoryRepository(_fixtureHistory());
+
+      await tester.pumpWidget(_app(repository, userId: null));
+      await _load(tester);
+
+      expect(repository.fetchCount, 0);
+      expect(find.textContaining('oturum açın'), findsOneWidget);
+    });
+
+    testWidgets('gerçek kart tek anlamlı kayıt semantiği üretir',
+        (tester) async {
+      final history = _fixtureHistory();
+      final entry = history.dailyLogs.single.foods.single;
+      await tester.pumpWidget(_app(_FakeHistoryRepository(history)));
       await _load(tester);
 
       expect(
         find.byWidgetPredicate(
           (widget) =>
               widget is Semantics &&
-              widget.properties.label ==
-                  'Elma, 150 gram, 78 kalori. Atıştırmalık öğünü.',
+              widget.properties.label == entry.semanticLabel,
         ),
         findsOneWidget,
       );
+      expect(entry.semanticLabel, contains('Elma, 150 gram, 78 kalori'));
+      expect(entry.semanticLabel, contains('Kullanıcı onaylı'));
+    });
+
+    testWidgets('düzeltme repositoryye gider ve yenilenen kaydı gösterir',
+        (tester) async {
+      final repository = _FakeHistoryRepository(_fixtureHistory());
+      await tester.pumpWidget(_app(repository));
+      await _load(tester);
+
+      await _revealActions(tester);
+      await tester.tap(find.byKey(const Key('edit_$_logId')));
+      await tester.pumpAndSettle();
+      await tester.enterText(
+        find.byKey(const Key('history_edit_name')),
+        'Yeşil elma',
+      );
+      await tester.enterText(
+        find.byKey(const Key('history_edit_portion')),
+        '100',
+      );
+      await tester.tap(find.byKey(const Key('history_edit_save')));
+      await tester.pumpAndSettle();
+
+      expect(repository.updateCount, 1);
+      expect(find.text('Yeşil elma'), findsOneWidget);
+      expect(find.text('Düzeltilmiş'), findsOneWidget);
+    });
+
+    testWidgets('silme onaylıdır ve snackbar üzerinden geri alınabilir',
+        (tester) async {
+      final repository = _FakeHistoryRepository(_fixtureHistory());
+      await tester.pumpWidget(_app(repository));
+      await _load(tester);
+
+      await _revealActions(tester);
+      await tester.tap(find.byKey(const Key('delete_$_logId')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const Key('history_delete_confirm')));
+      await tester.pumpAndSettle();
+
+      expect(repository.deleteCount, 1);
+      expect(find.text('Seçilen dönemde kayıt yok'), findsOneWidget);
+      expect(find.text('Geri al'), findsOneWidget);
+
+      await tester.tap(find.text('Geri al'));
+      await tester.pumpAndSettle();
+      expect(repository.restoreCount, 1);
+      expect(find.text('Elma'), findsOneWidget);
     });
   });
 }
 
-Map<String, dynamic> _fixture() => jsonDecode(
-      File('contracts/fixtures/food_history_success.json').readAsStringSync(),
-    ) as Map<String, dynamic>;
+const _connectionFailure = ApiFailure(
+  code: 'CONNECTION_ERROR',
+  message: 'Ağ bağlantısı kurulamadı.',
+  kind: ApiFailureKind.connection,
+);
 
-Widget _app(Map<String, dynamic> payload) {
-  final dio = Dio(BaseOptions(baseUrl: 'https://contract.test/api/v1'))
-    ..httpClientAdapter = _FixtureAdapter(payload);
-  final api = ApiService(
-    dio: dio,
-    tokenStore: _MemoryTokenStore(),
+FoodHistoryResult _fixtureHistory() {
+  final payload = jsonDecode(
+    File('contracts/fixtures/food_history_success.json').readAsStringSync(),
+  ) as Map<String, dynamic>;
+  final today = DateTime.now();
+  final date = _dateOnly(today);
+  payload
+    ..['from_date'] = date
+    ..['to_date'] = date
+    ..['total_days'] = 1;
+  final day = (payload['daily_logs'] as List).single as Map<String, dynamic>;
+  day['date'] = date;
+  return FoodHistoryResult.fromJson(payload);
+}
+
+FoodHistoryResult _emptyHistory([FoodHistoryResult? source]) {
+  final current = source ?? _fixtureHistory();
+  return FoodHistoryResult(
+    userId: current.userId,
+    fromDate: current.fromDate,
+    toDate: current.toDate,
+    totalDays: current.totalDays,
+    averageDailyCalories: 0,
+    totalCalories: 0,
+    totalLogCount: 0,
+    totalDateCount: 0,
+    page: 1,
+    pageSize: current.pageSize,
+    hasMore: false,
+    dailyLogs: const [],
   );
+}
+
+String _dateOnly(DateTime value) => '${value.year.toString().padLeft(4, '0')}-'
+    '${value.month.toString().padLeft(2, '0')}-'
+    '${value.day.toString().padLeft(2, '0')}';
+
+Widget _app(
+  _FakeHistoryRepository repository, {
+  String? userId = _userId,
+  VoidCallback? onScanRequested,
+}) {
   return ProviderScope(
-    overrides: [apiServiceProvider.overrideWithValue(api)],
+    overrides: [
+      historyRepositoryProvider.overrideWithValue(repository),
+      historyUserIdProvider.overrideWithValue(userId),
+    ],
     child: MaterialApp(
       theme: AppTheme.lightTheme,
-      home: const FoodHistoryScreen(),
+      home: FoodHistoryScreen(onScanRequested: onScanRequested),
     ),
   );
 }
 
 Future<void> _load(WidgetTester tester) async {
   await tester.pump();
-  await tester.pump(const Duration(milliseconds: 100));
+  await tester.pumpAndSettle();
 }
 
-class _MemoryTokenStore implements TokenStore {
-  AuthSession? session = const AuthSession(
-    accessToken: 'fixture-access',
-    refreshToken: 'fixture-refresh',
-    userId: '9e4e5356-b491-4575-a9dd-c5abbc777fe9',
-    fullName: 'Fixture User',
-    expiresIn: 3600,
-    refreshExpiresIn: 86400,
+Future<void> _revealActions(WidgetTester tester) async {
+  await tester.drag(
+    find.byKey(const Key('history_list')),
+    const Offset(0, -500),
   );
-
-  @override
-  Future<void> clear() async => session = null;
-
-  @override
-  Future<AuthSession?> read() async => session;
-
-  @override
-  Future<void> write(AuthSession value) async => session = value;
+  await tester.pumpAndSettle();
 }
 
-class _FixtureAdapter implements HttpClientAdapter {
-  _FixtureAdapter(this.payload);
+class _FakeHistoryRepository implements HistoryRepository {
+  _FakeHistoryRepository(this.remote);
 
-  final Map<String, dynamic> payload;
+  FoodHistoryResult remote;
+  FoodHistoryResult? _deleted;
+  HistoryCacheSnapshot? cache;
+  ApiFailure? fetchFailure;
+  Completer<void>? fetchGate;
+  int fetchCount = 0;
+  int updateCount = 0;
+  int deleteCount = 0;
+  int restoreCount = 0;
 
   @override
-  Future<ResponseBody> fetch(
-    RequestOptions options,
-    Stream<Uint8List>? requestStream,
-    Future<void>? cancelFuture,
-  ) async {
-    if (options.path.contains('/food-history/')) {
-      return ResponseBody.fromString(
-        jsonEncode(payload),
-        200,
-        headers: {
-          Headers.contentTypeHeader: ['application/json'],
-        },
-      );
-    }
-    return ResponseBody.fromString('{}', 404);
+  Future<ApiResult<FoodHistoryResult>> fetch({
+    required DateTime fromDate,
+    required DateTime toDate,
+    required int page,
+    required int pageSize,
+  }) async {
+    fetchCount += 1;
+    final gate = fetchGate;
+    if (gate != null) await gate.future;
+    if (fetchFailure != null) return ApiResult.error(fetchFailure!);
+    remote = _withRange(remote, fromDate, toDate, pageSize);
+    return ApiResult.success(remote);
   }
 
   @override
-  void close({bool force = false}) {}
+  Future<HistoryCacheSnapshot?> readCache(String userId) async => cache;
+
+  @override
+  Future<void> writeCache(String userId, FoodHistoryResult history) async {
+    cache = HistoryCacheSnapshot(
+      history: history,
+      cachedAt: DateTime.now().toUtc(),
+    );
+  }
+
+  @override
+  Future<ApiResult<FoodLogEntry>> update({
+    required String logId,
+    String? foodNameTr,
+    double? portionGrams,
+    String? mealType,
+  }) async {
+    updateCount += 1;
+    final payload = remote.toJson();
+    final day = (payload['daily_logs'] as List).single as Map<String, dynamic>;
+    final food = (day['foods'] as List).single as Map<String, dynamic>;
+    if (foodNameTr != null) food['food_name_tr'] = foodNameTr;
+    if (mealType != null) food['meal_type'] = mealType;
+    if (portionGrams != null) {
+      food
+        ..['portion_g'] = portionGrams
+        ..['portion_value'] = portionGrams
+        ..['calories'] = 52 * portionGrams / 100;
+    }
+    food['is_corrected'] = true;
+    remote = FoodHistoryResult.fromJson(payload);
+    return ApiResult.success(remote.dailyLogs.single.foods.single);
+  }
+
+  @override
+  Future<ApiResult<Map<String, dynamic>>> delete(String logId) async {
+    deleteCount += 1;
+    _deleted = remote;
+    remote = _emptyHistory(remote);
+    return const ApiResult.success({'deleted': true});
+  }
+
+  @override
+  Future<ApiResult<Map<String, dynamic>>> restore(String logId) async {
+    restoreCount += 1;
+    if (_deleted != null) remote = _deleted!;
+    return const ApiResult.success({'restored': true});
+  }
+}
+
+FoodHistoryResult _withRange(
+  FoodHistoryResult source,
+  DateTime fromDate,
+  DateTime toDate,
+  int pageSize,
+) {
+  return FoodHistoryResult(
+    userId: source.userId,
+    fromDate: fromDate,
+    toDate: toDate,
+    totalDays: toDate.difference(fromDate).inDays + 1,
+    averageDailyCalories: source.averageDailyCalories,
+    totalCalories: source.totalCalories,
+    totalLogCount: source.totalLogCount,
+    totalDateCount: source.totalDateCount,
+    page: 1,
+    pageSize: pageSize,
+    hasMore: source.hasMore,
+    dailyLogs: source.dailyLogs,
+  );
 }

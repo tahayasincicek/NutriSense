@@ -56,7 +56,7 @@ OpenAPI snapshot değişikliği; backend testi, mobil fixture testi ve migration
 | Ekran/özellik | Provider | Tek istemci metodu | Backend |
 |---|---|---|---|
 | `CameraScreen` | `apiServiceProvider` | `analyzeFood()` → `decideFoodAnalysis()` | `POST /api/v1/analyze-food` → `POST /api/v1/food-analysis/{analysis_id}/decision` |
-| `FoodHistoryScreen` | `apiServiceProvider` | `getFoodHistory()` | `GET /api/v1/food-history/{user_id}` |
+| `FoodHistoryScreen` | `historyControllerProvider` → `HistoryRepository` → `apiServiceProvider` | `getFoodHistory()`, `updateFoodLog()`, `deleteFoodLog()`, `restoreFoodLog()` | Geçmiş ve kullanıcıya ait kayıt yaşam döngüsü |
 | `SendReportWizard` | `apiServiceProvider` | `sendToDietitian()` | `POST /api/v1/send-to-dietitian` |
 | `LoginScreen` | `apiServiceProvider` | `login()` | `POST /api/v1/auth/login` |
 | Survey | `SurveyService` → `ApiService` | `submitSurvey()` | `POST /api/v1/survey` |
@@ -80,7 +80,10 @@ OpenAPI snapshot değişikliği; backend testi, mobil fixture testi ve migration
 | POST | `/analyze-food` | Bearer access | Multipart `image`, `meal_type`, `capture_id` | Onay bekleyen `FoodAnalysisResponse`; `log_id=null` |
 | POST | `/food-analysis/{analysis_id}/decision` | Bearer access | JSON `decision`, opsiyonel `corrected_food_name` | `FoodAnalysisDecisionResponse` |
 | POST | `/food-log/manual` | Bearer access | JSON `food_name`, `meal_type`, `capture_id` | Onaylı `FoodAnalysisDecisionResponse` |
-| GET | `/food-history/{user_id}` | Bearer access | `from_date`, `to_date` | `FoodHistoryResponse` |
+| GET | `/food-history/{user_id}` | Bearer access | `from_date`, `to_date`, `page`, `page_size` | `FoodHistoryResponse` |
+| PATCH | `/food-logs/{log_id}` | Bearer access | Besin etiketi, gram ve/veya öğün türü | Güncellenmiş `FoodLogEntry` |
+| DELETE | `/food-logs/{log_id}` | Bearer access | Yok | Soft-delete sonucu |
+| POST | `/food-logs/{log_id}/restore` | Bearer access | Yok | Geri alma sonucu |
 | POST | `/send-to-dietitian` | Bearer access | JSON `SendToDietitianRequest`; `consent=true`; önerilen `Idempotency-Key` başlığı | `SendToDietitianResponse` |
 | POST | `/survey` | Araştırma katılımcı kimliği gövdede | JSON `SurveySubmissionSchema` | `SurveyResponseSchema` |
 | POST | `/usability` | Araştırma katılımcı kimliği gövdede | JSON `UsabilitySessionSchema` | `UsabilityResponseSchema` |
