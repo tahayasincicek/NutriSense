@@ -16,6 +16,7 @@ alembic>=1.13.1
 # ── Validation & Serialization ──
 pydantic>=2.9.0
 pydantic[email]
+pydantic-settings>=2.2.1
 python-multipart>=0.0.6
 
 # ── Kimlik Doğrulama ──

@@ -138,7 +138,7 @@ jobs:
           MIGRATION_CHECK_ENABLED: "false"
         run: |
           python scripts/export_openapi.py --check
-          pytest -v --tb=short
+          python -m pytest -v --tb=short
 
   # ═══════════════════════════════════════════════════════════════════════════
   # ERİŞİLEBİLİRLİK DENETİMİ
