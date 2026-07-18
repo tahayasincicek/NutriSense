@@ -1,61 +1,54 @@
-// =============================================================================
-// lib/features/food_scan/models/camera_state.dart
-// NutriSense — Kamera Durum Yönetimi
-//
-// CameraState enum'u ve CameraNotifier — Riverpod ile durum yönetimi.
-// Her durum geçişinde TTS ile sesli bildirim yapılır.
-// =============================================================================
-
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-/// Kamera durumları — her geçişte TTS ile bildirilir
+import '../../../shared/models/food_analysis_model.dart';
+
 enum CameraStatus {
-  /// Kamera başlatılıyor
+  permissionRequesting,
   initializing,
-
-  /// Kamera hazır, tarama bekliyor
   ready,
-
-  /// Otomatik kare yakalama aktif
+  qualityWarning,
   capturing,
-
-  /// Yakalanan görüntü işleniyor / backend'e gönderiliyor
-  processing,
-
-  /// Yiyecek tespit edildi, sonuç bekleniyor
-  foodDetected,
-
-  /// Sonuç alındı
+  preprocessing,
+  uploading,
+  offlineInference,
   resultReady,
-
-  /// Hata durumu
+  confirmationRequired,
+  confirmed,
+  rejected,
+  corrected,
+  saved,
   error,
 }
 
-/// Kamera durum modeli — tüm UI state'i tek yerde
 class CameraState {
   final CameraStatus status;
-  final String? statusMessage;
+  final String statusMessage;
   final String? errorMessage;
   final bool isFlashOn;
   final bool isAutoCapture;
   final double? brightness;
   final bool isBlurry;
+  final FoodAnalysisResult? analysis;
   final String? recognizedFood;
   final double? calories;
   final double? confidence;
+  final String? savedLogId;
+  final bool permissionPermanentlyDenied;
 
   const CameraState({
-    this.status = CameraStatus.initializing,
-    this.statusMessage,
+    this.status = CameraStatus.permissionRequesting,
+    this.statusMessage = 'Kamera izni isteniyor...',
     this.errorMessage,
     this.isFlashOn = false,
     this.isAutoCapture = true,
     this.brightness,
     this.isBlurry = false,
+    this.analysis,
     this.recognizedFood,
     this.calories,
     this.confidence,
+    this.savedLogId,
+    this.permissionPermanentlyDenied = false,
   });
 
   CameraState copyWith({
@@ -66,136 +59,134 @@ class CameraState {
     bool? isAutoCapture,
     double? brightness,
     bool? isBlurry,
+    FoodAnalysisResult? analysis,
     String? recognizedFood,
     double? calories,
     double? confidence,
-  }) {
-    return CameraState(
-      status: status ?? this.status,
-      statusMessage: statusMessage ?? this.statusMessage,
-      errorMessage: errorMessage,
-      isFlashOn: isFlashOn ?? this.isFlashOn,
-      isAutoCapture: isAutoCapture ?? this.isAutoCapture,
-      brightness: brightness ?? this.brightness,
-      isBlurry: isBlurry ?? this.isBlurry,
-      recognizedFood: recognizedFood,
-      calories: calories,
-      confidence: confidence,
-    );
-  }
-
-  /// Her durum için TTS ile okunacak Türkçe mesaj
-  String get ttsMessage {
-    switch (status) {
-      case CameraStatus.initializing:
-        return 'Kamera başlatılıyor, lütfen bekleyin.';
-      case CameraStatus.ready:
-        return 'Kamera hazır. Besini kameraya tutun veya tara butonuna basın.';
-      case CameraStatus.capturing:
-        return 'Görüntü yakalanıyor, telefonu sabit tutun.';
-      case CameraStatus.processing:
-        return 'Yiyecek analiz ediliyor, lütfen bekleyin.';
-      case CameraStatus.foodDetected:
-        return 'Yiyecek tespit edildi, analiz ediliyor.';
-      case CameraStatus.resultReady:
-        if (recognizedFood != null && calories != null) {
-          return '$recognizedFood tanındı. ${calories!.toStringAsFixed(0)} kalori.';
-        }
-        return 'Sonuç hazır.';
-      case CameraStatus.error:
-        return errorMessage ?? 'Bir hata oluştu.';
-    }
-  }
+    String? savedLogId,
+    bool? permissionPermanentlyDenied,
+    bool clearAnalysis = false,
+  }) =>
+      CameraState(
+        status: status ?? this.status,
+        statusMessage: statusMessage ?? this.statusMessage,
+        errorMessage: errorMessage,
+        isFlashOn: isFlashOn ?? this.isFlashOn,
+        isAutoCapture: isAutoCapture ?? this.isAutoCapture,
+        brightness: brightness ?? this.brightness,
+        isBlurry: isBlurry ?? this.isBlurry,
+        analysis: clearAnalysis ? null : analysis ?? this.analysis,
+        recognizedFood:
+            clearAnalysis ? null : recognizedFood ?? this.recognizedFood,
+        calories: clearAnalysis ? null : calories ?? this.calories,
+        confidence: clearAnalysis ? null : confidence ?? this.confidence,
+        savedLogId: clearAnalysis ? null : savedLogId ?? this.savedLogId,
+        permissionPermanentlyDenied:
+            permissionPermanentlyDenied ?? this.permissionPermanentlyDenied,
+      );
 }
 
-/// Kamera durum yöneticisi (Riverpod StateNotifier)
 class CameraNotifier extends StateNotifier<CameraState> {
   CameraNotifier() : super(const CameraState());
 
-  void setInitializing() {
-    state = state.copyWith(
-      status: CameraStatus.initializing,
-      statusMessage: 'Kamera başlatılıyor...',
-    );
-  }
+  void setPermissionRequesting() => state = state.copyWith(
+        status: CameraStatus.permissionRequesting,
+        statusMessage: 'Kamera izni isteniyor...',
+      );
 
-  void setReady() {
-    state = state.copyWith(
-      status: CameraStatus.ready,
-      statusMessage: 'Besini kameraya tutun',
-    );
-  }
+  void setInitializing() => state = state.copyWith(
+        status: CameraStatus.initializing,
+        statusMessage: 'Kamera başlatılıyor...',
+      );
 
-  void setCapturing() {
-    state = state.copyWith(
-      status: CameraStatus.capturing,
-      statusMessage: 'Görüntü yakalanıyor...',
-    );
-  }
+  void setReady() => state = state.copyWith(
+        status: CameraStatus.ready,
+        statusMessage: 'Besini çerçeveye yerleştirin',
+      );
 
-  void setProcessing() {
-    state = state.copyWith(
-      status: CameraStatus.processing,
-      statusMessage: 'Analiz ediliyor...',
-    );
-  }
+  void setCapturing() => state = state.copyWith(
+        status: CameraStatus.capturing,
+        statusMessage: 'Görüntü yakalanıyor...',
+      );
 
-  void setFoodDetected() {
-    state = state.copyWith(
-      status: CameraStatus.foodDetected,
-      statusMessage: 'Yiyecek tespit edildi!',
-    );
-  }
+  void setPreprocessing() => state = state.copyWith(
+        status: CameraStatus.preprocessing,
+        statusMessage: 'Görüntü hazırlanıyor...',
+      );
 
-  void setResult({
-    required String foodName,
-    required double calories,
-    required double confidence,
-  }) {
-    state = state.copyWith(
-      status: CameraStatus.resultReady,
-      statusMessage: '$foodName — ${calories.toStringAsFixed(0)} kcal',
-      recognizedFood: foodName,
-      calories: calories,
-      confidence: confidence,
-    );
-  }
+  void setUploading() => state = state.copyWith(
+        status: CameraStatus.uploading,
+        statusMessage: 'Güvenli analiz yapılıyor...',
+      );
 
-  void setError(String message) {
-    state = CameraState(
-      status: CameraStatus.error,
-      errorMessage: message,
-      statusMessage: message,
-      isAutoCapture: state.isAutoCapture,
-    );
-  }
+  void setOfflineInference() => state = state.copyWith(
+        status: CameraStatus.offlineInference,
+        statusMessage: 'Çevrimdışı model deneniyor...',
+      );
 
-  void toggleFlash() {
-    state = state.copyWith(isFlashOn: !state.isFlashOn);
-  }
+  void setQualityWarning(String message, double brightness, bool blurry) =>
+      state = state.copyWith(
+        status: CameraStatus.qualityWarning,
+        statusMessage: message,
+        brightness: brightness,
+        isBlurry: blurry,
+      );
 
-  void toggleAutoCapture() {
-    state = state.copyWith(isAutoCapture: !state.isAutoCapture);
-  }
+  void setAnalysis(FoodAnalysisResult result, {required bool medium}) =>
+      state = state.copyWith(
+        status: medium
+            ? CameraStatus.confirmationRequired
+            : CameraStatus.resultReady,
+        statusMessage: medium
+            ? 'Sonuç kesin değil; seçim yapın'
+            : 'Sonucu kontrol edip onaylayın',
+        analysis: result,
+        recognizedFood: result.foodNameTr,
+        calories: result.totalCalories,
+        confidence: result.confidence,
+      );
 
-  void updateBrightness(double brightness) {
-    state = state.copyWith(brightness: brightness);
-  }
+  void setSaved(String logId, {bool corrected = false}) =>
+      state = state.copyWith(
+        status: CameraStatus.saved,
+        statusMessage: corrected
+            ? 'Düzeltilen yemek geçmişe kaydedildi'
+            : 'Yemek geçmişe kaydedildi',
+        savedLogId: logId,
+      );
 
-  void updateBlurry(bool isBlurry) {
-    state = state.copyWith(isBlurry: isBlurry);
-  }
+  void setDecisionAccepted({required bool corrected}) => state = state.copyWith(
+        status: corrected ? CameraStatus.corrected : CameraStatus.confirmed,
+        statusMessage: corrected
+            ? 'Düzeltme onaylandı; kayıt tamamlanıyor'
+            : 'Sonuç onaylandı; kayıt tamamlanıyor',
+      );
 
-  void reset() {
-    state = const CameraState(status: CameraStatus.ready);
-  }
+  void setRejected() => state = state.copyWith(
+        status: CameraStatus.rejected,
+        statusMessage: 'Sonuç reddedildi; kayıt oluşturulmadı',
+      );
+
+  void setError(String message, {bool permanentlyDenied = false}) =>
+      state = CameraState(
+        status: CameraStatus.error,
+        errorMessage: message,
+        statusMessage: message,
+        isAutoCapture: state.isAutoCapture,
+        permissionPermanentlyDenied: permanentlyDenied,
+      );
+
+  void toggleFlash() => state = state.copyWith(isFlashOn: !state.isFlashOn);
+
+  void reset() => state = CameraState(
+        status: CameraStatus.ready,
+        statusMessage: 'Besini çerçeveye yerleştirin',
+        isFlashOn: state.isFlashOn,
+        isAutoCapture: state.isAutoCapture,
+      );
 }
 
-// =============================================================================
-// RIVERPOD PROVIDERS
-// =============================================================================
-
 final cameraStateProvider =
-    StateNotifierProvider<CameraNotifier, CameraState>((ref) {
+    StateNotifierProvider.autoDispose<CameraNotifier, CameraState>((ref) {
   return CameraNotifier();
 });

@@ -198,7 +198,7 @@ class _FoodScanScreenState extends ConsumerState<FoodScanScreen> {
 
     // Sonuç dönerse güncelle
     if (result != null &&
-        result.status == CameraStatus.resultReady &&
+        result.status == CameraStatus.saved &&
         result.recognizedFood != null) {
       setState(() {
         _lastFood = result.recognizedFood;

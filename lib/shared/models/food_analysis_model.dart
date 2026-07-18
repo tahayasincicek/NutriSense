@@ -41,8 +41,28 @@ class NutrientData {
       'F:${fat.toStringAsFixed(1)}g';
 }
 
+class FoodCandidate {
+  final String foodName;
+  final String foodNameTr;
+  final double confidence;
+
+  const FoodCandidate({
+    required this.foodName,
+    required this.foodNameTr,
+    required this.confidence,
+  });
+
+  factory FoodCandidate.fromJson(Map<String, dynamic> json) => FoodCandidate(
+        foodName: _requiredString(json, 'food_name'),
+        foodNameTr: _requiredString(json, 'food_name_tr'),
+        confidence: _confidence(json['confidence']),
+      );
+}
+
 /// POST /api/v1/analyze-food yanıtı
 class FoodAnalysisResult {
+  final String analysisId;
+  final String? logId;
   final String foodName;
   final String foodNameTr;
   final double caloriesPer100g;
@@ -51,13 +71,17 @@ class FoodAnalysisResult {
   final double confidence;
   final NutrientData nutrients;
   final String mealType;
-  final String logId;
   final String recognitionSource;
   final String nutritionSource;
+  final String nutritionStatus;
+  final List<FoodCandidate> candidates;
   final bool needsConfirmation;
+  final bool canConfirm;
   final String ttsText;
 
   const FoodAnalysisResult({
+    required this.analysisId,
+    this.logId,
     required this.foodName,
     required this.foodNameTr,
     required this.caloriesPer100g,
@@ -66,15 +90,19 @@ class FoodAnalysisResult {
     required this.confidence,
     required this.nutrients,
     required this.mealType,
-    required this.logId,
     required this.recognitionSource,
     required this.nutritionSource,
+    required this.nutritionStatus,
+    required this.candidates,
     required this.needsConfirmation,
+    required this.canConfirm,
     required this.ttsText,
   });
 
   factory FoodAnalysisResult.fromJson(Map<String, dynamic> json) {
     return FoodAnalysisResult(
+      analysisId: _requiredString(json, 'analysis_id'),
+      logId: json['log_id'] as String?,
       foodName: _requiredString(json, 'food_name'),
       foodNameTr: _requiredString(json, 'food_name_tr'),
       caloriesPer100g: (json['calories_per_100g'] as num?)?.toDouble() ?? 0,
@@ -83,15 +111,23 @@ class FoodAnalysisResult {
       confidence: _confidence(json['confidence']),
       nutrients: NutrientData.fromJson(_mapOrEmpty(json['nutrients'])),
       mealType: json['meal_type'] ?? 'atistirmalik',
-      logId: _requiredString(json, 'log_id'),
       recognitionSource: json['recognition_source'] as String? ?? 'unknown',
       nutritionSource: json['nutrition_source'] as String? ?? 'unknown',
+      nutritionStatus: json['nutrition_status'] as String? ?? 'not_found',
+      candidates: (json['candidates'] as List<dynamic>? ?? const [])
+          .whereType<Map<String, dynamic>>()
+          .take(3)
+          .map(FoodCandidate.fromJson)
+          .toList(growable: false),
       needsConfirmation: json['needs_confirmation'] as bool? ?? true,
+      canConfirm: json['can_confirm'] as bool? ?? false,
       ttsText: json['tts_text'] ?? '',
     );
   }
 
   Map<String, dynamic> toJson() => {
+        'analysis_id': analysisId,
+        'log_id': logId,
         'food_name': foodName,
         'food_name_tr': foodNameTr,
         'calories_per_100g': caloriesPer100g,
@@ -100,12 +136,42 @@ class FoodAnalysisResult {
         'confidence': confidence,
         'nutrients': nutrients.toJson(),
         'meal_type': mealType,
-        'log_id': logId,
         'recognition_source': recognitionSource,
         'nutrition_source': nutritionSource,
+        'nutrition_status': nutritionStatus,
+        'candidates': candidates
+            .map((candidate) => {
+                  'food_name': candidate.foodName,
+                  'food_name_tr': candidate.foodNameTr,
+                  'confidence': candidate.confidence,
+                })
+            .toList(growable: false),
         'needs_confirmation': needsConfirmation,
+        'can_confirm': canConfirm,
         'tts_text': ttsText,
       };
+}
+
+class FoodAnalysisDecisionResult {
+  final String analysisId;
+  final String? logId;
+  final String status;
+  final String message;
+
+  const FoodAnalysisDecisionResult({
+    required this.analysisId,
+    required this.logId,
+    required this.status,
+    required this.message,
+  });
+
+  factory FoodAnalysisDecisionResult.fromJson(Map<String, dynamic> json) =>
+      FoodAnalysisDecisionResult(
+        analysisId: _requiredString(json, 'analysis_id'),
+        logId: json['log_id'] as String?,
+        status: _requiredString(json, 'status'),
+        message: _requiredString(json, 'message'),
+      );
 }
 
 Map<String, dynamic> _mapOrEmpty(dynamic value) =>

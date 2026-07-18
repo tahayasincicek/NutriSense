@@ -498,6 +498,7 @@ class ApiService {
 
   Future<ApiResult<FoodAnalysisResult>> analyzeFood({
     required Uint8List imageBytes,
+    required String captureId,
     String fileName = 'capture.jpg',
     String mealType = 'atistirmalik',
     CancelToken? cancelToken,
@@ -518,6 +519,7 @@ class ApiService {
             contentType: DioMediaType('image', 'jpeg'),
           ),
           'meal_type': mealType,
+          'capture_id': captureId,
         });
         final response = await _dio.post<Map<String, dynamic>>(
           '/analyze-food',
@@ -526,6 +528,50 @@ class ApiService {
           onSendProgress: onSendProgress,
         );
         return FoodAnalysisResult.fromJson(response.data ?? const {});
+      });
+
+  Future<ApiResult<FoodAnalysisDecisionResult>> decideFoodAnalysis({
+    required String analysisId,
+    required String action,
+    String? correctedFoodName,
+    String? correctedFoodNameTr,
+    CancelToken? cancelToken,
+  }) =>
+      _safeCall(() async {
+        final response = await _dio.post<Map<String, dynamic>>(
+          '/food-analysis/$analysisId/decision',
+          data: {
+            'action': action,
+            if (correctedFoodName != null)
+              'corrected_food_name': correctedFoodName,
+            if (correctedFoodNameTr != null)
+              'corrected_food_name_tr': correctedFoodNameTr,
+          },
+          cancelToken: cancelToken,
+        );
+        return FoodAnalysisDecisionResult.fromJson(response.data ?? const {});
+      });
+
+  Future<ApiResult<FoodAnalysisDecisionResult>> createManualFoodLog({
+    required String captureId,
+    required String foodName,
+    String? foodNameTr,
+    String mealType = 'atistirmalik',
+    CancelToken? cancelToken,
+  }) =>
+      _safeCall(() async {
+        final response = await _dio.post<Map<String, dynamic>>(
+          '/food-log/manual',
+          data: {
+            'capture_id': captureId,
+            'food_name': foodName,
+            'food_name_tr': foodNameTr,
+            'meal_type': mealType,
+            'confirmed': true,
+          },
+          cancelToken: cancelToken,
+        );
+        return FoodAnalysisDecisionResult.fromJson(response.data ?? const {});
       });
 
   Future<ApiResult<FoodHistoryResult>> getFoodHistory({

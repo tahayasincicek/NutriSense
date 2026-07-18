@@ -20,11 +20,14 @@ void main() {
         _fixture('food_analysis_success.json'),
       );
 
-      expect(result.logId, '550e8400-e29b-41d4-a716-446655440000');
+      expect(result.analysisId, '550e8400-e29b-41d4-a716-446655440000');
+      expect(result.logId, isNull);
       expect(result.foodNameTr, 'Elma');
       expect(result.portionGrams, 150);
       expect(result.nutrients.carbs, 20.7);
-      expect(result.needsConfirmation, isFalse);
+      expect(result.needsConfirmation, isTrue);
+      expect(result.canConfirm, isTrue);
+      expect(result.candidates.single.foodNameTr, 'Elma');
       expect(result.recognitionSource, 'google_vision');
       expect(result.nutritionSource, 'nutritionix');
     });
@@ -56,7 +59,7 @@ void main() {
 
     test('zorunlu alan null ise sözleşme ihlalini gizlemez', () {
       final fixture = _fixture('food_analysis_success.json');
-      fixture['log_id'] = null;
+      fixture['analysis_id'] = null;
       expect(
         () => FoodAnalysisResult.fromJson(fixture),
         throwsFormatException,
