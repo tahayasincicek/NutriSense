@@ -47,25 +47,32 @@ def upgrade() -> None:
 
     with op.batch_alter_table("dietitian_reports") as batch_op:
         batch_op.add_column(sa.Column("request_id", sa.String(64)))
-        batch_op.add_column(sa.Column(
-            "consent_context_hash", sa.String(64), nullable=False,
-            server_default="legacy-unverified",
-        ))
-        batch_op.add_column(sa.Column(
-            "channels_json", sa.JSON(), nullable=False, server_default="[]",
-        ))
-        batch_op.add_column(sa.Column(
-            "recipient_snapshot_json", sa.JSON(), nullable=False,
-            server_default="{}",
-        ))
-        batch_op.add_column(sa.Column(
-            "payload_json", sa.JSON(), nullable=False, server_default="{}",
-        ))
-        batch_op.add_column(sa.Column(
-            "record_count", sa.Integer(), nullable=False, server_default="0",
-        ))
+        # Add nullable first, backfill, then enforce NOT NULL below.  MySQL JSON
+        # columns do not accept portable string defaults across supported versions.
+        batch_op.add_column(sa.Column("consent_context_hash", sa.String(64)))
+        batch_op.add_column(sa.Column("channels_json", sa.JSON()))
+        batch_op.add_column(sa.Column("recipient_snapshot_json", sa.JSON()))
+        batch_op.add_column(sa.Column("payload_json", sa.JSON()))
+        batch_op.add_column(sa.Column("record_count", sa.Integer()))
         batch_op.add_column(sa.Column("completed_at", sa.DateTime(timezone=True)))
         batch_op.create_index("ix_dietitian_reports_request_id", ["request_id"])
+
+    op.execute(
+        "UPDATE dietitian_reports SET "
+        "consent_context_hash = 'legacy-unverified', "
+        "channels_json = '[]', recipient_snapshot_json = '{}', "
+        "payload_json = '{}', record_count = 0"
+    )
+
+    with op.batch_alter_table("dietitian_reports") as batch_op:
+        batch_op.alter_column(
+            "consent_context_hash", existing_type=sa.String(64), nullable=False,
+        )
+        for column in ("channels_json", "recipient_snapshot_json", "payload_json"):
+            batch_op.alter_column(column, existing_type=sa.JSON(), nullable=False)
+        batch_op.alter_column(
+            "record_count", existing_type=sa.Integer(), nullable=False,
+        )
 
     with op.batch_alter_table("dietitian_reports") as batch_op:
         batch_op.alter_column(
@@ -112,6 +119,10 @@ def downgrade() -> None:
     op.execute(
         "UPDATE notification_deliveries SET status = 'failed' "
         "WHERE status IN ('queued', 'sending')"
+    )
+    op.execute(
+        "UPDATE notification_deliveries SET attempted_at = CURRENT_TIMESTAMP "
+        "WHERE attempted_at IS NULL"
     )
     with op.batch_alter_table("notification_deliveries") as batch_op:
         batch_op.alter_column(
