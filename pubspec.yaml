@@ -70,7 +70,10 @@ flutter:
         - asset: assets/fonts/InterVariable-Italic.ttf
           style: italic
 
-  # Boş images/icons/sounds/models klasörleri bilinçli olarak bundle edilmez.
+  assets:
+    - assets/images/nutrition_scan_cover.png
+
+  # Boş icons/sounds/models klasörleri bilinçli olarak bundle edilmez.
   # Gerçek model eklenmeden assets/models deklarasyonu yapılmamalıdır.
 
 

@@ -41,21 +41,21 @@ class _FoodScanScreenState extends ConsumerState<FoodScanScreen> {
     return Scaffold(
       appBar: AppBar(
         leadingWidth: 72,
-        leading: const Padding(
-          padding: EdgeInsets.only(left: 18, top: 10, bottom: 10),
+        leading: Padding(
+          padding: const EdgeInsets.only(left: 18, top: 10, bottom: 10),
           child: ExcludeSemantics(
-            child: DecoratedBox(
-              decoration: BoxDecoration(
+            child: Container(
+              decoration: const BoxDecoration(
                 shape: BoxShape.circle,
-                color: Color(0xFFF0F0F0),
                 border: Border.fromBorderSide(
                   BorderSide(color: Color(0xFFD8D8D8), width: 0.8),
                 ),
               ),
-              child: Icon(
-                Icons.restaurant_menu_rounded,
-                size: 22,
-                color: AppTheme.primaryDark,
+              clipBehavior: Clip.antiAlias,
+              child: Image.asset(
+                'assets/images/nutrition_scan_cover.png',
+                fit: BoxFit.cover,
+                alignment: const Alignment(0.25, -0.35),
               ),
             ),
           ),
@@ -309,27 +309,10 @@ class _CameraBackdrop extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => ExcludeSemantics(
-        child: Stack(
-          alignment: Alignment.center,
-          children: [
-            Container(
-              width: 150,
-              height: 150,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: Colors.white.withValues(alpha: 0.52),
-                border: Border.all(
-                  color: Colors.black.withValues(alpha: 0.08),
-                  width: 1,
-                ),
-              ),
-            ),
-            Icon(
-              Icons.restaurant_menu_rounded,
-              size: 72,
-              color: Colors.black.withValues(alpha: 0.18),
-            ),
-          ],
+        child: Image.asset(
+          'assets/images/nutrition_scan_cover.png',
+          fit: BoxFit.cover,
+          alignment: Alignment.topCenter,
         ),
       );
 }
