@@ -1,5 +1,7 @@
 # NutriSense — iOS App Store Listesi ve Info.plist Yapılandırması
 
+> **Yayın kapısı:** Bu dosyadaki kapsam, model başarısı ve uyumluluk iddiaları kanıt envanteriyle doğrulanmadan mağazada kullanılmamalıdır. Gerçek iOS cihaz E2E testi henüz çalıştırılmamıştır.
+
 ## Info.plist Gizlilik Açıklamaları
 
 Aşağıdaki anahtarları `ios/Runner/Info.plist` dosyasına ekleyin:
@@ -7,7 +9,7 @@ Aşağıdaki anahtarları `ios/Runner/Info.plist` dosyasına ekleyin:
 ```xml
 <!-- ═══ KAMERA ═══ -->
 <key>NSCameraUsageDescription</key>
-<string>NutriSense yiyecekleri tanımak ve kalori bilgisi sağlamak için kameraya erişim gerektirir. Kamera görüntüleri cihazda işlenir ve saklanmaz.</string>
+<string>NutriSense yiyecekleri tanımak ve kalori bilgisi sağlamak için kameraya erişir. Çekim analiz için güvenli sunucuya gönderilebilir; görüntü varsayılan olarak saklanmaz.</string>
 
 <!-- ═══ MİKROFON ═══ -->
 <key>NSMicrophoneUsageDescription</key>
@@ -49,7 +51,7 @@ Görme Engelliler İçin Kalori Takibi
 
 ### Açıklama
 
-NutriSense, görme engelli bireyler için yapay zeka destekli besin tanıma ve kalori takip uygulamasıdır. Telefon kamerasını yiyeceğe tutmanız yeterli — uygulama besini otomatik olarak tanır ve kalori bilgisini sesli olarak bildirir.
+NutriSense, görme engelli bireyler için yapay zeka destekli besin tanıma ve kalori takip prototipidir. Uygulama çekilen görüntüyü yapılandırılmış çevrimiçi servisle analiz eder; sonuç ve veri kaynağını sesli bildirir ve geçmişe yazmadan önce kullanıcı onayı ister. Hizmet kullanılamıyorsa sahte sonuç üretmez, manuel giriş sunar.
 
 **Öne Çıkan Özellikler:**
 

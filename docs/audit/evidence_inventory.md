@@ -4,6 +4,8 @@
 **Kök:** `C:\Users\TAHA\Desktop\2209\nutrisense`  
 **Kural:** “Var” yalnız fiziksel artefaktın bulunduğunu gösterir; artefaktın doğru, güncel veya kabul edilmiş olduğunu ayrıca kanıtlamaz.
 
+> **Snapshot notu:** Ana tablolar ilk denetim anını korur. 18 Temmuz 2026 kamera güvenlik uygulaması sonrasında güncel yürütme kanıtı: backend **31/31**, Flutter **97/97** test geçti; OpenAPI drift kontrolü ve debug APK build başarılıdır. Fiziksel cihaz E2E/latency hâlâ **NOT RUN**, gerçek TFLite model hâlâ **YOK**. Ayrıntı: `docs/camera_food_scan_pipeline.md`.
+
 ## Hızlı sonuç
 
 | Sınıf | Var | Kısmi | Yok | Kritik yorum |

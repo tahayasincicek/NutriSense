@@ -1,5 +1,7 @@
 # NutriSense — Google Play Store Türkçe Listesi
 
+> **Yayın kapısı:** Bu dosyadaki sınıf sayısı, model, erişilebilirlik ve uyumluluk iddiaları kanıt envanteriyle doğrulanmadan mağazada kullanılmamalıdır. Fiziksel Android cihaz E2E/latency kanıtı henüz çalıştırılmamıştır.
+
 ## Uygulama Adı
 NutriSense — Görme Engelliler İçin Akıllı Besin Tanıma
 
@@ -11,9 +13,9 @@ Yapay zeka ile yiyecekleri tanı, kalori hesapla, sesli geri bildirim al.
 🍽️ **NutriSense** — görme engelli bireyler için özel olarak tasarlanmış, yapay zeka destekli besin tanıma ve kalori takip uygulaması.
 
 ### Nasıl Çalışır?
-1. 📷 **Telefon kamerasını yiyeceğe tutun** — otomatik olarak besin tanınır
-2. 🔊 **Sesli geri bildirim alın** — besin adı, kalori ve porsiyon bilgisi anında okunur
-3. 📊 **Günlük kalori takibinizi yapın** — tüm öğünleriniz otomatik kaydedilir
+1. 📷 **Yiyeceğin fotoğrafını çekin** — görüntü yapılandırılmış çevrimiçi servisle analiz edilir
+2. 🔊 **Sesli geri bildirim alın** — güven yeterliyse aday ve beslenme kaynağı ayrı açıklanır
+3. 📊 **Sonucu onaylayın veya düzeltin** — yalnız onaylanan öğün geçmişe kaydedilir
 4. 👨‍⚕️ **Diyetisyeninize rapor gönderin** — haftalık beslenme raporlarınız tek tuşla iletilir
 
 ### Temel Özellikler

@@ -55,7 +55,7 @@ OpenAPI snapshot değişikliği; backend testi, mobil fixture testi ve migration
 
 | Ekran/özellik | Provider | Tek istemci metodu | Backend |
 |---|---|---|---|
-| `CameraScreen` | `apiServiceProvider` | `analyzeFood(imageBytes)` | `POST /api/v1/analyze-food` |
+| `CameraScreen` | `apiServiceProvider` | `analyzeFood()` → `decideFoodAnalysis()` | `POST /api/v1/analyze-food` → `POST /api/v1/food-analysis/{analysis_id}/decision` |
 | `FoodHistoryScreen` | `apiServiceProvider` | `getFoodHistory()` | `GET /api/v1/food-history/{user_id}` |
 | `SendReportWizard` | `apiServiceProvider` | `sendToDietitian()` | `POST /api/v1/send-to-dietitian` |
 | `LoginScreen` | `apiServiceProvider` | `login()` | `POST /api/v1/auth/login` |
@@ -77,7 +77,9 @@ OpenAPI snapshot değişikliği; backend testi, mobil fixture testi ve migration
 | GET/POST | `/dietitians/assignment` | Bearer access | Doğrulanmış diyetisyen e-postası | `DietitianAssignmentResponse` |
 | POST | `/dietitians/assignment/{id}/approve` | Bearer access | Yok | `DietitianAssignmentResponse` |
 | DELETE | `/dietitians/assignment/{id}` | Bearer access | Yok | 204 |
-| POST | `/analyze-food` | Bearer access | Multipart `image`, `meal_type` | `FoodAnalysisResponse` |
+| POST | `/analyze-food` | Bearer access | Multipart `image`, `meal_type`, `capture_id` | Onay bekleyen `FoodAnalysisResponse`; `log_id=null` |
+| POST | `/food-analysis/{analysis_id}/decision` | Bearer access | JSON `decision`, opsiyonel `corrected_food_name` | `FoodAnalysisDecisionResponse` |
+| POST | `/food-log/manual` | Bearer access | JSON `food_name`, `meal_type`, `capture_id` | Onaylı `FoodAnalysisDecisionResponse` |
 | GET | `/food-history/{user_id}` | Bearer access | `from_date`, `to_date` | `FoodHistoryResponse` |
 | POST | `/send-to-dietitian` | Bearer access | JSON `SendToDietitianRequest`; `consent=true`; önerilen `Idempotency-Key` başlığı | `SendToDietitianResponse` |
 | POST | `/survey` | Araştırma katılımcı kimliği gövdede | JSON `SurveySubmissionSchema` | `SurveyResponseSchema` |
@@ -98,6 +100,7 @@ Survey/usability gönderimlerinde hesap `user_id` değeri kullanılmaz; yalnız 
   - Görüntü RGB JPEG olarak yeniden kodlanır; EXIF/metadatası aktarılmaz.
   - En büyük kenar 2048 piksele indirilir.
 - `meal_type`: `kahvalti | ogle | aksam | atistirmalik`
+- `capture_id`: zorunlu UUID; aynı fiziksel çekimin tekrar gönderilmesini idempotent yapar.
 - `user_id` gövdede gönderilmez; access token'dan alınır.
 
 Mobil ön işleme 224×224 JPEG byte üretir ve bu byte'ları multipart dosya olarak yollar. Cancellation, Dio `CancelToken` ile çağrıdan taşıma katmanına kadar iletilir.
@@ -106,7 +109,8 @@ Mobil ön işleme 224×224 JPEG byte üretir ve bu byte'ları multipart dosya ol
 
 ```json
 {
-  "log_id": "550e8400-e29b-41d4-a716-446655440000",
+  "analysis_id": "550e8400-e29b-41d4-a716-446655440000",
+  "log_id": null,
   "food_name": "elma",
   "food_name_tr": "Elma",
   "confidence": 0.93,
@@ -122,12 +126,19 @@ Mobil ön işleme 224×224 JPEG byte üretir ve bu byte'ları multipart dosya ol
   "meal_type": "atistirmalik",
   "recognition_source": "google_vision",
   "nutrition_source": "nutritionix",
-  "needs_confirmation": false,
-  "tts_text": "Elma tanındı. 150 gram, 78 kalori."
+  "nutrition_status": "available",
+  "candidates": [
+    {"food_name": "elma", "food_name_tr": "Elma", "confidence": 0.93}
+  ],
+  "can_confirm": true,
+  "needs_confirmation": true,
+  "tts_text": "Elma tanındı. 150 gram, 78 kalori. Kaydetmek için onaylayın."
 }
 ```
 
-Mobil parser bilinmeyen alanları görmezden gelir. `log_id`, `food_name`, `food_name_tr` gibi zorunlu alanların null/boş olması veya confidence'ın `0..1` dışında olması `CONTRACT_MISMATCH` üretir; sahte varsayılanla başarı göstermez. Opsiyonel kaynak alanları bilinmiyorsa `unknown`, sayısal makrolar eksikse `0` kullanılır. `needs_confirmation=true` ise UI sonucu kesin tanıma olarak seslendirmez.
+Analiz başarılı olsa bile bu aşamada `food_logs` kaydı oluşmaz. `log_id` zorunlu olarak `null`, `needs_confirmation=true` olur. Kullanıcı onayı `decision=confirm`, düzeltme `decision=correct` ve `corrected_food_name`, ret `decision=reject` ile ayrı karar endpointine gönderilir. Yalnız confirm/correct başarılı olursa response gerçek `log_id` içerir. Aynı `analysis_id` için yinelenen onay aynı kaydı döndürür; ikinci kayıt oluşturmaz.
+
+Mobil parser bilinmeyen alanları görmezden gelir. `analysis_id`, besin adları gibi zorunlu alanların null/boş olması veya confidence'ın `0..1` dışında olması `CONTRACT_MISMATCH` üretir; sahte varsayılanla başarı göstermez. `nutrition_status=not_found`, sıfır kalori veya `can_confirm=false` kayıt oluşturamaz. `nutrition_status=unverified`, yerel ve doğrulanmamış besin tabanı kullanıldığını UI'da ayrı açıklar. Model confidence ile beslenme verisi güvenilirliği aynı ölçü değildir.
 
 `tts_text` bir response verisidir; ağ katmanı bunu seslendirmez. Seslendirme ve haptic kararı kamera/UI katmanındadır.
 
@@ -203,6 +214,7 @@ $accessToken = '<ACCESS_TOKEN_FROM_SECURE_SESSION>'
 curl.exe -X POST 'http://127.0.0.1:8000/api/v1/analyze-food' `
   -H "Authorization: Bearer $accessToken" `
   -H 'X-Request-ID: 410d2c2f-926d-4fc8-9a3d-6af18ce8d893' `
+  -F 'capture_id=6d2ab370-66e2-449d-b915-240ad8b7860a' `
   -F 'meal_type=ogle' `
   -F 'image=@C:\path\to\food.jpg;type=image/jpeg'
 ```
@@ -212,11 +224,13 @@ Flutter gerçek akışı:
 ```text
 CameraScreen
   → ImagePreprocessor.processImage()
-  → ApiService.analyzeFood(processedBytes)
+  → ApiService.analyzeFood(processedBytes, captureId)
   → multipart POST /api/v1/analyze-food
   → FoodAnalysisResult.fromJson()
-  → CameraNotifier.setResult()
-  → UI/TtsService erişilebilir geri bildirimi
+  → recognition policy + UI/TtsService erişilebilir geri bildirimi
+  → kullanıcı onayı/düzeltmesi
+  → ApiService.decideFoodAnalysis(analysisId, decision)
+  → yalnız gerçek log_id geldiyse CameraStatus.saved
 ```
 
 ## 11. Test komutları

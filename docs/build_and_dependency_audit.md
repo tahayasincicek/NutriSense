@@ -242,3 +242,13 @@ Bu bölüm, yukarıdaki eski test sayıları ve QA-01 durumunun güncel sonucudu
 - `backend\\venv\\Scripts\\python.exe scripts\\export_openapi.py --check` drift kontrolü başarılıdır. Google Vision kimliği bulunmadığına dair mesaj, opsiyonel dış sağlayıcının bilinçli olarak yapılandırılmadığını gösterir.
 
 CI Flutter sürümü yerel doğrulamayla aynı olan 3.41.4'e sabitlenmiştir. Android debug artefaktı `build/app/outputs/flutter-apk/app-debug.apk` altında üretilir; `build/` Git'e alınmaz.
+
+## 2026-07-18 kamera hattı doğrulaması
+
+- `flutter test`: **97 test geçti, 0 başarısız**.
+- `flutter analyze`: **0 error, 0 warning, 90 info**; info-only lint'ler nedeniyle exit 1, kamera değişikliğinde yeni bulgu yok.
+- `flutter build apk --debug`: başarılı; `build/app/outputs/flutter-apk/app-debug.apk` üretildi.
+- Backend `pytest -q`: **31 test geçti, 0 başarısız**.
+- OpenAPI snapshot drift kontrolü: başarılı.
+- `flutter devices` yalnız Android emülatörü, Windows ve web hedefleri buldu; fiziksel Android cihaz bulunmadı. Bu nedenle fiziksel cihaz kamera E2E ve latency kabul kapısı tamamlanmış sayılmamıştır.
+- Google Vision Application Default Credentials bulunmadı; bu durum sahte sonuçla aşılmadı. Gerçek sağlayıcı E2E sonucu **NOT RUN** olarak kalır.
