@@ -25,31 +25,41 @@ class AccessibilityUtils {
   ///
   /// Örnek: `AccessibilityUtils.announce('Elma tanındı, 78 kalori')`
   static Future<void> announce(String message) async {
-    await SemanticsService.announce(message, TextDirection.ltr);
+    await _sendAnnouncement(message);
   }
 
   /// Ekran okuyucuya hata mesajı duyurur (assertive).
   /// Daha yüksek öncelikle okunur.
   static Future<void> announceError(String message) async {
-    await SemanticsService.announce(
+    await _sendAnnouncement(
       'Hata: $message',
-      TextDirection.ltr,
+      assertiveness: Assertiveness.assertive,
     );
   }
 
   /// Ekran okuyucuya başarı mesajı duyurur.
   static Future<void> announceSuccess(String message) async {
-    await SemanticsService.announce(
-      'Başarılı: $message',
-      TextDirection.ltr,
-    );
+    await _sendAnnouncement('Başarılı: $message');
   }
 
   /// Sayfa değişikliğini duyurur.
   static Future<void> announcePageChange(String pageName) async {
-    await SemanticsService.announce(
-      '$pageName sayfasına geçildi',
+    await _sendAnnouncement('$pageName sayfasına geçildi');
+  }
+
+  /// Duyuruyu aktif Flutter görünümüne gönderir. Görünüm kurulmadan çağrılırsa
+  /// sessizce bekler; böylece test/başlatma sırasında null view hatası üretmez.
+  static Future<void> _sendAnnouncement(
+    String message, {
+    Assertiveness assertiveness = Assertiveness.polite,
+  }) async {
+    final views = WidgetsBinding.instance.platformDispatcher.views;
+    if (views.isEmpty) return;
+    await SemanticsService.sendAnnouncement(
+      views.first,
+      message,
       TextDirection.ltr,
+      assertiveness: assertiveness,
     );
   }
 

@@ -6,6 +6,8 @@ import '../../../shared/models/auth_model.dart';
 import '../../../shared/models/food_analysis_model.dart';
 import '../../../shared/services/accessibility_service.dart';
 import '../../../shared/services/api_service.dart';
+import '../../../shared/services/contextual_voice_command.dart';
+import '../../../shared/services/stt_service.dart';
 import '../../../shared/widgets/accessible_button.dart';
 
 enum ReportRange {
@@ -32,6 +34,9 @@ class _SendReportWizardState extends ConsumerState<SendReportWizard> {
   final _noteController = TextEditingController();
   final _uuid = const Uuid();
   late final AccessibilityService _accessibility;
+  late final SttService _stt;
+  static const _voiceParser = ContextualVoiceCommandParser();
+  final _voiceConfirmation = VoiceConfirmationGate();
   ReportRange _range = ReportRange.weekly;
   late DateTime _toDate;
   late DateTime _fromDate;
@@ -44,6 +49,8 @@ class _SendReportWizardState extends ConsumerState<SendReportWizard> {
   String? _idempotencyKey;
   DietitianReportPreview? _preview;
   SendToDietitianResult? _result;
+  String? _voiceStatus;
+  bool _voiceListening = false;
 
   ApiService get _api => ref.read(apiServiceProvider);
 
@@ -51,6 +58,7 @@ class _SendReportWizardState extends ConsumerState<SendReportWizard> {
   void initState() {
     super.initState();
     _accessibility = ref.read(accessibilityServiceProvider);
+    _stt = ref.read(sttServiceProvider);
     _toDate = DateTime.now();
     _setRangeDates();
     _channels = {
@@ -64,6 +72,13 @@ class _SendReportWizardState extends ConsumerState<SendReportWizard> {
         priority: TtsPriority.high,
       );
     });
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _accessibility
+        .setScreenReaderActive(MediaQuery.of(context).accessibleNavigation);
   }
 
   void _setRangeDates() {
@@ -245,6 +260,7 @@ class _SendReportWizardState extends ConsumerState<SendReportWizard> {
           onPressed: () => _accessibility.speak(
             preview.accessibilitySummary,
             priority: TtsPriority.high,
+            allowWhileScreenReaderActive: true,
           ),
           icon: const Icon(Icons.volume_up),
           label: const Text('Özeti Dinle'),
@@ -294,6 +310,33 @@ class _SendReportWizardState extends ConsumerState<SendReportWizard> {
             'bu gönderim için açıkça onaylıyorum.',
           ),
           controlAffinity: ListTileControlAffinity.leading,
+        ),
+        if (_voiceStatus != null) ...[
+          const SizedBox(height: 12),
+          Semantics(
+            liveRegion: true,
+            label: _voiceStatus,
+            child: Text(
+              _voiceStatus!,
+              key: const Key('report_voice_status'),
+            ),
+          ),
+        ],
+        const SizedBox(height: 12),
+        AccessibleButton(
+          key: const Key('report_voice_command_button'),
+          label: _voiceListening
+              ? 'Dinleniyor'
+              : _voiceConfirmation.isActive
+                  ? 'Sesli İkinci Onayı Ver'
+                  : 'Sesli Rapor Komutu',
+          semanticLabel: _voiceConfirmation.isActive
+              ? 'Rapor gönderimini ikinci kez onaylamak için evet, iptal etmek için hayır söyleyin'
+              : 'Rapor göndermek için rapor gönder deyin. Gönderimden önce ikinci onay istenir.',
+          icon: _voiceListening ? Icons.mic : Icons.mic_none,
+          type: AccessibleButtonType.outlined,
+          onPressed:
+              _voiceListening || _sending ? null : _listenForReportCommand,
         ),
         const SizedBox(height: 20),
         AccessibleButton(
@@ -454,6 +497,80 @@ class _SendReportWizardState extends ConsumerState<SendReportWizard> {
     _accessibility.speak(spoken, priority: TtsPriority.high);
   }
 
+  Future<void> _listenForReportCommand() async {
+    await _accessibility.prepareForSpeechInput();
+    await _stt.startListening(
+      listenFor: const Duration(seconds: 8),
+      onListeningStarted: () {
+        if (!mounted) return;
+        setState(() {
+          _voiceListening = true;
+          _voiceStatus = _voiceConfirmation.isActive
+              ? 'Dinleniyor. Gönderimi onaylamak için evet, vazgeçmek için hayır söyleyin.'
+              : 'Dinleniyor. Rapor gönder deyin.';
+        });
+        _accessibility.mediumHaptic();
+      },
+      onListeningStopped: () {
+        _accessibility.finishSpeechInput();
+        if (mounted) setState(() => _voiceListening = false);
+      },
+      onResult: (result) {
+        if (!result.isFinal) return;
+        _accessibility.finishSpeechInput();
+        final confirmationActive = _voiceConfirmation.isActive;
+        final intent = _voiceParser.parse(
+          result.text,
+          context: confirmationActive
+              ? VoiceInteractionContext.reportSendConfirmation
+              : VoiceInteractionContext.reportConsent,
+        );
+        if (confirmationActive) {
+          final resolved = _voiceConfirmation.resolve(intent);
+          if (resolved == ContextualVoiceAction.sendReport) {
+            setState(() {
+              _explicitConsent = true;
+              _voiceStatus = 'İkinci sesli onay alındı. Gönderim başlatılıyor.';
+            });
+            _accessibility.successHaptic();
+            _send();
+            return;
+          }
+          setState(() => _voiceStatus =
+              'Gönderim onaylanmadı. Rapor gönderilmedi. Dokunmatik onay seçeneği kullanılabilir.');
+          _accessibility.errorHaptic();
+          return;
+        }
+        if (intent.accepted &&
+            intent.action == ContextualVoiceAction.sendReport &&
+            intent.requiresSecondConfirmation) {
+          _voiceConfirmation.request(ContextualVoiceAction.sendReport);
+          setState(() => _voiceStatus =
+              'Kritik işlem. Göndermek için sesli komut düğmesine yeniden basıp evet söyleyin.');
+          _accessibility.doubleHaptic();
+          return;
+        }
+        if (intent.accepted && intent.action == ContextualVoiceAction.back) {
+          setState(() => _step = 1);
+          return;
+        }
+        setState(() => _voiceStatus =
+            'Komut güvenli biçimde reddedildi. Tam olarak rapor gönder deyin veya dokunmatik düğmeyi kullanın.');
+        _accessibility.errorHaptic();
+      },
+      onError: (message) {
+        _accessibility.finishSpeechInput();
+        if (!mounted) return;
+        setState(() {
+          _voiceListening = false;
+          _voiceStatus =
+              '$message. Mikrofon olmadan onay kutusu ve gönder düğmesi kullanılabilir.';
+        });
+        _accessibility.errorHaptic();
+      },
+    );
+  }
+
   Future<void> _retry() async {
     final reportId = _result?.reportId;
     if (reportId == null || _sending) return;
@@ -481,6 +598,9 @@ class _SendReportWizardState extends ConsumerState<SendReportWizard> {
 
   @override
   void dispose() {
+    _voiceConfirmation.clear();
+    _accessibility.finishSpeechInput();
+    _stt.cancelListening();
     _noteController.dispose();
     super.dispose();
   }

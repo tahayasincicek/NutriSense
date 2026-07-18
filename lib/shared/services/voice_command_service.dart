@@ -179,8 +179,8 @@ class VoiceCommandService {
       await _speech.stop();
     }
 
+    await _accessibility.prepareForSpeechInput();
     _setListeningState(ListeningState.listening);
-    await _accessibility.speakInfo(AppStrings.listeningStarted);
     await _accessibility.lightHaptic();
 
     await _speech.listen(
@@ -211,6 +211,7 @@ class VoiceCommandService {
     }
 
     _setListeningState(ListeningState.idle);
+    _accessibility.finishSpeechInput();
   }
 
   /// Dinleme/durdurma geçişi
@@ -231,8 +232,11 @@ class VoiceCommandService {
     if (!result.finalResult) return; // Sadece final sonuçları işle
 
     final text = result.recognizedWords.toLowerCase().trim();
-    if (text.isEmpty) return;
-
+    _accessibility.finishSpeechInput();
+    if (text.isEmpty) {
+      _setListeningState(ListeningState.idle);
+      return;
+    }
     _setListeningState(ListeningState.processing);
 
     // Fuzzy matching ile komut ara
@@ -390,6 +394,10 @@ class VoiceCommandService {
   }
 
   void _onStatus(String status) {
+    if (status == 'notListening' || status == 'done') {
+      _accessibility.finishSpeechInput();
+      if (!_continuousMode) _setListeningState(ListeningState.idle);
+    }
     if (status == 'notListening' && _continuousMode) {
       _restartTimer?.cancel();
       _restartTimer = Timer(_restartDelay, () {
@@ -399,6 +407,7 @@ class VoiceCommandService {
   }
 
   void _onError(SpeechRecognitionError error) {
+    _accessibility.finishSpeechInput();
     if (error.permanent) {
       _accessibility.speakError(
         'Sesli tanıma kalıcı olarak başarısız oldu. '

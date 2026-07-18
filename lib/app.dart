@@ -12,7 +12,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'core/utils/accessibility_utils.dart';
-import 'shared/services/tts_service.dart';
+import 'shared/services/accessibility_service.dart';
 import 'shared/services/voice_command_service.dart';
 import 'features/food_scan/screens/food_scan_screen.dart';
 import 'features/history/screens/food_history_screen.dart';
@@ -31,6 +31,9 @@ class AppShell extends ConsumerStatefulWidget {
 }
 
 class _AppShellState extends ConsumerState<AppShell> {
+  ListeningState _listeningState = ListeningState.idle;
+  String? _voiceStatus;
+  late final VoiceCommandService _voiceCmdService;
   // Sekmeler — lazy olarak oluşturulur (IndexedStack sayesinde state korunur)
   // Sekme bilgileri
   static const List<_TabInfo> _tabs = [
@@ -74,6 +77,7 @@ class _AppShellState extends ConsumerState<AppShell> {
   @override
   void initState() {
     super.initState();
+    _voiceCmdService = ref.read(voiceCommandServiceProvider);
     // Uygulama açılışında hoş geldiniz mesajı
     WidgetsBinding.instance.addPostFrameCallback((_) {
       AccessibilityUtils.announce(
@@ -84,9 +88,36 @@ class _AppShellState extends ConsumerState<AppShell> {
       );
 
       // Sesli komut dinleyicisini ayarla
-      final voiceCmdService = ref.read(voiceCommandServiceProvider);
-      voiceCmdService.onCommandRecognized = _handleVoiceCommand;
+      _voiceCmdService.onCommandRecognized = _handleVoiceCommand;
+      _voiceCmdService.onListeningStateChanged = (state) {
+        if (!mounted) return;
+        setState(() {
+          _listeningState = state;
+          _voiceStatus = switch (state) {
+            ListeningState.listening =>
+              'Sesli komut dinleniyor. Konuşmaya başlayın.',
+            ListeningState.processing => 'Sesli komut işleniyor.',
+            ListeningState.idle => null,
+          };
+        });
+      };
     });
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    ref
+        .read(accessibilityServiceProvider)
+        .setScreenReaderActive(MediaQuery.of(context).accessibleNavigation);
+  }
+
+  @override
+  void dispose() {
+    _voiceCmdService.onCommandRecognized = null;
+    _voiceCmdService.onListeningStateChanged = null;
+    _voiceCmdService.stopListening();
+    super.dispose();
   }
 
   /// Sesli komut algılandığında çalıştırılacak işlem
@@ -137,8 +168,8 @@ class _AppShellState extends ConsumerState<AppShell> {
     AccessibilityUtils.announcePageChange(tab.label);
 
     // TTS ile detaylı açıklama (ekran okuyucu kullanmayanlar için)
-    final tts = ref.read(ttsServiceProvider);
-    tts.speak(tab.ttsAnnouncement);
+    final accessibility = ref.read(accessibilityServiceProvider);
+    accessibility.speak(tab.ttsAnnouncement);
   }
 
   @override
@@ -148,13 +179,41 @@ class _AppShellState extends ConsumerState<AppShell> {
 
     return Scaffold(
       // IndexedStack: tüm sekmelerin state'ini korur, her seferinde rebuild etmez
-      body: IndexedStack(
-        index: currentIndex,
+      body: Stack(
         children: [
-          const FoodScanScreen(),
-          FoodHistoryScreen(onScanRequested: () => _onTabChanged(0)),
-          const DietitianScreen(),
-          const SettingsScreen(),
+          IndexedStack(
+            index: currentIndex,
+            children: [
+              const FoodScanScreen(),
+              FoodHistoryScreen(onScanRequested: () => _onTabChanged(0)),
+              const DietitianScreen(),
+              const SettingsScreen(),
+            ],
+          ),
+          if (_voiceStatus != null)
+            Positioned(
+              left: 16,
+              right: 16,
+              bottom: 16,
+              child: Semantics(
+                liveRegion: true,
+                label: _voiceStatus,
+                child: Material(
+                  color: theme.colorScheme.inverseSurface,
+                  borderRadius: BorderRadius.circular(12),
+                  child: Padding(
+                    padding: const EdgeInsets.all(12),
+                    child: Text(
+                      _voiceStatus!,
+                      key: const Key('global_voice_status'),
+                      style: TextStyle(
+                        color: theme.colorScheme.onInverseSurface,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
         ],
       ),
 
@@ -200,13 +259,20 @@ class _AppShellState extends ConsumerState<AppShell> {
 
       // Floating Action Button — sesli komut kısayolu
       floatingActionButton: Semantics(
-        label: 'Sesli komut butonu. Mikrofona konuşarak komut verin.',
+        label: _listeningState == ListeningState.listening
+            ? 'Sesli komut dinleniyor. Durdurmak için dokunun.'
+            : 'Sesli komut butonu. Mikrofona konuşarak komut verin.',
         hint: 'Çift dokunarak sesli komutu başlatın',
         button: true,
         child: FloatingActionButton.large(
           onPressed: _startVoiceCommand,
           heroTag: 'voice_command_fab',
-          child: const Icon(Icons.mic, size: 36),
+          child: Icon(
+            _listeningState == ListeningState.listening
+                ? Icons.mic
+                : Icons.mic_none,
+            size: 36,
+          ),
         ),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
@@ -215,8 +281,7 @@ class _AppShellState extends ConsumerState<AppShell> {
 
   /// Sesli komut dinlemeyi başlatır
   void _startVoiceCommand() {
-    final voiceCmdService = ref.read(voiceCommandServiceProvider);
-    voiceCmdService.toggleListening();
+    _voiceCmdService.toggleListening();
   }
 }
 

@@ -13,9 +13,10 @@ import '../../../core/constants/app_constants.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/accessibility_utils.dart';
 import '../../../shared/models/food_analysis_model.dart';
+import '../../../shared/services/accessibility_service.dart';
 import '../../../shared/services/api_service.dart';
+import '../../../shared/services/contextual_voice_command.dart';
 import '../../../shared/services/stt_service.dart';
-import '../../../shared/services/tts_service.dart';
 import '../../../shared/widgets/accessible_button.dart';
 import '../../history/state/history_controller.dart';
 import '../models/camera_state.dart';
@@ -30,7 +31,14 @@ final availableCamerasProvider = FutureProvider<List<CameraDescription>>((ref) {
 });
 
 class CameraScreen extends ConsumerStatefulWidget {
-  const CameraScreen({super.key});
+  const CameraScreen({
+    super.key,
+    this.initializeHardware = true,
+  });
+
+  /// Yalnız widget testlerinde platform kamerasını başlatmadan gerçek ekran
+  /// ağacını doğrulamak için kullanılır. Ürün varsayılanı her zaman `true`dur.
+  final bool initializeHardware;
 
   @override
   ConsumerState<CameraScreen> createState() => _CameraScreenState();
@@ -42,12 +50,13 @@ class _CameraScreenState extends ConsumerState<CameraScreen>
   static const _policy = RecognitionPolicy();
   static const _qualityWarningCooldown = Duration(seconds: 6);
   static const _uuid = Uuid();
+  static const _voiceParser = ContextualVoiceCommandParser();
 
   CameraController? _controller;
   Timer? _autoCaptureTimer;
   CancelToken? _requestCancelToken;
   File? _temporaryCapture;
-  late final TtsService _tts;
+  late final AccessibilityService _tts;
   late final SttService _stt;
   late final OfflineFoodRecognizer _offline;
   bool _initialized = false;
@@ -58,15 +67,25 @@ class _CameraScreenState extends ConsumerState<CameraScreen>
   int _generation = 0;
   DateTime? _lastQualityWarningAt;
   String? _captureId;
+  String? _voiceStatus;
+  bool _voiceListening = false;
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-    _tts = ref.read(ttsServiceProvider);
+    _tts = ref.read(accessibilityServiceProvider);
     _stt = ref.read(sttServiceProvider);
     _offline = ref.read(offlineFoodRecognizerProvider);
-    WidgetsBinding.instance.addPostFrameCallback((_) => _initializeCamera());
+    if (widget.initializeHardware) {
+      WidgetsBinding.instance.addPostFrameCallback((_) => _initializeCamera());
+    }
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _tts.setScreenReaderActive(MediaQuery.of(context).accessibleNavigation);
   }
 
   @override
@@ -76,7 +95,7 @@ class _CameraScreenState extends ConsumerState<CameraScreen>
     WidgetsBinding.instance.removeObserver(this);
     _stopAutoCapture();
     _requestCancelToken?.cancel('Kamera ekranı kapatıldı.');
-    unawaited(_stt.cancelListening());
+    if (widget.initializeHardware) unawaited(_stt.cancelListening());
     unawaited(_deleteTemporaryCapture());
     unawaited(_controller?.dispose());
     _controller = null;
@@ -477,6 +496,7 @@ class _CameraScreenState extends ConsumerState<CameraScreen>
     await _tts.speak(
       'Porsiyonu birimiyle söyleyin. Örnek: yüz elli gram veya iki dilim.',
     );
+    await _tts.prepareForSpeechInput();
     await _stt.startListening(
       listenFor: const Duration(seconds: 8),
       onResult: (result) {
@@ -486,6 +506,7 @@ class _CameraScreenState extends ConsumerState<CameraScreen>
           unawaited(_tts.speakError(
             'Porsiyon anlaşılamadı. Gram, adet, dilim veya kase ile tekrar söyleyin.',
           ));
+          _tts.finishSpeechInput();
           return;
         }
         unawaited(_updatePortion(
@@ -493,8 +514,12 @@ class _CameraScreenState extends ConsumerState<CameraScreen>
           input.unit,
           method: 'user_voice',
         ));
+        _tts.finishSpeechInput();
       },
-      onError: (message) => _tts.speakError(message),
+      onError: (message) {
+        _tts.finishSpeechInput();
+        _tts.speakError(message);
+      },
     );
   }
 
@@ -586,34 +611,89 @@ class _CameraScreenState extends ConsumerState<CameraScreen>
   }
 
   Future<void> _listenForDecision() async {
+    await _tts.prepareForSpeechInput();
     await _stt.startListening(
       listenFor: const Duration(seconds: 8),
+      onListeningStarted: () {
+        if (!mounted) return;
+        setState(() {
+          _voiceListening = true;
+          _voiceStatus =
+              'Dinleniyor. Evet, hayır, tekrar çek veya seçenek söyleyin.';
+        });
+        unawaited(_tts.mediumHaptic());
+      },
+      onListeningStopped: () {
+        _tts.finishSpeechInput();
+        if (!mounted) return;
+        setState(() => _voiceListening = false);
+      },
       onResult: (result) {
         if (!result.isFinal) return;
-        final text = result.text.toLowerCase();
-        if (text.contains('evet') || text.contains('onay')) {
-          unawaited(_confirm());
-        } else if (text.contains('hayır') || text.contains('reddet')) {
-          unawaited(_reject());
-        } else {
-          final candidates =
-              ref.read(cameraStateProvider).analysis?.candidates ?? [];
-          final index = text.contains('bir')
-              ? 0
-              : text.contains('iki')
-                  ? 1
-                  : text.contains('üç')
-                      ? 2
-                      : -1;
-          if (index >= 0 && index < candidates.length) {
-            unawaited(_confirm(
-              correctedName: candidates[index].foodName,
-              correctedNameTr: candidates[index].foodNameTr,
-            ));
+        _tts.finishSpeechInput();
+        final intent = _voiceParser.parse(
+          result.text,
+          context: VoiceInteractionContext.scanConfirmation,
+        );
+        if (!intent.accepted) {
+          if (mounted) {
+            setState(() => _voiceStatus =
+                'Komut anlaşılmadı. Dokunmatik düğmeleri kullanabilir veya yeniden deneyebilirsiniz.');
           }
+          unawaited(_tts.errorHaptic());
+          return;
+        }
+        switch (intent.action!) {
+          case ContextualVoiceAction.yes:
+          case ContextualVoiceAction.save:
+            unawaited(_confirm());
+            break;
+          case ContextualVoiceAction.no:
+          case ContextualVoiceAction.cancel:
+            unawaited(_reject());
+            break;
+          case ContextualVoiceAction.retake:
+            _reset();
+            break;
+          case ContextualVoiceAction.firstOption:
+          case ContextualVoiceAction.secondOption:
+          case ContextualVoiceAction.thirdOption:
+            final candidates =
+                ref.read(cameraStateProvider).analysis?.candidates ?? [];
+            final index = switch (intent.action!) {
+              ContextualVoiceAction.firstOption => 0,
+              ContextualVoiceAction.secondOption => 1,
+              _ => 2,
+            };
+            if (index < candidates.length) {
+              unawaited(_confirm(
+                correctedName: candidates[index].foodName,
+                correctedNameTr: candidates[index].foodNameTr,
+              ));
+            }
+            break;
+          case ContextualVoiceAction.setPortion:
+            unawaited(_updatePortion(intent.portionGrams!, 'gram',
+                method: 'user_voice'));
+            break;
+          case ContextualVoiceAction.back:
+            if (mounted) Navigator.pop(context);
+            break;
+          default:
+            break;
         }
       },
-      onError: (message) => _tts.speakError(message),
+      onError: (message) {
+        _tts.finishSpeechInput();
+        if (mounted) {
+          setState(() {
+            _voiceListening = false;
+            _voiceStatus =
+                '$message. Mikrofon olmadan dokunmatik düğmeleri kullanabilirsiniz.';
+          });
+        }
+        _tts.errorHaptic();
+      },
     );
   }
 
@@ -806,6 +886,17 @@ class _CameraScreenState extends ConsumerState<CameraScreen>
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
+          if (_voiceStatus != null)
+            Semantics(
+              liveRegion: true,
+              label: _voiceStatus,
+              child: Text(
+                _voiceStatus!,
+                key: const Key('camera_voice_status'),
+                textAlign: TextAlign.center,
+                style: const TextStyle(color: Colors.white),
+              ),
+            ),
           if (analysis?.canConfirm == true) ...[
             AccessiblePortionSelector(
               result: analysis!,
@@ -861,9 +952,14 @@ class _CameraScreenState extends ConsumerState<CameraScreen>
                   onPressed: _reject,
                 ),
                 IconButton(
-                  tooltip: 'Sesli evet, hayır veya seçenek söyle',
+                  tooltip: _voiceListening
+                      ? 'Sesli komut dinleniyor'
+                      : 'Sesli evet, hayır, tekrar çek veya seçenek söyle',
                   onPressed: _listenForDecision,
-                  icon: const Icon(Icons.mic, color: Colors.white),
+                  icon: Icon(
+                    _voiceListening ? Icons.mic : Icons.mic_none,
+                    color: Colors.white,
+                  ),
                 ),
               ],
             )

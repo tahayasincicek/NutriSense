@@ -10,7 +10,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/accessibility_utils.dart';
-import '../../../shared/services/tts_service.dart';
+import '../../../shared/services/accessibility_service.dart';
 import '../../../shared/widgets/accessible_button.dart';
 import '../../../shared/widgets/accessible_card.dart';
 import '../../../shared/widgets/accessible_text.dart';
@@ -65,7 +65,7 @@ class _FoodScanScreenState extends ConsumerState<FoodScanScreen> {
                 borderRadius: BorderRadius.circular(24),
                 child: Container(
                   width: double.infinity,
-                  height: 200,
+                  constraints: const BoxConstraints(minHeight: 200),
                   decoration: BoxDecoration(
                     gradient: const LinearGradient(
                       begin: Alignment.topLeft,
@@ -83,6 +83,7 @@ class _FoodScanScreenState extends ConsumerState<FoodScanScreen> {
                   ),
                   child: ExcludeSemantics(
                     child: Column(
+                      mainAxisSize: MainAxisSize.min,
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         const Icon(
@@ -132,11 +133,11 @@ class _FoodScanScreenState extends ConsumerState<FoodScanScreen> {
                 leading: const Icon(Icons.restaurant, size: 32),
                 backgroundColor: AppTheme.successColor.withOpacity(0.1),
                 onTap: () {
-                  final tts = ref.read(ttsServiceProvider);
-                  tts.speakFoodResult(
-                    foodName: _lastFood!,
-                    calories: _lastCalories ?? 0,
-                    portionGrams: 100,
+                  final accessibility = ref.read(accessibilityServiceProvider);
+                  accessibility.speak(
+                    '$_lastFood. Yaklaşık ${(_lastCalories ?? 0).toStringAsFixed(0)} kalori.',
+                    priority: TtsPriority.high,
+                    allowWhileScreenReaderActive: true,
                   );
                 },
               ),
@@ -193,7 +194,10 @@ class _FoodScanScreenState extends ConsumerState<FoodScanScreen> {
 
     // CameraScreen'e git, sonucu bekle
     final result = await Navigator.of(context).push<CameraState>(
-      MaterialPageRoute(builder: (_) => const CameraScreen()),
+      MaterialPageRoute(
+        settings: const RouteSettings(name: '/camera'),
+        builder: (_) => const CameraScreen(),
+      ),
     );
 
     // Sonuç dönerse güncelle

@@ -16,6 +16,7 @@
 import 'dart:async';
 import 'dart:collection';
 import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -46,16 +47,16 @@ enum TtsPriority {
 class _TtsMessage implements Comparable<_TtsMessage> {
   final String text;
   final TtsPriority priority;
-  final DateTime addedAt;
+  final int sequence;
 
-  _TtsMessage(this.text, this.priority) : addedAt = DateTime.now();
+  _TtsMessage(this.text, this.priority, this.sequence);
 
   @override
   int compareTo(_TtsMessage other) {
     // Yüksek öncelik önce, aynı öncelikte ekleme sırasına göre
     final priComp = other.priority.value.compareTo(priority.value);
     if (priComp != 0) return priComp;
-    return addedAt.compareTo(other.addedAt);
+    return sequence.compareTo(other.sequence);
   }
 }
 
@@ -77,7 +78,7 @@ class _PrefKeys {
 // ═══════════════════════════════════════════════════════════════════════════════
 
 /// NutriSense erişilebilirlik ana servisi
-class AccessibilityService {
+class AccessibilityService with WidgetsBindingObserver {
   final FlutterTts _tts = FlutterTts();
   SharedPreferences? _prefs;
 
@@ -86,10 +87,15 @@ class AccessibilityService {
   bool _isSpeaking = false;
   bool _isPaused = false;
   bool _isAppInForeground = true;
+  bool _screenReaderActive = false;
+  bool _speechInputActive = false;
+  bool _observerRegistered = false;
+  String? _ttsFailureReason;
 
   // ── Öncelikli kuyruk ──
   final SplayTreeSet<_TtsMessage> _messageQueue = SplayTreeSet<_TtsMessage>();
   bool _isProcessingQueue = false;
+  int _nextMessageSequence = 0;
 
   // ── Ayarlar (varsayılanlar) ──
   double _speechRate = 0.5;
@@ -109,6 +115,9 @@ class AccessibilityService {
   bool get vibrationEnabled => _vibrationEnabled;
   double get autoReadDelay => _autoReadDelay;
   bool get highContrast => _highContrast;
+  bool get screenReaderActive => _screenReaderActive;
+  bool get speechInputActive => _speechInputActive;
+  String? get ttsFailureReason => _ttsFailureReason;
 
   // ─────────────────────────────────────────────────────────────────────────
   // BAŞLATMA
@@ -118,15 +127,26 @@ class AccessibilityService {
   Future<void> initialize() async {
     if (_isInitialized) return;
 
+    if (!_observerRegistered) {
+      WidgetsBinding.instance.addObserver(this);
+      _observerRegistered = true;
+    }
+
     // Tercihleri yükle
     _prefs = await SharedPreferences.getInstance();
     _loadPreferences();
 
     // TTS konfigürasyonu
-    await _tts.setLanguage('tr-TR');
+    final languageAvailable = await _tts.isLanguageAvailable('tr-TR');
+    if (languageAvailable == true) {
+      await _tts.setLanguage('tr-TR');
+    } else {
+      _ttsFailureReason = 'Türkçe metin okuma sesi bu cihazda bulunamadı.';
+    }
     await _tts.setSpeechRate(_speechRate);
     await _tts.setPitch(_pitch);
     await _tts.setVolume(_volume);
+    await _tts.awaitSpeakCompletion(true);
 
     // iOS ayarları
     await _tts.setIosAudioCategory(
@@ -166,6 +186,7 @@ class AccessibilityService {
 
     _tts.setErrorHandler((msg) {
       _isSpeaking = false;
+      _ttsFailureReason = 'Metin okuma motoru konuşmayı tamamlayamadı.';
     });
 
     _isInitialized = true;
@@ -193,15 +214,20 @@ class AccessibilityService {
   Future<void> speak(
     String text, {
     TtsPriority priority = TtsPriority.normal,
+    bool allowWhileScreenReaderActive = false,
   }) async {
     if (text.isEmpty || !_isInitialized) return;
     if (!_isAppInForeground && priority != TtsPriority.critical) return;
+    if (_speechInputActive || _ttsFailureReason != null) return;
+    if (_screenReaderActive && !allowWhileScreenReaderActive) return;
 
     if (priority == TtsPriority.critical) {
       // Kritik: hemen kes ve çal
       await stop();
       _messageQueue.clear();
+      _isSpeaking = true;
       await _tts.speak(text);
+      _isSpeaking = false;
       if (_vibrationEnabled) await heavyHaptic();
       return;
     }
@@ -212,7 +238,9 @@ class AccessibilityService {
       return;
     }
 
-    _messageQueue.add(_TtsMessage(text, priority));
+    // SplayTreeSet karşılaştırması kimlik görevi de görür. Monoton sıra numarası,
+    // aynı öncelikte aynı anda eklenen iki farklı duyurunun kaybolmasını önler.
+    _messageQueue.add(_TtsMessage(text, priority, _nextMessageSequence++));
     _processQueue();
   }
 
@@ -225,20 +253,12 @@ class AccessibilityService {
       final message = _messageQueue.first;
       _messageQueue.remove(message);
 
+      _isSpeaking = true;
       await _tts.speak(message.text);
-
-      // Konuşma bitene kadar bekle
-      await _waitForSpeechComplete();
+      _isSpeaking = false;
     }
 
     _isProcessingQueue = false;
-  }
-
-  Future<void> _waitForSpeechComplete() async {
-    // Basit polling — FlutterTts completion handler state'i günceller
-    while (_isSpeaking) {
-      await Future.delayed(const Duration(milliseconds: 100));
-    }
   }
 
   /// Tüm konuşmayı durdurur ve kuyruğu temizler.
@@ -248,6 +268,24 @@ class AccessibilityService {
     _isSpeaking = false;
     _isPaused = false;
     _isProcessingQueue = false;
+  }
+
+  /// Ekran okuyucu etkinse otomatik TTS'i susturur ve çift konuşmayı önler.
+  void setScreenReaderActive(bool active) {
+    if (_screenReaderActive == active) return;
+    _screenReaderActive = active;
+    if (active && _isInitialized) unawaited(stop());
+  }
+
+  /// STT mikrofonunu açmadan önce bütün TTS çıkışını ve kuyruğu durdurur.
+  Future<void> prepareForSpeechInput() async {
+    _speechInputActive = true;
+    if (_isInitialized) await stop();
+  }
+
+  /// STT tamamlandığında TTS kuyruğunun yeniden kullanılabilmesini sağlar.
+  void finishSpeechInput() {
+    _speechInputActive = false;
   }
 
   /// Konuşmayı duraklatır.
@@ -360,6 +398,21 @@ class AccessibilityService {
     }
   }
 
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    switch (state) {
+      case AppLifecycleState.resumed:
+        onAppResumed();
+        break;
+      case AppLifecycleState.inactive:
+      case AppLifecycleState.hidden:
+      case AppLifecycleState.paused:
+      case AppLifecycleState.detached:
+        onAppPaused();
+        break;
+    }
+  }
+
   // ─────────────────────────────────────────────────────────────────────────
   // HAPTİK GERİ BİLDİRİM
   // ─────────────────────────────────────────────────────────────────────────
@@ -414,6 +467,10 @@ class AccessibilityService {
 
   /// Kaynakları serbest bırakır
   void dispose() {
+    if (_observerRegistered) {
+      WidgetsBinding.instance.removeObserver(this);
+      _observerRegistered = false;
+    }
     _messageQueue.clear();
     _tts.stop();
     _isInitialized = false;

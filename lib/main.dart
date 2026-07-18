@@ -12,7 +12,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'core/config/app_config.dart';
 import 'core/theme/app_theme.dart';
-import 'shared/services/tts_service.dart';
+import 'shared/services/accessibility_service.dart';
 import 'app.dart';
 import 'features/auth/screens/auth_gate.dart';
 
@@ -20,12 +20,6 @@ void main() async {
   // Flutter engine başlatma — native platform çağrıları için gerekli
   WidgetsFlutterBinding.ensureInitialized();
   AppConfig.validate();
-
-  // Dikey yönlendirmeyi kilitle (erişilebilirlik: tutarlı deneyim)
-  await SystemChrome.setPreferredOrientations([
-    DeviceOrientation.portraitUp,
-    DeviceOrientation.portraitDown,
-  ]);
 
   // Durum çubuğu stili
   SystemChrome.setSystemUIOverlayStyle(
@@ -70,8 +64,8 @@ class _NutriSenseAppState extends ConsumerState<NutriSenseApp> {
 
   Future<void> _initializeServices() async {
     // TTS servisini asenkron olarak başlat
-    final ttsService = ref.read(ttsServiceProvider);
-    await ttsService.initialize();
+    final accessibility = ref.read(accessibilityServiceProvider);
+    await accessibility.initialize();
   }
 
   @override

@@ -212,6 +212,7 @@ class _DietitianScreenState extends ConsumerState<DietitianScreen> {
   Future<void> _sendReport() async {
     await Navigator.of(context).push(
       MaterialPageRoute(
+        settings: const RouteSettings(name: '/dietitian/report'),
         builder: (_) => SendReportWizard(assignment: _assignment!),
       ),
     );
