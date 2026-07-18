@@ -60,11 +60,13 @@ Production için yasal saklama/audit politikası, yedeklerden silme takvimi ve d
 2. Backend yalnız aktif ve en az bir doğrulanmış iletişim kanalına sahip diyetisyeni kabul eder.
 3. Atama `pending` oluşur; aynı kullanıcının ikinci aktif ataması 409 ile reddedilir.
 4. Yalnız atamanın sahibi onaylayabilir. Onay `approved` durumuna geçer ve kullanıcıya bağlanır.
-5. Yalnız onaylı atama rapor paylaşabilir. İstek gövdesinde `consent: true` zorunludur.
-6. Yalnız doğrulanmış e-posta/telefon kanalı bildirim servisine verilir.
-7. Kullanıcı pending veya approved atamayı iptal edebilir; durum `cancelled` olur ve aktif bağ kaldırılır.
+5. Yalnız onaylı atama rapor önizleyebilir; alıcı mobilde maskeli gösterilir.
+6. Önizleme tarih aralığı, kanallar, maskeli alıcı ve gönderilecek gerçek kayıt kümesini bir `consent_context_hash` değerine bağlar.
+7. Kullanıcı erişilebilir özeti gördükten/dinledikten sonra her gönderim için ayrı açık onay verir. `consent: true`, preview hash ve `Idempotency-Key` zorunludur.
+8. Yalnız doğrulanmış e-posta/telefon kanalı bildirim servisine verilir. Kanal sonuçları birbirinden bağımsız saklanır.
+9. Kullanıcı pending veya approved atamayı iptal edebilir; durum `cancelled` olur ve aktif bağ kaldırılır.
 
-Başka kullanıcının UUID'siyle geçmiş okuma veya rapor gönderme 403; başka kullanıcının assignment UUID'sini onaylama 404 döner. Otomatik/periyodik rapor paylaşımı yoktur; her gönderim kullanıcı arayüzünde ayrı checkbox onayı gerektirir.
+Başka kullanıcının UUID'siyle geçmiş okuma 403; başka kullanıcının raporunu görme/retry etme ve assignment UUID'sini onaylama 404 döner. Otomatik/periyodik rapor paylaşımı yoktur; her gönderim kullanıcı arayüzünde önizleme sonrası ayrı checkbox onayı gerektirir. Sağlayıcı kabulü nihai insan teslimatı olarak gösterilmez; e-posta/SMS kısmi sonuçları ayrı sunulur.
 
 ## Tehdit özeti
 

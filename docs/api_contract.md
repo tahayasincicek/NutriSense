@@ -57,7 +57,7 @@ OpenAPI snapshot değişikliği; backend testi, mobil fixture testi ve migration
 |---|---|---|---|
 | `CameraScreen` | `apiServiceProvider` | `analyzeFood()` → `decideFoodAnalysis()` | `POST /api/v1/analyze-food` → `POST /api/v1/food-analysis/{analysis_id}/decision` |
 | `FoodHistoryScreen` | `historyControllerProvider` → `HistoryRepository` → `apiServiceProvider` | `getFoodHistory()`, `updateFoodLog()`, `deleteFoodLog()`, `restoreFoodLog()` | Geçmiş ve kullanıcıya ait kayıt yaşam döngüsü |
-| `SendReportWizard` | `apiServiceProvider` | `sendToDietitian()` | `POST /api/v1/send-to-dietitian` |
+| `SendReportWizard` | `apiServiceProvider` | `previewDietitianReport()`, `sendToDietitian()`, `retryDietitianReport()` | Önizleme → rıza-bağlı gönderim → kanal retry |
 | `LoginScreen` | `apiServiceProvider` | `login()` | `POST /api/v1/auth/login` |
 | Survey | `SurveyService` → `ApiService` | `submitSurvey()` | `POST /api/v1/survey` |
 | Usability | `SurveyService` → `ApiService` | `submitUsability()` | `POST /api/v1/usability` |
@@ -84,7 +84,10 @@ OpenAPI snapshot değişikliği; backend testi, mobil fixture testi ve migration
 | PATCH | `/food-logs/{log_id}` | Bearer access | Besin etiketi, gram ve/veya öğün türü | Güncellenmiş `FoodLogEntry` |
 | DELETE | `/food-logs/{log_id}` | Bearer access | Yok | Soft-delete sonucu |
 | POST | `/food-logs/{log_id}/restore` | Bearer access | Yok | Geri alma sonucu |
-| POST | `/send-to-dietitian` | Bearer access | JSON `SendToDietitianRequest`; `consent=true`; önerilen `Idempotency-Key` başlığı | `SendToDietitianResponse` |
+| POST | `/dietitian-reports/preview` | Bearer access | Dönem, kanallar ve opsiyonel not | Maskeli alıcı, gerçek kayıt özeti ve `consent_context_hash` |
+| POST | `/send-to-dietitian` | Bearer access | `consent=true`, preview hash; zorunlu `Idempotency-Key` | Rapor ve kanal bazlı `queued/sent/failed` sonucu |
+| POST | `/dietitian-reports/{report_id}/retry` | Bearer access | Yok | Yalnız sahibin uygun başarısız kanallarını yeniden işler |
+| GET | `/dietitian-reports` | Bearer access | Yok | Güncel kullanıcının maskeli gönderim geçmişi |
 | POST | `/survey` | Araştırma katılımcı kimliği gövdede | JSON `SurveySubmissionSchema` | `SurveyResponseSchema` |
 | POST | `/usability` | Araştırma katılımcı kimliği gövdede | JSON `UsabilitySessionSchema` | `UsabilityResponseSchema` |
 
