@@ -336,7 +336,18 @@ class SurveySubmission(Base):
     answers_json = Column(JSON, nullable=False)
     completion_seconds = Column(Integer, nullable=True)
     device_info = Column(String(255), nullable=True)
+    protocol_version = Column(String(64), nullable=False, default="legacy-unverified")
+    approval_reference = Column(String(128), nullable=False, default="legacy-unverified")
+    data_origin = Column(String(16), nullable=False, default="synthetic")
+    idempotency_key = Column(String(128), nullable=True)
     submitted_at = Column(UTCDateTime, default=utc_now, nullable=False, index=True)
+    __table_args__ = (
+        UniqueConstraint(
+            "participant_pseudonym",
+            "idempotency_key",
+            name="uq_survey_participant_idempotency",
+        ),
+    )
 
 
 class UsabilitySession(Base):
@@ -348,7 +359,19 @@ class UsabilitySession(Base):
     general_note = Column(String(1000), nullable=True)
     success_rate = Column(Float, nullable=True)
     avg_task_duration = Column(Float, nullable=True)
+    schema_version = Column(String(32), nullable=False, default="1.0")
+    protocol_version = Column(String(64), nullable=False, default="legacy-unverified")
+    approval_reference = Column(String(128), nullable=False, default="legacy-unverified")
+    data_origin = Column(String(16), nullable=False, default="synthetic")
+    idempotency_key = Column(String(128), nullable=True)
     created_at = Column(UTCDateTime, default=utc_now, nullable=False)
+    __table_args__ = (
+        UniqueConstraint(
+            "participant_pseudonym",
+            "idempotency_key",
+            name="uq_usability_participant_idempotency",
+        ),
+    )
 
 
 class UsabilityTask(Base):
@@ -364,7 +387,33 @@ class UsabilityTask(Base):
     ended_at = Column(UTCDateTime, nullable=True)
     duration_seconds = Column(Float, nullable=True)
     is_success = Column(Boolean, nullable=True)
+    error_count = Column(Integer, nullable=False, default=0)
+    assistance_level = Column(String(32), nullable=False, default="none")
+    abort_reason = Column(String(255), nullable=True)
+    timing_source = Column(String(32), nullable=False, default="monotonic")
+    manually_edited = Column(Boolean, nullable=False, default=False)
+    edit_reason = Column(String(255), nullable=True)
     researcher_note = Column(String(1000), nullable=True)
+
+
+class ResearchConsent(Base):
+    """Consent evidence kept separate from survey and usability outcomes."""
+
+    __tablename__ = "research_consents"
+
+    id = Column(UUIDString, primary_key=True, default=lambda: str(uuid.uuid4()))
+    participant_pseudonym = Column(UUIDString, nullable=False, unique=True, index=True)
+    protocol_version = Column(String(64), nullable=False)
+    consent_version = Column(String(64), nullable=False)
+    approval_reference = Column(String(128), nullable=False)
+    consent_method = Column(String(32), nullable=False)
+    evidence_reference = Column(String(255), nullable=True)
+    witness_reference = Column(String(255), nullable=True)
+    withdrawal_code_hash = Column(String(64), nullable=False, unique=True)
+    data_origin = Column(String(16), nullable=False)
+    granted_at = Column(UTCDateTime, nullable=False, default=utc_now)
+    withdrawn_at = Column(UTCDateTime, nullable=True)
+    created_at = Column(UTCDateTime, nullable=False, default=utc_now)
 
 
 class RefreshToken(Base):

@@ -74,6 +74,13 @@ class Settings(BaseSettings):
 
     cors_origins: str = "http://localhost:3000"
     research_export_token: str = ""
+    # disabled: no collection; synthetic: fixtures only; approved: consented
+    # participant collection is allowed after the external ethics gate is set.
+    research_mode: str = "synthetic"
+    research_protocol_version: str = ""
+    research_consent_version: str = ""
+    research_approval_reference: str = ""
+    research_audio_consent_approved: bool = False
     migration_check_enabled: bool = True
     max_analysis_image_bytes: int = 5 * 1024 * 1024
     max_analysis_image_pixels: int = 20_000_000
@@ -144,6 +151,23 @@ class Settings(BaseSettings):
         if environment == "test":
             self.validate_test_database_safety()
 
+        if self.research_mode not in {"disabled", "synthetic", "approved"}:
+            raise RuntimeError(
+                "RESEARCH_MODE disabled, synthetic veya approved olmalıdır."
+            )
+        if self.research_mode == "approved":
+            required = {
+                "RESEARCH_PROTOCOL_VERSION": self.research_protocol_version,
+                "RESEARCH_CONSENT_VERSION": self.research_consent_version,
+                "RESEARCH_APPROVAL_REFERENCE": self.research_approval_reference,
+            }
+            invalid = [name for name, value in required.items() if _unsafe_research_value(value)]
+            if invalid:
+                raise RuntimeError(
+                    "Onaylı araştırma modu için gerçek ve kurulca doğrulanmış "
+                    f"alanlar gerekli: {', '.join(invalid)}"
+                )
+
     def validate_test_database_safety(self) -> None:
         """Prevent tests from ever targeting a production-like database."""
         url = make_url(self.database_url)
@@ -158,3 +182,18 @@ class Settings(BaseSettings):
 @lru_cache()
 def get_settings() -> Settings:
     return Settings()
+
+
+def _unsafe_research_value(value: str) -> bool:
+    normalized = value.strip()
+    upper = normalized.upper()
+    return (
+        not normalized
+        or normalized in {"0", "N/A", "NA", "NONE"}
+        or "PLACEHOLDER" in upper
+        or "REPLACE" in upper
+        or "TBD" in upper
+        or "TODO" in upper
+        or "ÖRNEK" in upper
+        or "EXAMPLE" in upper
+    )
