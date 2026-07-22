@@ -1,0 +1,17 @@
+{
+  "analysis_plan_version": "NS-HCI-SAP-1.0-DRAFT",
+  "analysis_run_id": "NO-REAL-DATA-20260722T113127Z",
+  "command": "python.exe analysis/run_analysis.py --mode real",
+  "figures_generated": false,
+  "generated_at_utc": "2026-07-22T11:31:27.456187+00:00",
+  "message": "Analiz hattı hazır, bilimsel sonuç yok.",
+  "missing_inputs": [
+    "analysis/data/real/usability_tidy.json",
+    "analysis/data/real/survey_tidy.json"
+  ],
+  "pipeline_version": "1.0.0",
+  "results": {},
+  "status": "NO REAL DATA",
+  "synthetic": false,
+  "tables_generated": false
+}

@@ -69,6 +69,11 @@ app.*.map.json
 !/ml/runs/NOT_RUN/
 /ml/artifacts/*
 !/ml/artifacts/index.example.json
+# Human-participant analysis inputs and generated run artefacts.
+/analysis/data/real/
+/analysis/data/synthetic/*.json
+/analysis/outputs/
+/analysis/.venv/
 *.keras
 *.h5
 *.tflite
