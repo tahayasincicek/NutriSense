@@ -151,6 +151,7 @@ class SurveyResponseSchema(BaseModel):
 
 class UsabilityTaskSchema(BaseModel):
     id: str = Field(min_length=1, max_length=64)
+    condition: Literal["nutrisense", "standardized_assistance"] = "nutrisense"
     title: str = Field(min_length=1, max_length=255)
     description: Optional[str] = Field(default=None, max_length=1000)
     status: str = Field(min_length=1, max_length=32)
@@ -175,6 +176,7 @@ class UsabilitySessionSchema(BaseModel):
     id: Optional[UUID] = None
     participant_id: UUID = Field(description="Hesap UUID'sinden bağımsız rastgele pseudonym")
     schema_version: str = Field(default="1.0", max_length=32)
+    counterbalance_sequence: Optional[Literal["AB", "BA"]] = None
     protocol_version: str = Field(default="", max_length=64)
     data_origin: Literal["synthetic", "participant"] = "synthetic"
     session_date: Optional[datetime] = None
@@ -511,6 +513,7 @@ async def submit_usability_session(
         success_rate=session.success_rate,
         avg_task_duration=session.avg_task_duration,
         schema_version=session.schema_version,
+        counterbalance_sequence=session.counterbalance_sequence,
         protocol_version=protocol_version,
         approval_reference=approval_reference,
         data_origin=session.data_origin,
@@ -524,6 +527,7 @@ async def submit_usability_session(
                 UsabilityTask(
                     session_id=record.id,
                     task_key=task.id,
+                    condition=task.condition,
                     title=task.title,
                     description=task.description,
                     status=task.status,
@@ -581,6 +585,7 @@ async def export_usability_sessions(
             {
                 "id": session.id,
                 "participant_id": session.participant_pseudonym,
+                "counterbalance_sequence": session.counterbalance_sequence,
                 "session_date": session.session_date.isoformat(),
                 "general_note": session.general_note,
                 "success_rate": session.success_rate,
@@ -588,6 +593,7 @@ async def export_usability_sessions(
                 "tasks": [
                     {
                         "id": task.task_key,
+                        "condition": task.condition,
                         "title": task.title,
                         "description": task.description,
                         "status": task.status,
@@ -633,11 +639,13 @@ async def export_usability_tidy(
                 "session_id": session.id,
                 "participant_id": session.participant_pseudonym,
                 "schema_version": session.schema_version,
+                "counterbalance_sequence": session.counterbalance_sequence,
                 "protocol_version": session.protocol_version,
                 "approval_reference": session.approval_reference,
                 "data_origin": session.data_origin,
                 "session_date": session.session_date.isoformat(),
                 "task_id": task.task_key,
+                "condition": task.condition,
                 "status": task.status,
                 "started_at": task.started_at.isoformat() if task.started_at else None,
                 "ended_at": task.ended_at.isoformat() if task.ended_at else None,

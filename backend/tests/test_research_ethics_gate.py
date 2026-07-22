@@ -85,8 +85,10 @@ def test_consent_idempotency_tidy_export_and_withdrawal(client, monkeypatch):
         "protocol_version": "SYNTHETIC-TEST-PROTOCOL-V1",
         "data_origin": "participant",
         "schema_version": "1.0",
+        "counterbalance_sequence": "AB",
         "tasks": [{
             "id": "t1",
+            "condition": "nutrisense",
             "title": "Synthetic fixture task",
             "description": "No human participant",
             "status": "completed",
@@ -111,6 +113,8 @@ def test_consent_idempotency_tidy_export_and_withdrawal(client, monkeypatch):
     assert survey_tidy.json()["rows"][0]["question_id"] == "q2"
     assert usability_tidy.status_code == 200
     assert usability_tidy.json()["rows"][0]["assistance_level"] == "prompt"
+    assert usability_tidy.json()["rows"][0]["counterbalance_sequence"] == "AB"
+    assert usability_tidy.json()["rows"][0]["condition"] == "nutrisense"
 
     withdrawal = client.post(
         "/api/v1/research/withdraw",

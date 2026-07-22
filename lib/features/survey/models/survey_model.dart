@@ -39,6 +39,7 @@ class SurveyQuestion {
 }
 
 const surveyInstrumentVersion = 'NS-SURVEY-1.0-DRAFT';
+const surveyApiSchemaVersion = '1.0';
 
 /// Likert seviyeleri — Türkçe etiketler
 class LikertLabels {
@@ -145,7 +146,7 @@ class SurveySubmission {
         'answers': answers.map((a) => a.toJson()).toList(),
         'completion_seconds': completionTime.inSeconds,
         'device_info': deviceInfo,
-        'survey_version': surveyInstrumentVersion,
+        'survey_version': surveyApiSchemaVersion,
         'protocol_version': protocolVersion,
         'data_origin': dataOrigin,
         'submitted_at': submittedAt.toIso8601String(),
@@ -164,6 +165,7 @@ class UsabilityTask {
   final String id;
   final String title;
   final String description;
+  final String condition;
   TaskStatus status;
   DateTime? _startTime;
   DateTime? _endTime;
@@ -184,6 +186,7 @@ class UsabilityTask {
     required this.id,
     required this.title,
     required this.description,
+    this.condition = 'nutrisense',
     this.status = TaskStatus.notStarted,
     DateTime? startTime,
     DateTime? endTime,
@@ -236,6 +239,7 @@ class UsabilityTask {
 
   Map<String, dynamic> toJson() => {
         'id': id,
+        'condition': condition,
         'title': title,
         'description': description,
         'status': status.name,
@@ -268,6 +272,7 @@ class UsabilitySession {
   final String schemaVersion;
   final String protocolVersion;
   final String dataOrigin;
+  final String? counterbalanceSequence;
 
   UsabilitySession({
     required this.id,
@@ -277,6 +282,7 @@ class UsabilitySession {
     this.schemaVersion = '1.0',
     this.protocolVersion = '',
     this.dataOrigin = 'synthetic',
+    this.counterbalanceSequence,
     DateTime? sessionDate,
   }) : sessionDate = sessionDate ?? DateTime.now();
 
@@ -306,6 +312,7 @@ class UsabilitySession {
         'schema_version': schemaVersion,
         'protocol_version': protocolVersion,
         'data_origin': dataOrigin,
+        'counterbalance_sequence': counterbalanceSequence,
         'success_rate': successRate,
         'avg_task_duration': avgTaskDuration,
       };

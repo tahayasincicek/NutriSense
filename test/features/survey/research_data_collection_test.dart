@@ -55,6 +55,7 @@ void main() {
     expect(json['timing_source'], 'monotonic');
     expect(json['error_count'], 1);
     expect(json['assistance_level'], 'prompt');
+    expect(json['condition'], 'nutrisense');
     expect(json['maximum_seconds'], 30);
   });
 
