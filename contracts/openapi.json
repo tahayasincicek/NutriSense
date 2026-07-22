@@ -1530,6 +1530,143 @@
         "title": "RefreshTokenRequest",
         "type": "object"
       },
+      "ResearchConsentCreateSchema": {
+        "properties": {
+          "consent_method": {
+            "enum": [
+              "signed",
+              "witnessed_verbal",
+              "recorded_verbal"
+            ],
+            "title": "Consent Method",
+            "type": "string"
+          },
+          "consent_version": {
+            "default": "",
+            "maxLength": 64,
+            "title": "Consent Version",
+            "type": "string"
+          },
+          "data_origin": {
+            "default": "synthetic",
+            "enum": [
+              "synthetic",
+              "participant"
+            ],
+            "title": "Data Origin",
+            "type": "string"
+          },
+          "evidence_reference": {
+            "anyOf": [
+              {
+                "maxLength": 255,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Evidence Reference"
+          },
+          "protocol_version": {
+            "default": "",
+            "maxLength": 64,
+            "title": "Protocol Version",
+            "type": "string"
+          },
+          "witness_reference": {
+            "anyOf": [
+              {
+                "maxLength": 255,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Witness Reference"
+          }
+        },
+        "required": [
+          "consent_method"
+        ],
+        "title": "ResearchConsentCreateSchema",
+        "type": "object"
+      },
+      "ResearchConsentResponseSchema": {
+        "properties": {
+          "consent_version": {
+            "title": "Consent Version",
+            "type": "string"
+          },
+          "participant_id": {
+            "format": "uuid",
+            "title": "Participant Id",
+            "type": "string"
+          },
+          "protocol_version": {
+            "title": "Protocol Version",
+            "type": "string"
+          },
+          "withdrawal_code": {
+            "description": "Yalnız bu yanıtta gösterilir; araştırma sonucuna yazılmaz.",
+            "title": "Withdrawal Code",
+            "type": "string"
+          }
+        },
+        "required": [
+          "participant_id",
+          "protocol_version",
+          "consent_version",
+          "withdrawal_code"
+        ],
+        "title": "ResearchConsentResponseSchema",
+        "type": "object"
+      },
+      "ResearchWithdrawalResponseSchema": {
+        "properties": {
+          "deleted_survey_submissions": {
+            "title": "Deleted Survey Submissions",
+            "type": "integer"
+          },
+          "deleted_usability_sessions": {
+            "title": "Deleted Usability Sessions",
+            "type": "integer"
+          },
+          "withdrawn": {
+            "title": "Withdrawn",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "withdrawn",
+          "deleted_survey_submissions",
+          "deleted_usability_sessions"
+        ],
+        "title": "ResearchWithdrawalResponseSchema",
+        "type": "object"
+      },
+      "ResearchWithdrawalSchema": {
+        "properties": {
+          "participant_id": {
+            "format": "uuid",
+            "title": "Participant Id",
+            "type": "string"
+          },
+          "withdrawal_code": {
+            "maxLength": 128,
+            "minLength": 12,
+            "title": "Withdrawal Code",
+            "type": "string"
+          }
+        },
+        "required": [
+          "participant_id",
+          "withdrawal_code"
+        ],
+        "title": "ResearchWithdrawalSchema",
+        "type": "object"
+      },
       "SendToDietitianRequest": {
         "description": "POST /api/v1/send-to-dietitian istek gövdesi.",
         "properties": {
@@ -1727,6 +1864,11 @@
       },
       "SurveyResponseSchema": {
         "properties": {
+          "duplicate": {
+            "default": false,
+            "title": "Duplicate",
+            "type": "boolean"
+          },
           "message": {
             "title": "Message",
             "type": "string"
@@ -1773,6 +1915,15 @@
             ],
             "title": "Completion Seconds"
           },
+          "data_origin": {
+            "default": "synthetic",
+            "enum": [
+              "synthetic",
+              "participant"
+            ],
+            "title": "Data Origin",
+            "type": "string"
+          },
           "device_info": {
             "anyOf": [
               {
@@ -1801,6 +1952,12 @@
             "description": "Hesap UUID'sinden bağımsız rastgele pseudonym",
             "format": "uuid",
             "title": "Participant Id",
+            "type": "string"
+          },
+          "protocol_version": {
+            "default": "",
+            "maxLength": 64,
+            "title": "Protocol Version",
             "type": "string"
           },
           "submitted_at": {
@@ -1876,6 +2033,11 @@
       },
       "UsabilityResponseSchema": {
         "properties": {
+          "duplicate": {
+            "default": false,
+            "title": "Duplicate",
+            "type": "boolean"
+          },
           "message": {
             "title": "Message",
             "type": "string"
@@ -1912,6 +2074,30 @@
             ],
             "title": "Avg Task Duration"
           },
+          "counterbalance_sequence": {
+            "anyOf": [
+              {
+                "enum": [
+                  "AB",
+                  "BA"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Counterbalance Sequence"
+          },
+          "data_origin": {
+            "default": "synthetic",
+            "enum": [
+              "synthetic",
+              "participant"
+            ],
+            "title": "Data Origin",
+            "type": "string"
+          },
           "general_note": {
             "anyOf": [
               {
@@ -1941,6 +2127,18 @@
             "description": "Hesap UUID'sinden bağımsız rastgele pseudonym",
             "format": "uuid",
             "title": "Participant Id",
+            "type": "string"
+          },
+          "protocol_version": {
+            "default": "",
+            "maxLength": 64,
+            "title": "Protocol Version",
+            "type": "string"
+          },
+          "schema_version": {
+            "default": "1.0",
+            "maxLength": 32,
+            "title": "Schema Version",
             "type": "string"
           },
           "session_date": {
@@ -1987,6 +2185,38 @@
       },
       "UsabilityTaskSchema": {
         "properties": {
+          "abort_reason": {
+            "anyOf": [
+              {
+                "maxLength": 255,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Abort Reason"
+          },
+          "assistance_level": {
+            "default": "none",
+            "enum": [
+              "none",
+              "prompt",
+              "partial",
+              "full"
+            ],
+            "title": "Assistance Level",
+            "type": "string"
+          },
+          "condition": {
+            "default": "nutrisense",
+            "enum": [
+              "nutrisense",
+              "standardized_assistance"
+            ],
+            "title": "Condition",
+            "type": "string"
+          },
           "description": {
             "anyOf": [
               {
@@ -2011,6 +2241,18 @@
             ],
             "title": "Duration Seconds"
           },
+          "edit_reason": {
+            "anyOf": [
+              {
+                "maxLength": 255,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Edit Reason"
+          },
           "end_time": {
             "anyOf": [
               {
@@ -2022,6 +2264,13 @@
               }
             ],
             "title": "End Time"
+          },
+          "error_count": {
+            "default": 0,
+            "maximum": 1000.0,
+            "minimum": 0.0,
+            "title": "Error Count",
+            "type": "integer"
           },
           "id": {
             "maxLength": 64,
@@ -2039,6 +2288,11 @@
               }
             ],
             "title": "Is Success"
+          },
+          "manually_edited": {
+            "default": false,
+            "title": "Manually Edited",
+            "type": "boolean"
           },
           "researcher_note": {
             "anyOf": [
@@ -2069,6 +2323,15 @@
             "maxLength": 32,
             "minLength": 1,
             "title": "Status",
+            "type": "string"
+          },
+          "timing_source": {
+            "default": "monotonic",
+            "enum": [
+              "monotonic",
+              "manual"
+            ],
+            "title": "Timing Source",
             "type": "string"
           },
           "title": {
@@ -3222,6 +3485,88 @@
         ]
       }
     },
+    "/api/v1/research/consents": {
+      "post": {
+        "operationId": "create_research_consent_api_v1_research_consents_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ResearchConsentCreateSchema"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResearchConsentResponseSchema"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Create Research Consent",
+        "tags": [
+          "Anket"
+        ]
+      }
+    },
+    "/api/v1/research/withdraw": {
+      "post": {
+        "operationId": "withdraw_research_data_api_v1_research_withdraw_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ResearchWithdrawalSchema"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResearchWithdrawalResponseSchema"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Withdraw Research Data",
+        "tags": [
+          "Anket"
+        ]
+      }
+    },
     "/api/v1/send-to-dietitian": {
       "post": {
         "operationId": "send_to_dietitian_api_v1_send_to_dietitian_post",
@@ -3284,6 +3629,24 @@
     "/api/v1/survey": {
       "post": {
         "operationId": "submit_survey_api_v1_survey_post",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Idempotency-Key",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Idempotency-Key"
+            }
+          }
+        ],
         "requestBody": {
           "content": {
             "application/json": {
@@ -3317,6 +3680,54 @@
           }
         },
         "summary": "Submit Survey",
+        "tags": [
+          "Anket"
+        ]
+      }
+    },
+    "/api/v1/survey/export/tidy": {
+      "get": {
+        "description": "One row per answer; directly consumable by R, pandas or jamovi.",
+        "operationId": "export_survey_tidy_api_v1_survey_export_tidy_get",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "x-research-export-token",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Research-Export-Token"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Export Survey Tidy",
         "tags": [
           "Anket"
         ]
@@ -3372,6 +3783,24 @@
     "/api/v1/usability": {
       "post": {
         "operationId": "submit_usability_session_api_v1_usability_post",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Idempotency-Key",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Idempotency-Key"
+            }
+          }
+        ],
         "requestBody": {
           "content": {
             "application/json": {
@@ -3452,6 +3881,54 @@
           }
         },
         "summary": "Export Usability Sessions",
+        "tags": [
+          "Anket"
+        ]
+      }
+    },
+    "/api/v1/usability/export/tidy": {
+      "get": {
+        "description": "One row per task with explicit assistance, error and abort fields.",
+        "operationId": "export_usability_tidy_api_v1_usability_export_tidy_get",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "x-research-export-token",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Research-Export-Token"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Export Usability Tidy",
         "tags": [
           "Anket"
         ]
