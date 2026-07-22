@@ -764,17 +764,40 @@ class ApiService {
     Map<String, dynamic> payload, {
     CancelToken? cancelToken,
   }) =>
-      _postJson('/survey', payload, cancelToken: cancelToken);
+      _postJson(
+        '/survey',
+        payload,
+        idempotencyKey: payload['id']?.toString(),
+        cancelToken: cancelToken,
+      );
 
   Future<ApiResult<Map<String, dynamic>>> submitUsability(
     Map<String, dynamic> payload, {
     CancelToken? cancelToken,
   }) =>
-      _postJson('/usability', payload, cancelToken: cancelToken);
+      _postJson(
+        '/usability',
+        payload,
+        idempotencyKey: payload['id']?.toString(),
+        cancelToken: cancelToken,
+      );
+
+  Future<ApiResult<Map<String, dynamic>>> createResearchConsent(
+    Map<String, dynamic> payload, {
+    CancelToken? cancelToken,
+  }) =>
+      _postJson('/research/consents', payload, cancelToken: cancelToken);
+
+  Future<ApiResult<Map<String, dynamic>>> withdrawResearchData(
+    Map<String, dynamic> payload, {
+    CancelToken? cancelToken,
+  }) =>
+      _postJson('/research/withdraw', payload, cancelToken: cancelToken);
 
   Future<ApiResult<Map<String, dynamic>>> _postJson(
     String path,
     Map<String, dynamic> payload, {
+    String? idempotencyKey,
     CancelToken? cancelToken,
   }) =>
       _safeCall(() async {
@@ -782,6 +805,9 @@ class ApiService {
           path,
           data: payload,
           cancelToken: cancelToken,
+          options: idempotencyKey == null
+              ? null
+              : Options(headers: {'Idempotency-Key': idempotencyKey}),
         );
         return response.data ?? const {};
       });
