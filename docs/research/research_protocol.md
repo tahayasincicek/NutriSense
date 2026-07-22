@@ -1,8 +1,10 @@
 # NutriSense insan katılımcılı araştırma protokolü
 
-**Durum:** Etik kurul başvuru taslağı; onay değildir.  
-**Protokol sürümü:** Kurum ve araştırmacı tarafından atanacak.  
-**Etik kurul referansı:** Bekleniyor; boş bırakılmalıdır.  
+**Durum:** Etik kurul başvuru taslağı; onay değildir.
+
+**Protokol sürümü:** Kurum ve araştırmacı tarafından atanacak.
+
+**Etik kurul referansı:** Bekleniyor; boş bırakılmalıdır.
 **Sorumlu araştırmacı / danışman / kurum:** Araştırmacı kararı gerekiyor.
 
 ## 1. Amaç ve araştırma soruları
@@ -80,8 +82,9 @@ Küçük örneklemde normal dağılım otomatik varsayılmaz. Sürelerde dağıl
 
 ## 7. Sonlanımlar ve analiz birimi
 
-Birincil: her görev için yardımsız başarı (`success=true`, `assistance_level=none`).  
-İkincil: monotonik süre, hata sayısı, yardım düzeyi, abort nedeni, anket maddeleri.  
+Birincil: her görev için yardımsız başarı (`success=true`, `assistance_level=none`).
+
+İkincil: monotonik süre, hata sayısı, yardım düzeyi, abort nedeni, anket maddeleri.
 Analiz birimi görev-katılımcı-koşul satırıdır; aynı katılımcının görevleri bağımsız kabul edilmez.
 
 Eksik veri nedeni (`technical_failure`, `participant_abort`, `researcher_abort`, `not_attempted`) ayrı tutulur. Teknik arıza başarısız kullanıcı performansı olarak kodlanmaz. Protokolden sapmalar audit edilir.

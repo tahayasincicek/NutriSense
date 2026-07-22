@@ -1,6 +1,7 @@
 # Anket araç kaydı ve puanlama yönü
 
-**Kod sürümü:** `NS-SURVEY-1.0-DRAFT`  
+**Kod sürümü:** `NS-SURVEY-1.0-DRAFT`
+
 **Durum:** Araştırmacı tarafından geliştirilmiş taslak; doğrulanmış SUS, UEQ veya başka bir standart ölçek değildir. “SUS skoru” üretilemez.
 
 | ID | Yapı | Tip/seçenek | Yön | Kaynak/durum |
