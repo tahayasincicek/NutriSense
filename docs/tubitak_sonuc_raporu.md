@@ -1,5 +1,14 @@
 # TÜBİTAK 2209-A Sonuç Raporu
 
+> **STATUS: NO REAL DATA — RAPORDA KULLANILMAMALI**
+>
+> Depoda gerçek ham katılımcı export'u ve bu taslaktaki sayıları üreten yeniden
+> üretilebilir analiz run'ı yoktur. Aşağıdaki 20 katılımcı, %85/%90, süre,
+> p-değeri ve etki büyüklüğü ifadeleri doğrulanmamış tarihsel taslak değerlerdir.
+> Bilimsel sonuç ancak `analysis/results_manifest.json` durumu
+> `REAL_DATA_ANALYZED` olduğunda ve etik onay/ham veri checksum'u doğrulandığında
+> bu dosyaya aktarılabilir. Sentetik pipeline çıktısı aktarılamaz.
+
 ## Proje Başlığı
 **Görme Engelli Bireyler İçin Yapay Zeka Destekli Besin Tanıma ve Kalori Takip Mobil Uygulaması: NutriSense**
 

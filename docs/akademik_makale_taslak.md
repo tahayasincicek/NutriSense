@@ -1,6 +1,13 @@
 # AI-Powered Nutritional Assistance for Visually Impaired Individuals:
 # A Mobile Application with Voice Feedback
 
+> **STATUS: NO REAL DATA — DO NOT SUBMIT OR CITE AS RESULTS**
+>
+> The participant count, success rates, durations, p-values and effect sizes in
+> this historical draft are unsupported by raw participant exports or a
+> reproducible analysis run. They must not be submitted, cited or copied as
+> findings. Synthetic pipeline outputs are test artefacts, not evidence.
+
 ## Akademik Makale Taslağı (IEEE Conference Format)
 
 **Hedef Konferanslar:** IEEE EMBC, ACM ASSETS, CHI, MobileHCI
