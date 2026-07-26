@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/time/app_clock.dart';
 import '../../../shared/models/food_analysis_model.dart';
 import '../../auth/state/auth_controller.dart';
 import '../data/history_repository.dart';
@@ -80,11 +81,16 @@ class HistoryActionResult {
 }
 
 class HistoryController extends StateNotifier<HistoryState> {
-  HistoryController(this._repository, this._userId)
-      : super(HistoryState(anchorDate: DateTime.now()));
+  HistoryController(
+    this._repository,
+    this._userId, {
+    AppClock clock = const SystemAppClock(),
+  })  : _clock = clock,
+        super(HistoryState(anchorDate: clock.nowLocal()));
 
   final HistoryRepository _repository;
   final String? _userId;
+  final AppClock _clock;
   static const _pageSize = 7;
 
   Future<void> load({bool refresh = false}) async {
@@ -122,7 +128,7 @@ class HistoryController extends StateNotifier<HistoryState> {
             ? HistoryStatus.empty
             : HistoryStatus.data,
         history: history,
-        cachedAt: DateTime.now().toUtc(),
+        cachedAt: _clock.nowUtc(),
         clearError: true,
         clearMessage: true,
       );
@@ -161,7 +167,7 @@ class HistoryController extends StateNotifier<HistoryState> {
   Future<void> refresh() => load(refresh: true);
 
   Future<void> setPeriod(HistoryPeriod period) async {
-    state = HistoryState(period: period, anchorDate: DateTime.now());
+    state = HistoryState(period: period, anchorDate: _clock.nowLocal());
     await load();
   }
 
@@ -212,7 +218,7 @@ class HistoryController extends StateNotifier<HistoryState> {
     state = state.copyWith(
       status: HistoryStatus.data,
       history: merged,
-      cachedAt: DateTime.now().toUtc(),
+      cachedAt: _clock.nowUtc(),
       clearError: true,
       clearMessage: true,
     );
@@ -262,7 +268,7 @@ class HistoryController extends StateNotifier<HistoryState> {
   }
 
   (DateTime, DateTime) _dateRange() {
-    final anchor = state.anchorDate ?? DateTime.now();
+    final anchor = state.anchorDate ?? _clock.nowLocal();
     final toDate = DateTime(anchor.year, anchor.month, anchor.day);
     final fromDate = toDate.subtract(Duration(days: state.period.days - 1));
     return (fromDate, toDate);
@@ -292,5 +298,6 @@ final historyControllerProvider =
   return HistoryController(
     ref.read(historyRepositoryProvider),
     ref.watch(historyUserIdProvider),
+    clock: ref.read(appClockProvider),
   );
 });

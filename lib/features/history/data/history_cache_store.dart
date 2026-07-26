@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
+import '../../../core/time/app_clock.dart';
 import '../../../shared/models/food_analysis_model.dart';
 
 class HistoryCacheSnapshot {
@@ -22,12 +23,16 @@ abstract interface class HistoryCacheStore {
 /// Small, user-scoped read-only cache stored through Android Keystore/iOS Keychain.
 /// Mutations are never queued here and SharedPreferences is not used for health data.
 class SecureHistoryCacheStore implements HistoryCacheStore {
-  SecureHistoryCacheStore({FlutterSecureStorage? storage})
-      : _storage = storage ?? const FlutterSecureStorage();
+  SecureHistoryCacheStore({
+    FlutterSecureStorage? storage,
+    AppClock clock = const SystemAppClock(),
+  })  : _storage = storage ?? const FlutterSecureStorage(),
+        _clock = clock;
 
   static const _indexKey = 'food_history_cache_index_v1';
   static const _schemaVersion = 1;
   final FlutterSecureStorage _storage;
+  final AppClock _clock;
 
   String _key(String userId) => 'food_history_cache_v1_$userId';
 
@@ -66,7 +71,7 @@ class SecureHistoryCacheStore implements HistoryCacheStore {
       value: jsonEncode({
         'schema_version': _schemaVersion,
         'user_id': userId,
-        'cached_at': DateTime.now().toUtc().toIso8601String(),
+        'cached_at': _clock.nowUtc().toIso8601String(),
         'history': history.toJson(),
       }),
     );
@@ -108,5 +113,5 @@ class SecureHistoryCacheStore implements HistoryCacheStore {
 }
 
 final historyCacheStoreProvider = Provider<HistoryCacheStore>((ref) {
-  return SecureHistoryCacheStore();
+  return SecureHistoryCacheStore(clock: ref.read(appClockProvider));
 });
