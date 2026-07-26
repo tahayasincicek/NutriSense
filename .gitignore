@@ -34,8 +34,11 @@ migrate_working_dir/
 .pub-cache/
 .pub/
 /build/
+**/build/
 /coverage/
-/backend/venv/
+**/venv/
+**/.venv/
+**/env/
 /backend/data/*.json
 *.db
 *.sqlite
@@ -54,14 +57,37 @@ app.*.map.json
 /android/build/
 
 # Secrets and platform credentials (templates remain versioned)
-/backend/.env
-!/backend/.env.example
+.env
+.env.*
+**/.env
+**/.env.*
+!.env.example
+!**/.env.example
 **/google-services.json
 **/GoogleService-Info.plist
 **/*service-account*.json
+**/*credential*.json
 **/*credentials*.json
+**/firebase-adminsdk*.json
 *.jks
 *.keystore
+*.pem
+*.key
+*.p8
+*.p12
+*.pfx
+*.mobileprovision
+*.provisionprofile
+*.xcarchive/
+
+# Database exports and operational backups
+*.dump
+*.bak
+*.sql.gz
+*.sql.bz2
+*.sql.xz
+*dump*.sql
+*backup*.sql
 
 # Reproducible ML pipeline: data and generated evidence stay out of Git.
 /ml/data/
@@ -74,6 +100,9 @@ app.*.map.json
 /analysis/data/synthetic/*.json
 /analysis/outputs/
 /analysis/.venv/
+/research/data/raw/
+/research/exports/
+/docs/research/raw/
 *.keras
 *.h5
 *.tflite
