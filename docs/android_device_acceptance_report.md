@@ -1,6 +1,7 @@
 # Android gerçek cihaz kabul raporu
 
-Rapor tarihi: 2026-07-26  
+Rapor tarihi: 2026-07-26
+
 Durum: **MANUAL EVIDENCE NOT RUN**
 
 Bu dosya sentetik emulator testini gerçek cihaz sonucu gibi göstermez. Model,
