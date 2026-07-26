@@ -1,4 +1,4 @@
-enum AppEnvironment { dev, test, prod }
+enum AppEnvironment { dev, test, staging, prod }
 
 /// Compile-time application configuration.
 ///
@@ -24,9 +24,11 @@ abstract final class AppConfig {
   static AppEnvironment get environment => switch (_environmentValue) {
         'dev' => AppEnvironment.dev,
         'test' => AppEnvironment.test,
+        'staging' => AppEnvironment.staging,
         'prod' => AppEnvironment.prod,
         _ => throw StateError(
-            'Unsupported APP_ENV "$_environmentValue". Use dev, test, or prod.',
+            'Unsupported APP_ENV "$_environmentValue". '
+            'Use dev, test, staging, or prod.',
           ),
       };
 
@@ -38,6 +40,10 @@ abstract final class AppConfig {
         : switch (environment) {
             AppEnvironment.dev => 'http://10.0.2.2:8000/api/v1',
             AppEnvironment.test => 'http://127.0.0.1:8000/api/v1',
+            AppEnvironment.staging => throw StateError(
+                'Staging requires '
+                '--dart-define=API_BASE_URL=https://.../api/v1',
+              ),
             AppEnvironment.prod => throw StateError(
                 'Production requires --dart-define=API_BASE_URL=https://.../api/v1',
               ),
@@ -51,8 +57,9 @@ abstract final class AppConfig {
     if (uri == null || !uri.hasAuthority || !validScheme) {
       throw StateError('API_BASE_URL must be an absolute HTTP(S) URL.');
     }
-    if (environment == AppEnvironment.prod && uri.scheme != 'https') {
-      throw StateError('Production API_BASE_URL must use HTTPS.');
+    if ({AppEnvironment.staging, AppEnvironment.prod}.contains(environment) &&
+        uri.scheme != 'https') {
+      throw StateError('Staging and production API_BASE_URL must use HTTPS.');
     }
     if (uri.userInfo.isNotEmpty ||
         uri.query.isNotEmpty ||

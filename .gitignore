@@ -71,6 +71,8 @@ app.*.map.json
 **/firebase-adminsdk*.json
 *.jks
 *.keystore
+/android/key.properties
+/android/upload-keystore.jks
 *.pem
 *.key
 *.p8
