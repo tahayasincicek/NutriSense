@@ -84,6 +84,8 @@ class AccessibleButton extends StatelessWidget {
     final theme = Theme.of(context);
 
     return Semantics(
+      container: true,
+      excludeSemantics: true,
       label: semanticLabel ?? label,
       hint: semanticHint ?? 'Etkinleştirmek için çift dokunun',
       button: true,
