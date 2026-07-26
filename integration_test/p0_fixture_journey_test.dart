@@ -43,36 +43,37 @@ void main() {
       expect(api.isAuthenticated, isTrue);
 
       final repository = _JourneyHistoryRepository();
-      final cameraContainer = ProviderContainer(
-        overrides: [
-          apiServiceProvider.overrideWithValue(api),
-          accessibilityServiceProvider.overrideWithValue(
-            _SilentAccessibilityService(),
-          ),
-          appClockProvider.overrideWithValue(
-            FixedAppClock(DateTime.parse('2026-07-26T12:30:00+03:00')),
-          ),
-          historyControllerProvider.overrideWith(
-            (ref) => HistoryController(
-              repository,
-              SyntheticFactories.userId,
-              clock: ref.read(appClockProvider),
-            ),
-          ),
-        ],
-      );
-      addTearDown(cameraContainer.dispose);
       await tester.pumpWidget(
-        UncontrolledProviderScope(
-          container: cameraContainer,
+        ProviderScope(
+          overrides: [
+            apiServiceProvider.overrideWithValue(api),
+            accessibilityServiceProvider.overrideWithValue(
+              _SilentAccessibilityService(),
+            ),
+            appClockProvider.overrideWithValue(
+              FixedAppClock(DateTime.parse('2026-07-26T12:30:00+03:00')),
+            ),
+            cameraStateProvider.overrideWith((ref) {
+              final notifier = CameraNotifier();
+              notifier.setAnalysis(
+                SyntheticFactories.foodAnalysis(),
+                medium: false,
+              );
+              return notifier;
+            }),
+            historyControllerProvider.overrideWith(
+              (ref) => HistoryController(
+                repository,
+                SyntheticFactories.userId,
+                clock: ref.read(appClockProvider),
+              ),
+            ),
+          ],
           child: const MaterialApp(
             home: CameraScreen(initializeHardware: false),
           ),
         ),
       );
-      cameraContainer
-          .read(cameraStateProvider.notifier)
-          .setAnalysis(SyntheticFactories.foodAnalysis(), medium: false);
       await tester.pump();
 
       expect(find.text('Elma'), findsOneWidget);
@@ -81,22 +82,18 @@ void main() {
       expect(transport.decisionCalls, 1);
       expect(find.text('Geçmişe Dön'), findsOneWidget);
 
-      final historyContainer = ProviderContainer(
-        overrides: [
-          historyRepositoryProvider.overrideWithValue(repository),
-          historyUserIdProvider.overrideWithValue(SyntheticFactories.userId),
-          accessibilityServiceProvider.overrideWithValue(
-            _SilentAccessibilityService(),
-          ),
-          appClockProvider.overrideWithValue(
-            FixedAppClock(DateTime.parse('2026-07-26T12:30:00+03:00')),
-          ),
-        ],
-      );
-      addTearDown(historyContainer.dispose);
       await tester.pumpWidget(
-        UncontrolledProviderScope(
-          container: historyContainer,
+        ProviderScope(
+          overrides: [
+            historyRepositoryProvider.overrideWithValue(repository),
+            historyUserIdProvider.overrideWithValue(SyntheticFactories.userId),
+            accessibilityServiceProvider.overrideWithValue(
+              _SilentAccessibilityService(),
+            ),
+            appClockProvider.overrideWithValue(
+              FixedAppClock(DateTime.parse('2026-07-26T12:30:00+03:00')),
+            ),
+          ],
           child: const MaterialApp(home: FoodHistoryScreen()),
         ),
       );
