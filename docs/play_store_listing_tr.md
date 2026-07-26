@@ -42,16 +42,22 @@ Yapay zeka ile yiyecekleri tanı, kalori hesapla, sesli geri bildirim al.
 - E-posta ve SMS ile bildirim
 - Detaylı beslenme grafiklerı
 
-♿ **Erişilebilirlik — WCAG 2.1 AA Uyumlu**
-- TalkBack ve VoiceOver desteği
+♿ **Erişilebilirlik — Kısmi uygunluk hedefleniyor**
+- Android TalkBack akışları hedeflenir; gerçek cihaz doğrulaması tamamlanmadan tam uyumluluk iddiası kullanılmaz
 - Yüksek kontrast modu
 - Minimum 44×44dp dokunma hedefleri
 - Titreşim geri bildirimi
 
 🔒 **Gizlilik ve Güvenlik**
-- KVKK uyumlu
-- Kişisel veriler şifreli saklanır
+- Kamera görüntüsü varsayılan olarak analiz sonrasında saklanmaz
+- Diyetisyen paylaşımı her gönderimde kullanıcı onayı gerektirir
+- Erişim belirteçleri cihazın platform güvenli deposunda tutulur
 - Konum bilgisi toplanmaz
+
+> **Hukuki yayın kapısı:** “KVKK uyumlu” veya sunucu verilerinin belirli bir
+> algoritmayla şifrelendiği iddiası; üniversite veri sorumlusu/hukuk onayı,
+> production altyapı kanıtı ve güncel veri akışı incelemesi olmadan
+> kullanılmamalıdır.
 
 ### Kim İçin?
 - Görme engelli bireyler

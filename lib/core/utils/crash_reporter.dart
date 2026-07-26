@@ -1,18 +1,17 @@
 // =============================================================================
 // lib/core/utils/crash_reporter.dart
-// NutriSense — Firebase Crashlytics Entegrasyonu
+// NutriSense — yalnız yerel/debug hata köprüsü
 //
-// KVKK uyumlu hata raporlama:
-//   - Kullanıcı kimliği kaydetmez (anonim)
-//   - Her rapora: ekran adı, uygulama versiyonu, cihaz modeli
-//   - Yakalanmamış istisnaları otomatik kaydet
-//   - Flutter & Dart zone hataları
+// Firebase Crashlytics bu projede yapılandırılmamış ve devre dışıdır. Bu sınıf
+// uzaktaki bir sağlayıcıya veri göndermez. İleride uzaktan crash reporting
+// eklenecekse kullanıcı bilgilendirmesi/onayı, veri minimizasyonu, retention,
+// yurtdışı aktarım değerlendirmesi ve platform yapılandırması ayrıca gerekir.
 // =============================================================================
 
 import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-// Firebase Crashlytics import — paketi ekledikten sonra aktifleşir:
+// Aşağıdaki örnek importlar bilinçli olarak devre dışıdır:
 // import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 // import 'package:firebase_core/firebase_core.dart';
 
@@ -28,7 +27,7 @@ class CrashReporter {
   String _currentScreen = 'unknown';
   String _appVersion = '1.0.0';
 
-  /// Crashlytics'i başlat ve global hata yakalayıcıları kur
+  /// Yerel/global hata yakalayıcılarını kur; uzaktan raporlama yapmaz.
   ///
   /// Kullanım (main.dart içinde):
   /// ```dart
@@ -101,7 +100,7 @@ class CrashReporter {
   }
 
   // ─────────────────────────────────────────────────────────────────────────
-  // EKRAN TAKİBİ (KVKK uyumlu — sadece ekran adı)
+  // YEREL EKRAN BAĞLAMI (uzaktan gönderilmez)
   // ─────────────────────────────────────────────────────────────────────────
 
   /// Aktif ekranı güncelle (hata raporlarına eklenir)

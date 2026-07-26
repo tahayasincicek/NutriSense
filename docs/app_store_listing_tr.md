@@ -23,10 +23,6 @@ Aşağıdaki anahtarları `ios/Runner/Info.plist` dosyasına ekleyin:
 <key>NSPhotoLibraryUsageDescription</key>
 <string>Taranan besin fotoğraflarını kaydetmek için fotoğraf kitaplığına erişim gerektirir.</string>
 
-<!-- ═══ ERİŞİLEBİLİRLİK ═══ -->
-<key>UIAccessibilityTraits</key>
-<string>Bu uygulama görme engelli kullanıcılar için özel olarak tasarlanmıştır ve VoiceOver ile tam uyumludur.</string>
-
 <!-- ═══ ARKA PLAN SES ═══ -->
 <key>UIBackgroundModes</key>
 <array>
@@ -60,10 +56,15 @@ NutriSense, görme engelli bireyler için yapay zeka destekli besin tanıma ve k
 • Sesli komutlarla kontrol: "Tara", "Bugün ne yedim", "Gönder"
 • Günlük/haftalık kalori ve makro takibi
 • Diyetisyene otomatik rapor gönderme
-• VoiceOver ile tam uyumlu (WCAG 2.1 AA)
+• VoiceOver ve WCAG 2.1 AA hedefleniyor; gerçek iOS cihaz doğrulaması tamamlanmadı
 • Yüksek kontrast modu ve ayarlanabilir yazı boyutu
 • Türk mutfağına özel yemek veritabanı
-• KVKK uyumlu — kişisel verileriniz güvende
+• Kamera görüntüsü varsayılan olarak saklanmaz; diyetisyen paylaşımı açık onay gerektirir
+
+> **Hukuki ve teknik yayın kapısı:** Depoda iOS platform projesi ve gerçek cihaz
+> kanıtı yoktur. “VoiceOver ile tam uyumlu”, “WCAG 2.1 AA uyumlu” veya “KVKK
+> uyumlu” ifadeleri; cihaz testi, kurum veri sorumlusu/hukuk incelemesi ve
+> production altyapı kanıtı olmadan mağazada kullanılmamalıdır.
 
 TÜBİTAK 2209-A desteğiyle geliştirilmiştir.
 
