@@ -9,8 +9,8 @@ import uuid
 from pathlib import Path
 
 import pytest
+import jwt
 from fastapi import HTTPException
-from jose import jwt
 
 from app.config import Settings
 from app.middleware.auth import create_access_token, decode_token, settings as auth_settings
@@ -61,7 +61,7 @@ def test_production_requires_https_closed_docs_and_explicit_allowlists():
 def test_jwt_has_bound_issuer_audience_time_type_and_unique_identifier():
     subject = str(uuid.uuid4())
     token = create_access_token(subject)
-    claims = jwt.get_unverified_claims(token)
+    claims = jwt.decode(token, options={"verify_signature": False})
 
     assert claims["sub"] == subject
     assert claims["iss"] == auth_settings.jwt_issuer

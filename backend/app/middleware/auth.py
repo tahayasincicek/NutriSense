@@ -13,7 +13,8 @@ import uuid
 from datetime import datetime, timedelta, timezone
 from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
-from jose import jwt, JWTError
+import jwt
+from jwt import InvalidTokenError
 from pwdlib import PasswordHash
 from pwdlib.hashers.argon2 import Argon2Hasher
 from pwdlib.hashers.bcrypt import BcryptHasher
@@ -190,15 +191,13 @@ def decode_token(token: str) -> dict:
             audience=settings.jwt_audience,
             issuer=settings.jwt_issuer,
             options={
-                "require_exp": True,
-                "require_iat": True,
-                "require_sub": True,
+                "require": ["exp", "iat", "sub", "iss", "aud", "jti"],
             },
         )
         if not payload.get("jti"):
-            raise JWTError("jti claim missing")
+            raise InvalidTokenError("jti claim missing")
         return payload
-    except JWTError:
+    except InvalidTokenError:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Geçersiz veya süresi dolmuş token. Lütfen tekrar giriş yapın.",

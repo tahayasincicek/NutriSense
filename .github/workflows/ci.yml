@@ -133,7 +133,7 @@ jobs:
       - name: Backend testleri çalıştır
         env:
           DATABASE_URL: "sqlite+pysqlite:///:memory:"
-          JWT_SECRET_KEY: "test-secret-key-for-ci-only"
+          JWT_SECRET_KEY: "synthetic-ci-jwt-key-000000000000000000000000"
           APP_ENVIRONMENT: "test"
           DEBUG: "false"
           MIGRATION_CHECK_ENABLED: "false"

@@ -20,7 +20,7 @@ pydantic-settings>=2.2.1
 python-multipart>=0.0.6
 
 # ── Kimlik Doğrulama ──
-python-jose[cryptography]>=3.3.0
+PyJWT[crypto]>=2.10.1
 pwdlib[argon2,bcrypt]>=0.3.0
 
 # ── API İstemcileri ──
