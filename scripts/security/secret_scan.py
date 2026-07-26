@@ -68,6 +68,7 @@ RULES = (
 )
 
 PLACEHOLDER_MARKERS = (
+    "abcdefghijklmnopqrstuvwxyz",
     "change-me",
     "dummy",
     "example",

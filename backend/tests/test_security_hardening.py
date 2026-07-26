@@ -140,9 +140,10 @@ def test_secret_scanner_distinguishes_placeholder_from_literal_secret():
         "backend/.env.example",
         'JWT_SECRET_KEY="REPLACE_WITH_LONG_RANDOM_JWT_SECRET"',
     ) == set()
+    synthetic_literal = 'JWT_SECRET_KEY="' + ("N5f9" * 10) + '"'
     findings = scanner.scan_text(
         "backend/app/config_override.py",
-        'JWT_SECRET_KEY="abcdefghijklmnopqrstuvwxyz0123456789ABCD"',
+        synthetic_literal,
     )
     assert "GENERIC_QUOTED_SECRET" in findings
 

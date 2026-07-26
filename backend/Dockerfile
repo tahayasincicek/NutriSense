@@ -6,7 +6,12 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 
 WORKDIR /app
 COPY requirements.txt requirements-dev.txt ./
-RUN python -m pip install --upgrade pip && pip install -r requirements.txt
+RUN python -m pip install --upgrade \
+        pip \
+        "setuptools>=83.0.0" \
+        "wheel>=0.46.2" \
+        "jaraco.context>=6.1.0" \
+    && pip install -r requirements.txt
 COPY . .
 RUN chmod +x /app/docker/entrypoint.sh
 
