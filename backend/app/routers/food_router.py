@@ -46,7 +46,7 @@ from ..models.schemas import (
     DietitianReportPreviewRequest, DietitianReportPreviewResponse,
     AccountDeletionRequest, DietitianAssignmentRequest,
     DietitianAssignmentResponse, LogoutRequest, RefreshTokenRequest,
-    UserCreate, UserLogin, UserResponse, TokenResponse,
+    UserCreate, UserLogin, UserProfileUpdate, UserResponse, TokenResponse,
     ErrorResponse,
 )
 from ..domain.nutrition import (
@@ -415,8 +415,8 @@ async def analyze_food(
     # ── 2. Nutritionix'ten besin değerleri ──
     try:
         nutrition = await nutrition_service.get_nutrition(food_name)
-    except Exception as e:
-        logger.error(f"Nutritionix hatası: {e}")
+    except Exception as exc:
+        logger.error("Nutritionix hatası exception_type=%s", type(exc).__name__)
         nutrition = nutrition_service._query_local_db(
             food_name, portion_grams=None, input_locale="en-US"
         )
@@ -1837,7 +1837,157 @@ async def get_me(current_user: User = Depends(get_current_user)):
         email=current_user.email,
         full_name=current_user.full_name,
         is_active=current_user.is_active,
+        phone=current_user.phone,
+        preferred_language=current_user.preferred_language,
+        tts_speed=current_user.tts_speed,
+        high_contrast=current_user.high_contrast,
     )
+
+
+@router.patch("/users/me", response_model=UserResponse)
+async def update_me(
+    request: UserProfileUpdate,
+    http_request: Request,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """Allow correction of non-credential account and accessibility data."""
+    for field in request.model_fields_set:
+        setattr(current_user, field, getattr(request, field))
+    current_user.updated_at = utc_now()
+    db.add(current_user)
+    db.commit()
+    db.refresh(current_user)
+    _audit_auth(
+        db,
+        event="profile_corrected",
+        success=True,
+        user_id=current_user.id,
+        ip_address=http_request.client.host if http_request.client else None,
+        reason=",".join(sorted(request.model_fields_set)),
+    )
+    return UserResponse(
+        id=current_user.id,
+        email=current_user.email,
+        full_name=current_user.full_name,
+        is_active=current_user.is_active,
+        phone=current_user.phone,
+        preferred_language=current_user.preferred_language,
+        tts_speed=current_user.tts_speed,
+        high_contrast=current_user.high_contrast,
+    )
+
+
+@router.get("/users/me/export")
+async def export_my_data(
+    http_request: Request,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """Export only the authenticated user's product data; never token hashes."""
+    logs = db.query(FoodLog).filter(FoodLog.user_id == current_user.id).all()
+    assignments = db.query(DietitianAssignment).filter(
+        DietitianAssignment.user_id == current_user.id
+    ).all()
+    reports = db.query(DietitianReport).filter(
+        DietitianReport.user_id == current_user.id
+    ).all()
+    consents = db.query(ConsentRecord).filter(
+        ConsentRecord.user_id == current_user.id
+    ).all()
+
+    payload = {
+        "schema_version": "1.0",
+        "generated_at": utc_now().isoformat(),
+        "scope": "authenticated_product_account_only",
+        "research_identity_note": (
+            "Araştırma pseudonymi ürün hesabına bağlanmaz; araştırma verisi "
+            "yalnız geri çekilme koduyla yönetilir."
+        ),
+        "account": {
+            "id": current_user.id,
+            "email": current_user.email,
+            "full_name": current_user.full_name,
+            "phone": current_user.phone,
+            "is_active": current_user.is_active,
+            "created_at": current_user.created_at.isoformat(),
+            "updated_at": current_user.updated_at.isoformat(),
+            "preferred_language": current_user.preferred_language,
+            "tts_speed": current_user.tts_speed,
+            "high_contrast": current_user.high_contrast,
+        },
+        "food_logs": [
+            {
+                "id": item.id,
+                "food_name": item.food_name,
+                "food_name_tr": item.food_name_tr,
+                "canonical_food_id": item.canonical_food_id,
+                "portion_value": float(item.portion_value),
+                "portion_unit": item.portion_unit,
+                "total_calories": float(item.total_calories),
+                "recognition_source": item.recognition_source,
+                "confirmed": item.is_user_confirmed,
+                "corrected": item.is_corrected,
+                "logged_at": item.logged_at.isoformat(),
+                "deleted_at": item.deleted_at.isoformat() if item.deleted_at else None,
+            }
+            for item in logs
+        ],
+        "dietitian_assignments": [
+            {
+                "id": item.id,
+                "dietitian_id": item.dietitian_id,
+                "status": item.status,
+                "created_at": item.created_at.isoformat(),
+                "approved_at": item.approved_at.isoformat() if item.approved_at else None,
+                "cancelled_at": item.cancelled_at.isoformat() if item.cancelled_at else None,
+            }
+            for item in assignments
+        ],
+        "report_shares": [
+            {
+                "id": item.id,
+                "status": item.status,
+                "report_type": item.report_type,
+                "date_from": item.date_from.isoformat(),
+                "date_to": item.date_to.isoformat(),
+                "record_count": item.record_count,
+                "channels": item.channels_json,
+                "recipients_masked": item.recipient_snapshot_json,
+                "created_at": item.created_at.isoformat(),
+                "completed_at": item.completed_at.isoformat() if item.completed_at else None,
+            }
+            for item in reports
+        ],
+        "consents": [
+            {
+                "id": item.id,
+                "type": item.consent_type,
+                "policy_version": item.policy_version,
+                "granted": item.granted,
+                "channels": item.channels_json,
+                "record_count": item.record_count,
+                "recipient_masked": item.recipient_masked,
+                "granted_at": item.granted_at.isoformat(),
+                "revoked_at": item.revoked_at.isoformat() if item.revoked_at else None,
+            }
+            for item in consents
+        ],
+    }
+    db.add(AuthAuditLog(
+        event="personal_data_exported",
+        success=True,
+        user_id=current_user.id,
+        ip_address=http_request.client.host if http_request.client else None,
+        reason="self_service_json",
+        metadata_json={
+            "food_log_count": len(logs),
+            "report_count": len(reports),
+            "consent_count": len(consents),
+        },
+    ))
+    db.commit()
+    return payload
 
 
 @router.delete("/users/me", status_code=status.HTTP_204_NO_CONTENT)

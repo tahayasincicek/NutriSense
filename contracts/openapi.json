@@ -2416,6 +2416,73 @@
         "title": "UserLogin",
         "type": "object"
       },
+      "UserProfileUpdate": {
+        "properties": {
+          "full_name": {
+            "anyOf": [
+              {
+                "maxLength": 255,
+                "minLength": 2,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Full Name"
+          },
+          "high_contrast": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "High Contrast"
+          },
+          "phone": {
+            "anyOf": [
+              {
+                "pattern": "^\\+?[1-9][0-9]{7,14}$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Phone"
+          },
+          "preferred_language": {
+            "anyOf": [
+              {
+                "const": "tr-TR",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Preferred Language"
+          },
+          "tts_speed": {
+            "anyOf": [
+              {
+                "maximum": 1.0,
+                "minimum": 0.1,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tts Speed"
+          }
+        },
+        "title": "UserProfileUpdate",
+        "type": "object"
+      },
       "UserResponse": {
         "properties": {
           "email": {
@@ -2427,6 +2494,11 @@
             "title": "Full Name",
             "type": "string"
           },
+          "high_contrast": {
+            "default": true,
+            "title": "High Contrast",
+            "type": "boolean"
+          },
           "id": {
             "format": "uuid",
             "title": "Id",
@@ -2435,6 +2507,27 @@
           "is_active": {
             "title": "Is Active",
             "type": "boolean"
+          },
+          "phone": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Phone"
+          },
+          "preferred_language": {
+            "default": "tr-TR",
+            "title": "Preferred Language",
+            "type": "string"
+          },
+          "tts_speed": {
+            "default": 0.5,
+            "title": "Tts Speed",
+            "type": "number"
           }
         },
         "required": [
@@ -3992,6 +4085,76 @@
           }
         ],
         "summary": "Get Me",
+        "tags": [
+          "NutriSense API"
+        ]
+      },
+      "patch": {
+        "description": "Allow correction of non-credential account and accessibility data.",
+        "operationId": "update_me_api_v1_users_me_patch",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserProfileUpdate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Update Me",
+        "tags": [
+          "NutriSense API"
+        ]
+      }
+    },
+    "/api/v1/users/me/export": {
+      "get": {
+        "description": "Export only the authenticated user's product data; never token hashes.",
+        "operationId": "export_my_data_api_v1_users_me_export_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Export My Data",
         "tags": [
           "NutriSense API"
         ]

@@ -1,6 +1,7 @@
 """NutriSense configuration and environment safety gates."""
 
 from functools import lru_cache
+from urllib.parse import urlsplit
 
 from pydantic import model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -40,6 +41,8 @@ class Settings(BaseSettings):
     app_environment: str = "dev"
     debug: bool = False
     secret_key: str = "change-me-in-production"
+    public_base_url: str = "http://localhost:8000"
+    api_docs_enabled: bool = True
 
     database_url: str = ""
     db_host: str = "localhost"
@@ -50,6 +53,8 @@ class Settings(BaseSettings):
 
     jwt_secret_key: str = "change-me"
     jwt_algorithm: str = "HS256"
+    jwt_issuer: str = "nutrisense-api"
+    jwt_audience: str = "nutrisense-mobile"
     jwt_access_token_expire_minutes: int = 60
     jwt_refresh_token_expire_days: int = 30
 
@@ -73,6 +78,9 @@ class Settings(BaseSettings):
     smtp_start_tls: bool = True
 
     cors_origins: str = "http://localhost:3000"
+    cors_allow_credentials: bool = False
+    trusted_hosts: str = "localhost,127.0.0.1,testserver"
+    security_hsts_max_age_seconds: int = 31536000
     research_export_token: str = ""
     # disabled: no collection; synthetic: fixtures only; approved: consented
     # participant collection is allowed after the external ethics gate is set.
@@ -108,6 +116,10 @@ class Settings(BaseSettings):
         return [origin.strip() for origin in self.cors_origins.split(",") if origin.strip()]
 
     @property
+    def trusted_hosts_list(self) -> list[str]:
+        return [host.strip() for host in self.trusted_hosts.split(",") if host.strip()]
+
+    @property
     def sandbox_email_allowlist(self) -> set[str]:
         return {
             value.strip().lower() for value in
@@ -124,6 +136,18 @@ class Settings(BaseSettings):
     def validate_security(self) -> None:
         environment = self.app_environment.lower()
         url = make_url(self.database_url)
+        public_url = urlsplit(self.public_base_url)
+
+        if self.jwt_algorithm not in {"HS256", "HS384", "HS512"}:
+            raise RuntimeError("JWT algorithm güvenli HMAC allowlist dışında.")
+        if not self.jwt_issuer.strip() or not self.jwt_audience.strip():
+            raise RuntimeError("JWT issuer ve audience boş olamaz.")
+        if not 1 <= self.jwt_access_token_expire_minutes <= 60:
+            raise RuntimeError("Access token süresi 1-60 dakika arasında olmalıdır.")
+        if not 1 <= self.jwt_refresh_token_expire_days <= 30:
+            raise RuntimeError("Refresh token süresi 1-30 gün arasında olmalıdır.")
+        if self.notification_mode not in {"disabled", "sandbox", "production"}:
+            raise RuntimeError("NOTIFICATION_MODE disabled, sandbox veya production olmalıdır.")
 
         if environment == "prod":
             if self.debug:
@@ -134,6 +158,28 @@ class Settings(BaseSettings):
                 raise RuntimeError("Production application secret dışarıdan sağlanmalıdır.")
             if _unsafe_secret(self.research_export_token):
                 raise RuntimeError("Production araştırma export anahtarı güvenli sağlanmalıdır.")
+            if public_url.scheme != "https" or not public_url.netloc:
+                raise RuntimeError("Production PUBLIC_BASE_URL mutlak HTTPS olmalıdır.")
+            if public_url.username or public_url.password:
+                raise RuntimeError("PUBLIC_BASE_URL kullanıcı bilgisi içeremez.")
+            if self.api_docs_enabled:
+                raise RuntimeError("Production API dokümantasyonu kapalı olmalıdır.")
+            if not self.trusted_hosts_list or "*" in self.trusted_hosts_list:
+                raise RuntimeError("Production TRUSTED_HOSTS açık allowlist olmalıdır.")
+            public_host = (public_url.hostname or "").lower()
+            if public_host not in {host.lower() for host in self.trusted_hosts_list}:
+                raise RuntimeError("PUBLIC_BASE_URL hostu TRUSTED_HOSTS içinde olmalıdır.")
+            if self.cors_allow_credentials:
+                raise RuntimeError("Bearer token API'sinde CORS credentials kapalı olmalıdır.")
+            for origin in self.cors_origins_list:
+                parsed_origin = urlsplit(origin)
+                if (
+                    origin == "*"
+                    or parsed_origin.scheme != "https"
+                    or not parsed_origin.netloc
+                    or parsed_origin.hostname in {"localhost", "127.0.0.1"}
+                ):
+                    raise RuntimeError("Production CORS originleri HTTPS allowlist olmalıdır.")
             if url.get_backend_name() == "sqlite":
                 raise RuntimeError("Production SQLite kullanamaz.")
             if not url.password or "REPLACE" in str(url.password).upper():
@@ -145,8 +191,12 @@ class Settings(BaseSettings):
                     raise RuntimeError("Production SMTP kimlik bilgileri secret store'dan gelmelidir.")
                 if not self.smtp_from_email:
                     raise RuntimeError("Production SMTP gönderici adresi tanımlanmalıdır.")
+                if not (self.smtp_use_tls or self.smtp_start_tls):
+                    raise RuntimeError("Production SMTP aktarım şifrelemesi etkin olmalıdır.")
             if self.notification_mode == "sandbox":
                 raise RuntimeError("Production sandbox bildirim modunda başlatılamaz.")
+            if self.research_mode == "synthetic":
+                raise RuntimeError("Production araştırma modu synthetic olamaz.")
 
         if environment == "test":
             self.validate_test_database_safety()

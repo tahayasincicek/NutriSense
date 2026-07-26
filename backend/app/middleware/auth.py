@@ -48,12 +48,17 @@ def verify_password(plain: str, hashed: str) -> bool:
 
 def create_access_token(user_id: str) -> str:
     """Kısa ömürlü access token oluşturur."""
-    expire = _utcnow() + timedelta(
+    issued_at = _utcnow()
+    expire = issued_at + timedelta(
         minutes=settings.jwt_access_token_expire_minutes
     )
     payload = {
         "sub": user_id,
         "exp": expire,
+        "iat": issued_at,
+        "iss": settings.jwt_issuer,
+        "aud": settings.jwt_audience,
+        "jti": str(uuid.uuid4()),
         "type": "access",
     }
     return jwt.encode(payload, settings.jwt_secret_key, algorithm=settings.jwt_algorithm)
@@ -61,9 +66,13 @@ def create_access_token(user_id: str) -> str:
 
 def create_refresh_token(user_id: str, jti: str, expires_at: datetime) -> str:
     """Kimliği veritabanında izlenen refresh JWT oluşturur."""
+    issued_at = _utcnow()
     payload = {
         "sub": user_id,
         "exp": expires_at,
+        "iat": issued_at,
+        "iss": settings.jwt_issuer,
+        "aud": settings.jwt_audience,
         "type": "refresh",
         "jti": jti,
     }
@@ -178,7 +187,16 @@ def decode_token(token: str) -> dict:
             token,
             settings.jwt_secret_key,
             algorithms=[settings.jwt_algorithm],
+            audience=settings.jwt_audience,
+            issuer=settings.jwt_issuer,
+            options={
+                "require_exp": True,
+                "require_iat": True,
+                "require_sub": True,
+            },
         )
+        if not payload.get("jti"):
+            raise JWTError("jti claim missing")
         return payload
     except JWTError:
         raise HTTPException(

@@ -437,6 +437,24 @@ class UserResponse(BaseModel):
     email: EmailStr
     full_name: str
     is_active: bool
+    phone: Optional[str] = None
+    preferred_language: str = "tr-TR"
+    tts_speed: float = 0.5
+    high_contrast: bool = True
+
+
+class UserProfileUpdate(BaseModel):
+    full_name: Optional[str] = Field(default=None, min_length=2, max_length=255)
+    phone: Optional[str] = Field(default=None, pattern=r"^\+?[1-9][0-9]{7,14}$")
+    preferred_language: Optional[Literal["tr-TR"]] = None
+    tts_speed: Optional[float] = Field(default=None, ge=0.1, le=1.0)
+    high_contrast: Optional[bool] = None
+
+    @model_validator(mode="after")
+    def require_change(self):
+        if not self.model_fields_set:
+            raise ValueError("En az bir profil alanı gönderilmelidir.")
+        return self
 
 
 class AccountDeletionRequest(BaseModel):

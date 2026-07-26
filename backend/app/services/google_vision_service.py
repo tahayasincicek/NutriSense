@@ -81,8 +81,11 @@ class GoogleVisionService:
             self.client = vision.ImageAnnotatorClient()
             self._available = True
             logger.info("Google Vision API bağlantısı başarılı")
-        except Exception as e:
-            logger.warning(f"Google Vision API başlatılamadı: {e}")
+        except Exception as exc:
+            logger.warning(
+                "Google Vision API başlatılamadı exception_type=%s",
+                type(exc).__name__,
+            )
             self._available = False
             self.client = None
 
@@ -166,9 +169,12 @@ class GoogleVisionService:
 
         except VisionAPIError:
             raise
-        except Exception as e:
-            logger.error(f"Vision API çağrısı başarısız: {e}")
-            raise VisionAPIError(f"Görüntü analizi başarısız: {str(e)}")
+        except Exception as exc:
+            logger.error(
+                "Vision API çağrısı başarısız exception_type=%s",
+                type(exc).__name__,
+            )
+            raise VisionAPIError("Görüntü analizi sağlayıcı hatası.") from None
 
     def _request_annotations(self, image):
         """Blocking Google client calls run outside the FastAPI event loop."""

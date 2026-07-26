@@ -10,6 +10,7 @@
 # ==============================================================================
 
 import logging
+import re
 import uuid
 from contextlib import asynccontextmanager
 from pathlib import Path
@@ -22,10 +23,12 @@ from sqlalchemy import text
 from fastapi import FastAPI, HTTPException, Request, status
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.middleware.trustedhost import TrustedHostMiddleware
 from fastapi.responses import JSONResponse
 
 from .config import get_settings
 from .models.database import engine
+from .security.logging import configure_secure_logging
 from .routers.food_router import router as food_router
 from .routers.survey_router import router as survey_router
 
@@ -33,12 +36,9 @@ settings = get_settings()
 BACKEND_DIR = Path(__file__).resolve().parent.parent
 
 # ── Logging ──
-logging.basicConfig(
-    level=logging.DEBUG if settings.debug else logging.INFO,
-    format="%(asctime)s | %(levelname)-8s | %(name)s | %(message)s",
-    datefmt="%Y-%m-%d %H:%M:%S",
-)
+configure_secure_logging(debug=settings.debug)
 logger = logging.getLogger("nutrisense")
+REQUEST_ID_PATTERN = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._:-]{0,63}$")
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -79,28 +79,60 @@ app = FastAPI(
         "Görme engelli bireyler için yapay zeka destekli besin tanıma "
         "ve kalori takip API'si. Google Vision + Nutritionix entegrasyonu."
     ),
-    docs_url="/docs",
-    redoc_url="/redoc",
+    docs_url="/docs" if settings.api_docs_enabled else None,
+    redoc_url="/redoc" if settings.api_docs_enabled else None,
+    openapi_url="/openapi.json" if settings.api_docs_enabled else None,
     lifespan=lifespan,
+)
+
+app.add_middleware(
+    TrustedHostMiddleware,
+    allowed_hosts=settings.trusted_hosts_list,
 )
 
 # ── CORS ──
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.cors_origins_list,
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_credentials=settings.cors_allow_credentials,
+    allow_methods=["GET", "POST", "PATCH", "DELETE", "OPTIONS"],
+    allow_headers=[
+        "Accept",
+        "Authorization",
+        "Content-Type",
+        "Idempotency-Key",
+        "X-Request-ID",
+        "X-Research-Export-Token",
+    ],
 )
 
 
 @app.middleware("http")
 async def request_id_middleware(request: Request, call_next):
     """İstemci request-id'sini korur veya yeni UUID üretir."""
-    request_id = request.headers.get("X-Request-ID") or str(uuid.uuid4())
+    supplied_request_id = request.headers.get("X-Request-ID", "")
+    request_id = (
+        supplied_request_id
+        if REQUEST_ID_PATTERN.fullmatch(supplied_request_id)
+        else str(uuid.uuid4())
+    )
     request.state.request_id = request_id
     response = await call_next(request)
     response.headers["X-Request-ID"] = request_id
+    response.headers["X-Content-Type-Options"] = "nosniff"
+    response.headers["X-Frame-Options"] = "DENY"
+    response.headers["Referrer-Policy"] = "no-referrer"
+    response.headers["Permissions-Policy"] = "camera=(), microphone=(), geolocation=()"
+    response.headers["Cross-Origin-Resource-Policy"] = "same-site"
+    response.headers["Cache-Control"] = "no-store"
+    response.headers["Pragma"] = "no-cache"
+    if settings.app_environment.lower() == "prod":
+        response.headers["Strict-Transport-Security"] = (
+            f"max-age={settings.security_hsts_max_age_seconds}; includeSubDomains"
+        )
+        response.headers["Content-Security-Policy"] = (
+            "default-src 'none'; frame-ancestors 'none'; base-uri 'none'"
+        )
     return response
 
 
@@ -170,7 +202,11 @@ async def validation_handler(request: Request, exc: RequestValidationError):
 
 @app.exception_handler(500)
 async def server_error_handler(request: Request, exc):
-    logger.error(f"Sunucu hatası: {exc}")
+    logger.error(
+        "Beklenmeyen sunucu hatası request_id=%s exception_type=%s",
+        getattr(request.state, "request_id", None),
+        type(exc).__name__,
+    )
     return JSONResponse(
         status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
         content=_error_body(
@@ -204,8 +240,8 @@ def database_readiness() -> dict:
                 result["migration"] = current is not None and current in heads
             else:
                 result["migration"] = True
-    except Exception:
-        logger.exception("Readiness kontrolü başarısız.")
+    except Exception as exc:
+        logger.error("Readiness kontrolü başarısız exception_type=%s", type(exc).__name__)
     result["ready"] = result["database"] and result["migration"]
     return result
 
