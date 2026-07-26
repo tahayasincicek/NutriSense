@@ -67,6 +67,15 @@ jobs:
       - name: Mobil API consumer contract testleri
         run: flutter test test/contract/ --reporter expanded
 
+      - name: Staging ve production public config TLS kapısı
+        run: |
+          flutter test test/unit/app_config_test.dart \
+            --dart-define=APP_ENV=staging \
+            --dart-define=API_BASE_URL=https://staging.invalid/api/v1
+          flutter test test/unit/app_config_test.dart \
+            --dart-define=APP_ENV=prod \
+            --dart-define=API_BASE_URL=https://production.invalid/api/v1
+
       # ── Widget Testler ──
       - name: Widget testleri çalıştır
         run: |
@@ -192,7 +201,7 @@ jobs:
           profile: pixel_4
           disable-animations: true
           emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
-          script: flutter test integration_test/p0_fixture_journey_test.dart -d emulator-5554
+          script: flutter test integration_test/p0_fixture_journey_test.dart -d emulator-5554 --flavor dev --dart-define=APP_ENV=dev
 
   ml-validation:
     name: ML Güvenlik ve Yeniden Üretilebilirlik Kapıları
@@ -243,6 +252,9 @@ jobs:
 
       - name: Secret taraması (değerler redakte)
         run: python scripts/security/secret_scan.py --history
+
+      - name: Android release sınırları
+        run: python scripts/qa/android_release_checks.py
 
       - name: Python bağımlılık zafiyet taraması
         run: |
@@ -364,13 +376,15 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          flutter build apk --debug --no-tree-shake-icons 2>&1 | tee "$RUNNER_TEMP/flutter-build.log"
-          test -s build/app/outputs/flutter-apk/app-debug.apk
+          flutter build apk --debug --flavor dev \
+            --dart-define=APP_ENV=dev \
+            --no-tree-shake-icons 2>&1 | tee "$RUNNER_TEMP/flutter-build.log"
+          test -s build/app/outputs/flutter-apk/app-dev-debug.apk
 
       - name: Debug APK artefaktını kaydet
         uses: actions/upload-artifact@v7
         with:
           name: nutrisense-debug-apk
-          path: build/app/outputs/flutter-apk/app-debug.apk
+          path: build/app/outputs/flutter-apk/app-dev-debug.apk
           if-no-files-found: error
           retention-days: 7
