@@ -245,6 +245,247 @@
         "title": "DietitianAssignmentResponse",
         "type": "object"
       },
+      "DietitianCreate": {
+        "description": "Diyetisyen hesabı ve profilini birlikte oluşturur.",
+        "properties": {
+          "email": {
+            "format": "email",
+            "title": "Email",
+            "type": "string"
+          },
+          "full_name": {
+            "maxLength": 255,
+            "minLength": 2,
+            "title": "Full Name",
+            "type": "string"
+          },
+          "password": {
+            "maxLength": 128,
+            "minLength": 8,
+            "title": "Password",
+            "type": "string"
+          },
+          "phone": {
+            "anyOf": [
+              {
+                "pattern": "^\\+?[1-9][0-9]{7,14}$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Phone"
+          },
+          "specialization": {
+            "default": "Beslenme ve Diyet",
+            "maxLength": 255,
+            "minLength": 2,
+            "title": "Specialization",
+            "type": "string"
+          }
+        },
+        "required": [
+          "email",
+          "password",
+          "full_name"
+        ],
+        "title": "DietitianCreate",
+        "type": "object"
+      },
+      "DietitianDashboardPatient": {
+        "properties": {
+          "email": {
+            "format": "email",
+            "title": "Email",
+            "type": "string"
+          },
+          "full_name": {
+            "title": "Full Name",
+            "type": "string"
+          },
+          "last_log_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Log At"
+          },
+          "seven_day_meals": {
+            "title": "Seven Day Meals",
+            "type": "integer"
+          },
+          "today_calories": {
+            "title": "Today Calories",
+            "type": "number"
+          },
+          "user_id": {
+            "format": "uuid",
+            "title": "User Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "user_id",
+          "full_name",
+          "email",
+          "today_calories",
+          "seven_day_meals"
+        ],
+        "title": "DietitianDashboardPatient",
+        "type": "object"
+      },
+      "DietitianDashboardResponse": {
+        "properties": {
+          "active_patients": {
+            "title": "Active Patients",
+            "type": "integer"
+          },
+          "dietitian_id": {
+            "format": "uuid",
+            "title": "Dietitian Id",
+            "type": "string"
+          },
+          "email_verified": {
+            "title": "Email Verified",
+            "type": "boolean"
+          },
+          "full_name": {
+            "title": "Full Name",
+            "type": "string"
+          },
+          "patients": {
+            "items": {
+              "$ref": "#/components/schemas/DietitianDashboardPatient"
+            },
+            "title": "Patients",
+            "type": "array"
+          },
+          "pending_assignments": {
+            "title": "Pending Assignments",
+            "type": "integer"
+          },
+          "reports_received": {
+            "title": "Reports Received",
+            "type": "integer"
+          },
+          "specialization": {
+            "title": "Specialization",
+            "type": "string"
+          }
+        },
+        "required": [
+          "dietitian_id",
+          "full_name",
+          "specialization",
+          "email_verified",
+          "active_patients",
+          "pending_assignments",
+          "reports_received",
+          "patients"
+        ],
+        "title": "DietitianDashboardResponse",
+        "type": "object"
+      },
+      "DietitianPatientHistoryResponse": {
+        "properties": {
+          "date_from": {
+            "format": "date",
+            "title": "Date From",
+            "type": "string"
+          },
+          "date_to": {
+            "format": "date",
+            "title": "Date To",
+            "type": "string"
+          },
+          "full_name": {
+            "title": "Full Name",
+            "type": "string"
+          },
+          "logs": {
+            "items": {
+              "$ref": "#/components/schemas/DietitianPatientLogItem"
+            },
+            "title": "Logs",
+            "type": "array"
+          },
+          "total_calories": {
+            "title": "Total Calories",
+            "type": "number"
+          },
+          "total_meals": {
+            "title": "Total Meals",
+            "type": "integer"
+          },
+          "user_id": {
+            "format": "uuid",
+            "title": "User Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "user_id",
+          "full_name",
+          "date_from",
+          "date_to",
+          "total_calories",
+          "total_meals",
+          "logs"
+        ],
+        "title": "DietitianPatientHistoryResponse",
+        "type": "object"
+      },
+      "DietitianPatientLogItem": {
+        "properties": {
+          "food_name": {
+            "title": "Food Name",
+            "type": "string"
+          },
+          "food_name_tr": {
+            "title": "Food Name Tr",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "logged_at": {
+            "format": "date-time",
+            "title": "Logged At",
+            "type": "string"
+          },
+          "meal_type": {
+            "title": "Meal Type",
+            "type": "string"
+          },
+          "portion_grams": {
+            "title": "Portion Grams",
+            "type": "number"
+          },
+          "total_calories": {
+            "title": "Total Calories",
+            "type": "number"
+          }
+        },
+        "required": [
+          "id",
+          "food_name",
+          "food_name_tr",
+          "meal_type",
+          "portion_grams",
+          "total_calories",
+          "logged_at"
+        ],
+        "title": "DietitianPatientLogItem",
+        "type": "object"
+      },
       "DietitianReportHistoryItem": {
         "properties": {
           "channels": {
@@ -1480,6 +1721,58 @@
         "title": "NutritionProvenanceData",
         "type": "object"
       },
+      "PasswordResetConfirm": {
+        "description": "Jeton ile yeni parola belirleme.",
+        "properties": {
+          "new_password": {
+            "maxLength": 128,
+            "minLength": 8,
+            "title": "New Password",
+            "type": "string"
+          },
+          "token": {
+            "maxLength": 128,
+            "minLength": 8,
+            "title": "Token",
+            "type": "string"
+          }
+        },
+        "required": [
+          "token",
+          "new_password"
+        ],
+        "title": "PasswordResetConfirm",
+        "type": "object"
+      },
+      "PasswordResetRequest": {
+        "description": "Parola sıfırlama bağlantısı talebi.",
+        "properties": {
+          "email": {
+            "format": "email",
+            "title": "Email",
+            "type": "string"
+          }
+        },
+        "required": [
+          "email"
+        ],
+        "title": "PasswordResetRequest",
+        "type": "object"
+      },
+      "PasswordResetResponse": {
+        "description": "Her iki uçta da aynı gövde döner; hesap varlığı sızdırılmaz.",
+        "properties": {
+          "message": {
+            "title": "Message",
+            "type": "string"
+          }
+        },
+        "required": [
+          "message"
+        ],
+        "title": "PasswordResetResponse",
+        "type": "object"
+      },
       "PortionOption": {
         "properties": {
           "grams_per_unit": {
@@ -2485,6 +2778,15 @@
       },
       "UserResponse": {
         "properties": {
+          "account_type": {
+            "default": "patient",
+            "enum": [
+              "patient",
+              "dietitian"
+            ],
+            "title": "Account Type",
+            "type": "string"
+          },
           "email": {
             "format": "email",
             "title": "Email",
@@ -2616,7 +2918,7 @@
     },
     "/api/v1/analyze-food": {
       "post": {
-        "description": "Multipart görüntüyü MIME/boyut doğrulaması ve EXIF temizliği sonrası Google Vision API ile analiz eder, besin adını tanır ve Nutritionix'ten kalori bilgisini çeker. Yemek günlüğü yalnız ayrı karar endpointinde kullanıcı onayıyla oluşur.",
+        "description": "Multipart görüntüyü MIME/boyut doğrulaması ve EXIF temizliği sonrası yapılandırılan görüntü sağlayıcısı (Google Vision veya Gemini) ile analiz eder, besin adını tanır ve Nutritionix'ten kalori bilgisini çeker. Yemek günlüğü yalnız ayrı karar endpointinde kullanıcı onayıyla oluşur.",
         "operationId": "analyze_food_api_v1_analyze_food_post",
         "requestBody": {
           "content": {
@@ -2769,18 +3071,83 @@
     },
     "/api/v1/auth/password-reset": {
       "post": {
-        "operationId": "password_reset_unavailable_api_v1_auth_password_reset_post",
+        "description": "Kayıtlı bir e-posta için tek kullanımlık sıfırlama kodu gönderir.",
+        "operationId": "request_password_reset_api_v1_auth_password_reset_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PasswordResetRequest"
+              }
+            }
+          },
+          "required": true
+        },
         "responses": {
-          "501": {
+          "200": {
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+                  "$ref": "#/components/schemas/PasswordResetResponse"
+                }
               }
             },
             "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
           }
         },
-        "summary": "Password Reset Unavailable",
+        "summary": "Parola sıfırlama kodu iste",
+        "tags": [
+          "NutriSense API"
+        ]
+      }
+    },
+    "/api/v1/auth/password-reset/confirm": {
+      "post": {
+        "description": "Geçerli bir kodla parolayı değiştirir ve tüm oturumları kapatır.",
+        "operationId": "confirm_password_reset_api_v1_auth_password_reset_confirm_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PasswordResetConfirm"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PasswordResetResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Kod ile yeni parola belirle",
         "tags": [
           "NutriSense API"
         ]
@@ -2865,6 +3232,47 @@
           }
         },
         "summary": "Yeni kullanıcı kaydı",
+        "tags": [
+          "NutriSense API"
+        ]
+      }
+    },
+    "/api/v1/auth/register-dietitian": {
+      "post": {
+        "operationId": "register_dietitian_api_v1_auth_register_dietitian_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DietitianCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TokenResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Diyetisyen hesabı oluştur",
         "tags": [
           "NutriSense API"
         ]
@@ -2988,6 +3396,91 @@
           }
         ],
         "summary": "Retry Dietitian Report",
+        "tags": [
+          "NutriSense API"
+        ]
+      }
+    },
+    "/api/v1/dietitian/dashboard": {
+      "get": {
+        "operationId": "dietitian_dashboard_api_v1_dietitian_dashboard_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DietitianDashboardResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Dietitian Dashboard",
+        "tags": [
+          "NutriSense API"
+        ]
+      }
+    },
+    "/api/v1/dietitian/patients/{patient_id}/history": {
+      "get": {
+        "operationId": "dietitian_patient_history_api_v1_dietitian_patients__patient_id__history_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "patient_id",
+            "required": true,
+            "schema": {
+              "title": "Patient Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "days",
+            "required": false,
+            "schema": {
+              "default": 30,
+              "maximum": 365,
+              "minimum": 1,
+              "title": "Days",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DietitianPatientHistoryResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Dietitian Patient History",
         "tags": [
           "NutriSense API"
         ]
@@ -3573,6 +4066,56 @@
           }
         ],
         "summary": "Silinen besin günlüğü kaydını geri al",
+        "tags": [
+          "NutriSense API"
+        ]
+      }
+    },
+    "/api/v1/food/search": {
+      "get": {
+        "description": "Metin tabanlı manuel besin arama ve kalori getirme (Nutritionix).",
+        "operationId": "search_food_api_v1_food_search_get",
+        "parameters": [
+          {
+            "description": "Aranacak besin adı",
+            "in": "query",
+            "name": "query",
+            "required": true,
+            "schema": {
+              "description": "Aranacak besin adı",
+              "title": "Query",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FoodAnalysisResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Besin arama",
         "tags": [
           "NutriSense API"
         ]

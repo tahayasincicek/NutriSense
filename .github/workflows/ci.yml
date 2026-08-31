@@ -264,6 +264,18 @@ jobs:
       - name: Android release sınırları
         run: python scripts/qa/android_release_checks.py
 
+      # iOS kapısı .flutter-plugins-dependencies dosyasını okur; bu dosya
+      # sürüm kontrolüne girmez ve yalnız `flutter pub get` ile üretilir.
+      - name: Flutter kurulumu
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+
+      - name: Flutter bağımlılıklarını çöz
+        run: flutter pub get
+
       - name: iOS kaynak hazırlığı sınırları
         run: python scripts/qa/ios_release_checks.py
 
