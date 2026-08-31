@@ -6,7 +6,7 @@
 - Kapsam: Flutter mobil istemci; kayıt/girişten tarama, geçmiş ve diyetisyen raporuna kadar ana görevler
 - Hedef: WCAG 2.1 AA ve mobil erişilebilirlik iyi uygulamaları
 - Mevcut beyan: **Kısmi uygunluk hedefleniyor. “WCAG 2.1 AA uyumlu” iddiası kullanılmamalıdır.**
-- Kanıt sınırı: Otomatik testler Windows üzerinde çalıştırıldı. Android 16 emülatörü bağlıdır; bu çalışmada fiziksel cihaz/TalkBack oturumu tamamlanmamıştır. Depoda `ios/` platformu yoktur; VoiceOver testi engellidir.
+- Kanıt sınırı: Otomatik testler Windows üzerinde çalıştırıldı. Android 16 emülatörü bağlıdır; bu çalışmada fiziksel cihaz/TalkBack oturumu tamamlanmamıştır. `ios/` kaynak iskeleti hazırlanmıştır; macOS/Xcode ve gerçek iPhone olmadığı için VoiceOver testi engellidir.
 
 Bu rapor otomatik kontrolleri gerçek kullanıcı testi yerine koymaz. Özellikle kamera hizalama, ortam gürültüsü, kulaklık/Bluetooth yönlendirmesi ve TalkBack ile uçtan uca görev tamamlaması fiziksel cihazda doğrulanmadan tam uygunluk iddia edilemez.
 
@@ -51,24 +51,24 @@ Durumlar: **Uygulandı** kod ve otomatik kanıt var; **Kısmi** bazı yollar var
 
 | Görev | TalkBack | VoiceOver | Yalnız TTS + STT | Az gören kullanıcı | Durum ve kanıt |
 |---|---|---|---|---|---|
-| Kayıt | Form alanları ve dokunma eylemleri mevcut; gerçek cihaz sırası bekliyor | `ios/` yok | Sesle form doldurma yok; klavye alternatifi var | Kaydırılabilir form; 200% ayrı fiziksel kontrol bekliyor | Kısmi |
-| Giriş | Route adı, alan etiketleri, şifre görünürlüğü ve odak sırası otomatik testli | `ios/` yok | Sesle kimlik bilgisi girişi yok; klavye kullanılabilir | 200% widget testi geçti | Kısmi; `test/widget/login_accessibility_test.dart` |
-| Kamera/mikrofon izinleri | Durum ve dokunma alternatifleri var; sistem izin diyaloğu gerçek cihazda bekliyor | `ios/` yok | Mikrofon reddinde butonlar kullanılabilir | Kalıcı ret ve yeniden deneme görünür | Kısmi |
-| Taramayı başlatma | Büyük semantik tarama kontrolü var | `ios/` yok | Global “tara” navigasyonu ve kamera eylemleri kısmi | En az 48dp hedef, yüksek görünürlük | Kısmi |
-| Kamera hizalama/kalite | Görsel olmayan durum metni ve duyurular var; gerçek sahne kalibrasyonu bekliyor | `ios/` yok | Kısa TTS/haptic mevcut; ortam testi yok | Metinsel kalite yönergeleri var | Kısmi |
-| Sonucu dinleme | Tek birleşik sonuç semantiği ve kullanıcı tetiklemeli dinleme var | `ios/` yok | Sonuç TTS ile dinlenebilir | Metin ve durum etiketi görünür | Uygulandı; gerçek cihaz kanıtı bekliyor |
-| Aday seçme | En fazla üç adayın dokunma kontrolleri var | `ios/` yok | “Birinci/ikinci/üçüncü seçenek” bağlama bağlı | Metin seçenekleri görünür | Kısmi; parser ve kamera testleri geçti |
-| Porsiyon düzeltme | Dokunma seçenekleri ve değer bilgisi var | `ios/` yok | `porsiyon N gram` 0–2000 g aralığında kabul edilir | Büyüyebilen kontrol/metin | Kısmi |
-| Onaylama/kaydetme | Evet/hayır/yeniden çek dokunma alternatifleri mevcut | `ios/` yok | Evet/hayır yalnız tarama onayında çalışır | Renk dışı metin ve ikon kullanılır | Kısmi; gerçek backend E2E ayrı önkoşul |
-| Geçmişi dinleme | Kayıt tek anlamlı cümle; günlük özet butonu | `ios/` yok | Global özet ve seçili kayıt için “kaydı dinle” bağlı | Loading/empty/offline/error açık durumları | Uygulandı; gerçek cihaz kanıtı bekliyor |
-| Kaydı düzeltme/öğün değiştirme | Gerçek kart eylemleri mevcut | `ios/` yok | Seçili kayıtta kesin düzeltme/öğün/porsiyon komutları gerçek eyleme bağlı | Dokunma alternatifleri ve diyalog | Kısmi; fiziksel STT bekliyor |
-| Kaydı silme | Onay diyaloğu ve dokunma yolu mevcut | `ios/` yok | Seçili kayıt + kesin komut + ayrı kesin “evet”; kısmi/fuzzy sonuç çalışmaz | Açık onaylı, geri alınabilir eylem | Kısmi; otomatik güvenlik testi geçti |
-| Diyetisyen atama | E-posta alanı, bulma/onay/iptal kontrolleri | `ios/` yok | Sesli atama yok | Kaydırılabilir kartlar | Kısmi; doğrulanmış sandbox verisi gerekir |
-| Rapor önizleme | Alıcı, dönem, kayıt ve kanal özeti semantik | `ios/` yok | Kullanıcı “özeti dinle” ile TTS ister | Metin ve maskeli alıcı gösterilir | Uygulandı; gerçek cihaz bekliyor |
-| Rapor onayı/gönderme | Checkbox ve gönder butonu; live region sonucu | `ios/` yok | Kesin komut + ikinci kesin onay; fuzzy reddedilir | 200% widget testi geçti | Kısmi; sandbox backend önkoşulu |
-| Anket | Soru grupları ve dokunma cevapları var | `ios/` yok | Açık metinde sesli giriş var; tüm soru tipleri sesle tamamlanmıyor | Reduce motion dikkate alınıyor | Kısmi |
-| Ayarlar | Gruplar, switch/slider semantiği var | `ios/` yok | Sesli “ayarlar” navigasyonu, görünür dinleme durumu ve iptal var | Yüksek kontrast/TTS/haptic tercihleri merkezi servise yazılır | Kısmi |
-| Çıkış | Dokunma yolu ve auth temizliği mevcut | `ios/` yok | Ayarlar bağlamında kesin “çıkış yap” + ayrı kesin “evet” | Açık etiketli dokunma kontrolü korunur | Kısmi; otomatik kritik eylem testi geçti |
+| Kayıt | Form alanları ve dokunma eylemleri mevcut; gerçek cihaz sırası bekliyor | Kaynak hazır; VoiceOver NOT RUN | Sesle form doldurma yok; klavye alternatifi var | Kaydırılabilir form; 200% ayrı fiziksel kontrol bekliyor | Kısmi |
+| Giriş | Route adı, alan etiketleri, şifre görünürlüğü ve odak sırası otomatik testli | Kaynak hazır; route/odak gerçek iPhone'da NOT RUN | Sesle kimlik bilgisi girişi yok; klavye kullanılabilir | 200% widget testi geçti | Kısmi; `test/widget/login_accessibility_test.dart` |
+| Kamera/mikrofon izinleri | Durum ve dokunma alternatifleri var; sistem izin diyaloğu gerçek cihazda bekliyor | Privacy metinleri hazır; sistem izin diyaloğu NOT RUN | Mikrofon reddinde butonlar kullanılabilir | Kalıcı ret ve yeniden deneme görünür | Kısmi |
+| Taramayı başlatma | Büyük semantik tarama kontrolü var | Kaynak hazır; VoiceOver + fiziksel kamera NOT RUN | Global “tara” navigasyonu ve kamera eylemleri kısmi | En az 48dp hedef, yüksek görünürlük | Kısmi |
+| Kamera hizalama/kalite | Görsel olmayan durum metni ve duyurular var; gerçek sahne kalibrasyonu bekliyor | Kaynak hazır; iPhone kamera yönlendirmesi NOT RUN | Kısa TTS/haptic mevcut; ortam testi yok | Metinsel kalite yönergeleri var | Kısmi |
+| Sonucu dinleme | Tek birleşik sonuç semantiği ve kullanıcı tetiklemeli dinleme var | Kaynak hazır; VoiceOver/TTS çakışması NOT RUN | Sonuç TTS ile dinlenebilir | Metin ve durum etiketi görünür | Uygulandı; gerçek cihaz kanıtı bekliyor |
+| Aday seçme | En fazla üç adayın dokunma kontrolleri var | Kaynak hazır; aday odağı VoiceOver'da NOT RUN | “Birinci/ikinci/üçüncü seçenek” bağlama bağlı | Metin seçenekleri görünür | Kısmi; parser ve kamera testleri geçti |
+| Porsiyon düzeltme | Dokunma seçenekleri ve değer bilgisi var | Kaynak hazır; picker/değer duyurusu NOT RUN | `porsiyon N gram` 0–2000 g aralığında kabul edilir | Büyüyebilen kontrol/metin | Kısmi |
+| Onaylama/kaydetme | Evet/hayır/yeniden çek dokunma alternatifleri mevcut | Kaynak hazır; modal/odak geri dönüşü NOT RUN | Evet/hayır yalnız tarama onayında çalışır | Renk dışı metin ve ikon kullanılır | Kısmi; gerçek backend E2E ayrı önkoşul |
+| Geçmişi dinleme | Kayıt tek anlamlı cümle; günlük özet butonu | Kaynak hazır; liste gezinme ve custom actions NOT RUN | Global özet ve seçili kayıt için “kaydı dinle” bağlı | Loading/empty/offline/error açık durumları | Uygulandı; gerçek cihaz kanıtı bekliyor |
+| Kaydı düzeltme/öğün değiştirme | Gerçek kart eylemleri mevcut | Kaynak hazır; modal/picker VoiceOver NOT RUN | Seçili kayıtta kesin düzeltme/öğün/porsiyon komutları gerçek eyleme bağlı | Dokunma alternatifleri ve diyalog | Kısmi; fiziksel STT bekliyor |
+| Kaydı silme | Onay diyaloğu ve dokunma yolu mevcut | Kaynak hazır; kritik onay VoiceOver'da NOT RUN | Seçili kayıt + kesin komut + ayrı kesin “evet”; kısmi/fuzzy sonuç çalışmaz | Açık onaylı, geri alınabilir eylem | Kısmi; otomatik güvenlik testi geçti |
+| Diyetisyen atama | E-posta alanı, bulma/onay/iptal kontrolleri | Kaynak hazır; VoiceOver form sırası NOT RUN | Sesli atama yok | Kaydırılabilir kartlar | Kısmi; doğrulanmış sandbox verisi gerekir |
+| Rapor önizleme | Alıcı, dönem, kayıt ve kanal özeti semantik | Kaynak hazır; önizleme okuma sırası NOT RUN | Kullanıcı “özeti dinle” ile TTS ister | Metin ve maskeli alıcı gösterilir | Uygulandı; gerçek cihaz bekliyor |
+| Rapor onayı/gönderme | Checkbox ve gönder butonu; live region sonucu | Kaynak hazır; live region ve modal odağı NOT RUN | Kesin komut + ikinci kesin onay; fuzzy reddedilir | 200% widget testi geçti | Kısmi; sandbox backend önkoşulu |
+| Anket | Soru grupları ve dokunma cevapları var | Kaynak hazır; form/picker VoiceOver NOT RUN | Açık metinde sesli giriş var; tüm soru tipleri sesle tamamlanmıyor | Reduce motion dikkate alınıyor | Kısmi |
+| Ayarlar | Gruplar, switch/slider semantiği var | Kaynak hazır; switch/slider değerleri NOT RUN | Sesli “ayarlar” navigasyonu, görünür dinleme durumu ve iptal var | Yüksek kontrast/TTS/haptic tercihleri merkezi servise yazılır | Kısmi |
+| Çıkış | Dokunma yolu ve auth temizliği mevcut | Kaynak hazır; ikinci onay ve odak dönüşü NOT RUN | Ayarlar bağlamında kesin “çıkış yap” + ayrı kesin “evet” | Açık etiketli dokunma kontrolü korunur | Kısmi; otomatik kritik eylem testi geçti |
 
 ## Altı ana araştırma görevi için kabul durumu
 
@@ -121,6 +121,7 @@ flutter test test/widget/dietitian_report_wizard_test.dart
 flutter test test/widget/food_history_screen_test.dart
 flutter test test/widget/settings_accessibility_test.dart
 flutter test test/accessibility/accessibility_test.dart
+flutter test test/accessibility/ios_voiceover_semantics_test.dart
 ```
 
 Kapsanan kanıtlar:
@@ -136,12 +137,12 @@ Kapsanan kanıtlar:
 
 Otomatik testlerde sahte widget ağacı kurulmamıştır. Platform kamera, TTS, STT ve sağlayıcı çağrıları testte başlatılmadan gerçek ekranlar pump edilmiştir.
 
-Tam `flutter test --no-pub` koşusunda 116 test geçti. `flutter analyze --no-pub --no-fatal-infos` sıfır error ve sıfır warning ile tamamlandı; 29 adet mevcut info düzeyi bulgu (çoğunlukla Flutter API deprecation ve `prefer_const`) ayrı teknik temizlik işi olarak kalmıştır. Eski çoklu-pencere uyumsuz `SemanticsService.announce` kullanımları güncel `sendAnnouncement` API'sine taşınmıştır.
+27 Temmuz 2026 tam `flutter test` koşusunda 128 test geçti. `flutter analyze --no-fatal-infos` sıfır error ve sıfır warning ile tamamlandı; 68 adet mevcut info düzeyi bulgu (çoğunlukla Flutter API deprecation ve `prefer_const`) ayrı teknik temizlik işi olarak kalmıştır. iOS platform dalını zorlayan testler gerçek `LoginScreen` ve `CameraScreen` widget'larında route/form, live region ve dokunmatik alternatifleri doğrular; bunlar gerçek VoiceOver kanıtı değildir. Eski çoklu-pencere uyumsuz `SemanticsService.announce` kullanımları güncel `sendAnnouncement` API'sine taşınmıştır.
 
 ## Açık engeller ve riskler
 
 - P0: Fiziksel Android cihazda TalkBack ile altı görev tamamlanmış değildir.
-- P0: `ios/` platformu yoktur; VoiceOver, iOS mikrofon/kamera izinleri ve iOS ses yönlendirmesi test edilemez.
+- P0: iOS kaynakları ve izin açıklamaları hazırlanmıştır; ancak Xcode build/archive, VoiceOver, iOS mikrofon/kamera izinleri ve ses yönlendirmesi gerçek cihazda test edilmemiştir.
 - P0: Fiziksel kamera + kanonik backend + sandbox rapor gönderimi aynı senaryoda kanıtlanmamıştır.
 - P1: Diyetisyen atama sesli komutla tamamlanamaz; ekran okuyucu + dokunma yolu fiziksel cihazda doğrulanmalıdır.
 - P1: Tüm ekranların 200%, yatay, yüksek kontrast ve azaltılmış hareket matrisi tamamlanmamıştır.
@@ -154,7 +155,7 @@ Tam `flutter test --no-pub` koşusunda 116 test geçti. `flutter analyze --no-pu
 “WCAG 2.1 AA uyumlu” ifadesi ancak aşağıdakilerin tümü sağlandıktan sonra değerlendirilebilir:
 
 1. Manuel plandaki P0 Android/TalkBack senaryoları iki Android sürümünde geçer.
-2. iOS platformu eklenir ve en az bir desteklenen iPhone/VoiceOver koşusu geçer veya iOS açıkça ürün kapsamından çıkarılır.
+2. Hazırlanan iOS kaynakları macOS/Xcode ortamında derlenir ve en az bir desteklenen iPhone/VoiceOver koşusu geçer veya iOS açıkça ürün kapsamından çıkarılır.
 3. Tüm ana ekranlarda 200%, yatay, yüksek kontrast, reduce motion ve odak görünürlüğü matrisi tamamlanır.
 4. Otomatik testler CI'da geçer ve sonuç artefaktı saklanır.
 5. En az görme engelli katılımcılarla etik/onamlı kullanılabilirlik testi yapılır; ham veri olmadan başarı yüzdesi üretilmez.

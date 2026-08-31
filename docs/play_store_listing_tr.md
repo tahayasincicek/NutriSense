@@ -1,111 +1,73 @@
-# NutriSense — Google Play Store Türkçe Listesi
+# NutriSense — Google Play mağaza metni taslağı
 
-> **Yayın kapısı:** Bu dosyadaki sınıf sayısı, model, erişilebilirlik ve uyumluluk iddiaları kanıt envanteriyle doğrulanmadan mağazada kullanılmamalıdır. Fiziksel Android cihaz E2E/latency kanıtı henüz çalıştırılmamıştır.
+Durum: **YAYINA HAZIR DEĞİL / KURUM ONAYI BEKLİYOR**
 
-## Uygulama Adı
-NutriSense — Görme Engelliler İçin Akıllı Besin Tanıma
+Bu metin yalnız çalışan ürün kapsamını tarif eder. Gerçek gizlilik politikası
+URL'si, veri sorumlusu, application ID, imzalı AAB ve fiziksel cihaz kabul
+kanıtı tamamlanmadan Play Console'a kopyalanmamalıdır.
 
-## Kısa Açıklama (80 karakter)
-Yapay zeka ile yiyecekleri tanı, kalori hesapla, sesli geri bildirim al.
+## Uygulama adı
 
-## Tam Açıklama (4000 karakter)
+NutriSense
 
-🍽️ **NutriSense** — görme engelli bireyler için özel olarak tasarlanmış, yapay zeka destekli besin tanıma ve kalori takip uygulaması.
+## Kısa açıklama
 
-### Nasıl Çalışır?
-1. 📷 **Yiyeceğin fotoğrafını çekin** — görüntü yapılandırılmış çevrimiçi servisle analiz edilir
-2. 🔊 **Sesli geri bildirim alın** — güven yeterliyse aday ve beslenme kaynağı ayrı açıklanır
-3. 📊 **Sonucu onaylayın veya düzeltin** — yalnız onaylanan öğün geçmişe kaydedilir
-4. 👨‍⚕️ **Diyetisyeninize rapor gönderin** — haftalık beslenme raporlarınız tek tuşla iletilir
+Besin sonucunu dinleyin, porsiyonu doğrulayın ve günlüğünüzü takip edin.
 
-### Temel Özellikler
+## Tam açıklama
 
-🎯 **Yapay Zeka ile Besin Tanıma**
-- Google Vision AI ve özel MobileNetV3 modeli
-- 1000+ besin türü tanıma
-- Türk mutfağına özel yemek desteği (döner, lahmacun, mercimek çorbası...)
+NutriSense, görme engelli ve az gören kullanıcıların bir yiyecek görüntüsünden
+alınan tahmini besin bilgisini dinlemesine, sonucu doğrulamasına veya
+düzeltmesine ve onaylanan kaydı beslenme günlüğünde izlemesine yardımcı olan
+bir araştırma prototipidir.
 
-🔊 **Tamamen Sesli Kullanım**
-- Ekrana bakmadan kullanılabilir
-- Türkçe sesli komutlar: "Tara", "Bugün ne yedim", "Diyetisyene gönder"
-- Ayarlanabilir konuşma hızı ve ses tonu
-- Tüm bilgiler sesli olarak okunur
+Uygulama:
 
-📊 **Detaylı Beslenme Takibi**
-- Günlük/haftalık/aylık kalori geçmişi
-- Protein, karbonhidrat, yağ dağılımı
-- Öğün bazlı kayıt (kahvaltı, öğle, akşam)
-- Hedef kalori takibi
+- Yapılandırılmış çevrimiçi analiz hizmetinden gelen aday sonucu ve güven
+  durumunu gösterir; hizmet yoksa sahte sonuç üretmez.
+- Porsiyonu kesin ölçüm olarak sunmaz; kullanıcıya tahmini değeri değiştirme
+  olanağı verir.
+- Yalnız kullanıcı tarafından onaylanan kaydı geçmişe ekler.
+- Türkçe sesli geri bildirim, sesli komut ve Android TalkBack ile kullanılmayı
+  hedefler. Fiziksel cihaz erişilebilirlik doğrulaması tamamlanmadığı için tam
+  uyumluluk iddiasında bulunulmaz.
+- Atanmış ve doğrulanmış diyetisyene rapor göndermeden önce alıcıyı, dönemi ve
+  kanalları kullanıcıya gösterip açık onay ister.
 
-👨‍⚕️ **Diyetisyen Bağlantısı**
-- Otomatik rapor oluşturma
-- E-posta ve SMS ile bildirim
-- Detaylı beslenme grafiklerı
+NutriSense tıbbi teşhis, tedavi veya kişiselleştirilmiş diyet önerisi sunmaz.
+Besin ve porsiyon değerleri tahminidir; kullanıcı doğrulaması gerekir.
 
-♿ **Erişilebilirlik — Kısmi uygunluk hedefleniyor**
-- Android TalkBack akışları hedeflenir; gerçek cihaz doğrulaması tamamlanmadan tam uyumluluk iddiası kullanılmaz
-- Yüksek kontrast modu
-- Minimum 44×44dp dokunma hedefleri
-- Titreşim geri bildirimi
+## Gizlilik özeti
 
-🔒 **Gizlilik ve Güvenlik**
-- Kamera görüntüsü varsayılan olarak analiz sonrasında saklanmaz
-- Diyetisyen paylaşımı her gönderimde kullanıcı onayı gerektirir
-- Erişim belirteçleri cihazın platform güvenli deposunda tutulur
-- Konum bilgisi toplanmaz
+- Kamera görüntüsü analiz sırasında işlenir ve varsayılan olarak kalıcı
+  saklanmaz.
+- Erişim belirteçleri Android platformunun güvenli deposunda tutulur.
+- Diyetisyen paylaşımı her gönderimde ayrı kullanıcı onayı gerektirir.
+- Araştırma veri toplama modu, etik protokol bilgileri yapılandırılmadan gerçek
+  katılımcı verisi kabul etmez.
+- Konum izni istenmez.
 
-> **Hukuki yayın kapısı:** “KVKK uyumlu” veya sunucu verilerinin belirli bir
-> algoritmayla şifrelendiği iddiası; üniversite veri sorumlusu/hukuk onayı,
-> production altyapı kanıtı ve güncel veri akışı incelemesi olmadan
-> kullanılmamalıdır.
+## Kanıtlanmadan kullanılmayacak ifadeler
 
-### Kim İçin?
-- Görme engelli bireyler
-- Düşük görme kapasitesine sahip kullanıcılar
-- Yaşlı bireyler
-- Diyetisyen desteği alan herkes
+Şu ifadeler yayın metninde yasaktır: “TÜBİTAK destekli”, “WCAG uyumlu”,
+“tamamen erişilebilir”, “tam AI”, “klinik doğruluk”, belirli bir besin/sınıf
+sayısı, doğrulanmamış model veya sağlayıcı adı ve “KVKK uyum garantisi”.
 
-### TÜBİTAK 2209-A Destekli
-Bu uygulama TÜBİTAK 2209-A Üniversite Öğrencileri Araştırma Projeleri kapsamında geliştirilmiştir.
+## Play Console için açık kullanıcı kararları
 
----
+| Alan | Durum |
+|---|---|
+| Uygulama/application ID | Kurum/ürün sahibi belirleyecek |
+| İletişim e-postası | Yetkili kurum sağlayacak |
+| Gizlilik politikası URL'si | Hukuk/KVKK onaylı gerçek URL gerekli |
+| İçerik derecelendirmesi | Play Console anketiyle belirlenecek |
+| Hedef kitle | Araştırmacı ve kurum kararı gerekli |
+| Data Safety | `docs/play_store_data_safety_draft.md` üzerinden sonlandırılacak |
+| Sağlık uygulaması beyanları | Play politikası ve hukuk incelemesi gerekli |
 
-## Anahtar Kelimeler
-görme engelli, besin tanıma, kalori hesaplama, yapay zeka, erişilebilirlik, diyetisyen, sesli geri bildirim, TalkBack, besin takibi, sağlık
+## Ekran görüntüsü kapısı
 
-## Kategori
-Sağlık ve Fitness
-
-## İçerik Derecelendirmesi
-Herkes (Everyone)
-
-## İletişim E-postası
-nutrisense@example.com
-
-## Gizlilik Politikası URL
-https://nutrisense.app/privacy
-
----
-
-## Ekran Görüntüsü Gereklilikleri
-
-### Zorunlu Ekran Görüntüleri (min. 2, max. 8)
-| # | Ekran | Açıklama | Erişilebilirlik Vurgusu |
-|---|-------|----------|-------------------------|
-| 1 | Ana Sayfa | Büyük "Tara" butonu, temiz arayüz | Yüksek kontrast, büyük butonlar |
-| 2 | Kamera Tarama | Kameraya tutulan yiyecek | "Otomatik tanıma — ekrana bakmaya gerek yok" |
-| 3 | Sonuç Ekranı | Besin adı + kalori + sesli okuma | Sesli geri bildirim ikonu vurgulu |
-| 4 | Besin Geçmişi | Günlük kalori özeti kartı | Liste ve özet görünümü |
-| 5 | Diyetisyen Rapor | Rapor gönderme sihirbazı | Adım adım sesli rehber |
-| 6 | Sesli Komut | Mikrofon aktif, komut listesi | "Tamamen sesle kontrol" |
-| 7 | Ayarlar | Konuşma hızı/ses ayarları | Erişilebilirlik ayarları |
-| 8 | Anket | Likert ölçeği sorusu | Büyük butonlar, TTS aktif |
-
-### Boyut Gereksinimleri
-- Telefon: 1080×1920 px (16:9) veya üzeri
-- Tablet (7"): 1200×1920 px
-- Tablet (10"): 1600×2560 px
-
-### Feature Graphic
-- Boyut: 1024×500 px
-- İçerik: Logo + "Görme Engelliler İçin Akıllı Besin Tanıma" + kullanıcı görseli
+Ekran görüntüleri yalnız production-benzeri, sentetik test verisiyle
+oluşturulmalıdır. Gerçek ad, e-posta, telefon, token, beslenme geçmişi veya
+katılımcı verisi görünmemelidir. Görseller henüz tamamlanmamış erişilebilirlik,
+offline model veya dış sağlayıcı desteği varmış gibi göstermemelidir.

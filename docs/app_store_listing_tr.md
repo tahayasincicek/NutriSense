@@ -1,85 +1,54 @@
-# NutriSense — iOS App Store Listesi ve Info.plist Yapılandırması
+# NutriSense — iOS mağaza kapsam notu
 
-> **Yayın kapısı:** Bu dosyadaki kapsam, model başarısı ve uyumluluk iddiaları kanıt envanteriyle doğrulanmadan mağazada kullanılmamalıdır. Gerçek iOS cihaz E2E testi henüz çalıştırılmamıştır.
+Durum: **BLOKE / kaynak hazır, iOS yayın kanıtı yok**
 
-## Info.plist Gizlilik Açıklamaları
+Depoda iOS kaynak iskeleti vardır; ancak Xcode build/archive, Apple signing,
+gerçek VoiceOver cihaz testi ve App Store Connect yetkisi doğrulanmamıştır.
+Android için doğrulanan davranışlar iOS'ta çalışıyormuş gibi tekrarlanmamalıdır.
 
-Aşağıdaki anahtarları `ios/Runner/Info.plist` dosyasına ekleyin:
+## İzin kapsamı
 
-```xml
-<!-- ═══ KAMERA ═══ -->
-<key>NSCameraUsageDescription</key>
-<string>NutriSense yiyecekleri tanımak ve kalori bilgisi sağlamak için kameraya erişir. Çekim analiz için güvenli sunucuya gönderilebilir; görüntü varsayılan olarak saklanmaz.</string>
+Hazırlanan iOS uygulaması yalnız gerçekten kullanılan izinleri açık Türkçe
+gerekçelerle içerir:
 
-<!-- ═══ MİKROFON ═══ -->
-<key>NSMicrophoneUsageDescription</key>
-<string>NutriSense sesli komutlarınızı algılayabilmek için mikrofon erişimi gerektirir. Ses kaydı saklanmaz veya paylaşılmaz.</string>
+- Kamera: yiyecek görüntüsünü analiz etmek için.
+- Mikrofon ve konuşma tanıma: kullanıcı sesli komutu başlattığında.
 
-<!-- ═══ KONUŞMA TANIMA ═══ -->
-<key>NSSpeechRecognitionUsageDescription</key>
-<string>NutriSense sesli komutlarınızı metne dönüştürmek için konuşma tanıma özelliğini kullanır.</string>
+Fotoğraf kitaplığına kayıt ve arka planda ses çalma mevcut ürün gereksinimi
+değildir; ilgili entitlement/izinler kanıtlanmış özellik olmadan eklenmemelidir.
+Görüntünün çevrimiçi hizmete aktarılması ve varsayılan saklamama davranışı,
+uygulama içi aydınlatma ile gizlilik politikasında aynı şekilde açıklanmalıdır.
 
-<!-- ═══ FOTOĞRAF KİTAPLIĞI ═══ -->
-<key>NSPhotoLibraryUsageDescription</key>
-<string>Taranan besin fotoğraflarını kaydetmek için fotoğraf kitaplığına erişim gerektirir.</string>
+## Yayın öncesi zorunlu kanıt
 
-<!-- ═══ ARKA PLAN SES ═══ -->
-<key>UIBackgroundModes</key>
-<array>
-    <string>audio</string>
-</array>
-```
+- Gerçek bundle ID ve Apple takım/sözleşme sahibi.
+- Distribution sertifikası ve güvenli signing süreci.
+- VoiceOver, %200 metin, koyu tema, izin reddi, kamera lifecycle ve Türkçe
+  TTS/STT için fiziksel iPhone test kaydı.
+- Gerçek gizlilik politikası ve App Privacy yanıtları.
+- Archive/TestFlight smoke ve crash/log PII incelemesi.
+- Production backend ve üçüncü taraf aktarımına göre App Privacy formu.
+- Uygulama içinden hesap silme/dışa aktarma ve support akışının iPhone kanıtı.
 
-## Xcode Accessibility Capability Ayarları
+## App Privacy teknik taslak
 
-1. Xcode'da projeyi açın: `ios/Runner.xcworkspace`
-2. Runner target → Signing & Capabilities
-3. **Background Modes** → Audio (TTS arka planda devam etsin)
-4. VoiceOver uyumluluğu için özel ayar gerekmez (Flutter Semantics yeterli)
+Nihai etiket değildir. Production konfigürasyonuna göre en az şu kategoriler
+yeniden değerlendirilmelidir:
 
-## App Store Connect Bilgileri
+- Contact Info: hesap adı/e-postası.
+- Identifiers: kullanıcı UUID'si ve auth/audit kimlikleri.
+- Health & Fitness veya User Content: kullanıcı onaylı beslenme günlüğü.
+- Photos or Videos: görüntü yalnız analiz sırasında cloud sağlayıcısına
+  aktarılıyorsa.
+- Other User Content: araştırma anketinin açık uçlu yanıtları yalnız etik modda.
+- Diagnostics: Crashlytics/analytics eklenirse; şu anda doğrulanmış SDK yoktur.
 
-### Uygulama Adı
-NutriSense — Akıllı Besin Tanıma
+Verinin kullanıcıyla ilişkilendirilmesi, tracking, üçüncü taraf paylaşımı,
+saklama ülkesi ve silme süreleri üniversite veri sorumlusu/hukuk birimi
+tarafından production akışıyla doğrulanmalıdır.
 
-### Alt Başlık
-Görme Engelliler İçin Kalori Takibi
+Gerçek support e-postası, support URL'si ve privacy URL'si henüz sağlanmamıştır;
+placeholder URL mağazaya girilemez.
 
-### Açıklama
-
-NutriSense, görme engelli bireyler için yapay zeka destekli besin tanıma ve kalori takip prototipidir. Uygulama çekilen görüntüyü yapılandırılmış çevrimiçi servisle analiz eder; sonuç ve veri kaynağını sesli bildirir ve geçmişe yazmadan önce kullanıcı onayı ister. Hizmet kullanılamıyorsa sahte sonuç üretmez, manuel giriş sunar.
-
-**Öne Çıkan Özellikler:**
-
-• Yapay zeka ile otomatik besin tanıma (1000+ besin)
-• Türkçe sesli geri bildirim — ekrana bakmaya gerek yok
-• Sesli komutlarla kontrol: "Tara", "Bugün ne yedim", "Gönder"
-• Günlük/haftalık kalori ve makro takibi
-• Diyetisyene otomatik rapor gönderme
-• VoiceOver ve WCAG 2.1 AA hedefleniyor; gerçek iOS cihaz doğrulaması tamamlanmadı
-• Yüksek kontrast modu ve ayarlanabilir yazı boyutu
-• Türk mutfağına özel yemek veritabanı
-• Kamera görüntüsü varsayılan olarak saklanmaz; diyetisyen paylaşımı açık onay gerektirir
-
-> **Hukuki ve teknik yayın kapısı:** Depoda iOS platform projesi ve gerçek cihaz
-> kanıtı yoktur. “VoiceOver ile tam uyumlu”, “WCAG 2.1 AA uyumlu” veya “KVKK
-> uyumlu” ifadeleri; cihaz testi, kurum veri sorumlusu/hukuk incelemesi ve
-> production altyapı kanıtı olmadan mağazada kullanılmamalıdır.
-
-TÜBİTAK 2209-A desteğiyle geliştirilmiştir.
-
-### Anahtar Kelimeler (100 karakter)
-besin,kalori,görme engelli,erişilebilirlik,yapay zeka,diyetisyen,sesli,TalkBack,sağlık
-
-### Kategori
-Ana: Sağlık ve Fitness
-İkincil: Tıp
-
-### Yaş Sınırı
-4+ (Uygunsuz içerik yok)
-
-### Gizlilik Politikası
-https://nutrisense.app/privacy
-
-### Destek URL
-https://nutrisense.app/support
+“TÜBİTAK destekli”, “WCAG uyumlu”, belirli besin sayısı, doğrulanmamış model
+başarısı veya “KVKK uyum garantisi” kanıt ve kurum onayı olmadan kullanılamaz.

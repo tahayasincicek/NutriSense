@@ -26,7 +26,7 @@ Bu proje, görme engelli bireylerin günlük beslenme takibini bağımsız olara
 
 Dünya Sağlık Örgütü verilerine göre dünyada yaklaşık 2,2 milyar kişi görme bozukluğu yaşamaktadır. Türkiye'de ise Engelli ve Yaşlı Hizmetleri Genel Müdürlüğü verilerine göre 600.000'den fazla görme engelli birey bulunmaktadır. Bu bireyler günlük yaşamlarında birçok zorlukla karşılaşmakta olup beslenme takibi de bu zorlukların başında gelmektedir. Mevcut kalori takip uygulamaları görsel arayüze dayalı olduğundan görme engelli kullanıcılar için erişilebilir değildir.
 
-Geliştirilen NutriSense uygulaması Flutter çerçevesi ile Android ve iOS platformları için eş zamanlı olarak geliştirilmiştir. Backend altyapısı Python FastAPI ile oluşturulmuş, besin tanıma için Google Cloud Vision API ve özel eğitilmiş MobileNetV3 modeli entegre edilmiştir. Kalori veritabanı olarak Nutritionix API (800.000+ besin) kullanılmıştır.
+NutriSense uygulamasının ortak Flutter kaynakları ve Android prototipi geliştirilmiştir. iOS platform kaynak hazırlığı eklenmiş olsa da macOS/Xcode derlemesi, signing, archive ve gerçek iPhone/VoiceOver testi henüz yapılmamıştır; bu nedenle iOS tamamlanmış kabul edilmemektedir. Backend ve dış sağlayıcı/model başarı iddiaları yalnız yapılandırma, ham veri ve yeniden üretilebilir test kanıtı bulunduğu ölçüde raporlanmalıdır.
 
 Uygulamanın en kritik bileşeni erişilebilirlik sistemidir. Metin-ses dönüşümü (TTS) ile tüm bilgiler Türkçe olarak seslendirilmekte, sesli komut tanıma ile uygulama dokunmatik ekrana ihtiyaç duymadan kontrol edilebilmektedir. WCAG 2.1 AA standartlarına uyumluluk hedeflenmiştir.
 
@@ -176,7 +176,8 @@ Bu çalışma, yapay zeka destekli sesli geri bildirim sisteminin görme engelli
 
 | Çıktı | Durum |
 |-------|-------|
-| NutriSense mobil uygulama (Android + iOS) | Tamamlandı |
+| NutriSense mobil uygulama — Android kaynak/debug doğrulaması | Kısmi; fiziksel cihaz/release kabulü bekliyor |
+| NutriSense mobil uygulama — iOS | Kaynak hazırlığı tamam; Xcode build, signing ve gerçek iPhone/VoiceOver testi bekliyor |
 | Python FastAPI backend | Tamamlandı |
 | MobileNetV3 besin tanıma modeli | Tamamlandı |
 | Kullanılabilirlik testi (n=20) | Tamamlandı |

@@ -4,7 +4,7 @@
 
 Amaç, görme engelli bir kullanıcının ana görevleri ekranı görmeden bağımsız tamamlayabildiğini gerçek cihazda doğrulamaktır. Otomasyon yalnız ön kontrol sağlar; bu dosyada bir adım gerçekten uygulanmadıkça **GEÇTİ** işaretlenmez.
 
-Başlangıç durumu (19 Temmuz 2026): **Tüm manuel koşular NOT RUN.** Android 16 emülatörü bağlıdır fakat bu, fiziksel TalkBack kanıtı değildir. Depoda `ios/` bulunmadığı için iOS/VoiceOver koşuları **BLOCKED** durumundadır.
+Başlangıç durumu (27 Temmuz 2026): **Tüm manuel koşular NOT RUN.** Android 16 emülatörü bağlıdır fakat bu, fiziksel TalkBack kanıtı değildir. iOS kaynak iskeleti vardır; macOS/Xcode ve gerçek iPhone olmadığı için iOS/VoiceOver koşuları **BLOCKED** durumundadır.
 
 Gerçek sağlık verisi, gerçek diyetisyen iletişim bilgisi veya gerçek alıcı kullanılmaz. Yalnız açıkça `TEST/SYNTHETIC` olarak işaretlenmiş hesap, besin kayıtları ve sandbox alıcıları kullanılır.
 
@@ -16,8 +16,8 @@ Gerçek sağlık verisi, gerçek diyetisyen iletişim bilgisi veya gerçek alıc
 | A2 | Fiziksel Android, güncel sürüm | TalkBack güncel | 200% | Dikey/yatay | Kablolu veya USB kulaklık | Online | NOT RUN |
 | A3 | Fiziksel Android, güncel sürüm | TalkBack güncel | 200% | Dikey | Bluetooth kulaklık | Offline/kesintili | NOT RUN |
 | A4 | Android emülatör API 36 | TalkBack | 100%/200% | Dikey/yatay | Sanal | Online | NOT RUN; ön kontrol |
-| I1 | Desteklenen iPhone/iOS | VoiceOver | 100% | Dikey | Hoparlör | Online | BLOCKED: `ios/` yok |
-| I2 | Desteklenen iPhone/iOS | VoiceOver | En büyük desteklenen ölçek | Dikey/yatay | Bluetooth | Kesintili | BLOCKED: `ios/` yok |
+| I1 | Desteklenen iPhone/iOS | VoiceOver | 100% | Dikey | Hoparlör | Online | BLOCKED: Mac/iPhone yok, Xcode build yok |
+| I2 | Desteklenen iPhone/iOS | VoiceOver | En büyük desteklenen ölçek | Dikey/yatay | Bluetooth | Kesintili | BLOCKED: Mac/iPhone yok, Xcode build yok |
 | L1 | Fiziksel Android | Ekran okuyucu kapalı | 200%, yüksek kontrast, reduce motion | Dikey/yatay | Hoparlör | Online | NOT RUN |
 
 Her koşuda cihaz modeli, OS build, TalkBack/VoiceOver sürümü, TTS motoru/sesi, uygulama commit SHA'sı ve backend sürümü kaydedilir.

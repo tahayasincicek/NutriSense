@@ -13,7 +13,7 @@ başlangıcı daha erkense ilgili madde başlangıçtan **önce** kapanmalıdır
 | SEC-004 | P1 | TLS termination/cipher/certificate kanıtı yok | Açık | DevOps | 2026-08-02 veya production öncesi | TLS scan, redirect, HSTS ve proxy config artefaktı |
 | SEC-005 | P1 | DB disk/yedek şifreleme ve restore-sonrası-silme kanıtı yok | Açık | DevOps + veri sorumlusu | 2026-08-09 veya gerçek veri öncesi | Sağlayıcı config, anahtar sahipliği, restore ve silme testi |
 | SEC-006 | P1 | Dış sağlayıcı DPA/yurtdışı aktarım/hukuki sebep kararı yok | Açık | Üniversite veri sorumlusu + hukuk | 2026-08-09 veya production/katılımcı öncesi | İmzalı/onarılmış kayıt ve güncel aydınlatma |
-| SEC-007 | P1 | Gerçek cihaz secure storage/network/log sızıntı testi yok | Açık | Mobil QA | 2026-08-09 | Android cihaz kanıtı; iOS platformu yoksa blocker |
+| SEC-007 | P1 | Gerçek cihaz secure storage/network/log sızıntı testi yok | Açık | Mobil QA | 2026-08-09 | Android cihaz kanıtı; iOS için Xcode build ve gerçek iPhone kanıtı yoksa blocker |
 | SEC-008 | P1 | Diyetisyen kimlik doğrulama otoritesi tanımlı değil | Açık | Ürün + kurum | 2026-08-09 veya gerçek rapor öncesi | Yetkili kayıt/doğrulama prosedürü ve kötüye kullanım testi |
 | SEC-009 | P2 | Rate limit süreç belleğinde; çok instance'ta aşılabilir | Açık | Backend/DevOps | 2026-08-16 | Redis/API gateway limiti, concurrency ve 429 testi |
 | SEC-010 | P2 | Genel yönetici/diyetisyen kimlik sistemi yok; tam RBAC iddiası yapılamaz | Açık | Backend + ürün | 2026-08-23 | Rol matrisi, authn/authz, deny-by-default testleri |

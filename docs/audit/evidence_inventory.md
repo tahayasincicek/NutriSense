@@ -24,7 +24,7 @@
 | Android debug APK | **Var** | `build/app/outputs/apk/debug/app-debug.apk` ve `build/app/outputs/flutter-apk/app-debug.apk` | İki dosya aynı: 105.549.983 bayt, 19.03.2026 20:26, SHA-256 `48DF4778FA351F51AC5303676E978ACBEE8E09326409580E897B019484ED8619`. Commit/build logu yok. | Mevcut kaynakla üretildiği kanıtlanmadığı için beta/release kabul kanıtı değildir. |
 | Android release APK | **Yok** | `build/` taramasında bulunmadı | — | Release dağıtımı kanıtsız. |
 | Android App Bundle (`.aab`) | **Yok** | Proje taramasında bulunmadı | — | Play Store teslimi yok. |
-| iOS uygulama platformu | **Yok** | `ios/` dizini yok | — | iOS hedefi uygulanmamış. |
+| iOS kaynak/Xcode projesi | **Var; kaynak hazırlığı** | `ios/`, plist, Podfile, release guard | Windows statik kontrolü | Xcode derleme kanıtı değildir. |
 | iOS IPA/TestFlight build’i | **Yok** | `.ipa` yok | — | VoiceOver ve iOS dağıtım kanıtı yok. |
 | Store yayını | **Kısmi** | `docs/play_store_listing_tr.md`, `docs/app_store_listing_tr.md` | Yalnız metin taslakları; URL/sürüm/yayın kimliği yok. | Yayın gerçekleşmiş sayılamaz. |
 | Android imzalama/ürün kimliği | **Yetersiz** | `android/app/build.gradle.kts:25,35-38` | `com.example.nutrisense`; release debug key kullanıyor. | Güvenli release artefaktı üretilemez. |

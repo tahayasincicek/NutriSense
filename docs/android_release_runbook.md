@@ -1,19 +1,29 @@
 # Android release runbook
 
-Durum: **release adayı yapılandırması hazır; signed AAB bloke**. Kuruma ait
-application ID, upload key, production HTTPS URL, gizlilik politikası URL'si ve
-mağaza yetkisi verilmedi. Bunlar uydurulmamış ve repoya secret eklenmemiştir.
+Durum: **release yapılandırması hazırlanıyor; signed AAB kullanıcı girdileri
+olmadan bilinçli olarak bloke**
 
-## Merkezi kararlar
+Kurum/ürün sahibine ait application ID, upload key, production HTTPS URL,
+gizlilik politikası URL'si ve mağaza yetkisi verilmedi. Bu değerler
+uydurulmamıştır ve hiçbir secret repoya eklenmemiştir.
 
-| Alan | Kaynak | Mevcut karar |
+## Merkezi release sözleşmesi
+
+| Alan | Kanonik kaynak | Karar |
 |---|---|---|
-| Uygulama adı | flavor manifest placeholder | Dev/Staging suffix; prod `NutriSense` |
-| Version | `pubspec.yaml` | `1.0.0+1`; her mağaza sürümünde artır |
-| Application ID | `android/gradle.properties` | `com.example.nutrisense` placeholder; release blocker |
-| Namespace | `android/app/build.gradle.kts` | Kaynak kod namespace'i `com.example.nutrisense`; mağaza ID'sinden bağımsız |
-| min/target/compile SDK | Flutter SDK | doğrulanan debug APK: min 24, target/compile 36 |
-| Ortam URL'si | `AppConfig` + `--dart-define` | dev emulator HTTP; staging/prod yalnız HTTPS |
+| Uygulama adı | flavor manifest placeholder | dev/staging suffix; prod `NutriSense` |
+| Version | `pubspec.yaml` | Her mağaza yüklemesinde versionName/versionCode artırılır |
+| Application ID | Gradle `NUTRISENSE_APPLICATION_ID` property | `com.example.*` release blocker |
+| Namespace | `android/app/build.gradle.kts` | Kod namespace'i; mağaza ID'sinden ayrı tutulur |
+| compile SDK | `android/app/build.gradle.kts` | 36 |
+| min SDK | `android/app/build.gradle.kts` | 24 |
+| target SDK | `android/app/build.gradle.kts` | 36 |
+| Ortam URL'si | `AppConfig` + `--dart-define` | dev yerel HTTP; staging/prod yalnız HTTPS |
+| Tanılama logu | `AppConfig.diagnosticLoggingEnabled` + `kDebugMode` | Yalnız dev/test debug |
+
+SDK değerleri sabittir; Flutter SDK yükseltmesi release uyumluluk sözleşmesini
+sessizce değiştiremez. SDK değişikliği ayrı cihaz matrisi ve Play politika
+incelemesi gerektirir.
 
 ## Flavor komutları
 
@@ -22,31 +32,32 @@ mağaza yetkisi verilmedi. Bunlar uydurulmamış ve repoya secret eklenmemiştir
 flutter run --flavor dev `
   --dart-define=APP_ENV=dev
 
-# Staging: URL public config'dir, secret değildir
+# Staging; URL public config'dir, secret değildir
 flutter run --flavor staging `
   --dart-define=APP_ENV=staging `
   --dart-define=API_BASE_URL=https://STAGING_HOST/api/v1
 
-# Production signed AAB
+# Production; aşağıdaki kimlik ve imza kapıları tamamlanmadan başarısız olur
 flutter build appbundle --release --flavor prod `
   --dart-define=APP_ENV=prod `
   --dart-define=API_BASE_URL=https://PRODUCTION_HOST/api/v1
 ```
 
-`devDebug` network security config yalnız `10.0.2.2`, `127.0.0.1` ve
-`localhost` için cleartext tanır. Main/release config cleartext'i reddeder ve
-yalnız sistem CA deposunu kullanır. Custom certificate bypass/pinning yoktur.
-API/Twilio/SMTP/Nutritionix/Google anahtarları hiçbir flavor veya
-`dart-define` içine konmaz.
+`devDebug` yalnız `10.0.2.2`, `127.0.0.1` ve `localhost` için cleartext tanır.
+Main/staging/prod ağ ilkesi cleartext'i reddeder ve Android sistem sertifika
+deposunu kullanır. Riskli custom certificate bypass yoktur. API, Google,
+Nutritionix, Twilio veya SMTP anahtarları flavor ya da `dart-define` içine
+konmaz; mobil binary secret saklama yeri değildir.
 
 ## Application ID ve imza kapısı
 
-1. Üniversite/ürün sahibi benzersiz reverse-domain ID'yi yazılı kararla seçer.
-2. `NUTRISENSE_APPLICATION_ID` yerel/CI Gradle property olarak verilir.
-3. Yetkili kişi upload keystore'u güvenli kurum cihazında üretir. Codex bu
-   işlemde gerçek key üretmez.
-4. `android/key.properties` aşağıdaki adları içerir; gerçek değerler parola
-   yöneticisi/CI secret store'da kalır:
+1. Üniversite/ürün sahibi benzersiz reverse-domain application ID'yi yazılı
+   kararla belirler.
+2. Değer yerel/CI Gradle property olarak
+   `NUTRISENSE_APPLICATION_ID=...` biçiminde sağlanır.
+3. Yetkili kişi upload keystore'u güvenli kurum cihazında oluşturur. Gerçek
+   anahtar Codex tarafından üretilmez.
+4. `android/key.properties` yalnız yerel/CI ortamında aşağıdaki alanları taşır:
 
 ```properties
 storeFile=upload-keystore.jks
@@ -56,78 +67,115 @@ keyPassword=<secret>
 ```
 
 `android/key.properties`, `*.jks` ve `*.keystore` Git tarafından dışlanır.
-Release task; placeholder application ID veya `key.properties` yoksa hata
-verir. Release build debug key'e düşmez.
+Release task placeholder ID veya eksik key properties ile hata verir ve debug
+key'e düşmez. CI secret değerlerini loglamamalı; geçici key dosyası job sonunda
+runner ile imha edilmelidir. Play App Signing kullanılıyorsa upload key ve app
+signing key sorumluları kurum kayıtlarında ayrı belirtilmelidir.
 
-CI'da keystore base64 değerini loglamadan geçici dosyaya açın, job bitiminde
-runner ile birlikte imha edin. Play App Signing kullanılıyorsa upload key ile
-app signing key ayrımını ve kurtarma yetkililerini kurum kaydında tutun.
+## Manifest, izin ve veri koruması
 
-## İzin ve Android davranışı
+Main manifest yalnız doğrudan kullanılan izinleri ister:
 
-Doğrudan ürün manifesti `INTERNET`, `CAMERA`, `RECORD_AUDIO` ister.
-`VIBRATE`, kullanılan haptic eklentisinden; Android 28 ve altındaki
-`WRITE_EXTERNAL_STORAGE`, CameraX eklentisinden `maxSdkVersion=28` ile birleşir.
-Bildirim özelliği/runtime akışı olmadığı için `POST_NOTIFICATIONS` yoktur.
+- `INTERNET`: backend ve cihaz konuşma servisleri.
+- `CAMERA`: yiyecek tarama.
+- `RECORD_AUDIO`: kullanıcı başlattığında sesli komut.
 
-Kamera ekranı geçici rette tekrar deneme/manuel giriş, kalıcı rette Ayarlar
-eylemi sunar. Mikrofon reddinde dokunmatik/klavye alternatifi korunur. Bu
-durumların fiziksel cihaz kanıtı cihaz raporunda tamamlanmalıdır.
+Android bildirim özelliği/runtime akışı bulunmadığı için
+`POST_NOTIFICATIONS` yoktur. Özellik eklenirse manifest ve erişilebilir runtime
+gerekçesi aynı değişiklikte eklenmelidir.
 
-## Release doğrulama
+Kamera akışı geçici rette tekrar deneme/manuel giriş, kalıcı rette sistem
+Ayarları eylemi sunar. Mikrofon reddinde dokunmatik/klavye alternatifi korunur.
+Fiziksel cihaz kanıtı cihaz kabul raporunda tamamlanmalıdır.
+
+`allowBackup=false`, legacy backup exclusions ve Android 12+ data extraction
+exclusions; token, tercih ve yerel cache'in cloud backup/device transfer ile
+taşınmasını engeller. Release manifestinde cleartext kapalıdır.
+
+## Yerel preflight
+
+Her commit veya push kararından önce aşağıdaki sıra tamamlanır; başarısız sonuç
+gizlenmez:
 
 ```powershell
-python scripts/qa/android_release_checks.py
+py -3 scripts/qa/android_release_checks.py
+flutter pub get
+dart format --output=none --set-exit-if-changed lib test
 flutter analyze --no-fatal-infos
 flutter test
 flutter build apk --debug --flavor dev --dart-define=APP_ENV=dev
+```
 
-# Yetkili app ID + key sağlandıktan sonra:
+Android lint doğrudan çalıştırılacaksa Windows sistemindeki eski Java 8 yerine
+Android Studio JBR kullanılmalıdır:
+
+```powershell
+$env:JAVA_HOME='C:\Program Files\Android\Android Studio\jbr'
+$env:Path=(Join-Path $env:JAVA_HOME 'bin')+';'+$env:Path
+Push-Location android
+.\gradlew.bat lintDevDebug --no-daemon --console=plain
+Pop-Location
+```
+
+Flutter'ın Git'e alınmayan `android/local.properties` dosyasını Windows yol
+biçimiyle yeniden üretmesi Android Lint `PropertyEscape` yanlış pozitifine yol
+açar. `android/app/lint.xml` yalnız bu generated dosyayı istisna eder; proje
+genelinde lint baseline veya hata bastırma yoktur.
+
+Staging public URL ile ayrıca başlatma/config testi yapılır. Kurum kimliği ve
+upload key sağlandıktan sonra:
+
+```powershell
 flutter build appbundle --release --flavor prod `
   --dart-define=APP_ENV=prod `
   --dart-define=API_BASE_URL=https://PRODUCTION_HOST/api/v1
+
+bundletool validate --bundle build/app/outputs/bundle/prodRelease/app-prod-release.aab
 ```
 
-AAB için ayrıca:
+Release artefaktında ayrıca şunlar kontrol edilir:
 
-- `bundletool validate --bundle <aab>`
-- Play internal track kurulum testi ve signer fingerprint kontrolü
-- R8 sonrası auth, kamera, secure storage, TTS/STT ve paylaşım smoke
-- APK/AAB içinde `.env`, provider key, test token ve debug endpoint taraması
-- logcat'te token, parola, e-posta/telefon, base64 veya görüntü yolu olmaması
+- Signer fingerprint ve Play internal-track kurulum sonucu.
+- R8 sonrası auth, secure storage, kamera, geçmiş, TTS/STT ve rapor smoke.
+- `.env`, provider key, test token, localhost ve debug endpoint taraması.
+- Logcat'te token, parola, e-posta, telefon, base64 veya görüntü yolu olmaması.
+- Debug menüsü/test endpointinin prod navigasyonunda ve binary davranışında
+  erişilememesi.
 
-Mevcut `debugPrint` çağrıları `kDebugMode` korumasındadır. Release Crashlytics
-adaptörü/credential'ı yoktur; crash verisi gönderiliyor diye beyan edilmez.
+## Release checklist
+
+- [ ] Kurum application ID kararı kayda geçti.
+- [ ] Version name/code artırıldı.
+- [ ] Upload key güvenli üretildi ve kurtarma sorumlusu belirlendi.
+- [ ] Production HTTPS API ve provider sandbox doğrulandı.
+- [ ] Static checker, analyze ve tüm testler geçti.
+- [ ] İmzalı AAB validate edildi ve internal track'ten kuruldu.
+- [ ] İki fiziksel cihaz matrisi tamamlandı.
+- [ ] TalkBack, %200 font, koyu/yüksek kontrast ve izin retleri geçti.
+- [ ] Yavaş ağ/uçak modu/background-kill/kamera lifecycle geçti.
+- [ ] Release log/artefakt secret ve PII taraması geçti.
+- [ ] Gizlilik politikası ve Data Safety hukuk/KVKK onayı aldı.
+- [ ] Mağaza metni yalnız kanıtlı özellikleri içeriyor.
 
 ## Rollback
 
-1. Dağıtımı durdur, Play staged rollout oranını sıfırla.
-2. Güvenli son versionCode'a yeni ve daha yüksek versionCode ile dön; Play
-   aynı versionCode'un tekrar yüklenmesine izin vermez.
-3. API uyumluluğunu ve migration forward-fix'i doğrula; production DB'de
-   plansız downgrade çalıştırma.
-4. Secret/PII olayıysa `SECURITY.md` incident akışını başlat, anahtarı döndür,
-   log/rapor alıcı kapsamını belirle.
+1. Dağıtımı durdur ve staged rollout oranını sıfırla.
+2. Güvenli son sürümün kodunu yeni ve daha yüksek versionCode ile forward-fix
+   olarak yayınla; eski versionCode yeniden yüklenemez.
+3. API geriye uyumluluğunu doğrula; production DB'de plansız migration
+   downgrade çalıştırma.
+4. Secret/PII olayıysa `SECURITY.md` incident akışını başlat, ilgili anahtarı
+   döndür ve etkilenen alıcı/log kapsamını belirle.
 5. Cihaz matrisi ve P0 smoke yeniden geçmeden rollout'u açma.
 
-## Mağaza iddia ve Data Safety taslağı
+## Mağaza iddiaları ve Data Safety
 
-Kanıtsız `TÜBİTAK destekli`, `WCAG uyumlu`, `800.000 besin`, `tam AI`,
-`klinik doğruluk` ve `tıbbi öneri` ifadeleri yasaktır. Uygulama tahmini ve
-klinik karar vermeyen besin bilgisi sunar.
+Kanıtsız “TÜBİTAK destekli”, “WCAG uyumlu”, “800.000 besin”, “tam AI”,
+“klinik doğruluk” veya “KVKK uyum garantisi” ifadeleri kullanılamaz. Ürün
+tahmini, klinik karar vermeyen besin bilgisi sunar.
 
-Data Safety formu yayımdan önce gerçek production konfigürasyonuyla yeniden
-onaylanmalıdır:
-
-- Hesap: e-posta, ad, auth/audit verisi.
-- Beslenme: kullanıcı onaylı besin, porsiyon, zaman ve makrolar.
-- Kamera: analiz için işlenir; varsayılan kalıcı saklama yoktur; cloud aktarım
-  seçimi gizlilik metninde açıklanır.
-- Diyetisyen: yalnız atanmış/doğrulanmış alıcıya her gönderimde açık onam.
-- Araştırma: ürün UUID'sinden ayrı pseudonym ve etik/protokol kapısı.
-- Crash/analytics: production SDK yapılandırılmadığı için şu anda toplanıyor
-  diye işaretlenmez.
-
-Gizlilik politikası URL'si, veri sorumlusu, yurtdışı aktarım değerlendirmesi ve
-silme/retention metni üniversite hukuk/KVKK birimi tarafından onaylanmadan
-mağaza yayını yapılamaz.
+Teknik Data Safety taslağı
+`docs/play_store_data_safety_draft.md` dosyasındadır. Gerçek gizlilik
+politikası URL'si, veri sorumlusu, yurtdışı aktarım değerlendirmesi, retention
+ve production sağlayıcıları üniversite hukuk/KVKK birimince onaylanmadan mağaza
+yayını yapılamaz.

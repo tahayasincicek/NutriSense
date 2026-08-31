@@ -20,7 +20,7 @@
 | Bütün test paketi | **GEÇMEDİ — gizlenmedi** | 77 geçti, 2 test başarısız. İki hata da ürün ekranını import etmeyen `food_history_screen_test.dart` içindeki test-yerel sahte widget'larda. |
 | Android debug build | **GEÇTİ** | `app-debug.apk`, 97.483.436 bayt, SHA-256 `E572E3F2E31CD6ADDB85FDD618048C5B9436F099EBC95BABA90A891DC91B1DF2`. |
 | Android release | **BİLİNÇLİ OLARAK BLOKE** | Kuruma ait application ID ve release keystore yok. `com.example.*` ile release görevi fail-fast olur. |
-| iOS build | **UYGULANAMAZ / EKSİK** | Projede `ios/` platform dizini yok; `GoogleService-Info.plist` de yok. |
+| iOS build | **BLOKE / KAYNAK HAZIR** | `ios/` platform kaynakları eklendi; Windows ortamında CocoaPods, Xcode `--no-codesign` build, archive ve gerçek iPhone testi yapılamadı. Firebase etkin değil ve `GoogleService-Info.plist` üretilmedi. |
 
 ## Araç zinciri ve ortam
 
@@ -66,7 +66,7 @@ Hepsi `pubspec.yaml` içinde tanımlıdır. Ayrıca `camera_android_camerax` Dar
 | `firebase_core` | Eklenmedi | Aktif import ve çalışan Firebase adaptörü yok; sadece `crash_reporter.dart` içinde yorum örneği vardı. |
 | `firebase_crashlytics` | Eklenmedi | Gerçek platform kimlik bilgileri yok. Sahte `google-services.json` veya plist üretilmedi. |
 
-Firebase/Crashlytics isteğe bağlıdır. `ENABLE_FIREBASE_CRASHLYTICS=true` verilirse uygulama, yarım entegrasyonla sessizce çalışmak yerine açıklayıcı hata ile durur. Firebase kullanılacaksa ayrı adaptör, gerçek Android/iOS platform dosyaları ve test kanıtı eklenmelidir. Depoda `android/app/google-services.json` yoktur; `ios/` dizini de yoktur.
+Firebase/Crashlytics isteğe bağlıdır. `ENABLE_FIREBASE_CRASHLYTICS=true` verilirse uygulama, yarım entegrasyonla sessizce çalışmak yerine açıklayıcı hata ile durur. Firebase kullanılacaksa ayrı adaptör, gerçek Android/iOS platform kimlik dosyaları, Apple privacy manifest/consent değerlendirmesi ve test kanıtı eklenmelidir. Depoda `android/app/google-services.json` veya `GoogleService-Info.plist` yoktur. iOS kaynak iskeleti vardır; Xcode build/cihaz kanıtı yoktur.
 
 ### Kaldırılan kullanılmayan doğrudan bağımlılıklar
 
@@ -165,7 +165,7 @@ Test çalışması ayrıca gerçek bir ürün hatası buldu: boş sesli komut t�
 |---|---|---|---|
 | P0 (release) | Kuruma ait application ID yok | Store/release üretilemez | Yetkili kurum ID'si sağlanır; `NUTRISENSE_APPLICATION_ID` değiştirilir. |
 | P0 (release) | Release keystore/CI signing yok | Güvenilir imzalı APK/AAB üretilemez | CI secret tabanlı signing ve imzalı artefakt doğrulaması. |
-| P0 (iOS) | `ios/` platform dizini yok | IPA üretilemez; iOS izinleri/testleri yok | Uyumlu macOS/Xcode ortamında iOS platformu oluşturulur, mevcut bundle ID kararıyla incelenir ve gerçek cihaz/simülatör testi yapılır. |
+| P0 (iOS) | Platform kaynakları var; Xcode build/archive ve gerçek iPhone kanıtı yok | Kaynak hazırlığı release veya VoiceOver uyumluluğu kanıtlamaz | Uyumlu macOS/Xcode ortamında `pod install`, `flutter build ios --no-codesign`, archive/signing ve gerçek cihaz P0/VoiceOver matrisi tamamlanır. |
 | P1 | Tam test paketi 2 hata veriyor ve bazı widget testleri ürün kodunu sınamıyor | Yanlış güven üretir | QA-01 tamamlanır; tam suite yeşil olur. |
 | P1 | Production API URL'si bilinçli olarak tanımsız | Prod uygulaması başlamaz | Kurumun doğrulanmış HTTPS endpoint'i verilerek sözleşme/integration testi geçer. |
 | P1 (opsiyonel) | Firebase platform dosyaları/adaptörü yok | Crashlytics kapalı | Özellik gerçekten seçilirse gerçek platform konfigürasyonu, consent/policy ve sandbox kanıtı eklenir. |

@@ -87,7 +87,7 @@ Gerekli ham veri: katılımcı×soru cevap matrisi, kodlama (`1–5`), eksik cev
 |---|---|---|---|---|
 | CLM-040 | Belirli iki katılımcı alıntısı gerçekten söylendi. | `tubitak_sonuc_raporu.md:129-130` | Anonim kaynak not/transkript, onam, kodlama izi | **RAPORDA KULLANILMAMALI**; alıntılar doğrulanamıyor. |
 | CLM-041 | Bağımsızlık, sesli komut memnuniyeti ve iyileştirme önerileri veri temalarıdır. | `tubitak_sonuc_raporu.md:128-131` | Kod kitabı, kodlanmış veri, tema oluşturma süreci | **RAPORDA KULLANILMAMALI.** |
-| CLM-042 | Android+iOS mobil uygulama tamamlandı. | `tubitak_sonuc_raporu.md:170` | Android+iOS release build, kabul testi | **ÇELİŞKİLİ; RAPORDA KULLANILMAMALI.** `ios/` ve IPA yok; Android yalnız eski debug APK. |
+| CLM-042 | Android+iOS mobil uygulama tamamlandı. | Eski sonuç taslağı | Android+iOS release build, kabul testi | **ÇELİŞKİLİ; RAPORDA KULLANILMAMALI.** iOS kaynak iskeleti hazırlanmıştır fakat Xcode build/archive, IPA/TestFlight ve gerçek iPhone/VoiceOver kanıtı yoktur; Android fiziksel release kabulü de eksiktir. |
 | CLM-043 | FastAPI backend tamamlandı. | `tubitak_sonuc_raporu.md:171` | Deploy, migrasyon, test, sağlık ve sözleşme raporu | **RAPORDA KULLANILMAMALI.** Refresh/logout ve diyetisyen atama eksik; test yok. |
 | CLM-044 | MobileNetV3 besin tanıma modeli tamamlandı. | `tubitak_sonuc_raporu.md:172` | Model/checkpoint/veri/metrik/model card | **ÇELİŞKİLİ; RAPORDA KULLANILMAMALI.** Gerçek model dosyası yok. |
 | CLM-045 | Kullanılabilirlik testi (`n=20`) tamamlandı. | `tubitak_sonuc_raporu.md:173` | Etik/onam/ham veri/analiz | **RAPORDA KULLANILMAMALI.** |
@@ -99,7 +99,7 @@ Gerekli ham veri: katılımcı×soru cevap matrisi, kodlama (`1–5`), eksik cev
 1. **Görev tamamlama:** özet `%85`, tablo ve makale `%90` söylüyor.
 2. **Besin tarama süresi:** özet `4,2 sn`, görev tablosu/karşılaştırma `12,7 sn` söylüyor; `4,2` ayrıca genel değerlendirme puanı olarak geçiyor.
 3. **Yöntem:** PDF t-testi ve ki-kare planlıyor; sonuç taslağı yalnız Mann–Whitney U ve Cohen’s d veriyor. Veri/varsayım gerekçesi yok.
-4. **Platform:** sonuç taslağı Android+iOS tamamlandı diyor; `ios/` ve IPA yok.
+4. **Platform:** sonuç taslağı Android+iOS tamamlandı diyor; iOS kaynakları hazırlanmış olsa da Xcode build/archive, IPA/TestFlight ve gerçek iPhone/VoiceOver kanıtı yok.
 5. **Model:** sonuç taslağı MobileNetV3 tamamlandı diyor; model/checkpoint/TFLite yok.
 6. **Saha çalışması:** `n=20` ve katılımcı alıntıları var; etik karar, kurum izni, onam ve ham veri yok.
 7. **Ürün durumu:** “tamamlandı” denilen üründe auth bypass, mock geçmiş, API contract uyuşmazlığı, analyzer hataları ve çözülemeyen bağımlılık var.
