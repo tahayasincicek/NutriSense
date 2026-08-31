@@ -28,6 +28,7 @@ from ..domain.nutrition import (
 logger = logging.getLogger(__name__)
 settings = get_settings()
 
+
 def _resolve_local_db_path() -> Path:
     """Locate the verified calorie database across repo and container layouts.
 

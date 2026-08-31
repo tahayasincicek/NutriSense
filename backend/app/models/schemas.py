@@ -441,6 +441,66 @@ class UserResponse(BaseModel):
     preferred_language: str = "tr-TR"
     tts_speed: float = 0.5
     high_contrast: bool = True
+    account_type: Literal["patient", "dietitian"] = "patient"
+
+
+class DietitianCreate(BaseModel):
+    """Diyetisyen hesabı ve profilini birlikte oluşturur."""
+
+    email: EmailStr
+    password: str = Field(..., min_length=8, max_length=128)
+    full_name: str = Field(..., min_length=2, max_length=255)
+    phone: Optional[str] = Field(default=None, pattern=r"^\+?[1-9][0-9]{7,14}$")
+    specialization: str = Field(default="Beslenme ve Diyet", min_length=2, max_length=255)
+
+    @field_validator("password")
+    @classmethod
+    def validate_password_strength(cls, value: str) -> str:
+        if not any(character.isalpha() for character in value):
+            raise ValueError("Şifre en az bir harf içermelidir.")
+        if not any(character.isdigit() for character in value):
+            raise ValueError("Şifre en az bir rakam içermelidir.")
+        return value
+
+
+class DietitianDashboardPatient(BaseModel):
+    user_id: UUID
+    full_name: str
+    email: EmailStr
+    today_calories: float
+    seven_day_meals: int
+    last_log_at: Optional[datetime] = None
+
+
+class DietitianDashboardResponse(BaseModel):
+    dietitian_id: UUID
+    full_name: str
+    specialization: str
+    email_verified: bool
+    active_patients: int
+    pending_assignments: int
+    reports_received: int
+    patients: list[DietitianDashboardPatient]
+
+
+class DietitianPatientLogItem(BaseModel):
+    id: UUID
+    food_name: str
+    food_name_tr: str
+    meal_type: str
+    portion_grams: float
+    total_calories: float
+    logged_at: datetime
+
+
+class DietitianPatientHistoryResponse(BaseModel):
+    user_id: UUID
+    full_name: str
+    date_from: date
+    date_to: date
+    total_calories: float
+    total_meals: int
+    logs: list[DietitianPatientLogItem]
 
 
 class UserProfileUpdate(BaseModel):

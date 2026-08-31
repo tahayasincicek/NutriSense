@@ -47,6 +47,8 @@ from ..models.schemas import (
     ChannelDeliveryResponse, DietitianReportHistoryItem,
     DietitianReportPreviewRequest, DietitianReportPreviewResponse,
     AccountDeletionRequest, DietitianAssignmentRequest,
+    DietitianCreate, DietitianDashboardResponse,
+    DietitianPatientHistoryResponse, DietitianPatientLogItem,
     PasswordResetRequest, PasswordResetConfirm, PasswordResetResponse,
     DietitianAssignmentResponse, LogoutRequest, RefreshTokenRequest,
     UserCreate, UserLogin, UserProfileUpdate, UserResponse, TokenResponse,
@@ -79,6 +81,7 @@ settings = get_settings()
 
 router = APIRouter(prefix="/api/v1", tags=["NutriSense API"])
 
+
 # ── Servis singleton'ları ──
 def _build_vision_service():
     """VISION_PROVIDER_MODE'a göre görüntü tanıma sağlayıcısını seçer."""
@@ -87,11 +90,6 @@ def _build_vision_service():
     return GoogleVisionService()
 
 
-vision_service = _build_vision_service()
-nutrition_service = NutritionixService()
-notification_service = NotificationService()
-
-# Öğün türü Türkçe karşılıkları
 def _vision_provider_name() -> str:
     """Analiz kaydına yazılacak sağlayıcı etiketi."""
     return (
@@ -101,6 +99,11 @@ def _vision_provider_name() -> str:
     )
 
 
+vision_service = _build_vision_service()
+nutrition_service = NutritionixService()
+notification_service = NotificationService()
+
+# Öğün türü Türkçe karşılıkları
 MEAL_TYPE_TR = {
     "kahvalti": "Kahvaltı",
     "ogle": "Öğle",
@@ -894,7 +897,6 @@ async def create_manual_food_log(
     )
 
 
-
 # ═══════════════════════════════════════════════════════════════════════════════
 # BESİN ARAMA (MANUEL)
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -1007,7 +1009,6 @@ async def search_food(
 # ═══════════════════════════════════════════════════════════════════════════════
 # YEMEK GEÇMİŞİ
 # ═══════════════════════════════════════════════════════════════════════════════
-
 
 
 @router.get(
@@ -1843,6 +1844,77 @@ async def dietitian_report_history(
 # KİMLİK DOĞRULAMA
 # ═══════════════════════════════════════════════════════════════════════════════
 
+def _dietitian_profile_for_user(db: Session, user: User) -> Dietitian:
+    """Aynı doğrulanmış kimliğe bağlı diyetisyen profilini döndürür."""
+    profile = db.query(Dietitian).filter(
+        func.lower(Dietitian.email) == user.email.lower(),
+        Dietitian.is_active.is_(True),
+    ).first()
+    if profile is None:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Bu hesap bir diyetisyen hesabı değil.",
+        )
+    return profile
+
+
+@router.post(
+    "/auth/register-dietitian",
+    response_model=TokenResponse,
+    status_code=status.HTTP_201_CREATED,
+    summary="Diyetisyen hesabı oluştur",
+)
+async def register_dietitian(
+    request: DietitianCreate,
+    db: Session = Depends(get_db),
+):
+    normalized_email = request.email.lower()
+    existing_user = db.query(User).filter(
+        func.lower(User.email) == normalized_email
+    ).first()
+    existing_profile = db.query(Dietitian).filter(
+        func.lower(Dietitian.email) == normalized_email
+    ).first()
+    if existing_user or existing_profile:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Bu e-posta adresi zaten kayıtlı. Giriş yapmayı deneyin.",
+        )
+
+    # Yerel geliştirmede doğrulama sağlayıcısı bulunmadığından hesap doğrudan
+    # etkinleşir. Staging/production ortamında gerçek doğrulama tamamlanmadan
+    # hastalar bu profili eşleştiremez.
+    locally_verified = settings.app_environment.lower() in {"local", "dev", "test"}
+    user = User(
+        id=str(uuid.uuid4()),
+        email=normalized_email,
+        hashed_password=hash_password(request.password),
+        full_name=request.full_name,
+        phone=request.phone,
+    )
+    profile = Dietitian(
+        id=str(uuid.uuid4()),
+        email=normalized_email,
+        full_name=request.full_name,
+        phone=request.phone,
+        specialization=request.specialization,
+        email_verified=locally_verified,
+        phone_verified=bool(request.phone) and locally_verified,
+    )
+    try:
+        db.add_all([user, profile])
+        db.commit()
+        db.refresh(user)
+    except Exception:
+        db.rollback()
+        logger.exception("Diyetisyen hesabı oluşturulamadı.")
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="Diyetisyen hesabı oluşturulamadı.",
+        )
+    return TokenResponse(**issue_token_pair(db, user))
+
+
 @router.post(
     "/auth/register",
     response_model=TokenResponse,
@@ -1963,7 +2035,14 @@ async def logout(request: LogoutRequest, db: Session = Depends(get_db)):
 
 
 @router.get("/users/me", response_model=UserResponse)
-async def get_me(current_user: User = Depends(get_current_user)):
+async def get_me(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    is_dietitian = db.query(Dietitian.id).filter(
+        func.lower(Dietitian.email) == current_user.email.lower(),
+        Dietitian.is_active.is_(True),
+    ).first() is not None
     return UserResponse(
         id=current_user.id,
         email=current_user.email,
@@ -1973,6 +2052,120 @@ async def get_me(current_user: User = Depends(get_current_user)):
         preferred_language=current_user.preferred_language,
         tts_speed=current_user.tts_speed,
         high_contrast=current_user.high_contrast,
+        account_type="dietitian" if is_dietitian else "patient",
+    )
+
+
+@router.get("/dietitian/dashboard", response_model=DietitianDashboardResponse)
+async def dietitian_dashboard(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    profile = _dietitian_profile_for_user(db, current_user)
+    today = istanbul_date()
+    week_start = today - timedelta(days=6)
+    assignments = db.query(DietitianAssignment).filter(
+        DietitianAssignment.dietitian_id == profile.id,
+        DietitianAssignment.status == "approved",
+    ).all()
+
+    patients = []
+    for assignment in assignments:
+        patient = db.query(User).filter(User.id == assignment.user_id).first()
+        if patient is None or not patient.is_active:
+            continue
+        active_logs = db.query(FoodLog).filter(
+            FoodLog.user_id == patient.id,
+            FoodLog.deleted_at.is_(None),
+        )
+        today_calories = db.query(func.coalesce(func.sum(FoodLog.total_calories), 0.0)).filter(
+            FoodLog.user_id == patient.id,
+            FoodLog.log_date == today,
+            FoodLog.deleted_at.is_(None),
+        ).scalar()
+        seven_day_meals = active_logs.filter(FoodLog.log_date >= week_start).count()
+        last_log = active_logs.order_by(FoodLog.logged_at.desc()).first()
+        patients.append({
+            "user_id": patient.id,
+            "full_name": patient.full_name,
+            "email": patient.email,
+            "today_calories": float(today_calories or 0),
+            "seven_day_meals": seven_day_meals,
+            "last_log_at": last_log.logged_at if last_log else None,
+        })
+
+    pending = db.query(DietitianAssignment).filter(
+        DietitianAssignment.dietitian_id == profile.id,
+        DietitianAssignment.status == "pending",
+    ).count()
+    report_count = db.query(DietitianReport).filter(
+        DietitianReport.dietitian_id == profile.id,
+    ).count()
+    return DietitianDashboardResponse(
+        dietitian_id=profile.id,
+        full_name=profile.full_name,
+        specialization=profile.specialization,
+        email_verified=profile.email_verified,
+        active_patients=len(patients),
+        pending_assignments=pending,
+        reports_received=report_count,
+        patients=patients,
+    )
+
+
+@router.get(
+    "/dietitian/patients/{patient_id}/history",
+    response_model=DietitianPatientHistoryResponse,
+)
+async def dietitian_patient_history(
+    patient_id: str,
+    days: int = Query(default=30, ge=1, le=365),
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    profile = _dietitian_profile_for_user(db, current_user)
+    relationship = db.query(DietitianAssignment).filter(
+        DietitianAssignment.dietitian_id == profile.id,
+        DietitianAssignment.user_id == patient_id,
+        DietitianAssignment.status == "approved",
+    ).first()
+    if relationship is None:
+        raise HTTPException(status_code=404, detail="Danışan bulunamadı.")
+    patient = db.query(User).filter(
+        User.id == patient_id,
+        User.is_active.is_(True),
+    ).first()
+    if patient is None:
+        raise HTTPException(status_code=404, detail="Danışan bulunamadı.")
+
+    date_to = istanbul_date()
+    date_from = date_to - timedelta(days=days - 1)
+    logs = db.query(FoodLog).filter(
+        FoodLog.user_id == patient.id,
+        FoodLog.log_date >= date_from,
+        FoodLog.log_date <= date_to,
+        FoodLog.deleted_at.is_(None),
+    ).order_by(FoodLog.logged_at.desc()).all()
+    items = [
+        DietitianPatientLogItem(
+            id=log.id,
+            food_name=log.food_name,
+            food_name_tr=log.food_name_tr,
+            meal_type=log.meal_type,
+            portion_grams=log.estimated_portion_g,
+            total_calories=log.total_calories,
+            logged_at=log.logged_at,
+        )
+        for log in logs
+    ]
+    return DietitianPatientHistoryResponse(
+        user_id=patient.id,
+        full_name=patient.full_name,
+        date_from=date_from,
+        date_to=date_to,
+        total_calories=sum(item.total_calories for item in items),
+        total_meals=len(items),
+        logs=items,
     )
 
 
