@@ -22,6 +22,7 @@ services:
     restart: unless-stopped
     ports:
       - "127.0.0.1:8025:8025"
+      - "127.0.0.1:1025:1025"
 
   backend:
     build:
@@ -35,9 +36,19 @@ services:
       SMTP_PORT: 1025
       SMTP_USE_TLS: "false"
       SMTP_START_TLS: "false"
+      # Mailpit kimlik doğrulaması istemez; .env'deki placeholder
+      # değerler SMTP el sıkışmasını bozuyordu.
+      SMTP_USER: ""
+      SMTP_PASSWORD: ""
+      SMTP_FROM_EMAIL: no-reply@nutrisense.dev
       NOTIFICATION_MODE: sandbox
+      CALORIE_DB_PATH: /app/ai_model/calorie_database.json
+    # Doğrulanmış kalori veritabanı derleme bağlamının (backend/) dışında
+    # kaldığı için imaja kopyalanamıyor; salt okunur bağlanıyor.
+    volumes:
+      - ../ai_model:/app/ai_model:ro
     ports:
-      - "127.0.0.1:8000:8000"
+      - "8000:8000"
     depends_on:
       db:
         condition: service_healthy

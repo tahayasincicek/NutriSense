@@ -1,0 +1,75 @@
+schema_version: 1
+status: TEMPLATE_NOT_DEPLOYED
+
+artifact:
+  image_reference: REQUIRED_BY_DIGEST
+  image_digest: REQUIRED_SHA256
+  sbom: REQUIRED_CYCLONEDX
+  release_manifest: REQUIRED
+  signature_or_provenance: REQUIRED_BEFORE_PRODUCTION
+
+migration_job:
+  command: ["alembic", "upgrade", "head"]
+  runs_before_application: true
+  requires_backup_evidence: true
+  concurrent_jobs: 1
+  failure_policy: STOP_DEPLOYMENT
+
+application:
+  replicas_minimum: 2
+  user: 10001
+  group: 10001
+  read_only_root_filesystem: true
+  allow_privilege_escalation: false
+  capabilities_drop: ["ALL"]
+  writable_mounts:
+    - path: /tmp
+      type: memory
+      size_limit: 64Mi
+  resources:
+    requests:
+      cpu: 250m
+      memory: 384Mi
+    limits:
+      cpu: "1"
+      memory: 768Mi
+  shutdown_grace_seconds: 30
+  liveness:
+    path: /health/live
+    initial_delay_seconds: 15
+    period_seconds: 30
+  readiness:
+    path: /health/ready
+    initial_delay_seconds: 5
+    period_seconds: 10
+
+network:
+  public_domain: REQUIRED
+  tls_certificate: REQUIRED
+  minimum_tls_policy: PLATFORM_SECURITY_TEAM_DECISION
+  redirect_http_to_https: true
+  backend_port: 8000
+  database_publicly_accessible: false
+  operations_endpoint_publicly_accessible: false
+
+database:
+  engine: mysql-8.4-compatible
+  deployment: external_or_managed
+  encryption_at_rest: REQUIRED
+  encryption_in_transit: REQUIRED
+  automated_backups: REQUIRED
+  point_in_time_recovery: REQUIRED
+  multi_zone: DECISION_REQUIRED
+
+secrets:
+  source: PLATFORM_SECRET_STORE_REQUIRED
+  injected_as_files_or_environment: true
+  forbidden_in_image_or_manifest: true
+  rotation_runbook: docs/runbooks/security_incident_and_secret_rotation.md
+
+rollout:
+  strategy: rolling_or_blue_green
+  maximum_unavailable: 0
+  smoke_test_required: true
+  manual_approval_required: true
+  rollback_release_digest_required: true

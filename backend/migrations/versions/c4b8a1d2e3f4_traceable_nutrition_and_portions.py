@@ -43,9 +43,10 @@ def upgrade() -> None:
             "license_name", sa.String(255), nullable=False,
             server_default="UNVERIFIED LEGACY",
         ))
+        # MySQL rejects defaults on TEXT columns. Add nullable, backfill, then
+        # enforce NOT NULL in a separate portable operation.
         batch_op.add_column(sa.Column(
-            "attribution", sa.Text(), nullable=False,
-            server_default="Legacy record; source unavailable",
+            "attribution", sa.Text(), nullable=True,
         ))
         batch_op.add_column(sa.Column(
             "normalization_version", sa.String(64), nullable=False,
@@ -54,6 +55,23 @@ def upgrade() -> None:
         batch_op.alter_column(
             "calories_per_100g", existing_type=sa.Float(), type_=NUMERIC,
             existing_nullable=False,
+        )
+
+    nutrition_sources = sa.table(
+        "nutrition_sources",
+        sa.column("attribution", sa.Text()),
+    )
+    op.execute(
+        nutrition_sources.update()
+        .where(nutrition_sources.c.attribution.is_(None))
+        .values(attribution="Legacy record; source unavailable")
+    )
+    with op.batch_alter_table("nutrition_sources") as batch_op:
+        batch_op.alter_column(
+            "attribution",
+            existing_type=sa.Text(),
+            nullable=False,
+            existing_nullable=True,
         )
 
     with op.batch_alter_table("food_logs") as batch_op:

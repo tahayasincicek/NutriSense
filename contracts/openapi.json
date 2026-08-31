@@ -4179,6 +4179,26 @@
         ]
       }
     },
+    "/health/capabilities": {
+      "get": {
+        "description": "Public feature state; contains modes only, never credentials.",
+        "operationId": "capability_check_health_capabilities_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Capability Check",
+        "tags": [
+          "System"
+        ]
+      }
+    },
     "/health/live": {
       "get": {
         "operationId": "liveness_check_health_live_get",

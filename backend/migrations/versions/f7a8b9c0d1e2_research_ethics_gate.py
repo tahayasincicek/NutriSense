@@ -53,9 +53,21 @@ def upgrade() -> None:
         "approval_reference='legacy-unverified', data_origin='synthetic'"
     )
     with op.batch_alter_table("survey_submissions") as batch_op:
-        batch_op.alter_column("protocol_version", nullable=False)
-        batch_op.alter_column("approval_reference", nullable=False)
-        batch_op.alter_column("data_origin", nullable=False)
+        batch_op.alter_column(
+            "protocol_version",
+            existing_type=sa.String(64),
+            nullable=False,
+        )
+        batch_op.alter_column(
+            "approval_reference",
+            existing_type=sa.String(128),
+            nullable=False,
+        )
+        batch_op.alter_column(
+            "data_origin",
+            existing_type=sa.String(16),
+            nullable=False,
+        )
         batch_op.create_unique_constraint(
             "uq_survey_participant_idempotency",
             ["participant_pseudonym", "idempotency_key"],
@@ -73,10 +85,26 @@ def upgrade() -> None:
         "approval_reference='legacy-unverified', data_origin='synthetic'"
     )
     with op.batch_alter_table("usability_sessions") as batch_op:
-        batch_op.alter_column("schema_version", nullable=False)
-        batch_op.alter_column("protocol_version", nullable=False)
-        batch_op.alter_column("approval_reference", nullable=False)
-        batch_op.alter_column("data_origin", nullable=False)
+        batch_op.alter_column(
+            "schema_version",
+            existing_type=sa.String(32),
+            nullable=False,
+        )
+        batch_op.alter_column(
+            "protocol_version",
+            existing_type=sa.String(64),
+            nullable=False,
+        )
+        batch_op.alter_column(
+            "approval_reference",
+            existing_type=sa.String(128),
+            nullable=False,
+        )
+        batch_op.alter_column(
+            "data_origin",
+            existing_type=sa.String(16),
+            nullable=False,
+        )
         batch_op.create_unique_constraint(
             "uq_usability_participant_idempotency",
             ["participant_pseudonym", "idempotency_key"],

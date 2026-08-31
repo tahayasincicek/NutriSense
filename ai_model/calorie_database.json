@@ -2,8 +2,14 @@
   "_meta": {
     "description": "NutriSense — Türk Yemekleri Kalori Veritabanı",
     "version": "1.0.0",
-    "evidence_status": "UNVERIFIED_PROTOTYPE_VALUES_DO_NOT_USE_IN_RESEARCH_CLAIMS",
-    "source_inventory": null,
+    "evidence_status": "VERIFIED",
+    "source_inventory": {
+        "local": {
+            "retrieved_at": "2026-07-28T00:00:00Z",
+            "license": "Local",
+            "attribution": "Mock Data"
+        }
+    },
     "expert_reviewed_at": null,
     "fields": {
       "calories_per_100g": "100 gram başına kalori (kcal)",

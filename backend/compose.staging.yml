@@ -1,0 +1,179 @@
+name: nutrisense-staging-local
+
+x-service-hardening: &service-hardening
+  read_only: true
+  cap_drop: ["ALL"]
+  security_opt:
+    - no-new-privileges:true
+  tmpfs:
+    - /tmp:rw,noexec,nosuid,size=64m
+  pids_limit: 256
+  mem_limit: 768m
+  cpus: 1.0
+  logging:
+    driver: local
+    options:
+      max-size: 10m
+      max-file: "3"
+
+x-backend-environment: &backend-environment
+  APP_ENVIRONMENT: staging
+  DEBUG: "false"
+  LOG_LEVEL: INFO
+  LOG_FORMAT: json
+  APP_VERSION: ${APP_VERSION:-0.0.0-staging}
+  BUILD_REVISION: ${BUILD_REVISION:-local}
+  PUBLIC_BASE_URL: http://localhost:8000
+  STAGING_ALLOW_INSECURE_LOCALHOST: "true"
+  API_DOCS_ENABLED: "false"
+  DATABASE_URL: mysql+pymysql://nutrisense:${DB_PASSWORD}@db:3306/nutrisense_staging?charset=utf8mb4
+  SECRET_KEY: ${SECRET_KEY}
+  JWT_SECRET_KEY: ${JWT_SECRET_KEY}
+  RESEARCH_EXPORT_TOKEN: ${RESEARCH_EXPORT_TOKEN}
+  RESEARCH_MODE: synthetic
+  MIGRATION_CHECK_ENABLED: "true"
+  MIGRATION_STARTUP_MODE: verify
+  TRUSTED_HOSTS: localhost,127.0.0.1,testserver
+  CORS_ORIGINS: http://localhost:3000,http://localhost:8080
+  CORS_ALLOW_CREDENTIALS: "false"
+  VISION_PROVIDER_MODE: disabled
+  NUTRITION_PROVIDER_MODE: disabled
+  NOTIFICATION_MODE: sandbox
+  NOTIFICATION_SANDBOX_EMAIL_ALLOWLIST: sandbox-dietitian@nutrisense.invalid
+  NOTIFICATION_SANDBOX_PHONE_ALLOWLIST: +15005550006
+  SMTP_HOST: mailpit
+  SMTP_PORT: "1025"
+  SMTP_FROM_EMAIL: noreply@nutrisense.invalid
+  SMTP_USE_TLS: "false"
+  SMTP_START_TLS: "false"
+  METRICS_ENABLED: "true"
+  OPERATIONS_TOKEN: ${OPERATIONS_TOKEN}
+  WEB_CONCURRENCY: "1"
+  GRACEFUL_SHUTDOWN_TIMEOUT_SECONDS: "30"
+
+services:
+  db:
+    image: mysql@sha256:8dbcf531a03aade657e181b9cf2f1d1803ce621a1d55610cb44cb531ab7d7db6
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: nutrisense_staging
+      MYSQL_USER: nutrisense
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+      TZ: UTC
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+      - --default-time-zone=+00:00
+    volumes:
+      - staging_mysql_data:/var/lib/mysql
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - mysqladmin ping -h 127.0.0.1 -u"$${MYSQL_USER}" --password="$${MYSQL_PASSWORD}" --silent
+      interval: 5s
+      timeout: 5s
+      retries: 30
+    security_opt:
+      - no-new-privileges:true
+    pids_limit: 512
+    mem_limit: 1g
+    cpus: 1.5
+    logging:
+      driver: local
+      options:
+        max-size: 10m
+        max-file: "3"
+
+  mailpit:
+    image: axllent/mailpit@sha256:81370195cd4a0eab9604d17c2617a7525b0486f9365555253b6c5376c6350f1a
+    restart: unless-stopped
+    ports:
+      - 127.0.0.1:1025:1025
+      - 127.0.0.1:8025:8025
+    healthcheck:
+      test: ["CMD", "/mailpit", "readyz"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    security_opt:
+      - no-new-privileges:true
+    pids_limit: 128
+    mem_limit: 256m
+    cpus: 0.5
+
+  migration:
+    build:
+      context: .
+      target: production
+      args:
+        BUILD_VERSION: ${APP_VERSION:-0.0.0-staging}
+        BUILD_REVISION: ${BUILD_REVISION:-local}
+        BUILD_CREATED: ${BUILD_CREATED:-unknown}
+    image: nutrisense-backend:${BUILD_REVISION:-local}
+    entrypoint: ["alembic"]
+    command: ["upgrade", "head"]
+    environment: *backend-environment
+    depends_on:
+      db:
+        condition: service_healthy
+    <<: *service-hardening
+    restart: "no"
+
+  backend:
+    image: nutrisense-backend:${BUILD_REVISION:-local}
+    restart: unless-stopped
+    environment: *backend-environment
+    ports:
+      - 127.0.0.1:8000:8000
+    depends_on:
+      db:
+        condition: service_healthy
+      migration:
+        condition: service_completed_successfully
+      mailpit:
+        condition: service_healthy
+    healthcheck:
+      test:
+        - CMD
+        - python
+        - -c
+        - import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health/ready', timeout=3)
+      interval: 10s
+      timeout: 5s
+      start_period: 10s
+      retries: 12
+    <<: *service-hardening
+
+  provider-mocks:
+    profiles: ["mocks"]
+    build:
+      context: provider_mocks
+    ports:
+      - 127.0.0.1:8090:8090
+    <<: *service-hardening
+
+  ml-artifact:
+    profiles: ["ml"]
+    image: nutrisense-backend:${BUILD_REVISION:-local}
+    entrypoint: ["python", "/app/scripts/fetch_ml_artifact.py"]
+    command:
+      - --url
+      - ${ML_ARTIFACT_URL:-https://invalid.example/ml-artifact-not-configured}
+      - --sha256
+      - ${ML_ARTIFACT_SHA256:-0000000000000000000000000000000000000000000000000000000000000000}
+      - --destination
+      - /models/food_model.tflite
+    volumes:
+      - staging_ml_artifacts:/models
+    read_only: true
+    cap_drop: ["ALL"]
+    security_opt:
+      - no-new-privileges:true
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,size=64m
+    restart: "no"
+
+volumes:
+  staging_mysql_data:
+  staging_ml_artifacts:

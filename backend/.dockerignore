@@ -2,6 +2,7 @@
 .env.*
 **/.env
 **/.env.*
+!.env.example
 venv/
 .venv/
 env/
@@ -11,6 +12,8 @@ __pycache__/
 *.db
 coverage/
 data/
+.runtime/
+backups/
 .git/
 *.pem
 *.key
