@@ -1,0 +1,97 @@
+name: Production Readiness Approval (No Deploy)
+
+on:
+  workflow_dispatch:
+    inputs:
+      image_digest:
+        description: "Onaylı image digest (sha256:...)"
+        required: true
+        type: string
+      rollback_image_digest:
+        description: "Doğrulanmış rollback image digest (sha256:...)"
+        required: true
+        type: string
+      backup_evidence_id:
+        description: "Deployment öncesi backup/restore kanıt kimliği"
+        required: true
+        type: string
+      migration_revision:
+        description: "Hedef Alembic revision"
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  validate-readiness:
+    name: Manuel production kanıt kapısı
+    runs-on: ubuntu-latest
+    environment: production-approval
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Girdileri fail-closed doğrula
+        shell: bash
+        env:
+          IMAGE_DIGEST: ${{ inputs.image_digest }}
+          ROLLBACK_IMAGE_DIGEST: ${{ inputs.rollback_image_digest }}
+          BACKUP_EVIDENCE_ID: ${{ inputs.backup_evidence_id }}
+          MIGRATION_REVISION: ${{ inputs.migration_revision }}
+        run: |
+          set -euo pipefail
+          [[ "${IMAGE_DIGEST}" =~ ^sha256:[0-9a-f]{64}$ ]]
+          [[ "${ROLLBACK_IMAGE_DIGEST}" =~ ^sha256:[0-9a-f]{64}$ ]]
+          test "${IMAGE_DIGEST}" != "${ROLLBACK_IMAGE_DIGEST}"
+          test -n "${BACKUP_EVIDENCE_ID}"
+          [[ "${MIGRATION_REVISION}" =~ ^[0-9a-f]{12}$ ]]
+          python backend/scripts/deployment_checks.py
+
+      - name: Dağıtım yapılmadığını kaydet
+        shell: bash
+        env:
+          IMAGE_DIGEST: ${{ inputs.image_digest }}
+          ROLLBACK_IMAGE_DIGEST: ${{ inputs.rollback_image_digest }}
+          BACKUP_EVIDENCE_ID: ${{ inputs.backup_evidence_id }}
+          MIGRATION_REVISION: ${{ inputs.migration_revision }}
+        run: |
+          set -euo pipefail
+          mkdir -p dist
+          python - <<'PY'
+          import json
+          import os
+          from datetime import datetime, timezone
+          from pathlib import Path
+
+          Path("dist/production-readiness.json").write_text(
+              json.dumps(
+                  {
+                      "status": "APPROVED_NOT_DEPLOYED",
+                      "image_digest": os.environ["IMAGE_DIGEST"],
+                      "rollback_image_digest": os.environ[
+                          "ROLLBACK_IMAGE_DIGEST"
+                      ],
+                      "backup_evidence_id": os.environ[
+                          "BACKUP_EVIDENCE_ID"
+                      ],
+                      "migration_revision": os.environ[
+                          "MIGRATION_REVISION"
+                      ],
+                      "created_at": datetime.now(timezone.utc).isoformat(),
+                  },
+                  indent=2,
+              )
+              + "\n",
+              encoding="utf-8",
+          )
+          PY
+
+      - name: Readiness kanıtını kaydet
+        uses: actions/upload-artifact@v7
+        with:
+          name: production-readiness-${{ github.run_id }}
+          path: dist/production-readiness.json
+          if-no-files-found: error
+          retention-days: 30
