@@ -13,6 +13,12 @@ val nutriSenseApplicationId = providers
     .orElse("com.example.nutrisense")
     .get()
 
+// Release SDK decisions are pinned here so a Flutter SDK upgrade cannot
+// silently change the Play artifact's compatibility contract.
+val nutriSenseCompileSdk = 36
+val nutriSenseMinSdk = 24
+val nutriSenseTargetSdk = 36
+
 val releaseTaskRequested = gradle.startParameter.taskNames.any {
     it.contains("release", ignoreCase = true)
 }
@@ -39,7 +45,7 @@ if (releaseTaskRequested && !keyPropertiesFile.exists()) {
 
 android {
     namespace = "com.example.nutrisense"
-    compileSdk = flutter.compileSdkVersion
+    compileSdk = nutriSenseCompileSdk
     // Installed and explicitly pinned; satisfies plugins requiring NDK 27+.
     ndkVersion = "28.2.13676358"
 
@@ -57,8 +63,8 @@ android {
 
     defaultConfig {
         applicationId = nutriSenseApplicationId
-        minSdk = flutter.minSdkVersion
-        targetSdk = flutter.targetSdkVersion
+        minSdk = nutriSenseMinSdk
+        targetSdk = nutriSenseTargetSdk
         versionCode = flutter.versionCode
         versionName = flutter.versionName
         manifestPlaceholders["appLabel"] = "NutriSense"
@@ -132,5 +138,5 @@ flutter {
 }
 
 dependencies {
-    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.0.4")
+    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.5")
 }

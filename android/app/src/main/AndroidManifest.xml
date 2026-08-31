@@ -6,6 +6,11 @@
     <!-- speech_to_text requests this permission before voice recognition starts. -->
     <uses-permission android:name="android.permission.RECORD_AUDIO"/>
 
+    <!-- Kamera veya mikrofonu olmayan cihazlar Play tarafından dışlanmaz;
+         manuel/dokunmatik alternatifler kullanılabilir. -->
+    <uses-feature android:name="android.hardware.camera" android:required="false"/>
+    <uses-feature android:name="android.hardware.microphone" android:required="false"/>
+
     <!-- POST_NOTIFICATIONS is intentionally absent. The app currently exposes
          e-mail/SMS preferences, not Android local/push notifications, and has
          no runtime notification-permission flow. Add both together if that
@@ -15,9 +20,10 @@
         android:label="${appLabel}"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher"
-        android:roundIcon="@drawable/ic_launcher_round"
+        android:roundIcon="@mipmap/ic_launcher_round"
         android:allowBackup="false"
-        android:fullBackupContent="false"
+        android:fullBackupContent="@xml/backup_rules"
+        android:dataExtractionRules="@xml/data_extraction_rules"
         android:usesCleartextTraffic="false"
         android:networkSecurityConfig="@xml/network_security_config"
         android:supportsRtl="true">
@@ -58,6 +64,9 @@
         <intent>
             <action android:name="android.intent.action.PROCESS_TEXT"/>
             <data android:mimeType="text/plain"/>
+        </intent>
+        <intent>
+            <action android:name="android.speech.RecognitionService" />
         </intent>
     </queries>
 </manifest>

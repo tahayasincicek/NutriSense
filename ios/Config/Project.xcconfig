@@ -1,0 +1,4 @@
+// Public build configuration only. Never put API/provider secrets here.
+NUTRISENSE_BUNDLE_ID = com.example.nutrisense
+NUTRISENSE_DISPLAY_NAME = NutriSense
+NUTRISENSE_IOS_DEPLOYMENT_TARGET = 13.0

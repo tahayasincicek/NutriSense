@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<lint>
+    <!-- Flutter regenerates the ignored android/local.properties file using
+         valid Java-properties Windows paths that Android Lint 8.11 flags as
+         PropertyEscape. Scope the exception to that generated file only. -->
+    <issue id="PropertyEscape">
+        <ignore regexp=".*[\\/]android[\\/]local\.properties" />
+    </issue>
+</lint>
