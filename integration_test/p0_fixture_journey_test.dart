@@ -45,6 +45,7 @@ void main() {
       final repository = _JourneyHistoryRepository();
       await tester.pumpWidget(
         ProviderScope(
+          key: const ValueKey('camera'),
           overrides: [
             apiServiceProvider.overrideWithValue(api),
             accessibilityServiceProvider.overrideWithValue(
@@ -78,12 +79,15 @@ void main() {
 
       expect(find.text('Elma'), findsOneWidget);
       await tester.tap(find.text('Onayla'));
-      await tester.pumpAndSettle();
+      // Onay isteği ve ardından gelen kaydetme adımı kare zamanlayıcısına
+      // bağlı olmadığı için sonucun görünmesini bekleyerek pump ediyoruz.
+      await _pumpUntilFound(tester, find.text('Geçmişe Dön'));
       expect(transport.decisionCalls, 1);
       expect(find.text('Geçmişe Dön'), findsOneWidget);
 
       await tester.pumpWidget(
         ProviderScope(
+          key: const ValueKey('history'),
           overrides: [
             historyRepositoryProvider.overrideWithValue(repository),
             historyUserIdProvider.overrideWithValue(SyntheticFactories.userId),
@@ -103,6 +107,7 @@ void main() {
 
       await tester.pumpWidget(
         ProviderScope(
+          key: const ValueKey('report'),
           overrides: [
             apiServiceProvider.overrideWithValue(api),
             accessibilityServiceProvider.overrideWithValue(
@@ -147,6 +152,19 @@ class _MemoryTokenStore implements TokenStore {
   Future<void> write(AuthSession value) async => session = value;
 }
 
+/// Asenkron iş bitene kadar kare üretir; [finder] eşleşince erken döner.
+Future<void> _pumpUntilFound(
+  WidgetTester tester,
+  Finder finder, {
+  Duration timeout = const Duration(seconds: 20),
+}) async {
+  final deadline = DateTime.now().add(timeout);
+  while (DateTime.now().isBefore(deadline)) {
+    await tester.pump(const Duration(milliseconds: 100));
+    if (finder.evaluate().isNotEmpty) return;
+  }
+}
+
 class _JourneyTransport implements HttpClientAdapter {
   int decisionCalls = 0;
   int previewCalls = 0;
@@ -171,11 +189,13 @@ class _JourneyTransport implements HttpClientAdapter {
     if (options.path.contains('/food-analysis/') &&
         options.path.endsWith('/decision')) {
       decisionCalls++;
+      // Alanlar FoodAnalysisDecisionResponse sözleşmesiyle birebir aynıdır;
+      // 'message' zorunludur ve eksikliği istemci ayrıştırmasını düşürür.
       return _json({
         'analysis_id': SyntheticFactories.logId,
-        'action': 'confirm',
         'status': 'confirmed',
         'log_id': SyntheticFactories.logId,
+        'message': 'Yemek geçmişine kaydedildi.',
       });
     }
     if (options.path.endsWith('/dietitian-reports/preview')) {
