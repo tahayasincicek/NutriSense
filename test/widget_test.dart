@@ -17,10 +17,13 @@ void main() {
 
     final app = tester.widget<MaterialApp>(find.byType(MaterialApp));
     expect(app.title, 'NutriSense');
-    expect(find.byType(BottomNavigationBar), findsOneWidget);
+    // Material 3 NavigationBar; sekmeler: Tara, Aktivite, Günlük, Keşfet,
+    // Diyetisyen. (Ayarlar artık sekme değil, başlıktaki ikondan açılıyor.)
+    expect(find.byType(NavigationBar), findsOneWidget);
     expect(find.text('Tara'), findsOneWidget);
-    expect(find.text('Geçmiş'), findsOneWidget);
+    expect(find.text('Aktivite'), findsOneWidget);
+    expect(find.text('Günlük'), findsOneWidget);
+    expect(find.text('Keşfet'), findsOneWidget);
     expect(find.text('Diyetisyen'), findsOneWidget);
-    expect(find.text('Ayarlar'), findsOneWidget);
   });
 }

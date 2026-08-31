@@ -28,7 +28,8 @@ void main() {
 
     expect(find.byType(AppShell), findsOneWidget);
     expect(find.byType(FoodScanScreen), findsOneWidget);
-    expect(find.bySemanticsLabel('Ana navigasyon çubuğu, 4 sekme'),
+    // Sekme sayısı 5: Tara, Aktivite, Günlük, Keşfet, Diyetisyen.
+    expect(find.bySemanticsLabel('Ana navigasyon çubuğu, 5 sekme'),
         findsOneWidget);
     expect(
       find.bySemanticsLabel(RegExp('Tara sekmesi, seçili')),
@@ -61,7 +62,8 @@ void main() {
       isNull,
       reason: layoutError is FlutterError ? layoutError.toStringDeep() : null,
     );
-    expect(find.byType(BottomNavigationBar), findsOneWidget);
+    // Material 3 NavigationBar kullanılıyor (eski BottomNavigationBar değil).
+    expect(find.byType(NavigationBar), findsOneWidget);
   });
 
   testWidgets('gerçek AppShell görünür ikon eylemleri en az 48dp',
