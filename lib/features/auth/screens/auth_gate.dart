@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../app.dart';
 import '../../../shared/widgets/accessible_button.dart';
 import '../state/auth_controller.dart';
+import '../../onboarding/screens/onboarding_screen.dart';
 import 'login_screen.dart';
 
 class AuthGate extends ConsumerWidget {
@@ -12,13 +13,17 @@ class AuthGate extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final auth = ref.watch(authControllerProvider);
+    
+    Widget currentWidget;
     switch (auth.status) {
       case AuthStatus.authenticated:
-        return const AppShell();
+        currentWidget = const _OnboardingGate();
+        break;
       case AuthStatus.unauthenticated:
-        return const LoginScreen();
+        currentWidget = const LoginScreen();
+        break;
       case AuthStatus.locked:
-        return Scaffold(
+        currentWidget = Scaffold(
           body: SafeArea(
             child: Center(
               child: Padding(
@@ -49,9 +54,11 @@ class AuthGate extends ConsumerWidget {
             ),
           ),
         );
+        break;
       case AuthStatus.unknown:
       case AuthStatus.loading:
-        return Scaffold(
+      default:
+        currentWidget = Scaffold(
           body: Center(
             child: Semantics(
               liveRegion: true,
@@ -60,6 +67,53 @@ class AuthGate extends ConsumerWidget {
             ),
           ),
         );
+        break;
     }
+
+    return AnimatedSwitcher(
+      duration: const Duration(milliseconds: 300),
+      child: KeyedSubtree(
+        key: ValueKey(auth.status),
+        child: currentWidget,
+      ),
+    );
+  }
+}
+
+/// Onboarding tamamlanmamışsa onboarding ekranını göster
+class _OnboardingGate extends StatefulWidget {
+  const _OnboardingGate();
+
+  @override
+  State<_OnboardingGate> createState() => _OnboardingGateState();
+}
+
+class _OnboardingGateState extends State<_OnboardingGate> {
+  bool? _onboardingDone;
+
+  @override
+  void initState() {
+    super.initState();
+    _checkOnboarding();
+  }
+
+  Future<void> _checkOnboarding() async {
+    final done = await isOnboardingComplete();
+    if (mounted) setState(() => _onboardingDone = done);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (_onboardingDone == null) {
+      return const Scaffold(
+        body: Center(child: CircularProgressIndicator()),
+      );
+    }
+    if (_onboardingDone == false) {
+      return OnboardingScreen(
+        onComplete: () => setState(() => _onboardingDone = true),
+      );
+    }
+    return const AppShell();
   }
 }

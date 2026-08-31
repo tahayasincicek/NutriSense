@@ -21,46 +21,44 @@ dependencies:
     sdk: flutter
 
   # ---------- State Management ----------
-  # Riverpod: Compile-time güvenli, test edilebilir, bağımlılık enjeksiyonu
-  # desteği. Provider'a kıyasla daha güçlü ve BuildContext bağımsız çalışır.
   flutter_riverpod: ^2.5.1
 
   # ---------- Kamera & Görüntü ----------
-  camera: ^0.11.0+2              # Kamera erişimi ve canlı önizleme
-  # Yeni CameraX alt sürümleri Flutter 3.22 TextureRegistry API'siyle uyumsuz.
+  camera: ^0.11.0+2
   camera_android_camerax: 0.6.5
-  image: ^4.1.7                  # Görüntü ön işleme (resize, crop)
+  image: ^4.1.7
 
   # ---------- Sesli Etkileşim ----------
-  flutter_tts: 4.0.2             # Flutter 3.22 / minSdk 21 ile uyumlu TTS
-  speech_to_text: ^7.4.0         # Flutter 3.41 embedding v2 ile uyumlu STT
+  flutter_tts: 4.0.2
+  speech_to_text: ^7.4.0
 
   # ---------- Ağ & API ----------
-  dio: ^5.4.3+1                  # HTTP istemci (interceptors, retry desteği)
+  dio: ^5.4.3+1
 
   # ---------- Yerel Depolama ----------
-  shared_preferences: ^2.2.3     # Basit key-value depolama (tercihler)
-  flutter_secure_storage: ^10.3.1 # Access/refresh token platform kasası
+  shared_preferences: ^2.2.3
+  flutter_secure_storage: ^10.3.1
 
   # ---------- İzinler ----------
-  permission_handler: ^11.3.1    # Kamera, mikrofon, depolama izinleri
+  permission_handler: ^11.3.1
 
   # ---------- UI & Erişilebilirlik ----------
-  vibration: ^2.0.0              # Haptic feedback (titreşim)
+  vibration: ^2.0.0
+  google_fonts: ^6.2.1
 
   # ---------- Yardımcılar ----------
-  equatable: ^2.0.5              # Nesne eşitlik karşılaştırması
-  path_provider: ^2.1.3          # Cihaz dosya yolları
-  device_info_plus: ^10.1.2      # Araştırma formunda cihaz bilgisi
-  share_plus: ^12.0.2            # Flutter 3.41 uyumlu dışa aktarım paylaşımı
-  uuid: ^4.4.0                   # Benzersiz kimlik üretimi
+  equatable: ^2.0.5
+  path_provider: ^2.1.3
+  device_info_plus: ^10.1.2
+  share_plus: ^12.0.2
+  uuid: ^4.4.0
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
   integration_test:
     sdk: flutter
-  flutter_lints: ^4.0.0          # Lint kuralları
+  flutter_lints: ^4.0.0
 
 flutter:
   uses-material-design: true
@@ -74,8 +72,3 @@ flutter:
 
   assets:
     - assets/images/nutrition_scan_cover.png
-
-  # Boş icons/sounds/models klasörleri bilinçli olarak bundle edilmez.
-  # Gerçek model eklenmeden assets/models deklarasyonu yapılmamalıdır.
-
-

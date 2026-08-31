@@ -21,6 +21,13 @@ abstract final class AppConfig {
     defaultValue: false,
   );
 
+  /// Console diagnostics are available only in non-release environments.
+  ///
+  /// `kDebugMode` is still checked at each log call, so this public flag
+  /// cannot enable logging in an optimized release binary.
+  static bool get diagnosticLoggingEnabled =>
+      {AppEnvironment.dev, AppEnvironment.test}.contains(environment);
+
   static AppEnvironment get environment => switch (_environmentValue) {
         'dev' => AppEnvironment.dev,
         'test' => AppEnvironment.test,

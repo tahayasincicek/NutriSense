@@ -428,6 +428,45 @@ class ApiService {
         return UserProfile.fromJson(response.data ?? const {});
       });
 
+  /// Parola sıfırlama kodu ister.
+  ///
+  /// Sunucu, e-posta kayıtlı olsun ya da olmasın aynı yanıtı döner; hesabın
+  /// varlığı sızdırılmaz. Bu yüzden başarı yanıtı "kod gönderildi" anlamına
+  /// gelmez, yalnız isteğin işlendiğini gösterir.
+  Future<ApiResult<String>> requestPasswordReset({
+    required String email,
+    CancelToken? cancelToken,
+  }) =>
+      _safeCall(() async {
+        final response = await _dio.post<Map<String, dynamic>>(
+          '/auth/password-reset',
+          data: {'email': email.trim().toLowerCase()},
+          cancelToken: cancelToken,
+          options: Options(extra: const {_skipRefreshKey: true}),
+        );
+        return response.data?['message'] as String? ??
+            'Sıfırlama kodu gönderildi.';
+      });
+
+  /// Kod ile yeni parolayı belirler.
+  Future<ApiResult<String>> confirmPasswordReset({
+    required String token,
+    required String newPassword,
+    CancelToken? cancelToken,
+  }) =>
+      _safeCall(() async {
+        final response = await _dio.post<Map<String, dynamic>>(
+          '/auth/password-reset/confirm',
+          data: {
+            'token': token.trim(),
+            'new_password': newPassword,
+          },
+          cancelToken: cancelToken,
+          options: Options(extra: const {_skipRefreshKey: true}),
+        );
+        return response.data?['message'] as String? ?? 'Parolanız güncellendi.';
+      });
+
   Future<ApiResult<void>> deleteAccount({
     required String password,
     CancelToken? cancelToken,
@@ -603,6 +642,19 @@ class ApiService {
           cancelToken: cancelToken,
         );
         return FoodAnalysisDecisionResult.fromJson(response.data ?? const {});
+      });
+
+  Future<ApiResult<FoodAnalysisResult>> searchFoodByName({
+    required String query,
+    CancelToken? cancelToken,
+  }) =>
+      _safeCall(() async {
+        final response = await _dio.get<Map<String, dynamic>>(
+          '/food/search',
+          queryParameters: {'query': query},
+          cancelToken: cancelToken,
+        );
+        return FoodAnalysisResult.fromJson(response.data ?? const {});
       });
 
   Future<ApiResult<FoodHistoryResult>> getFoodHistory({

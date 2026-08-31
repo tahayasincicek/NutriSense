@@ -1,20 +1,13 @@
-// =============================================================================
-// lib/features/auth/screens/login_screen.dart
-// NutriSense — Giriş Ekranı
-//
-// Erişilebilir giriş formu: büyük inputlar, semantik etiketler,
-// sesli hata bildirimleri.
-// =============================================================================
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'dart:ui';
+import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/accessibility_utils.dart';
 import '../../../shared/widgets/accessible_button.dart';
-import '../../../shared/widgets/accessible_text.dart';
 import '../state/auth_controller.dart';
+import 'password_reset_screen.dart';
 import 'register_screen.dart';
 
-/// Giriş ekranı
 class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
 
@@ -26,192 +19,152 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
-  final _emailFocus = FocusNode();
-  final _passwordFocus = FocusNode();
   bool _obscurePassword = true;
   bool _isLoading = false;
-
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      AccessibilityUtils.announce(
-        'NutriSense giriş ekranı. '
-        'E-posta ve şifrenizi girerek devam edin.',
-      );
-    });
-  }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    return Semantics(
-      scopesRoute: true,
-      namesRoute: true,
-      explicitChildNodes: true,
-      label: 'Giriş',
-      child: Scaffold(
-        body: SafeArea(
-          child: Center(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.all(24),
-              child: Form(
-                key: _formKey,
+    return Scaffold(
+      body: Stack(
+        children: [
+          // Background Decor
+          Positioned(
+            top: -100,
+            right: -50,
+            child: CircleAvatar(radius: 150, backgroundColor: AppTheme.primaryColor.withOpacity(0.1)),
+          ),
+          Positioned(
+            bottom: -50,
+            left: -50,
+            child: CircleAvatar(radius: 100, backgroundColor: AppTheme.secondaryColor.withOpacity(0.05)),
+          ),
+          
+          SafeArea(
+            child: Center(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.symmetric(horizontal: 24),
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    // ── Logo ve Başlık ──
-                    Semantics(
-                      header: true,
-                      child: Column(
-                        children: [
-                          Icon(
-                            Icons.restaurant_menu,
-                            size: 72,
-                            color: theme.colorScheme.primary,
-                          ),
-                          const SizedBox(height: 16),
-                          AccessibleText(
-                            'NutriSense',
-                            style: theme.textTheme.displayMedium?.copyWith(
-                              color: theme.colorScheme.primary,
-                            ),
-                            semanticLabel: 'NutriSense uygulaması',
-                            isHeader: true,
-                          ),
-                          const SizedBox(height: 8),
-                          AccessibleText(
-                            'Akıllı Besin Takibi',
-                            style: theme.textTheme.bodyLarge?.copyWith(
-                              color:
-                                  theme.colorScheme.onSurface.withOpacity(0.7),
-                            ),
-                            semanticLabel: 'Akıllı besin takip uygulaması',
-                          ),
-                        ],
+                    // Logo Section
+                    Container(
+                      padding: const EdgeInsets.all(20),
+                      decoration: BoxDecoration(
+                        color: AppTheme.primaryColor.withOpacity(0.1),
+                        shape: BoxShape.circle,
                       ),
-                    ),
-                    const SizedBox(height: 48),
-
-                    // ── E-posta Alanı ──
-                    Semantics(
-                      label: 'E-posta adresi giriş alanı',
-                      textField: true,
-                      child: TextFormField(
-                        controller: _emailController,
-                        focusNode: _emailFocus,
-                        keyboardType: TextInputType.emailAddress,
-                        textInputAction: TextInputAction.next,
-                        style: theme.textTheme.bodyLarge,
-                        decoration: const InputDecoration(
-                          labelText: 'E-posta',
-                          hintText: 'ornek@email.com',
-                          prefixIcon: Icon(Icons.email_outlined, size: 28),
-                        ),
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return 'E-posta adresi gerekli';
-                          }
-                          if (!value.contains('@')) {
-                            return 'Geçerli bir e-posta adresi girin';
-                          }
-                          return null;
-                        },
-                        onFieldSubmitted: (_) =>
-                            FocusScope.of(context).requestFocus(_passwordFocus),
-                      ),
-                    ),
-                    const SizedBox(height: 20),
-
-                    // ── Şifre Alanı ──
-                    Semantics(
-                      label: 'Şifre giriş alanı',
-                      textField: true,
-                      child: TextFormField(
-                        controller: _passwordController,
-                        focusNode: _passwordFocus,
-                        obscureText: _obscurePassword,
-                        textInputAction: TextInputAction.done,
-                        style: theme.textTheme.bodyLarge,
-                        decoration: InputDecoration(
-                          labelText: 'Şifre',
-                          hintText: 'Şifrenizi girin',
-                          prefixIcon: const Icon(Icons.lock_outlined, size: 28),
-                          suffixIcon: Semantics(
-                            label: _obscurePassword
-                                ? 'Şifreyi göster'
-                                : 'Şifreyi gizle',
-                            button: true,
-                            child: IconButton(
-                              icon: Icon(
-                                _obscurePassword
-                                    ? Icons.visibility_outlined
-                                    : Icons.visibility_off_outlined,
-                                size: 28,
-                              ),
-                              onPressed: () {
-                                setState(
-                                    () => _obscurePassword = !_obscurePassword);
-                                AccessibilityUtils.announce(
-                                  _obscurePassword
-                                      ? 'Şifre gizlendi'
-                                      : 'Şifre gösteriliyor',
-                                );
-                              },
-                            ),
-                          ),
-                        ),
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return 'Şifre gerekli';
-                          }
-                          if (value.length < 8) {
-                            return 'Şifre en az 8 karakter olmalı';
-                          }
-                          return null;
-                        },
-                        onFieldSubmitted: (_) => _handleLogin(),
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-
-                    // ── Şifremi Unuttum ──
-                    Align(
-                      alignment: Alignment.centerRight,
-                      child: AccessibleButton(
-                        label: 'Şifremi Unuttum',
-                        semanticLabel:
-                            'Şifre sıfırlama sayfasına gitmek için dokunun',
-                        type: AccessibleButtonType.text,
-                        fullWidth: false,
-                        onPressed: _showPasswordResetUnavailable,
-                      ),
+                      child: const Icon(Icons.restaurant_menu_rounded, size: 64, color: AppTheme.primaryColor),
                     ),
                     const SizedBox(height: 24),
-
-                    // ── Giriş Butonu ──
-                    AccessibleButton(
-                      label: 'Giriş Yap',
-                      semanticLabel: 'Hesabınıza giriş yapmak için basın',
-                      icon: Icons.login,
-                      isLoading: _isLoading,
-                      onPressed: _handleLogin,
+                    // Ekran okuyucuya sayfa başlığı olarak sunulur; VoiceOver
+                    // ve TalkBack rotor'da başlıkla gezinmeyi sağlar.
+                    Semantics(
+                      header: true,
+                      label: 'Giriş',
+                      excludeSemantics: true,
+                      child: Text('NutriSense',
+                          style: theme.textTheme.displaySmall?.copyWith(
+                              fontWeight: FontWeight.w900,
+                              color: AppTheme.primaryDark)),
                     ),
-                    const SizedBox(height: 16),
-
-                    // ── Kayıt Ol ──
-                    AccessibleButton(
-                      label: 'Hesap Oluştur',
-                      semanticLabel: 'Yeni bir hesap oluşturmak için basın',
-                      icon: Icons.person_add_outlined,
-                      type: AccessibleButtonType.outlined,
-                      onPressed: () => Navigator.of(context).push(
-                        MaterialPageRoute<void>(
-                          settings: const RouteSettings(name: '/register'),
-                          builder: (_) => const RegisterScreen(),
-                        ),
+                    Text('Beslenmeni Akıllıca Yönet', style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant)),
+                    
+                    const SizedBox(height: 48),
+                    
+                    // Form Section
+                    Form(
+                      key: _formKey,
+                      child: Column(
+                        children: [
+                          Semantics(
+                            label: 'E-posta adresi giriş alanı',
+                            textField: true,
+                            child: TextFormField(
+                              controller: _emailController,
+                              keyboardType: TextInputType.emailAddress,
+                              autofillHints: const [AutofillHints.email],
+                              decoration: const InputDecoration(
+                                labelText: 'E-posta',
+                                prefixIcon: Icon(Icons.email_outlined),
+                                hintText: 'ornek@email.com',
+                              ),
+                              validator: (v) => (v == null || !v.contains('@')) ? 'Geçerli bir e-posta girin' : null,
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+                          Semantics(
+                            label: 'Şifre giriş alanı',
+                            textField: true,
+                            obscured: _obscurePassword,
+                            child: TextFormField(
+                              controller: _passwordController,
+                              obscureText: _obscurePassword,
+                              autofillHints: const [AutofillHints.password],
+                              decoration: InputDecoration(
+                                labelText: 'Şifre',
+                                prefixIcon: const Icon(Icons.lock_outline_rounded),
+                                suffixIcon: IconButton(
+                                  icon: Icon(_obscurePassword ? Icons.visibility_off : Icons.visibility),
+                                  tooltip: _obscurePassword
+                                      ? 'Şifreyi göster'
+                                      : 'Şifreyi gizle',
+                                  onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
+                                ),
+                              ),
+                              validator: (v) => (v == null || v.length < 6) ? 'Şifre çok kısa' : null,
+                            ),
+                          ),
+                          const SizedBox(height: 12),
+                          Align(
+                            alignment: Alignment.centerRight,
+                            child: Semantics(
+                              button: true,
+                              label: 'Şifremi unuttum. '
+                                  'Parola sıfırlama ekranını açar',
+                              excludeSemantics: true,
+                              child: TextButton(
+                                key: const Key('forgot_password'),
+                                onPressed: () =>
+                                    Navigator.of(context).push(
+                                  MaterialPageRoute(
+                                    builder: (_) => PasswordResetScreen(
+                                      initialEmail: _emailController.text.trim(),
+                                    ),
+                                  ),
+                                ),
+                                child: const Text('Şifremi Unuttum'),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 24),
+                          
+                          AccessibleButton(
+                            label: 'Giriş Yap',
+                            semanticLabel: 'Hesabınıza giriş yapmak için basın',
+                            isLoading: _isLoading,
+                            onPressed: _handleLogin,
+                          ),
+                          const SizedBox(height: 16),
+                          
+                          Semantics(
+                            button: true,
+                            label: 'Yeni bir hesap oluşturmak için basın',
+                            excludeSemantics: true,
+                            child: OutlinedButton(
+                              onPressed: () => Navigator.of(context).push(
+                                  MaterialPageRoute(
+                                      builder: (_) => const RegisterScreen())),
+                              style: OutlinedButton.styleFrom(
+                                minimumSize: const Size.fromHeight(56),
+                                side:
+                                    BorderSide(color: theme.colorScheme.outline),
+                              ),
+                              child: const Text('Hesap Oluştur'),
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ],
@@ -219,73 +172,39 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               ),
             ),
           ),
-        ),
-      ),
-    );
-  }
-
-  Future<void> _handleLogin() async {
-    if (!_formKey.currentState!.validate()) {
-      AccessibilityUtils.announceError(
-        'Form hatası var. Lütfen bilgilerinizi kontrol edin.',
-      );
-      await AccessibilityUtils.errorHaptic();
-      return;
-    }
-
-    setState(() => _isLoading = true);
-    AccessibilityUtils.announce('Giriş yapılıyor, lütfen bekleyin.');
-
-    final error = await ref.read(authControllerProvider.notifier).login(
-          email: _emailController.text.trim(),
-          password: _passwordController.text,
-        );
-
-    if (!mounted) return;
-    setState(() => _isLoading = false);
-
-    if (error == null) {
-      await AccessibilityUtils.successHaptic();
-      AccessibilityUtils.announceSuccess('Giriş başarılı.');
-    } else {
-      await AccessibilityUtils.errorHaptic();
-      if (!mounted) return;
-      AccessibilityUtils.announceError(
-        error,
-      );
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text(error)));
-    }
-  }
-
-  Future<void> _showPasswordResetUnavailable() async {
-    AccessibilityUtils.announce(
-      'Şifre sıfırlama henüz kullanılamıyor. Destek ekibiyle iletişime geçin.',
-    );
-    await showDialog<void>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Şifre Sıfırlama'),
-        content: const Text(
-          'Şifre sıfırlama henüz kullanılamıyor. Bu özellik etkinleşene kadar '
-          'destek ekibiyle iletişime geçin.',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Tamam'),
-          ),
         ],
       ),
     );
   }
 
-  @override
-  void dispose() {
-    _emailController.dispose();
-    _passwordController.dispose();
-    _emailFocus.dispose();
-    _passwordFocus.dispose();
-    super.dispose();
+  Future<void> _handleLogin() async {
+    if (!_formKey.currentState!.validate()) return;
+    
+    // Önceki hatadan kalan uyarı (SnackBar) mesajlarını temizliyoruz
+    ScaffoldMessenger.of(context).clearSnackBars();
+    
+    // Olası odak ve klavye sorunlarını önlemek için klavyeyi kapatıyoruz
+    FocusScope.of(context).unfocus();
+
+    // Klavyenin ve snackbar'ın kapanması için widget ağacına minik bir zaman tanıyoruz
+    // Bu, Scaffold unmount edilirken yaşanan "_dependents.isEmpty" crash'ini önler.
+    await Future.delayed(const Duration(milliseconds: 100));
+    if (!mounted) return;
+
+    setState(() => _isLoading = true);
+    
+    final error = await ref.read(authControllerProvider.notifier).login(
+      email: _emailController.text.trim(),
+      password: _passwordController.text,
+    );
+
+    if (!mounted) return;
+
+    if (error == null) {
+      AccessibilityUtils.announceSuccess('Giriş başarılı');
+    } else {
+      setState(() => _isLoading = false);
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(error)));
+    }
   }
 }

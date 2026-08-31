@@ -99,19 +99,24 @@ class _UsabilityTestScreenState extends ConsumerState<UsabilityTestScreen> {
           const SizedBox(height: 8),
           Text(
             'Araştırmacı arayüzü — katılımcı görev performansını kaydedin.',
-            style: theme.textTheme.bodyLarge?.copyWith(color: Colors.grey[600]),
+            style: theme.textTheme.bodyLarge?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant),
           ),
           const SizedBox(height: 32),
 
           // Katılımcı ID
-          TextField(
-            controller: _participantController,
-            decoration: InputDecoration(
-              labelText: 'Katılımcı ID',
-              hintText: 'Örn: P001',
-              prefixIcon: const Icon(Icons.person_outline),
-              border:
-                  OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+          Semantics(
+            label: 'Katılımcı kimliği giriş alanı',
+            textField: true,
+            child: TextField(
+              key: const Key('usability_participant_id'),
+              controller: _participantController,
+              decoration: InputDecoration(
+                labelText: 'Katılımcı ID',
+                hintText: 'Örn: P001',
+                prefixIcon: const Icon(Icons.person_outline),
+                border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(AppTheme.cardRadius)),
+              ),
             ),
           ),
           const SizedBox(height: 24),
@@ -120,8 +125,8 @@ class _UsabilityTestScreenState extends ConsumerState<UsabilityTestScreen> {
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: Colors.grey[100],
-              borderRadius: BorderRadius.circular(12),
+              color: Theme.of(context).colorScheme.surfaceContainerHigh,
+              borderRadius: BorderRadius.circular(AppTheme.cardRadius),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -133,7 +138,7 @@ class _UsabilityTestScreenState extends ConsumerState<UsabilityTestScreen> {
                       padding: const EdgeInsets.symmetric(vertical: 2),
                       child: Row(
                         children: [
-                          Icon(Icons.circle, size: 8, color: Colors.grey[400]),
+                          Icon(Icons.circle, size: 8, color: Theme.of(context).colorScheme.outline),
                           const SizedBox(width: 8),
                           Text(t.title, style: const TextStyle(fontSize: 14)),
                         ],
@@ -230,36 +235,51 @@ class _UsabilityTestScreenState extends ConsumerState<UsabilityTestScreen> {
       margin: const EdgeInsets.all(16),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        gradient: LinearGradient(
+        gradient: const LinearGradient(
           colors: [AppTheme.primaryColor, AppTheme.primaryDark],
         ),
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(AppTheme.cardRadius),
       ),
-      child: Row(
-        children: [
-          const Icon(Icons.person, color: Colors.white, size: 24),
-          const SizedBox(width: 12),
-          Text(
-            'Katılımcı: ${_session.participantId}',
-            style: const TextStyle(
-                color: Colors.white, fontWeight: FontWeight.w700, fontSize: 16),
-          ),
-          const Spacer(),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-            decoration: BoxDecoration(
-              color: Colors.white24,
-              borderRadius: BorderRadius.circular(20),
+      // Oturum özeti tek duyuru olarak okunur; başarı oranı araştırmacının
+      // anlık olarak izlediği ölçüttür.
+      child: Semantics(
+        container: true,
+        liveRegion: true,
+        excludeSemantics: true,
+        label: 'Katılımcı ${_session.participantId}. '
+            'Başarı oranı yüzde '
+            '${_session.successRate.toStringAsFixed(0)}.',
+        child: Row(
+          children: [
+            const Icon(Icons.person, color: Colors.white, size: 24),
+            const SizedBox(width: 12),
+            Flexible(
+              child: Text(
+                'Katılımcı: ${_session.participantId}',
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w700,
+                    fontSize: 16),
+              ),
             ),
-            child: Text(
-              'Başarı: %${_session.successRate.toStringAsFixed(0)}',
-              style: const TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.w600,
-                  fontSize: 13),
+            const Spacer(),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              decoration: BoxDecoration(
+                color: Colors.white24,
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: Text(
+                'Başarı: %${_session.successRate.toStringAsFixed(0)}',
+                style: const TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w600,
+                    fontSize: 13),
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -270,7 +290,7 @@ class _UsabilityTestScreenState extends ConsumerState<UsabilityTestScreen> {
 
   Widget _buildTaskCard(UsabilityTask task, int index, ThemeData theme) {
     final statusColors = {
-      TaskStatus.notStarted: Colors.grey[400]!,
+      TaskStatus.notStarted: Theme.of(context).colorScheme.outline,
       TaskStatus.inProgress: Colors.blue,
       TaskStatus.completed: Colors.green,
       TaskStatus.failed: Colors.red,
@@ -286,14 +306,21 @@ class _UsabilityTestScreenState extends ConsumerState<UsabilityTestScreen> {
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
       elevation: 1,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppTheme.cardRadius)),
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Başlık + durum
-            Row(
+            // Görev başlığı ve durumu tek duyuru olarak okunur; parça parça
+            // gezmek yerine "1. görev: Besin tarama. Durum: Başlamadı."
+            Semantics(
+              container: true,
+              excludeSemantics: true,
+              label: '${index + 1}. görev: ${task.title}. '
+                  '${task.description}. '
+                  'Durum: ${statusLabels[task.status] ?? ""}.',
+              child: Row(
               children: [
                 Container(
                   width: 32,
@@ -322,7 +349,7 @@ class _UsabilityTestScreenState extends ConsumerState<UsabilityTestScreen> {
                               fontWeight: FontWeight.w700, fontSize: 16)),
                       Text(task.description,
                           style:
-                              TextStyle(color: Colors.grey[600], fontSize: 13)),
+                              TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant, fontSize: 13)),
                     ],
                   ),
                 ),
@@ -332,7 +359,7 @@ class _UsabilityTestScreenState extends ConsumerState<UsabilityTestScreen> {
                       const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                   decoration: BoxDecoration(
                     color: statusColors[task.status]?.withOpacity(0.15),
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(AppTheme.cardRadius),
                   ),
                   child: Text(
                     statusLabels[task.status] ?? '',
@@ -344,6 +371,7 @@ class _UsabilityTestScreenState extends ConsumerState<UsabilityTestScreen> {
                   ),
                 ),
               ],
+              ),
             ),
             const SizedBox(height: 12),
 
@@ -351,12 +379,17 @@ class _UsabilityTestScreenState extends ConsumerState<UsabilityTestScreen> {
             if (task.durationSeconds != null)
               Padding(
                 padding: const EdgeInsets.only(bottom: 8),
-                child: Text(
-                  '⏱ Süre: ${task.durationSeconds!.toStringAsFixed(1)} saniye',
-                  style: TextStyle(
-                      color: Colors.grey[600],
-                      fontSize: 13,
-                      fontWeight: FontWeight.w600),
+                child: Semantics(
+                  label: 'Tamamlanma süresi '
+                      '${task.durationSeconds!.toStringAsFixed(1)} saniye',
+                  excludeSemantics: true,
+                  child: Text(
+                    '⏱ Süre: ${task.durationSeconds!.toStringAsFixed(1)} saniye',
+                    style: TextStyle(
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600),
+                  ),
                 ),
               ),
 
@@ -367,6 +400,7 @@ class _UsabilityTestScreenState extends ConsumerState<UsabilityTestScreen> {
                 if (task.status == TaskStatus.notStarted)
                   _actionButton(
                     label: 'Başlat',
+                    semanticLabel: '${task.title} görevini başlat',
                     icon: Icons.play_arrow,
                     color: Colors.blue,
                     onPressed: () => _startTask(task),
@@ -374,6 +408,8 @@ class _UsabilityTestScreenState extends ConsumerState<UsabilityTestScreen> {
                 else if (task.status == TaskStatus.inProgress) ...[
                   _actionButton(
                     label: 'Başarılı',
+                    semanticLabel:
+                        '${task.title} görevini başarılı olarak işaretle',
                     icon: Icons.check,
                     color: Colors.green,
                     onPressed: () => _completeTask(task, TaskStatus.completed),
@@ -381,6 +417,8 @@ class _UsabilityTestScreenState extends ConsumerState<UsabilityTestScreen> {
                   const SizedBox(width: 8),
                   _actionButton(
                     label: 'Başarısız',
+                    semanticLabel:
+                        '${task.title} görevini başarısız olarak işaretle',
                     icon: Icons.close,
                     color: Colors.red,
                     onPressed: () => _completeTask(task, TaskStatus.failed),
@@ -388,6 +426,7 @@ class _UsabilityTestScreenState extends ConsumerState<UsabilityTestScreen> {
                 ] else
                   _actionButton(
                     label: 'Sıfırla',
+                    semanticLabel: '${task.title} görevini sıfırla',
                     icon: Icons.refresh,
                     color: Colors.grey,
                     onPressed: () => _resetTask(task),
@@ -406,7 +445,9 @@ class _UsabilityTestScreenState extends ConsumerState<UsabilityTestScreen> {
                         : Colors.grey,
                   ),
                   onPressed: () => _addTaskNote(task),
-                  tooltip: 'Not Ekle',
+                  tooltip: task.researcherNote != null
+                      ? '${task.title} görevindeki notu düzenle'
+                      : '${task.title} görevine not ekle',
                 ),
               ],
             ),
@@ -421,11 +462,18 @@ class _UsabilityTestScreenState extends ConsumerState<UsabilityTestScreen> {
     required IconData icon,
     required Color color,
     required VoidCallback onPressed,
+    String? semanticLabel,
   }) {
     return OutlinedButton.icon(
       onPressed: onPressed,
       icon: Icon(icon, size: 18, color: color),
-      label: Text(label, style: TextStyle(color: color, fontSize: 13)),
+      // Aynı ekranda birden çok "Başlat" bulunur; ekran okuyucunun hangi
+      // göreve ait olduğunu söyleyebilmesi için etiket göreve özgüdür.
+      label: Semantics(
+        label: semanticLabel ?? label,
+        excludeSemantics: true,
+        child: Text(label, style: TextStyle(color: color, fontSize: 13)),
+      ),
       style: OutlinedButton.styleFrom(
         side: BorderSide(color: color),
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
@@ -441,7 +489,7 @@ class _UsabilityTestScreenState extends ConsumerState<UsabilityTestScreen> {
   Widget _buildGeneralNote(ThemeData theme) {
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppTheme.cardRadius)),
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(

@@ -89,6 +89,16 @@ class AuthController extends StateNotifier<AuthState> {
       state = const AuthState(AuthStatus.unauthenticated);
       return profile.errorMessage ?? 'Kullanıcı profili doğrulanamadı.';
     }
+
+    // Önce loading durumuna geçir — bu LoginScreen'deki TextFormField'ların
+    // odağını kaybetmesini ve render objelerinin temizlenmesini sağlar.
+    state = const AuthState(AuthStatus.loading);
+
+    // Bir frame bekle: TextFormField'ın zamanlanmış imleç callback'leri
+    // (scheduleShowCaretOnScreen) bu frame'de çalışıp tamamlansın.
+    // Bu olmadan Flutter'ın _dependents.isEmpty assertion hatası oluşuyor.
+    await Future.delayed(const Duration(milliseconds: 300));
+
     state = AuthState(AuthStatus.authenticated, user: profile.data);
     return null;
   }

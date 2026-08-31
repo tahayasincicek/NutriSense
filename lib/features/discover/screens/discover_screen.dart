@@ -1,9 +1,27 @@
 import 'package:flutter/material.dart';
+
 import '../../../core/theme/app_theme.dart';
-import '../../../core/utils/accessibility_utils.dart';
+import '../models/discover_content.dart';
+import '../widgets/article_card.dart';
+import 'article_detail_screen.dart';
+import 'category_screen.dart';
 
 class DiscoverScreen extends StatelessWidget {
   const DiscoverScreen({super.key});
+
+  void _openArticle(BuildContext context, DiscoverArticle article) {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => ArticleDetailScreen(article: article),
+      ),
+    );
+  }
+
+  void _openCategory(BuildContext context, DiscoverCategory category) {
+    Navigator.of(context).push(
+      MaterialPageRoute(builder: (_) => CategoryScreen(category: category)),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -19,121 +37,187 @@ class DiscoverScreen extends StatelessWidget {
       body: ListView(
         padding: const EdgeInsets.fromLTRB(20, 10, 20, 120),
         children: [
-          _buildFeaturedRecipe(theme),
+          _buildFeaturedRecipe(context, theme),
           const SizedBox(height: 32),
-          Text('Kategoriler', style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
+          Semantics(
+            header: true,
+            child: Text('Kategoriler',
+                style: theme.textTheme.titleMedium
+                    ?.copyWith(fontWeight: FontWeight.bold)),
+          ),
           const SizedBox(height: 16),
-          _buildCategoryGrid(theme),
+          _buildCategoryGrid(context, theme),
           const SizedBox(height: 32),
-          Text('Günün İpuçları', style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
+          Semantics(
+            header: true,
+            child: Text('Günün İpuçları',
+                style: theme.textTheme.titleMedium
+                    ?.copyWith(fontWeight: FontWeight.bold)),
+          ),
           const SizedBox(height: 12),
-          _buildTipCard(theme, 'Bağışıklık Güçlendirici', 'C vitamini deposu besinler listesi.', Icons.security_rounded, Colors.orange),
-          const SizedBox(height: 12),
-          _buildTipCard(theme, 'Uyku ve Beslenme', 'Daha iyi bir uyku için akşam ne yemeli?', Icons.bedtime_rounded, Colors.indigo),
+          ...dailyTips.map((tip) => ArticleCard(article: tip)),
         ],
       ),
     );
   }
 
-  Widget _buildFeaturedRecipe(ThemeData theme) {
-    return Container(
-      height: 220,
-      decoration: BoxDecoration(
+  Widget _buildFeaturedRecipe(BuildContext context, ThemeData theme) {
+    return Semantics(
+      container: true,
+      button: true,
+      excludeSemantics: true,
+      label: 'Haftanın tarifi: ${featuredRecipe.semanticLabel}',
+      hint: 'Tarifi açmak için çift dokunun',
+      onTap: () => _openArticle(context, featuredRecipe),
+      child: Material(
+        color: Colors.transparent,
         borderRadius: BorderRadius.circular(AppTheme.cardRadius),
-        image: const DecorationImage(
-          image: NetworkImage('https://images.unsplash.com/photo-1512621776951-a57141f2eefd?q=80&w=2070&auto=format&fit=crop'),
-          fit: BoxFit.cover,
-        ),
-      ),
-      child: Container(
-        padding: const EdgeInsets.all(20),
-        decoration: BoxDecoration(
+        child: InkWell(
+          onTap: () => _openArticle(context, featuredRecipe),
           borderRadius: BorderRadius.circular(AppTheme.cardRadius),
-          gradient: const LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [Colors.transparent, Colors.black87],
+          child: Container(
+            constraints: const BoxConstraints(minHeight: 220),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(AppTheme.cardRadius),
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  AppTheme.primaryColor,
+                  AppTheme.primaryDark,
+                ],
+              ),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(20),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.end,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 10, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.25),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: const Text('HAFTANIN TARİFİ',
+                        style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 10,
+                            fontWeight: FontWeight.bold)),
+                  ),
+                  const SizedBox(height: 12),
+                  Text(
+                    featuredRecipe.title,
+                    style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(featuredRecipe.summary,
+                      style: const TextStyle(
+                          color: Colors.white70, fontSize: 14)),
+                  const SizedBox(height: 12),
+                  // Büyük fontta yan yana sığmayınca alt satıra kayar.
+                  Wrap(
+                    spacing: 16,
+                    runSpacing: 4,
+                    children: [
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Icon(Icons.schedule_rounded,
+                              size: 16, color: Colors.white70),
+                          const SizedBox(width: 6),
+                          Text('${featuredRecipe.prepMinutes} dk',
+                              style: const TextStyle(color: Colors.white70)),
+                        ],
+                      ),
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Icon(Icons.local_fire_department_rounded,
+                              size: 16, color: Colors.white70),
+                          const SizedBox(width: 6),
+                          Text('${featuredRecipe.calories} kcal',
+                              style: const TextStyle(color: Colors.white70)),
+                        ],
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
           ),
-        ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.end,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-              decoration: BoxDecoration(color: AppTheme.primaryColor, borderRadius: BorderRadius.circular(8)),
-              child: const Text('HAFTANIN TARİFİ', style: TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold)),
-            ),
-            const SizedBox(height: 8),
-            const Text(
-              'Avokadolu ve Nohutlu Kinoa Salatası',
-              style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
-            ),
-            const Text('Yüksek protein, glutensiz ve ferah.', style: TextStyle(color: Colors.white70, fontSize: 14)),
-          ],
         ),
       ),
     );
   }
 
-  Widget _buildCategoryGrid(ThemeData theme) {
+  Widget _buildCategoryGrid(BuildContext context, ThemeData theme) {
+    // Sabit en-boy oranı büyük fontta içeriği kesiyordu; metin ölçeğiyle
+    // birlikte kutucuk da uzasın diye oranı ölçekle küçültüyoruz.
+    final scale = MediaQuery.textScalerOf(context).scale(14) / 14;
     return GridView.count(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
       crossAxisCount: 2,
       mainAxisSpacing: 12,
       crossAxisSpacing: 12,
-      childAspectRatio: 1.6,
-      children: [
-        _buildCategoryTile(theme, 'Kahvaltılık', Icons.wb_twilight_rounded, Colors.amber),
-        _buildCategoryTile(theme, 'Fit Tatlılar', Icons.icecream_rounded, Colors.pink),
-        _buildCategoryTile(theme, 'Ara Öğün', Icons.apple_rounded, Colors.green),
-        _buildCategoryTile(theme, 'Smoothie', Icons.blender_rounded, Colors.purple),
-      ],
+      childAspectRatio: 1.6 / scale.clamp(1.0, 2.0),
+      children: discoverCategories
+          .map((category) => _buildCategoryTile(context, theme, category))
+          .toList(),
     );
   }
 
-  Widget _buildCategoryTile(ThemeData theme, String title, IconData icon, Color color) {
-    return Container(
-      decoration: BoxDecoration(
+  Widget _buildCategoryTile(
+    BuildContext context,
+    ThemeData theme,
+    DiscoverCategory category,
+  ) {
+    final count = articlesForCategory(category.id).length;
+    return Semantics(
+      button: true,
+      container: true,
+      excludeSemantics: true,
+      label: '${category.title} kategorisi, $count tarif',
+      hint: 'Açmak için çift dokunun',
+      onTap: () => _openCategory(context, category),
+      child: Material(
         color: theme.colorScheme.surface,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: theme.colorScheme.outline.withOpacity(0.2)),
-      ),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(icon, color: color, size: 28),
-          const SizedBox(height: 4),
-          Text(title, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildTipCard(ThemeData theme, String title, String desc, IconData icon, Color color) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: theme.colorScheme.surface,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: theme.colorScheme.outline.withOpacity(0.1)),
-      ),
-      child: Row(
-        children: [
-          Icon(icon, color: color),
-          const SizedBox(width: 16),
-          Expanded(
+        child: InkWell(
+          onTap: () => _openCategory(context, category),
+          borderRadius: BorderRadius.circular(20),
+          child: Container(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(
+                  color: theme.colorScheme.outline.withOpacity(0.2)),
+            ),
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisSize: MainAxisSize.min,
               children: [
-                Text(title, style: const TextStyle(fontWeight: FontWeight.bold)),
-                Text(desc, style: theme.textTheme.bodySmall),
+                Icon(category.icon, color: category.color, size: 28),
+                const SizedBox(height: 4),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 8),
+                  child: Text(
+                    category.title,
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(
+                        fontWeight: FontWeight.bold, fontSize: 13),
+                  ),
+                ),
               ],
             ),
           ),
-          const Icon(Icons.chevron_right_rounded, color: Colors.grey),
-        ],
+        ),
       ),
     );
   }

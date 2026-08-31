@@ -98,7 +98,7 @@ class HistoryController extends StateNotifier<HistoryState> {
     if (userId == null || userId.isEmpty) {
       state = state.copyWith(
         status: HistoryStatus.error,
-        message: 'Beslenme geçmişi için oturum açılmalıdır.',
+        message: 'Beslenme geçmişinizi görmek için lütfen oturum açın.',
         errorCode: 'AUTH_REQUIRED',
       );
       return;
@@ -139,7 +139,8 @@ class HistoryController extends StateNotifier<HistoryState> {
       state = state.copyWith(
         status: HistoryStatus.offlineCache,
         history: previous,
-        message: 'Bağlantı kurulamadı; son güvenli kayıtlar gösteriliyor.',
+        message: 'Çevrim dışı kayıtlar gösteriliyor; '
+            'bağlantı kurulamadı.',
         errorCode: result.errorCode,
       );
       return;
@@ -151,7 +152,8 @@ class HistoryController extends StateNotifier<HistoryState> {
         status: HistoryStatus.offlineCache,
         history: cached.history,
         cachedAt: cached.cachedAt,
-        message: 'Çevrim dışı: son güvenli kayıtlar gösteriliyor.',
+        message: 'Çevrim dışı kayıtlar gösteriliyor; '
+            'son güvenli kopya kullanılıyor.',
         errorCode: result.errorCode,
       );
       return;

@@ -1,9 +1,6 @@
 // =============================================================================
 // lib/main.dart
-// NutriSense — Uygulama Giriş Noktası
-//
-// Riverpod ProviderScope, TTS başlatma, tema konfigürasyonu,
-// erişilebilirlik ayarlarını içerir.
+// NutriSense — Uygulama Giriş Noktası (Modernized)
 // =============================================================================
 
 import 'package:flutter/material.dart';
@@ -12,24 +9,25 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'core/config/app_config.dart';
 import 'core/theme/app_theme.dart';
+import 'core/theme/theme_controller.dart';
 import 'shared/services/accessibility_service.dart';
 import 'app.dart';
 import 'features/auth/screens/auth_gate.dart';
 
 void main() async {
-  // Flutter engine başlatma — native platform çağrıları için gerekli
   WidgetsFlutterBinding.ensureInitialized();
   AppConfig.validate();
 
-  // Durum çubuğu stili
+  // Sistem çubuğunu modern temaya uyumlu hale getir
   SystemChrome.setSystemUIOverlayStyle(
     const SystemUiOverlayStyle(
       statusBarColor: Colors.transparent,
-      statusBarIconBrightness: Brightness.light,
+      statusBarIconBrightness: Brightness.dark, // Açık renk arka plan için koyu ikonlar
+      systemNavigationBarColor: Colors.white,
+      systemNavigationBarIconBrightness: Brightness.dark,
     ),
   );
 
-  // Uygulamayı Riverpod ProviderScope içinde başlat
   runApp(
     const ProviderScope(
       child: NutriSenseApp(),
@@ -37,7 +35,6 @@ void main() async {
   );
 }
 
-/// Ana uygulama widget'ı
 class NutriSenseApp extends ConsumerStatefulWidget {
   const NutriSenseApp({
     super.key,
@@ -56,14 +53,12 @@ class _NutriSenseAppState extends ConsumerState<NutriSenseApp> {
   @override
   void initState() {
     super.initState();
-    // TTS motorunu başlat
     if (widget.initializePlatformServices) {
       _initializeServices();
     }
   }
 
   Future<void> _initializeServices() async {
-    // TTS servisini asenkron olarak başlat
     final accessibility = ref.read(accessibilityServiceProvider);
     await accessibility.initialize();
   }
@@ -71,19 +66,16 @@ class _NutriSenseAppState extends ConsumerState<NutriSenseApp> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      // Uygulama bilgileri
       title: 'NutriSense',
       debugShowCheckedModeBanner: false,
 
-      // ── Tema Yapılandırması ──
+      // --- Yeni Premium Tema ---
       theme: AppTheme.lightTheme,
       darkTheme: AppTheme.darkTheme,
-      themeMode: ThemeMode.system, // Sistem temasına uy
+      // Kullanıcının Ayarlar'daki tercihi; kayıtlı değilse cihaz ayarı.
+      themeMode: ref.watch(themeControllerProvider),
 
-      // ── Erişilebilirlik ──
-      // showSemanticsDebugger: true, // DEBUG: Semantik ağacı görselleştir
-
-      // ── Lokalizasyon ──
+      // --- Lokalizasyon ---
       locale: const Locale('tr', 'TR'),
       supportedLocales: const [
         Locale('tr', 'TR'),
@@ -95,19 +87,15 @@ class _NutriSenseAppState extends ConsumerState<NutriSenseApp> {
         GlobalCupertinoLocalizations.delegate,
       ],
 
-      // ── Ana Sayfa ──
       home: widget.bypassAuthenticationForTests
           ? const AppShell()
           : const AuthGate(),
 
-      // ── Navigasyon Geçiş Animasyonu ──
       builder: (context, child) {
-        // Erişilebilirlik: Sistem font ölçeklendirmesine saygı göster
-        // ama minimum boyutu garanti et. (Flutter TextScaler.clamp bug'ını
-        // önlemek için _CustomTextScaler kullanarak sınırlandırıyoruz)
         final mediaQuery = MediaQuery.of(context);
+        // Erişilebilirlik ölçeklendirmesini korurken aşırı büyümeyi engelle
         final double scaleFactor = mediaQuery.textScaler.scale(10.0) / 10.0;
-        final customScaler = TextScaler.linear(scaleFactor.clamp(1.0, 2.0));
+        final customScaler = TextScaler.linear(scaleFactor.clamp(1.0, 1.4));
 
         return MediaQuery(
           data: mediaQuery.copyWith(textScaler: customScaler),

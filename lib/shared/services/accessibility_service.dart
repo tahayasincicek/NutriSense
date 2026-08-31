@@ -152,17 +152,18 @@ class AccessibilityService with WidgetsBindingObserver {
       await _tts.setVolume(_volume);
       await _tts.awaitSpeakCompletion(true);
 
-      // iOS ayarları. Android motorları bu çağrıyı yok sayar.
-      await _tts.setIosAudioCategory(
-        IosTextToSpeechAudioCategory.playback,
-        [
-          IosTextToSpeechAudioCategoryOptions.allowBluetooth,
-          IosTextToSpeechAudioCategoryOptions.allowBluetoothA2DP,
-          IosTextToSpeechAudioCategoryOptions.mixWithOthers,
-          IosTextToSpeechAudioCategoryOptions.duckOthers,
-        ],
-        IosTextToSpeechAudioMode.voicePrompt,
-      );
+      if (defaultTargetPlatform == TargetPlatform.iOS) {
+        await _tts.setIosAudioCategory(
+          IosTextToSpeechAudioCategory.playback,
+          [
+            IosTextToSpeechAudioCategoryOptions.allowBluetooth,
+            IosTextToSpeechAudioCategoryOptions.allowBluetoothA2DP,
+            IosTextToSpeechAudioCategoryOptions.mixWithOthers,
+            IosTextToSpeechAudioCategoryOptions.duckOthers,
+          ],
+          IosTextToSpeechAudioMode.voicePrompt,
+        );
+      }
     } catch (_) {
       _setTtsFailure(
         'Metin okuma servisi başlatılamadı. Dokunma ve ekran okuyucu ile devam edebilirsiniz.',
@@ -228,7 +229,14 @@ class AccessibilityService with WidgetsBindingObserver {
     if (text.isEmpty || !_isInitialized) return;
     if (!_isAppInForeground && priority != TtsPriority.critical) return;
     if (_speechInputActive || _ttsFailure.value != null) return;
-    if (_screenReaderActive && !allowWhileScreenReaderActive) return;
+    // Ekran okuyucu açıkken çift konuşmayı önlemek için susarız; ancak
+    // kritik duyurular (hatalar) her hâlükârda duyulmalıdır, aksi hâlde
+    // kullanıcı bir işlemin başarısız olduğunu hiç öğrenemez.
+    if (_screenReaderActive &&
+        !allowWhileScreenReaderActive &&
+        priority != TtsPriority.critical) {
+      return;
+    }
 
     if (priority == TtsPriority.critical) {
       // Kritik: hemen kes ve çal

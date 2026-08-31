@@ -12,6 +12,10 @@
 
 import 'dart:developer' as developer;
 import 'package:flutter/foundation.dart';
+import '../config/app_config.dart';
+
+bool get _diagnosticsEnabled =>
+    kDebugMode && AppConfig.diagnosticLoggingEnabled;
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // PERFORMANS İZLEYİCİ
@@ -39,7 +43,7 @@ class PerformanceMonitor {
       startTime: DateTime.now(),
     );
 
-    if (kDebugMode) {
+    if (_diagnosticsEnabled) {
       developer.Timeline.startSync(operationName);
     }
   }
@@ -49,7 +53,7 @@ class PerformanceMonitor {
     final timer = _activeTimers.remove(operationName);
     if (timer == null) return null;
 
-    if (kDebugMode) {
+    if (_diagnosticsEnabled) {
       developer.Timeline.finishSync();
     }
 
@@ -65,7 +69,7 @@ class PerformanceMonitor {
     _history.add(record);
 
     // Hedef aşıldıysa uyar
-    if (!record.withinTarget && kDebugMode) {
+    if (!record.withinTarget && _diagnosticsEnabled) {
       debugPrint(
         '⚠️ PERFORMANS UYARISI: $operationName '
         '${duration.inMilliseconds}ms sürdü (hedef: ${maxAnalysisTimeMs}ms)',
@@ -150,14 +154,14 @@ class PerformanceMonitor {
 
   /// Timeline olayı logla (Dart DevTools)
   void logTimelineEvent(String name, {Map<String, dynamic>? args}) {
-    if (kDebugMode) {
+    if (_diagnosticsEnabled) {
       developer.Timeline.instantSync(name, arguments: args);
     }
   }
 
   /// Performans raporunu konsola yazdır
   void printReport() {
-    if (!kDebugMode) return;
+    if (!_diagnosticsEnabled) return;
 
     debugPrint('\n═══ NutriSense Performans Raporu ═══');
     debugPrint('Toplam kayıt: ${_history.length}');
@@ -225,7 +229,7 @@ mixin DisposeVerifier {
   /// Kaynak dispose edildi olarak işaretle
   void markDisposed(String resourceName) {
     _disposedResources.add(resourceName);
-    if (kDebugMode) {
+    if (_diagnosticsEnabled) {
       debugPrint('♻️ Dispose edildi: $resourceName');
     }
   }
@@ -236,7 +240,7 @@ mixin DisposeVerifier {
         .where((r) => !_disposedResources.contains(r))
         .toList();
 
-    if (missing.isNotEmpty && kDebugMode) {
+    if (missing.isNotEmpty && _diagnosticsEnabled) {
       debugPrint('⚠️ DİSPOSE UYARISI: Şu kaynaklar dispose edilmedi: $missing');
     }
 

@@ -6,12 +6,13 @@
 // Mikrofon dinleme, metin dönüşümü ve güven skoru yönetimi.
 // =============================================================================
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:speech_to_text/speech_recognition_error.dart';
 import 'package:speech_to_text/speech_recognition_result.dart';
 import 'package:speech_to_text/speech_to_text.dart';
-import '../../core/constants/app_constants.dart';
+import 'speech_locale_policy.dart';
 
 /// STT dinleme durumu
 enum SttState { idle, listening, processing, error }
@@ -48,6 +49,8 @@ class SttService {
   final SpeechToText _stt = SpeechToText();
   SttState _state = SttState.idle;
   bool _isInitialized = false;
+  String? _turkishLocaleId;
+  String? _initializationError;
 
   SttState get state => _state;
   bool get isListening => _state == SttState.listening;
@@ -71,7 +74,19 @@ class SttService {
     final microphoneStatus = await Permission.microphone.request();
     if (!microphoneStatus.isGranted) {
       _state = SttState.error;
+      _initializationError =
+          'Mikrofon izni verilmedi. Dokunmatik veya klavye ile devam edin.';
       return false;
+    }
+
+    if (defaultTargetPlatform == TargetPlatform.iOS) {
+      final speechStatus = await Permission.speech.request();
+      if (!speechStatus.isGranted) {
+        _state = SttState.error;
+        _initializationError =
+            'Konuşma tanıma izni verilmedi. Dokunmatik veya klavye ile devam edin.';
+        return false;
+      }
     }
 
     _isInitialized = await _stt.initialize(
@@ -79,6 +94,12 @@ class SttService {
       onError: _handleError,
       debugLogging: false,
     );
+    if (_isInitialized) {
+      final locales = await _stt.locales();
+      _turkishLocaleId = selectTurkishSpeechLocale(
+        locales.map((locale) => locale.localeId),
+      );
+    }
 
     return _isInitialized;
   }
@@ -104,7 +125,7 @@ class SttService {
     if (!_isInitialized) {
       final success = await initialize();
       if (!success) {
-        onError?.call('Ses tanıma başlatılamadı');
+        onError?.call(_initializationError ?? 'Ses tanıma başlatılamadı');
         return;
       }
     }
@@ -115,12 +136,22 @@ class SttService {
     _onListeningStarted = onListeningStarted;
     _onListeningStopped = onListeningStopped;
 
+    final requestedLocale = locale ?? _turkishLocaleId;
+    if (requestedLocale == null) {
+      _state = SttState.error;
+      onError?.call(
+        'Türkçe konuşma tanıma bu cihazda bulunamadı. '
+        'Dokunmatik veya klavye ile devam edin.',
+      );
+      return;
+    }
+
     _state = SttState.listening;
     _onListeningStarted?.call();
 
     await _stt.listen(
       onResult: _handleResult,
-      localeId: locale ?? AppConstants.defaultLocale,
+      localeId: requestedLocale,
       listenFor: listenFor,
       pauseFor: const Duration(seconds: 3), // 3 saniye sessizlikte dur
       listenMode: ListenMode.confirmation,

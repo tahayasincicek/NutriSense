@@ -6,6 +6,7 @@
 // dokunma alanlı kartlar içinde gösterir.
 // =============================================================================
 
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import '../../core/constants/app_constants.dart';
 import '../../core/theme/app_theme.dart';
@@ -61,18 +62,45 @@ class AccessibleCard extends StatelessWidget {
       hint: semanticHint ??
           (onTap != null ? 'Detayları görmek için çift dokunun' : null),
       button: onTap != null,
-      child: Card(
-        color: backgroundColor,
-        child: InkWell(
-          onTap: onTap != null
-              ? () {
-                  if (enableHaptic) AccessibilityUtils.lightHaptic();
-                  onTap!();
-                }
-              : null,
-          onLongPress: onLongPress,
+      onTap: onTap != null
+          ? () {
+              if (enableHaptic) AccessibilityUtils.lightHaptic();
+              onTap!();
+            }
+          : null,
+      onLongPress: onLongPress,
+      child: Container(
+        decoration: BoxDecoration(
+          color: backgroundColor ?? theme.colorScheme.surface.withOpacity(0.55),
           borderRadius: BorderRadius.circular(AppTheme.cardRadius),
-          child: Padding(
+          border: Border.all(
+            color: Colors.white.withOpacity(0.3),
+            width: 1,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.04),
+              blurRadius: 16,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(AppTheme.cardRadius),
+          child: BackdropFilter(
+            filter: ImageFilter.blur(sigmaX: 16, sigmaY: 16),
+            child: Material(
+              color: Colors.transparent,
+              child: InkWell(
+                onTap: onTap != null
+                    ? () {
+                        if (enableHaptic) AccessibilityUtils.lightHaptic();
+                        onTap!();
+                      }
+                    : null,
+                onLongPress: onLongPress,
+                borderRadius: BorderRadius.circular(AppTheme.cardRadius),
+                child: Padding(
             padding: padding ?? const EdgeInsets.all(16),
             child: Row(
               children: [
@@ -135,9 +163,12 @@ class AccessibleCard extends StatelessWidget {
                 ],
               ],
             ),
-          ),
-        ),
-      ),
-    );
+          ), // Padding
+        ), // InkWell
+      ), // Material
+    ), // BackdropFilter
+  ), // ClipRRect
+), // Container
+); // Semantics
   }
 }

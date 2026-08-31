@@ -123,7 +123,7 @@ class _SurveyScreenState extends ConsumerState<SurveyScreen> {
                       '${_questions.length} sorudan ${_currentIndex + 1}. soru.',
                   child: Text(
                     'Soru ${_currentIndex + 1} / ${_questions.length}',
-                    style: TextStyle(
+                    style: const TextStyle(
                       color: AppTheme.primaryColor,
                       fontWeight: FontWeight.w700,
                       fontSize: 15,
@@ -176,7 +176,7 @@ class _SurveyScreenState extends ConsumerState<SurveyScreen> {
           children: [
             Text(
               '%${(progress * 100).toInt()}',
-              style: TextStyle(
+              style: const TextStyle(
                 color: AppTheme.primaryColor,
                 fontWeight: FontWeight.w700,
                 fontSize: 13,
@@ -188,7 +188,7 @@ class _SurveyScreenState extends ConsumerState<SurveyScreen> {
               child: LinearProgressIndicator(
                 value: progress,
                 minHeight: 8,
-                backgroundColor: Colors.grey[200],
+                backgroundColor: Theme.of(context).colorScheme.surfaceContainerHighest,
                 valueColor: const AlwaysStoppedAnimation(AppTheme.primaryColor),
               ),
             ),
@@ -238,10 +238,10 @@ class _SurveyScreenState extends ConsumerState<SurveyScreen> {
               decoration: BoxDecoration(
                 color: isSelected
                     ? AppTheme.primaryColor.withOpacity(0.12)
-                    : Colors.grey[50],
-                borderRadius: BorderRadius.circular(14),
+                    : theme.colorScheme.surfaceContainer,
+                borderRadius: BorderRadius.circular(AppTheme.cardRadius),
                 border: Border.all(
-                  color: isSelected ? AppTheme.primaryColor : Colors.grey[300]!,
+                  color: isSelected ? AppTheme.primaryColor : theme.colorScheme.outlineVariant,
                   width: isSelected ? 2 : 1,
                 ),
               ),
@@ -254,13 +254,13 @@ class _SurveyScreenState extends ConsumerState<SurveyScreen> {
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
                       color:
-                          isSelected ? AppTheme.primaryColor : Colors.grey[200],
+                          isSelected ? AppTheme.primaryColor : Theme.of(context).colorScheme.surfaceContainerHighest,
                     ),
                     child: Center(
                       child: Text(
                         '$value',
                         style: TextStyle(
-                          color: isSelected ? Colors.white : Colors.grey[600],
+                          color: isSelected ? Colors.white : Theme.of(context).colorScheme.onSurfaceVariant,
                           fontWeight: FontWeight.w800,
                           fontSize: 18,
                         ),
@@ -313,10 +313,10 @@ class _SurveyScreenState extends ConsumerState<SurveyScreen> {
               decoration: BoxDecoration(
                 color: isSelected
                     ? AppTheme.primaryColor.withOpacity(0.12)
-                    : Colors.grey[50],
-                borderRadius: BorderRadius.circular(14),
+                    : Theme.of(context).colorScheme.surfaceContainer,
+                borderRadius: BorderRadius.circular(AppTheme.cardRadius),
                 border: Border.all(
-                  color: isSelected ? AppTheme.primaryColor : Colors.grey[300]!,
+                  color: isSelected ? AppTheme.primaryColor : Theme.of(context).colorScheme.outlineVariant,
                   width: isSelected ? 2 : 1,
                 ),
               ),
@@ -327,7 +327,7 @@ class _SurveyScreenState extends ConsumerState<SurveyScreen> {
                         ? Icons.radio_button_checked
                         : Icons.radio_button_off,
                     color:
-                        isSelected ? AppTheme.primaryColor : Colors.grey[400],
+                        isSelected ? AppTheme.primaryColor : Theme.of(context).colorScheme.outline,
                     size: 24,
                   ),
                   const SizedBox(width: 14),
@@ -385,12 +385,12 @@ class _SurveyScreenState extends ConsumerState<SurveyScreen> {
                 decoration: BoxDecoration(
                   color: isSelected
                       ? (colors[opt] ?? AppTheme.primaryColor).withOpacity(0.15)
-                      : Colors.grey[50],
-                  borderRadius: BorderRadius.circular(16),
+                      : Theme.of(context).colorScheme.surfaceContainer,
+                  borderRadius: BorderRadius.circular(AppTheme.cardRadius),
                   border: Border.all(
                     color: isSelected
                         ? (colors[opt] ?? AppTheme.primaryColor)
-                        : Colors.grey[300]!,
+                        : Theme.of(context).colorScheme.outlineVariant,
                     width: isSelected ? 2 : 1,
                   ),
                 ),
@@ -401,7 +401,7 @@ class _SurveyScreenState extends ConsumerState<SurveyScreen> {
                       size: 36,
                       color: isSelected
                           ? (colors[opt] ?? AppTheme.primaryColor)
-                          : Colors.grey[400],
+                          : Theme.of(context).colorScheme.outline,
                     ),
                     const SizedBox(height: 8),
                     Text(
@@ -441,9 +441,9 @@ class _SurveyScreenState extends ConsumerState<SurveyScreen> {
             decoration: InputDecoration(
               hintText: 'Yanıtınızı buraya yazın...',
               border:
-                  OutlineInputBorder(borderRadius: BorderRadius.circular(14)),
+                  OutlineInputBorder(borderRadius: BorderRadius.circular(AppTheme.cardRadius)),
               filled: true,
-              fillColor: Colors.grey[50],
+              fillColor: Theme.of(context).colorScheme.surfaceContainer,
             ),
             onChanged: (text) {
               _answers[question.id] = text;
@@ -508,7 +508,7 @@ class _SurveyScreenState extends ConsumerState<SurveyScreen> {
                           ? Icons.star_rounded
                           : Icons.star_outline_rounded,
                       size: 48,
-                      color: isActive ? Colors.amber[600] : Colors.grey[300],
+                      color: isActive ? AppTheme.warningColor : Theme.of(context).colorScheme.outlineVariant,
                     ),
                   ),
                 ),
@@ -520,10 +520,10 @@ class _SurveyScreenState extends ConsumerState<SurveyScreen> {
         if (current > 0)
           Text(
             LikertLabels.starLabels[current] ?? '',
-            style: TextStyle(
+            style: const TextStyle(
               fontSize: 17,
               fontWeight: FontWeight.w600,
-              color: Colors.amber[800],
+              color: AppTheme.warningColor,
             ),
           ),
       ],
@@ -541,7 +541,7 @@ class _SurveyScreenState extends ConsumerState<SurveyScreen> {
         color: theme.scaffoldBackgroundColor,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Theme.of(context).colorScheme.surfaceContainerHighest,
             blurRadius: 8,
             offset: const Offset(0, -2),
           ),
@@ -619,7 +619,7 @@ class _SurveyScreenState extends ConsumerState<SurveyScreen> {
               'Katılımınız için teşekkür ederiz.\n'
               'Yanıtlarınız araştırmaya önemli katkı sağlayacaktır.',
               style:
-                  theme.textTheme.bodyLarge?.copyWith(color: Colors.grey[600]),
+                  theme.textTheme.bodyLarge?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 40),
@@ -659,7 +659,7 @@ class _SurveyScreenState extends ConsumerState<SurveyScreen> {
     final total = _questions.length;
 
     _accessibility.speak(
-      '$total sorudan ${num}. soru. ${q.text}',
+      '$total sorudan $num. soru. ${q.text}',
       priority: TtsPriority.high,
     );
   }

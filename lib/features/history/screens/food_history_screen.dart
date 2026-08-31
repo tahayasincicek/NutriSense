@@ -1,8 +1,6 @@
 import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-
 import '../../../core/theme/app_theme.dart';
 import '../../../shared/models/food_analysis_model.dart';
 import '../../../shared/services/accessibility_service.dart';
@@ -10,10 +8,10 @@ import '../../../shared/services/contextual_voice_command.dart';
 import '../../../shared/services/navigation_announcer.dart';
 import '../../../shared/services/stt_service.dart';
 import '../state/history_controller.dart';
+import 'nutrition_stats_screen.dart';
 
 class FoodHistoryScreen extends ConsumerStatefulWidget {
   const FoodHistoryScreen({super.key, this.onScanRequested});
-
   final VoidCallback? onScanRequested;
 
   @override
@@ -21,14 +19,16 @@ class FoodHistoryScreen extends ConsumerStatefulWidget {
 }
 
 class _FoodHistoryScreenState extends ConsumerState<FoodHistoryScreen> {
+  static const _voiceParser = ContextualVoiceCommandParser();
+
   late final AccessibilityService _accessibility;
   late final NavigationAnnouncer _announcer;
   late final SttService _stt;
-  static const _voiceParser = ContextualVoiceCommandParser();
-  final _voiceConfirmation = VoiceConfirmationGate();
-  FoodLogEntry? _voiceEntry;
-  bool _voiceListening = false;
+
+  /// Sesli silme iki adımlıdır; hangi kaydın onay beklediğini burada tutarız.
+  final Map<String, bool> _pendingVoiceDelete = {};
   String? _voiceStatus;
+
 
   @override
   void initState() {
@@ -43,69 +43,53 @@ class _FoodHistoryScreenState extends ConsumerState<FoodHistoryScreen> {
   }
 
   @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    _accessibility
-        .setScreenReaderActive(MediaQuery.of(context).accessibleNavigation);
-  }
-
-  @override
-  void dispose() {
-    if (_voiceListening) unawaited(_stt.cancelListening());
-    _accessibility.finishSpeechInput();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
     final state = ref.watch(historyControllerProvider);
+    final theme = Theme.of(context);
+
     return Scaffold(
+      backgroundColor: Colors.transparent,
       appBar: AppBar(
+        backgroundColor: Colors.transparent,
         title: const Text('Beslenme Günlüğü'),
         actions: [
-          Semantics(
-            label: 'Erişilebilir tarih seçiciyi aç',
-            button: true,
-            child: IconButton(
-              key: const Key('history_date_picker'),
-              icon: const Icon(Icons.calendar_month),
-              tooltip: 'Tarih seç',
-              onPressed: _pickDate,
-            ),
+          IconButton(
+            icon: const Icon(Icons.bar_chart_rounded),
+            onPressed: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const NutritionStatsScreen())),
           ),
-          Semantics(
-            label: 'Günlük özetini sesli dinle',
-            button: true,
-            child: IconButton(
-              key: const Key('history_speak_summary'),
-              icon: const Icon(Icons.record_voice_over),
-              tooltip: 'Özeti dinle',
-              onPressed: state.hasData ? () => _speakSummary(state) : null,
-            ),
+          IconButton(
+            icon: const Icon(Icons.calendar_today_rounded, size: 20),
+            onPressed: _pickDate,
           ),
+          const SizedBox(width: 8),
         ],
       ),
       body: Column(
         children: [
           _PeriodSelector(
             selected: state.period,
-            onSelected: (period) =>
-                ref.read(historyControllerProvider.notifier).setPeriod(period),
+            onSelected: (period) => ref.read(historyControllerProvider.notifier).setPeriod(period),
           ),
+          if (state.isOffline && state.message != null)
+            _OfflineBanner(message: state.message!, cachedAt: state.cachedAt),
           if (_voiceStatus != null)
-            Semantics(
-              liveRegion: true,
-              container: true,
-              label: _voiceStatus,
-              child: MaterialBanner(
-                key: const Key('history_voice_status'),
-                content: Text(_voiceStatus!),
-                actions: [
-                  TextButton(
-                    onPressed: _cancelVoiceInteraction,
-                    child: const Text('İptal'),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+              child: Semantics(
+                liveRegion: true,
+                child: Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: theme.colorScheme.secondaryContainer,
+                    borderRadius: BorderRadius.circular(12),
                   ),
-                ],
+                  child: Text(
+                    _voiceStatus!,
+                    style: TextStyle(
+                        color: theme.colorScheme.onSecondaryContainer),
+                  ),
+                ),
               ),
             ),
           Expanded(child: _buildContent(state)),
@@ -115,34 +99,40 @@ class _FoodHistoryScreenState extends ConsumerState<FoodHistoryScreen> {
   }
 
   Widget _buildContent(HistoryState state) {
-    if (state.authRequired) return _buildAuthRequired();
-    if (state.status == HistoryStatus.initial ||
-        (state.status == HistoryStatus.loading && !state.hasData)) {
-      return Center(
-        child: Semantics(
-          label: 'Beslenme geçmişi yükleniyor',
-          liveRegion: true,
-          child: const CircularProgressIndicator(),
-        ),
-      );
+    if (state.status == HistoryStatus.loading && !state.hasData) {
+      return const Center(child: CircularProgressIndicator());
     }
+    // Oturum yoksa hata değil, yönlendirici bir mesaj gösterilir.
+    if (state.authRequired) return _buildAuthRequired(state);
+    if (state.status == HistoryStatus.empty) return _buildEmpty();
     if (state.status == HistoryStatus.error && !state.hasData) {
       return _buildError(state);
     }
-    if (state.status == HistoryStatus.empty) return _buildEmpty();
+    if (state.history == null || state.history!.dailyLogs.isEmpty) {
+      return _buildEmpty();
+    }
     return _buildHistory(state);
   }
 
-  Widget _buildAuthRequired() {
+  Widget _buildAuthRequired(HistoryState state) {
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(24),
         child: Semantics(
           liveRegion: true,
-          label: 'Oturum gerekli. Giriş ekranına yönlendiriliyorsunuz.',
-          child: const Text(
-            'Beslenme günlüğünü görmek için oturum açın.',
-            textAlign: TextAlign.center,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(Icons.lock_outline_rounded,
+                  size: 72, color: Theme.of(context).colorScheme.outline),
+              const SizedBox(height: 16),
+              Text(
+                state.message ??
+                    'Beslenme geçmişinizi görmek için lütfen oturum açın.',
+                textAlign: TextAlign.center,
+                style: const TextStyle(fontSize: 16),
+              ),
+            ],
           ),
         ),
       ),
@@ -153,54 +143,25 @@ class _FoodHistoryScreenState extends ConsumerState<FoodHistoryScreen> {
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(24),
-        child: Semantics(
-          liveRegion: true,
-          label: 'Geçmiş yüklenemedi. ${state.message}',
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Icon(Icons.cloud_off, size: 64),
-              const SizedBox(height: 16),
-              Text(state.message ?? 'Geçmiş yüklenemedi.'),
-              const SizedBox(height: 16),
-              ElevatedButton.icon(
-                key: const Key('history_retry'),
-                onPressed: () =>
-                    ref.read(historyControllerProvider.notifier).load(),
-                icon: const Icon(Icons.refresh),
-                label: const Text('Tekrar dene'),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildEmpty() {
-    return Center(
-      child: Semantics(
-        liveRegion: true,
-        label:
-            'Seçilen dönemde onaylı besin kaydı yok. Besin taramaya geçebilirsiniz.',
-        child: ExcludeSemantics(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Icon(Icons.restaurant_menu, size: 72),
-              const SizedBox(height: 16),
-              const Text('Seçilen dönemde kayıt yok'),
-              const SizedBox(height: 8),
-              const Text('Onayladığınız taramalar burada görünür.'),
-              const SizedBox(height: 20),
-              ElevatedButton.icon(
-                key: const Key('history_scan_action'),
-                onPressed: widget.onScanRequested,
-                icon: const Icon(Icons.camera_alt),
-                label: const Text('Besin tara'),
-              ),
-            ],
-          ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.cloud_off_rounded,
+                size: 72, color: Theme.of(context).colorScheme.outline),
+            const SizedBox(height: 16),
+            Text(
+              state.message ?? 'Beslenme geçmişi yüklenemedi.',
+              textAlign: TextAlign.center,
+              style: const TextStyle(fontSize: 16),
+            ),
+            const SizedBox(height: 24),
+            ElevatedButton(
+              key: const Key('history_retry'),
+              onPressed: () =>
+                  ref.read(historyControllerProvider.notifier).load(),
+              child: const Text('Tekrar Dene'),
+            ),
+          ],
         ),
       ),
     );
@@ -210,424 +171,243 @@ class _FoodHistoryScreenState extends ConsumerState<FoodHistoryScreen> {
     final history = state.history!;
     return RefreshIndicator(
       onRefresh: ref.read(historyControllerProvider.notifier).refresh,
-      child: ListView(
+      child: ListView.builder(
         key: const Key('history_list'),
-        physics: const AlwaysScrollableScrollPhysics(),
-        padding: const EdgeInsets.only(bottom: 96),
-        children: [
-          if (state.isOffline) _OfflineBanner(state: state),
-          if (state.isRefreshing) const LinearProgressIndicator(),
-          _PeriodSummary(history: history, period: state.period),
-          for (final day in history.dailyLogs) ...[
-            _DailySummaryCard(day: day),
-            for (final entry in day.foods)
-              _FoodLogCard(
+        padding: const EdgeInsets.fromLTRB(16, 8, 16, 120),
+        itemCount: history.dailyLogs.length + (history.hasMore ? 1 : 0),
+        itemBuilder: (context, index) {
+          if (index == history.dailyLogs.length) {
+            return _buildLoadMore();
+          }
+          final day = history.dailyLogs[index];
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _DailySummaryCard(day: day),
+              ...day.foods.map((entry) => _FoodLogCard(
                 entry: entry,
-                onListen: () => _accessibility.speak(
-                  entry.semanticLabel,
-                  priority: TtsPriority.normal,
-                  allowWhileScreenReaderActive: true,
-                ),
-                onEdit: () => _showEditDialog(entry),
-                onChangeMeal: () => _showMealDialog(entry),
                 onDelete: () => _confirmAndDelete(entry),
-                onVoice: () => _startVoiceInteraction(entry),
-                voiceListening: _voiceListening && _voiceEntry?.id == entry.id,
+                onEdit: () => _editEntry(entry),
+                onVoice: () => _voiceCommandFor(entry),
+              )),
+              const SizedBox(height: 24),
+            ],
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _buildEmpty() {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Semantics(
+          liveRegion: true,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              ExcludeSemantics(
+                child: Icon(Icons.no_food_rounded,
+                    size: 80, color: Theme.of(context).colorScheme.outline),
               ),
-          ],
-          if (history.hasMore)
-            Padding(
-              padding: const EdgeInsets.all(16),
-              child: OutlinedButton.icon(
-                key: const Key('history_load_more'),
-                onPressed: state.isRefreshing
-                    ? null
-                    : ref.read(historyControllerProvider.notifier).loadMore,
-                icon: const Icon(Icons.expand_more),
-                label: const Text('Daha eski günleri yükle'),
+              const SizedBox(height: 16),
+              const Text('Seçilen dönemde kayıt yok',
+                  textAlign: TextAlign.center,
+                  style:
+                      TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+              const SizedBox(height: 8),
+              Text('Yediklerini tarayarak başlayabilirsin.',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                      color: Theme.of(context).colorScheme.onSurfaceVariant)),
+              const SizedBox(height: 24),
+              ElevatedButton(
+                key: const Key('history_scan_action'),
+                onPressed: widget.onScanRequested,
+                child: const Text('Hemen Tara'),
               ),
-            ),
-        ],
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildLoadMore() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 16),
+      child: TextButton(
+        onPressed: ref.read(historyControllerProvider.notifier).loadMore,
+        child: const Text('Daha Fazla Yükle'),
       ),
     );
   }
 
   Future<void> _pickDate() async {
     final now = DateTime.now();
-    final state = ref.read(historyControllerProvider);
     final selected = await showDatePicker(
       context: context,
-      initialDate: state.anchorDate ?? now,
-      firstDate: DateTime(now.year - 2),
+      initialDate: now,
+      firstDate: DateTime(now.year - 1),
       lastDate: now,
-      helpText: 'Günlük kayıt tarihini seçin',
-      cancelText: 'İptal',
-      confirmText: 'Seç',
     );
-    if (selected != null && mounted) {
-      await ref.read(historyControllerProvider.notifier).selectDate(selected);
+    if (selected != null) {
+      ref.read(historyControllerProvider.notifier).selectDate(selected);
     }
-  }
-
-  void _speakSummary(HistoryState state) {
-    final history = state.history!;
-    _accessibility.speak(
-      '${state.period.label} özet. ${history.totalLogCount} onaylı kayıt. '
-      'Toplam ${history.totalCalories.toStringAsFixed(0)} kalori. '
-      'Günlük ortalama ${history.averageDailyCalories.toStringAsFixed(0)} kalori. '
-      'Değerler tahminidir ve tıbbi öneri değildir.',
-      priority: TtsPriority.high,
-      allowWhileScreenReaderActive: true,
-    );
-  }
-
-  Future<void> _startVoiceInteraction(FoodLogEntry entry) async {
-    if (_voiceListening) {
-      await _cancelVoiceInteraction();
-      return;
-    }
-    if (_voiceEntry?.id != entry.id) _voiceConfirmation.clear();
-    _voiceEntry = entry;
-    await _accessibility.prepareForSpeechInput();
-    if (!mounted) return;
-    setState(() {
-      _voiceListening = true;
-      _voiceStatus = _voiceConfirmation.isActive
-          ? '${entry.foodNameTr} kaydını silmek için yalnız “evet”, vazgeçmek için “hayır” deyin.'
-          : '${entry.foodNameTr} için dinleniyor. Kaydı dinle, kaydı düzelt, öğünü değiştir, porsiyon 150 gram veya kaydı sil diyebilirsiniz.';
-    });
-    unawaited(_accessibility.lightHaptic());
-    await _stt.startListening(
-      listenFor: const Duration(seconds: 12),
-      onResult: (result) {
-        if (!mounted || _voiceEntry?.id != entry.id) return;
-        if (!result.isFinal) {
-          setState(() => _voiceStatus = result.text.trim().isEmpty
-              ? 'Dinleniyor…'
-              : 'Algılanan: ${result.text}. Komut henüz çalıştırılmadı.');
-          return;
-        }
-        _accessibility.finishSpeechInput();
-        setState(() => _voiceListening = false);
-        unawaited(_handleVoiceIntent(entry, result.text));
-      },
-      onError: (message) {
-        _accessibility.finishSpeechInput();
-        if (!mounted) return;
-        setState(() {
-          _voiceListening = false;
-          _voiceStatus = '$message. Dokunmatik düğmelerle devam edebilirsiniz.';
-        });
-        unawaited(_accessibility.errorHaptic());
-      },
-      onListeningStopped: () {
-        _accessibility.finishSpeechInput();
-        if (mounted) setState(() => _voiceListening = false);
-      },
-    );
-  }
-
-  Future<void> _handleVoiceIntent(FoodLogEntry entry, String transcript) async {
-    final confirmationActive = _voiceConfirmation.isActive;
-    final intent = _voiceParser.parse(
-      transcript,
-      context: confirmationActive
-          ? VoiceInteractionContext.historyDeleteConfirmation
-          : VoiceInteractionContext.history,
-    );
-    if (confirmationActive) {
-      final resolved = _voiceConfirmation.resolve(intent);
-      if (resolved == ContextualVoiceAction.deleteEntry) {
-        setState(() => _voiceStatus = 'Silme onaylandı.');
-        await _deleteEntryWithUndo(entry);
-        return;
-      }
-      final cancelled = !_voiceConfirmation.isActive;
-      setState(() => _voiceStatus = cancelled
-          ? 'Silme iptal edildi.'
-          : 'Silme yapılmadı. Onay için yalnız tam olarak “evet” deyin.');
-      return;
-    }
-    if (!intent.accepted) {
-      setState(() => _voiceStatus =
-          '${intent.rejectionReason} Dokunmatik düğmelerle devam edebilirsiniz.');
-      await _accessibility.lightHaptic();
-      return;
-    }
-    switch (intent.action!) {
-      case ContextualVoiceAction.listenEntry:
-        setState(() => _voiceStatus = 'Kayıt seslendiriliyor.');
-        await _accessibility.speak(entry.semanticLabel,
-            priority: TtsPriority.high, allowWhileScreenReaderActive: true);
-        break;
-      case ContextualVoiceAction.editEntry:
-        setState(() => _voiceStatus = 'Düzeltme formu açıldı.');
-        await _showEditDialog(entry);
-        break;
-      case ContextualVoiceAction.changeMeal:
-        setState(() => _voiceStatus = 'Öğün seçimi açıldı.');
-        await _showMealDialog(entry);
-        break;
-      case ContextualVoiceAction.setPortion:
-        final result =
-            await ref.read(historyControllerProvider.notifier).updateEntry(
-                  logId: entry.id,
-                  portionGrams: intent.portionGrams,
-                );
-        if (mounted) _showMessage(result.message);
-        break;
-      case ContextualVoiceAction.deleteEntry:
-        _voiceConfirmation.request(ContextualVoiceAction.deleteEntry);
-        setState(() => _voiceStatus =
-            '${entry.foodNameTr} kaydı silinecek. Mikrofon düğmesine tekrar basıp yalnız tam olarak “evet” deyin.');
-        await _accessibility.speakWarning(
-          '${entry.foodNameTr} kaydını silmek için mikrofon düğmesine tekrar basıp evet deyin.',
-        );
-        break;
-      case ContextualVoiceAction.today:
-        _speakSummary(ref.read(historyControllerProvider));
-        break;
-      case ContextualVoiceAction.back:
-        if (mounted) await Navigator.maybePop(context);
-        break;
-      case ContextualVoiceAction.cancel:
-        await _cancelVoiceInteraction();
-        break;
-      default:
-        setState(() => _voiceStatus = 'Bu komut geçmiş kaydında kullanılamaz.');
-    }
-  }
-
-  Future<void> _cancelVoiceInteraction() async {
-    if (_voiceListening) await _stt.cancelListening();
-    _accessibility.finishSpeechInput();
-    _voiceConfirmation.clear();
-    if (!mounted) return;
-    setState(() {
-      _voiceListening = false;
-      _voiceStatus = null;
-      _voiceEntry = null;
-    });
-  }
-
-  Future<void> _showEditDialog(FoodLogEntry entry) async {
-    final name = TextEditingController(text: entry.foodNameTr);
-    final portion =
-        TextEditingController(text: entry.portionG.toStringAsFixed(0));
-    var mealType = entry.mealType;
-    final submitted = await showDialog<bool>(
-      context: context,
-      builder: (dialogContext) => StatefulBuilder(
-        builder: (context, setDialogState) => AlertDialog(
-          title: Text('${entry.foodNameTr} kaydını düzelt'),
-          content: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const Text(
-                  'Besin adı etiketi düzeltilir; besin kaynağı sessizce değiştirilmez.',
-                ),
-                const SizedBox(height: 12),
-                TextField(
-                  key: const Key('history_edit_name'),
-                  controller: name,
-                  decoration:
-                      const InputDecoration(labelText: 'Türkçe besin adı'),
-                ),
-                TextField(
-                  key: const Key('history_edit_portion'),
-                  controller: portion,
-                  keyboardType:
-                      const TextInputType.numberWithOptions(decimal: true),
-                  decoration:
-                      const InputDecoration(labelText: 'Onaylı porsiyon, gram'),
-                ),
-                DropdownButtonFormField<String>(
-                  key: const Key('history_edit_meal'),
-                  initialValue: mealType,
-                  decoration: const InputDecoration(labelText: 'Öğün türü'),
-                  items: _mealItems,
-                  onChanged: (value) => setDialogState(() => mealType = value!),
-                ),
-              ],
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(dialogContext, false),
-              child: const Text('İptal'),
-            ),
-            FilledButton(
-              key: const Key('history_edit_save'),
-              onPressed: () => Navigator.pop(dialogContext, true),
-              child: const Text('Kaydet'),
-            ),
-          ],
-        ),
-      ),
-    );
-    if (submitted != true || !mounted) return;
-    final grams = double.tryParse(portion.text.replaceAll(',', '.'));
-    if (grams == null || !grams.isFinite || grams <= 0 || grams > 2000) {
-      _showMessage('Porsiyon 0 ile 2000 gram arasında olmalıdır.');
-      return;
-    }
-    final result =
-        await ref.read(historyControllerProvider.notifier).updateEntry(
-              logId: entry.id,
-              foodNameTr: name.text.trim(),
-              portionGrams: grams,
-              mealType: mealType,
-            );
-    if (mounted) _showMessage(result.message);
-  }
-
-  Future<void> _showMealDialog(FoodLogEntry entry) async {
-    final meal = await showDialog<String>(
-      context: context,
-      builder: (dialogContext) => SimpleDialog(
-        title: const Text('Öğün türünü seçin'),
-        children: _mealItems
-            .map((item) => SimpleDialogOption(
-                  onPressed: () => Navigator.pop(dialogContext, item.value),
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 8),
-                    child: Text((item.child as Text).data!),
-                  ),
-                ))
-            .toList(),
-      ),
-    );
-    if (meal == null || !mounted) return;
-    final result =
-        await ref.read(historyControllerProvider.notifier).updateEntry(
-              logId: entry.id,
-              mealType: meal,
-            );
-    if (mounted) _showMessage(result.message);
   }
 
   Future<void> _confirmAndDelete(FoodLogEntry entry) async {
     final confirmed = await showDialog<bool>(
       context: context,
-      builder: (dialogContext) => AlertDialog(
-        title: const Text('Kaydı sil'),
-        content: Text(
-          '${entry.foodNameTr} kaydını silmek istiyor musunuz? İşlem kısa süre içinde geri alınabilir.',
-        ),
+      builder: (context) => AlertDialog(
+        title: const Text('Kaydı Sil'),
+        content: Text('${entry.foodNameTr} silinsin mi?'),
         actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(dialogContext, false),
-            child: const Text('Vazgeç'),
-          ),
+          TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Vazgeç')),
           FilledButton(
             key: const Key('history_delete_confirm'),
-            onPressed: () => Navigator.pop(dialogContext, true),
+            onPressed: () => Navigator.pop(context, true),
+            style: FilledButton.styleFrom(backgroundColor: AppTheme.errorColor),
             child: const Text('Sil'),
           ),
         ],
       ),
     );
-    if (confirmed != true || !mounted) return;
-    await _deleteEntryWithUndo(entry);
+    if (confirmed == true) await _deleteWithUndo(entry);
   }
 
-  Future<void> _deleteEntryWithUndo(FoodLogEntry entry) async {
-    final result = await ref
-        .read(historyControllerProvider.notifier)
-        .deleteEntry(entry.id);
+  /// Siler ve geri alma sunar. Yanlış silme, ekran okuyucu kullanıcısı için
+  /// düzeltmesi en zor hatalardan biri; geri alma bu yüzden zorunlu.
+  Future<void> _deleteWithUndo(FoodLogEntry entry) async {
+    final controller = ref.read(historyControllerProvider.notifier);
+    final result = await controller.deleteEntry(entry.id);
     if (!mounted) return;
-    if (!result.isSuccess) {
-      _showMessage(result.message);
-      return;
-    }
+    _accessibility.speak(result.message, priority: TtsPriority.high);
+    if (!result.isSuccess) return;
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: const Text('Kayıt silindi.'),
+        content: Text('${entry.foodNameTr} silindi.'),
+        duration: const Duration(seconds: 8),
         action: SnackBarAction(
           label: 'Geri al',
           onPressed: () async {
-            final restored = await ref
-                .read(historyControllerProvider.notifier)
-                .restoreEntry(entry.id);
-            if (mounted) _showMessage(restored.message);
+            final restored = await controller.restoreEntry(entry.id);
+            if (!mounted) return;
+            _accessibility.speak(restored.message, priority: TtsPriority.high);
           },
         ),
       ),
     );
   }
 
-  void _showMessage(String message) {
-    ScaffoldMessenger.of(context)
-      ..hideCurrentSnackBar()
-      ..showSnackBar(SnackBar(content: Text(message)));
-    _accessibility.speak(message, priority: TtsPriority.normal);
+  Future<void> _editEntry(FoodLogEntry entry) async {
+    final result = await showDialog<_HistoryEditResult>(
+      context: context,
+      builder: (_) => _HistoryEditDialog(entry: entry),
+    );
+    if (result == null || !mounted) return;
+    final outcome = await ref
+        .read(historyControllerProvider.notifier)
+        .updateEntry(
+          logId: entry.id,
+          foodNameTr: result.foodNameTr,
+          portionGrams: result.portionGrams,
+        );
+    if (!mounted) return;
+    _accessibility.speak(outcome.message, priority: TtsPriority.high);
   }
-}
 
-const _mealItems = [
-  DropdownMenuItem(value: 'kahvalti', child: Text('Kahvaltı')),
-  DropdownMenuItem(value: 'ogle', child: Text('Öğle')),
-  DropdownMenuItem(value: 'aksam', child: Text('Akşam')),
-  DropdownMenuItem(value: 'atistirmalik', child: Text('Atıştırmalık')),
-];
-
-class _PeriodSelector extends StatelessWidget {
-  const _PeriodSelector({required this.selected, required this.onSelected});
-
-  final HistoryPeriod selected;
-  final ValueChanged<HistoryPeriod> onSelected;
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(12),
-      child: Row(
-        children: HistoryPeriod.values
-            .map((period) => Expanded(
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 3),
-                    child: Semantics(
-                      selected: selected == period,
-                      button: true,
-                      label: '${period.label} görünüm',
-                      child: ChoiceChip(
-                        label: Text(period.label),
-                        selected: selected == period,
-                        onSelected: (_) => onSelected(period),
-                      ),
-                    ),
-                  ),
-                ))
-            .toList(),
-      ),
+  /// Sesli düzeltme/silme. Silme iki aşamalıdır: önce komut, sonra ayrı bir
+  /// "evet" onayı. Tek adımda silmek yanlış tanımada veri kaybı demek olurdu.
+  Future<void> _voiceCommandFor(FoodLogEntry entry) async {
+    final pending = _pendingVoiceDelete[entry.id] ?? false;
+    await _stt.startListening(
+      onResult: (result) {
+        if (!result.isFinal) {
+          if (!mounted) return;
+          setState(() => _voiceStatus =
+              'Komut henüz çalıştırılmadı; lütfen tamamlayın.');
+          return;
+        }
+        final intent = _voiceParser.parse(
+          result.text,
+          context: pending
+              ? VoiceInteractionContext.historyDeleteConfirmation
+              : VoiceInteractionContext.history,
+        );
+        if (!mounted) return;
+        if (pending) {
+          if (intent.action == ContextualVoiceAction.yes) {
+            _pendingVoiceDelete.remove(entry.id);
+            setState(() => _voiceStatus = null);
+            unawaited(_deleteWithUndo(entry));
+            return;
+          }
+          _pendingVoiceDelete.remove(entry.id);
+          setState(() => _voiceStatus = 'Silme iptal edildi.');
+          return;
+        }
+        if (intent.action == ContextualVoiceAction.deleteEntry) {
+          _pendingVoiceDelete[entry.id] = true;
+          setState(() => _voiceStatus =
+              'Silmeyi onaylamak için: Mikrofon düğmesine tekrar basıp '
+              'evet deyin.');
+          _accessibility.speak(_voiceStatus!, priority: TtsPriority.high);
+          return;
+        }
+        setState(() =>
+            _voiceStatus = 'Komut henüz çalıştırılmadı; anlaşılamadı.');
+      },
+      onError: (_) {
+        if (!mounted) return;
+        setState(() => _voiceStatus = 'Komut henüz çalıştırılmadı; ses hatası.');
+      },
     );
   }
 }
 
+/// Çevrim dışı önbellek uyarısı. Kullanıcı gördüğü verinin güncel olmadığını
+/// bilmeli; ekran okuyucu için liveRegion olarak duyurulur.
 class _OfflineBanner extends StatelessWidget {
-  const _OfflineBanner({required this.state});
+  const _OfflineBanner({required this.message, this.cachedAt});
 
-  final HistoryState state;
+  final String message;
+  final DateTime? cachedAt;
 
   @override
   Widget build(BuildContext context) {
-    final cachedAt = state.cachedAt?.toLocal();
-    final time = cachedAt == null
+    final theme = Theme.of(context);
+    final stamp = cachedAt == null
         ? ''
-        : ' Son güncelleme ${cachedAt.hour.toString().padLeft(2, '0')}:'
-            '${cachedAt.minute.toString().padLeft(2, '0')}.';
+        : ' Son güncelleme: '
+            '${cachedAt!.toLocal().hour.toString().padLeft(2, '0')}:'
+            '${cachedAt!.toLocal().minute.toString().padLeft(2, '0')}.';
     return Semantics(
       liveRegion: true,
-      label: 'Çevrim dışı önbellek gösteriliyor.$time',
+      container: true,
       child: Container(
-        color: Colors.amber.shade100,
+        width: double.infinity,
+        margin: const EdgeInsets.fromLTRB(16, 0, 16, 8),
         padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: theme.colorScheme.tertiaryContainer,
+          borderRadius: BorderRadius.circular(12),
+        ),
         child: Row(
           children: [
-            const Icon(Icons.cloud_off),
+            ExcludeSemantics(
+              child: Icon(Icons.cloud_off_rounded,
+                  size: 20, color: theme.colorScheme.onTertiaryContainer),
+            ),
             const SizedBox(width: 8),
-            Expanded(child: Text('Çevrim dışı kayıtlar gösteriliyor.$time')),
+            Expanded(
+              child: Text(
+                '$message$stamp',
+                style:
+                    TextStyle(color: theme.colorScheme.onTertiaryContainer),
+              ),
+            ),
           ],
         ),
       ),
@@ -635,41 +415,140 @@ class _OfflineBanner extends StatelessWidget {
   }
 }
 
-class _PeriodSummary extends StatelessWidget {
-  const _PeriodSummary({required this.history, required this.period});
+class _HistoryEditResult {
+  const _HistoryEditResult({this.foodNameTr, this.portionGrams});
+  final String? foodNameTr;
+  final double? portionGrams;
+}
 
-  final FoodHistoryResult history;
-  final HistoryPeriod period;
+/// Kayıt düzeltme diyaloğu. Controller'lar burada tutulur ki diyalog kapanma
+/// animasyonu sürerken atılıp "used after disposed" hatası vermesinler.
+class _HistoryEditDialog extends StatefulWidget {
+  const _HistoryEditDialog({required this.entry});
+
+  final FoodLogEntry entry;
+
+  @override
+  State<_HistoryEditDialog> createState() => _HistoryEditDialogState();
+}
+
+class _HistoryEditDialogState extends State<_HistoryEditDialog> {
+  late final TextEditingController _nameController =
+      TextEditingController(text: widget.entry.foodNameTr);
+  late final TextEditingController _portionController = TextEditingController(
+    text: widget.entry.portionValue.toStringAsFixed(0),
+  );
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _portionController.dispose();
+    super.dispose();
+  }
+
+  void _save() {
+    final name = _nameController.text.trim();
+    final portion =
+        double.tryParse(_portionController.text.trim().replaceAll(',', '.'));
+    Navigator.pop(
+      context,
+      _HistoryEditResult(
+        foodNameTr: name.isEmpty ? null : name,
+        portionGrams:
+            (portion != null && portion > 0 && portion <= 2000) ? portion : null,
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
-    final label =
-        '${period.label} özet: ${history.totalLogCount} onaylı kayıt, '
-        'toplam ${history.totalCalories.toStringAsFixed(0)} kalori, '
-        'günlük ortalama ${history.averageDailyCalories.toStringAsFixed(0)} kalori. '
-        'Besin değerleri tahminidir; tıbbi öneri değildir.';
-    return Semantics(
-      label: label,
-      container: true,
-      child: ExcludeSemantics(
-        child: Card(
-          margin: const EdgeInsets.fromLTRB(16, 4, 16, 8),
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text('${period.label} takip özeti',
-                    style: Theme.of(context).textTheme.titleMedium),
-                const SizedBox(height: 8),
-                Text('${history.totalLogCount} kayıt • '
-                    '${history.totalCalories.toStringAsFixed(0)} kcal'),
-                Text('Günlük ortalama '
-                    '${history.averageDailyCalories.toStringAsFixed(0)} kcal'),
-                const Text('Tahmini bilgi; tıbbi öneri değildir.'),
-              ],
+    return AlertDialog(
+      title: const Text('Kaydı Düzelt'),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Semantics(
+            label: 'Besin adı düzeltme alanı',
+            textField: true,
+            child: TextField(
+              key: const Key('history_edit_name'),
+              controller: _nameController,
+              decoration: const InputDecoration(labelText: 'Besin adı'),
             ),
           ),
+          const SizedBox(height: 12),
+          Semantics(
+            label: 'Porsiyon gram düzeltme alanı',
+            textField: true,
+            child: TextField(
+              key: const Key('history_edit_portion'),
+              controller: _portionController,
+              keyboardType: const TextInputType.numberWithOptions(),
+              decoration: const InputDecoration(
+                labelText: 'Porsiyon (gram)',
+                helperText: '0 ile 2000 gram arasında olmalıdır.',
+              ),
+            ),
+          ),
+        ],
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: const Text('Vazgeç'),
+        ),
+        FilledButton(
+          key: const Key('history_edit_save'),
+          onPressed: _save,
+          child: const Text('Kaydet'),
+        ),
+      ],
+    );
+  }
+}
+
+class _PeriodSelector extends StatelessWidget {
+  final HistoryPeriod selected;
+  final ValueChanged<HistoryPeriod> onSelected;
+  const _PeriodSelector({required this.selected, required this.onSelected});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      child: Container(
+        padding: const EdgeInsets.all(4),
+        decoration: BoxDecoration(
+          color: theme.colorScheme.surface,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: theme.colorScheme.outline.withOpacity(0.5)),
+        ),
+        child: Row(
+          children: HistoryPeriod.values.map((period) {
+            final isSelected = selected == period;
+            return Expanded(
+              child: GestureDetector(
+                onTap: () => onSelected(period),
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 200),
+                  padding: const EdgeInsets.symmetric(vertical: 10),
+                  decoration: BoxDecoration(
+                    color: isSelected ? theme.colorScheme.primary : Colors.transparent,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Text(
+                    period.label,
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: isSelected ? Colors.white : theme.colorScheme.onSurfaceVariant,
+                      fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                    ),
+                  ),
+                ),
+              ),
+            );
+          }).toList(),
         ),
       ),
     );
@@ -677,161 +556,168 @@ class _PeriodSummary extends StatelessWidget {
 }
 
 class _DailySummaryCard extends StatelessWidget {
-  const _DailySummaryCard({required this.day});
-
   final DailyLog day;
+  const _DailySummaryCard({required this.day});
 
   @override
   Widget build(BuildContext context) {
-    final targetText = day.calorieTarget > 0
-        ? day.remainingCalories >= 0
-            ? 'Kullanıcının takip hedefinde '
-                '${day.remainingCalories.toStringAsFixed(0)} kcal alan kaldı.'
-            : 'Kullanıcının takip hedefinin '
-                '${day.remainingCalories.abs().toStringAsFixed(0)} kcal üzerinde. '
-                'Bu tıbbi değerlendirme değildir.'
-        : 'Kişisel takip hedefi belirlenmemiş.';
-    final date = '${day.date.day.toString().padLeft(2, '0')}.'
-        '${day.date.month.toString().padLeft(2, '0')}.${day.date.year}';
-    final semantics = '$date özeti. ${day.mealCount} kayıt, '
-        '${day.totalCalories.toStringAsFixed(0)} kalori, '
-        '${day.totalProtein.toStringAsFixed(1)} gram protein, '
-        '${day.totalCarbs.toStringAsFixed(1)} gram karbonhidrat, '
-        '${day.totalFat.toStringAsFixed(1)} gram yağ. $targetText';
-    return Semantics(
-      label: semantics,
-      container: true,
-      child: ExcludeSemantics(
-        child: Container(
-          margin: const EdgeInsets.fromLTRB(16, 12, 16, 6),
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: AppTheme.primaryColor,
-            borderRadius: BorderRadius.circular(16),
-          ),
-          child: Column(
+    final theme = Theme.of(context);
+    final dateStr = '${day.date.day} ${_getMonthName(day.date.month)}';
+
+    return Padding(
+      padding: const EdgeInsets.only(top: 16, bottom: 12),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Flexible(
+            child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
             children: [
-              Text(date, style: const TextStyle(color: Colors.white)),
-              const SizedBox(height: 8),
+              Text(dateStr, style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
               Text(
-                  '${day.totalCalories.toStringAsFixed(0)} kcal • '
-                  '${day.mealCount} kayıt',
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                  )),
-              Text(
-                  'P ${day.totalProtein.toStringAsFixed(1)} g • '
-                  'K ${day.totalCarbs.toStringAsFixed(1)} g • '
-                  'Y ${day.totalFat.toStringAsFixed(1)} g',
-                  style: const TextStyle(color: Colors.white)),
-              const SizedBox(height: 8),
-              Text(targetText, style: const TextStyle(color: Colors.white)),
+                '${day.mealCount} kayıt • '
+                '${day.totalCalories.toStringAsFixed(0)} kcal',
+                style: theme.textTheme.bodySmall,
+              ),
             ],
+            ),
           ),
-        ),
+          const SizedBox(width: 8),
+          Flexible(
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              decoration: BoxDecoration(
+                color: theme.colorScheme.primary.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: Text(
+                'Toplam ${day.totalCalories.toStringAsFixed(0)} kcal',
+                textAlign: TextAlign.end,
+                style: TextStyle(color: theme.colorScheme.primary, fontWeight: FontWeight.bold),
+              ),
+            ),
+          ),
+        ],
       ),
     );
+  }
+
+  String _getMonthName(int month) {
+    const names = ['Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran', 'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık'];
+    return names[month - 1];
   }
 }
 
 class _FoodLogCard extends StatelessWidget {
+  final FoodLogEntry entry;
+  final VoidCallback onDelete;
+  final VoidCallback onEdit;
+  final VoidCallback onVoice;
   const _FoodLogCard({
     required this.entry,
-    required this.onListen,
-    required this.onEdit,
-    required this.onChangeMeal,
     required this.onDelete,
+    required this.onEdit,
     required this.onVoice,
-    required this.voiceListening,
   });
-
-  final FoodLogEntry entry;
-  final VoidCallback onListen;
-  final VoidCallback onEdit;
-  final VoidCallback onChangeMeal;
-  final VoidCallback onDelete;
-  final VoidCallback onVoice;
-  final bool voiceListening;
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      key: Key('food_log_${entry.id}'),
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 5),
-      child: Padding(
-        padding: const EdgeInsets.all(12),
+    final theme = Theme.of(context);
+    // Kart, ekran okuyucuya tek anlamlı birim olarak sunulur: parça parça
+    // gezinmek yerine "Elma, 150 gram, 78 kalori, ... Kullanıcı onaylı."
+    // şeklinde tek seferde okunur. Eylem butonları ayrı düğüm kalır.
+    return Semantics(
+      container: true,
+      explicitChildNodes: true,
+      label: entry.semanticLabel,
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 12),
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: theme.colorScheme.surface,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: theme.colorScheme.outline.withOpacity(0.3)),
+        ),
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Semantics(
-              label: entry.semanticLabel,
-              container: true,
-              child: ExcludeSemantics(
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Icon(Icons.restaurant, size: 34),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(entry.foodNameTr,
-                              style: Theme.of(context).textTheme.titleMedium),
-                          Text('${entry.portionLabel} • ${entry.mealTypeTr}'),
-                          Text(
-                              '${entry.nutrients.protein.toStringAsFixed(1)} g protein • '
-                              '${entry.nutrients.carbs.toStringAsFixed(1)} g karbonhidrat • '
-                              '${entry.nutrients.fat.toStringAsFixed(1)} g yağ'),
-                          Text('${entry.localDateTimeLabel} • '
-                              '${entry.recognitionSourceTr}'),
-                          Text(entry.statusLabel),
-                        ],
-                      ),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                ExcludeSemantics(
+                  child: Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: _getMealColor(entry.mealType).withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(12),
                     ),
-                    Text('${entry.calories.toStringAsFixed(0)} kcal'),
-                  ],
+                    child: Icon(_getMealIcon(entry.mealType),
+                        color: _getMealColor(entry.mealType)),
+                  ),
                 ),
-              ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(entry.foodNameTr,
+                          style: theme.textTheme.titleMedium
+                              ?.copyWith(fontSize: 16)),
+                      Text('${entry.portionLabel} • ${entry.mealTypeTr}',
+                          style: theme.textTheme.bodySmall),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Text('${entry.calories.toStringAsFixed(0)} kcal',
+                    style: const TextStyle(fontWeight: FontWeight.bold)),
+              ],
             ),
-            const Divider(),
+            const SizedBox(height: 8),
+            // Kaynak ve doğrulama durumu: kullanıcı kalorinin nereden geldiğini
+            // ve onaylanıp onaylanmadığını bilmeli.
             Wrap(
-              alignment: WrapAlignment.spaceEvenly,
-              spacing: 4,
+              spacing: 8,
+              runSpacing: 4,
+              crossAxisAlignment: WrapCrossAlignment.center,
+              children: [
+                Text('Kaynak: ${entry.recognitionSourceTr}',
+                    style: theme.textTheme.labelSmall),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 8, vertical: 2),
+                  decoration: BoxDecoration(
+                    color: theme.colorScheme.secondaryContainer,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Text(entry.statusLabel,
+                      style: theme.textTheme.labelSmall?.copyWith(
+                          color: theme.colorScheme.onSecondaryContainer)),
+                ),
+              ],
+            ),
+            const SizedBox(height: 4),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
               children: [
                 IconButton(
-                  key: Key('listen_${entry.id}'),
-                  tooltip: '${entry.foodNameTr} kaydını dinle',
-                  onPressed: onListen,
-                  icon: const Icon(Icons.volume_up),
+                  key: Key('voice_${entry.id}'),
+                  icon: const Icon(Icons.mic_none_rounded, size: 20),
+                  tooltip: 'Sesli komut',
+                  onPressed: onVoice,
                 ),
                 IconButton(
                   key: Key('edit_${entry.id}'),
+                  icon: const Icon(Icons.edit_outlined, size: 20),
                   tooltip: '${entry.foodNameTr} kaydını düzelt',
                   onPressed: onEdit,
-                  icon: const Icon(Icons.edit),
-                ),
-                IconButton(
-                  key: Key('meal_${entry.id}'),
-                  tooltip: '${entry.foodNameTr} öğün türünü değiştir',
-                  onPressed: onChangeMeal,
-                  icon: const Icon(Icons.schedule),
                 ),
                 IconButton(
                   key: Key('delete_${entry.id}'),
+                  icon: const Icon(Icons.delete_outline, size: 20),
                   tooltip: '${entry.foodNameTr} kaydını sil',
                   onPressed: onDelete,
-                  icon: const Icon(Icons.delete_outline),
-                ),
-                IconButton(
-                  key: Key('voice_${entry.id}'),
-                  tooltip: voiceListening
-                      ? '${entry.foodNameTr} sesli komutunu durdur'
-                      : '${entry.foodNameTr} kaydı için sesli eylemler',
-                  onPressed: onVoice,
-                  icon: Icon(voiceListening ? Icons.mic : Icons.mic_none),
                 ),
               ],
             ),
@@ -839,5 +725,23 @@ class _FoodLogCard extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  IconData _getMealIcon(String type) {
+    switch (type) {
+      case 'kahvalti': return Icons.wb_sunny_outlined;
+      case 'ogle': return Icons.lunch_dining_outlined;
+      case 'aksam': return Icons.dark_mode_outlined;
+      default: return Icons.local_pizza_outlined;
+    }
+  }
+
+  Color _getMealColor(String type) {
+    switch (type) {
+      case 'kahvalti': return Colors.orange;
+      case 'ogle': return Colors.blue;
+      case 'aksam': return Colors.indigo;
+      default: return Colors.green;
+    }
   }
 }

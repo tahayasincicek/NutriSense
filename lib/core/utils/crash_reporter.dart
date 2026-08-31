@@ -11,9 +11,13 @@
 import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import '../config/app_config.dart';
 // Aşağıdaki örnek importlar bilinçli olarak devre dışıdır:
 // import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 // import 'package:firebase_core/firebase_core.dart';
+
+bool get _diagnosticsEnabled =>
+    kDebugMode && AppConfig.diagnosticLoggingEnabled;
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // CRASH REPORTER SERVİSİ
@@ -64,7 +68,7 @@ class CrashReporter {
       // crashlytics.recordFlutterFatalError(details);
 
       // Debug modda konsola da yaz
-      if (kDebugMode) {
+      if (_diagnosticsEnabled) {
         FlutterError.dumpErrorToConsole(details);
       }
 
@@ -88,7 +92,7 @@ class CrashReporter {
         // Firebase:
         // crashlytics.recordError(error, stackTrace);
 
-        if (kDebugMode) {
+        if (_diagnosticsEnabled) {
           debugPrint('🔴 Yakalanmamış hata: $error');
           debugPrint('$stackTrace');
         }
@@ -110,7 +114,7 @@ class CrashReporter {
     // Firebase:
     // FirebaseCrashlytics.instance.setCustomKey('current_screen', screenName);
 
-    if (kDebugMode) {
+    if (_diagnosticsEnabled) {
       debugPrint('📱 Ekran: $screenName');
     }
   }
@@ -126,7 +130,7 @@ class CrashReporter {
     String? reason,
     bool fatal = false,
   }) {
-    if (!_initialized && !kDebugMode) return;
+    if (!_initialized && !_diagnosticsEnabled) return;
 
     // Firebase:
     // FirebaseCrashlytics.instance.recordError(
@@ -180,7 +184,7 @@ class CrashReporter {
     // Firebase:
     // FirebaseCrashlytics.instance.log(message);
 
-    if (kDebugMode) {
+    if (_diagnosticsEnabled) {
       debugPrint('🍞 Breadcrumb: $message ${data ?? ""}');
     }
   }
@@ -190,7 +194,7 @@ class CrashReporter {
   // ─────────────────────────────────────────────────────────────────────────
 
   void _logErrorContext(String error, {String? reason}) {
-    if (kDebugMode) {
+    if (_diagnosticsEnabled) {
       debugPrint('═══ HATA RAPORU ═══');
       debugPrint('  Ekran: $_currentScreen');
       debugPrint('  Versiyon: $_appVersion');

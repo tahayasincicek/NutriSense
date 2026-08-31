@@ -6,8 +6,10 @@
 // ve TTS geri bildirimi olan özel buton.
 // =============================================================================
 
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import '../../core/constants/app_constants.dart';
+import '../../core/theme/app_theme.dart';
 import '../../core/utils/accessibility_utils.dart';
 
 /// Erişilebilir buton — tüm butonlar bu widget üzerinden oluşturulmalı.
@@ -83,24 +85,6 @@ class AccessibleButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    return Semantics(
-      container: true,
-      excludeSemantics: true,
-      label: semanticLabel ?? label,
-      hint: semanticHint ?? 'Etkinleştirmek için çift dokunun',
-      button: true,
-      enabled: onPressed != null && !isLoading,
-      child: ConstrainedBox(
-        constraints: BoxConstraints(
-          minWidth: fullWidth ? double.infinity : A11yConstants.minTouchTarget,
-          minHeight: A11yConstants.minTouchTarget + 8,
-        ),
-        child: _buildButton(context, theme),
-      ),
-    );
-  }
-
-  Widget _buildButton(BuildContext context, ThemeData theme) {
     final effectiveOnPressed = isLoading
         ? null
         : () {
@@ -108,6 +92,26 @@ class AccessibleButton extends StatelessWidget {
             onPressed?.call();
           };
 
+    return Semantics(
+      container: true,
+      excludeSemantics: true,
+      label: semanticLabel ?? label,
+      hint: semanticHint ?? 'Etkinleştirmek için çift dokunun',
+      button: true,
+      enabled: onPressed != null && !isLoading,
+      onTap: effectiveOnPressed,
+      onLongPress: onLongPress,
+      child: ConstrainedBox(
+        constraints: BoxConstraints(
+          minWidth: fullWidth ? double.infinity : A11yConstants.minTouchTarget,
+          minHeight: A11yConstants.minTouchTarget + 8,
+        ),
+        child: _buildButton(context, theme, effectiveOnPressed),
+      ),
+    );
+  }
+
+  Widget _buildButton(BuildContext context, ThemeData theme, VoidCallback? effectiveOnPressed) {
     final child = isLoading
         ? SizedBox(
             width: 24,
@@ -139,26 +143,93 @@ class AccessibleButton extends StatelessWidget {
 
     switch (type) {
       case AccessibleButtonType.filled:
-        return ElevatedButton(
-          onPressed: effectiveOnPressed,
-          onLongPress: onLongPress,
-          style: ElevatedButton.styleFrom(
-            backgroundColor: backgroundColor,
-            foregroundColor: foregroundColor,
+        return Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(AppTheme.buttonRadius),
+            gradient: LinearGradient(
+              colors: [
+                backgroundColor ?? theme.colorScheme.primary,
+                (backgroundColor ?? theme.colorScheme.primary).withBlue(50).withGreen(180),
+              ],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: (backgroundColor ?? theme.colorScheme.primary).withOpacity(0.3),
+                blurRadius: 12,
+                offset: const Offset(0, 4),
+              ),
+            ],
           ),
-          child: child,
+          child: Material(
+            color: Colors.transparent,
+            child: InkWell(
+              onTap: effectiveOnPressed,
+              onLongPress: onLongPress,
+              borderRadius: BorderRadius.circular(AppTheme.buttonRadius),
+              child: DefaultTextStyle(
+                style: theme.textTheme.labelLarge!.copyWith(
+                  color: foregroundColor ?? theme.colorScheme.onPrimary,
+                ),
+                child: IconTheme(
+                  data: IconThemeData(
+                    color: foregroundColor ?? theme.colorScheme.onPrimary,
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 16),
+                    child: child,
+                  ),
+                ),
+              ),
+            ),
+          ),
         );
       case AccessibleButtonType.outlined:
-        return OutlinedButton(
-          onPressed: effectiveOnPressed,
-          onLongPress: onLongPress,
-          style: OutlinedButton.styleFrom(
-            foregroundColor: foregroundColor,
-            side: backgroundColor != null
-                ? BorderSide(color: backgroundColor!, width: 2)
-                : null,
+        return Container(
+          decoration: BoxDecoration(
+            color: theme.colorScheme.surface.withOpacity(0.3),
+            borderRadius: BorderRadius.circular(AppTheme.buttonRadius),
+            border: Border.all(
+              color: foregroundColor?.withOpacity(0.5) ?? theme.colorScheme.primary.withOpacity(0.5),
+              width: 1.5,
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: (foregroundColor ?? theme.colorScheme.primary).withOpacity(0.08),
+                blurRadius: 10,
+                offset: const Offset(0, 2),
+              ),
+            ],
           ),
-          child: child,
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(AppTheme.buttonRadius),
+            child: BackdropFilter(
+              filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+              child: Material(
+                color: Colors.transparent,
+                child: InkWell(
+                  onTap: effectiveOnPressed,
+                  onLongPress: onLongPress,
+                  borderRadius: BorderRadius.circular(AppTheme.buttonRadius),
+                  child: DefaultTextStyle(
+                    style: theme.textTheme.labelLarge!.copyWith(
+                      color: foregroundColor ?? theme.colorScheme.primary,
+                    ),
+                    child: IconTheme(
+                      data: IconThemeData(
+                        color: foregroundColor ?? theme.colorScheme.primary,
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 16),
+                        child: child,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
         );
       case AccessibleButtonType.text:
         return TextButton(

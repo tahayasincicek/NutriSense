@@ -1,391 +1,164 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 
-/// Visual tokens adapted from the referenced Nutrition App Figma community file.
-///
-/// The source uses a monochrome palette, white surfaces, 40% black secondary
-/// content, fine separators, compact Inter typography and small-radius cards.
-/// Touch targets and readable text sizes remain larger than the source mockup so
-/// the existing accessibility contract is not weakened.
+/// NutriSense Modern & Premium Theme
+/// Focused on clarity, depth (glassmorphism), and high-end typography.
 class AppTheme {
   AppTheme._();
 
-  static const Color primaryColor = Color(0xFF111111);
-  static const Color primaryLight = Color(0xFF4D4D4D);
-  static const Color primaryDark = Color(0xFF000000);
+  // --- Brand Colors (Modern Emerald & Slate Palette) ---
+  static const Color primaryColor = Color(0xFF10B981); // Emerald 500
 
-  static const Color accentColor = Color(0xFF666666);
-  static const Color accentLight = Color(0xFF8A8A8A);
+  /// Beyaz metin taşıyan yüzeylerde kullanılır (buton dolgusu, seçili sekme).
+  ///
+  /// Emerald 600 (#059669) beyaza karşı yalnızca 3.14:1 veriyordu; WCAG AA'nın
+  /// gövde metni için istediği 4.5:1'i karşılamıyordu. Emerald 800 ile aynı
+  /// renk ailesinde kalıp 4.5:1 eşiğinin üstüne çıkıyoruz.
+  static const Color primaryDark = Color(0xFF065F46);  // Emerald 800
+  static const Color primaryLight = Color(0xFFD1FAE5); // Emerald 100
 
-  static const Color successColor = Color(0xFF2E6A45);
-  static const Color warningColor = Color(0xFF8A5700);
-  static const Color errorColor = Color(0xFFB3261E);
-  static const Color infoColor = Color(0xFF315C75);
+  static const Color secondaryColor = Color(0xFF6366F1); // Indigo 500 (for accents)
+  
+  static const Color successColor = Color(0xFF10B981);
+  static const Color warningColor = Color(0xFFF59E0B); // Amber 500
+  static const Color errorColor = Color(0xFFEF4444);   // Red 500
+  static const Color infoColor = Color(0xFF3B82F6);    // Blue 500
 
-  static const Color lightBackground = Color(0xFFFFFFFF);
+  // Light Mode Colors
+  static const Color lightBg = Color(0xFFF8FAFC);      // Slate 50
   static const Color lightSurface = Color(0xFFFFFFFF);
-  static const Color lightOnSurface = Color(0xFF111111);
-  static const Color lightOnSurfaceVariant = Color(0xFF737373);
-  static const Color lightDivider = Color(0xFFD8D8D8);
-  static const Color lightMuted = Color(0xFFF5F5F5);
+  static const Color lightOnSurface = Color(0xFF0F172A); // Slate 900
+  static const Color lightOnSurfaceMuted = Color(0xFF64748B); // Slate 500
+  static const Color lightDivider = Color(0xFFE2E8F0);  // Slate 200
 
-  static const Color darkBackground = Color(0xFF0F0F0F);
-  static const Color darkSurface = Color(0xFF181818);
-  static const Color darkOnSurface = Color(0xFFF7F7F7);
-  static const Color darkOnSurfaceVariant = Color(0xFFAAAAAA);
-  static const Color darkDivider = Color(0xFF3D3D3D);
+  // Dark Mode Colors
+  static const Color darkBg = Color(0xFF020617);       // Slate 950
+  static const Color darkSurface = Color(0xFF0F172A);  // Slate 900
+  static const Color darkOnSurface = Color(0xFFF1F5F9); // Slate 100
+  static const Color darkOnSurfaceMuted = Color(0xFF94A3B8); // Slate 400
+  static const Color darkDivider = Color(0xFF1E293B);   // Slate 800
 
-  /// Figma cards use a 5 px radius on a 220 px artboard. At normal mobile
-  /// scale that corresponds to approximately 8 px.
-  static const double cardRadius = 8;
-  static const double controlRadius = 8;
-  static const double sheetRadius = 24;
-
-  static TextTheme _textTheme(Color text, Color muted) => TextTheme(
-        displayLarge: TextStyle(
-          fontSize: 34,
-          height: 1.12,
-          fontWeight: FontWeight.w700,
-          letterSpacing: -0.8,
-          color: text,
-        ),
-        displayMedium: TextStyle(
-          fontSize: 28,
-          height: 1.16,
-          fontWeight: FontWeight.w700,
-          letterSpacing: -0.5,
-          color: text,
-        ),
-        displaySmall: TextStyle(
-          fontSize: 24,
-          height: 1.2,
-          fontWeight: FontWeight.w700,
-          letterSpacing: -0.3,
-          color: text,
-        ),
-        headlineLarge: TextStyle(
-          fontSize: 24,
-          height: 1.22,
-          fontWeight: FontWeight.w700,
-          letterSpacing: -0.35,
-          color: text,
-        ),
-        headlineMedium: TextStyle(
-          fontSize: 22,
-          height: 1.25,
-          fontWeight: FontWeight.w700,
-          letterSpacing: -0.2,
-          color: text,
-        ),
-        headlineSmall: TextStyle(
-          fontSize: 20,
-          height: 1.3,
-          fontWeight: FontWeight.w700,
-          color: text,
-        ),
-        titleLarge: TextStyle(
-          fontSize: 20,
-          height: 1.3,
-          fontWeight: FontWeight.w700,
-          letterSpacing: -0.15,
-          color: text,
-        ),
-        titleMedium: TextStyle(
-          fontSize: 17,
-          height: 1.35,
-          fontWeight: FontWeight.w600,
-          color: text,
-        ),
-        titleSmall: TextStyle(
-          fontSize: 15,
-          height: 1.35,
-          fontWeight: FontWeight.w600,
-          color: text,
-        ),
-        bodyLarge: TextStyle(
-          fontSize: 17,
-          height: 1.5,
-          fontWeight: FontWeight.w400,
-          color: text,
-        ),
-        bodyMedium: TextStyle(
-          fontSize: 15,
-          height: 1.48,
-          fontWeight: FontWeight.w400,
-          color: text,
-        ),
-        bodySmall: TextStyle(
-          fontSize: 13,
-          height: 1.45,
-          fontWeight: FontWeight.w400,
-          color: muted,
-        ),
-        labelLarge: TextStyle(
-          fontSize: 15,
-          height: 1.3,
-          fontWeight: FontWeight.w600,
-          letterSpacing: 0.1,
-          color: text,
-        ),
-        labelMedium: TextStyle(
-          fontSize: 13,
-          height: 1.3,
-          fontWeight: FontWeight.w600,
-          color: text,
-        ),
-        labelSmall: TextStyle(
-          fontSize: 12,
-          height: 1.3,
-          fontWeight: FontWeight.w500,
-          color: muted,
-        ),
-      );
+  // Radii
+  static const double cardRadius = 24.0;
+  static const double buttonRadius = 16.0;
+  static const double inputRadius = 16.0;
 
   static ThemeData get lightTheme => _buildTheme(Brightness.light);
-
   static ThemeData get darkTheme => _buildTheme(Brightness.dark);
 
   static ThemeData _buildTheme(Brightness brightness) {
-    final dark = brightness == Brightness.dark;
-    final background = dark ? darkBackground : lightBackground;
-    final surface = dark ? darkSurface : lightSurface;
-    final onSurface = dark ? darkOnSurface : lightOnSurface;
-    final muted = dark ? darkOnSurfaceVariant : lightOnSurfaceVariant;
-    final divider = dark ? darkDivider : lightDivider;
-    final primary = dark ? darkOnSurface : primaryColor;
-    final onPrimary = dark ? darkBackground : Colors.white;
-    final fieldFill = dark ? const Color(0xFF222222) : lightMuted;
+    final isDark = brightness == Brightness.dark;
+    final bg = isDark ? darkBg : lightBg;
+    final surface = isDark ? darkSurface : lightSurface;
+    final onSurface = isDark ? darkOnSurface : lightOnSurface;
+    final muted = isDark ? darkOnSurfaceMuted : lightOnSurfaceMuted;
+    final divider = isDark ? darkDivider : lightDivider;
 
-    final scheme = ColorScheme.fromSeed(
+    // Dolgu renklerinin üstündeki metin WCAG AA (4.5:1) eşiğini geçmeli.
+    //
+    // Koyu temada `primary` parlak Emerald 500'dür; koyu yüzeyde vurgu
+    // rengi olarak doğru seçim (7:1 kontrast verir) ama üstüne beyaz metin
+    // konamaz (2.54:1). Bu yüzden koyu temada onPrimary siyah, aydınlık
+    // temada beyazdır. Aynı gerekçeyle hata dolgusu üstünde de koyu metin
+    // kullanılır: Red 500 üstüne beyaz yalnızca 3.76:1 verir.
+    final onPrimaryColor = isDark ? const Color(0xFF002014) : Colors.white;
+
+    final colorScheme = ColorScheme.fromSeed(
       seedColor: primaryColor,
       brightness: brightness,
-      primary: primary,
+      primary: isDark ? primaryColor : primaryDark,
+      onPrimary: onPrimaryColor,
+      secondary: secondaryColor,
       surface: surface,
-      error: dark ? const Color(0xFFFFB4AB) : errorColor,
-    ).copyWith(
-      onPrimary: onPrimary,
       onSurface: onSurface,
-      surfaceContainer: fieldFill,
+      error: errorColor,
+      onError: const Color(0xFF2B0000),
       outline: divider,
-      outlineVariant: divider,
     );
 
-    final textTheme = _textTheme(onSurface, muted);
-    final base = ThemeData(
+    // Using Google Fonts for a more premium feel (Inter or Plus Jakarta Sans)
+    final textTheme = GoogleFonts.plusJakartaSansTextTheme(
+      TextTheme(
+        displayLarge: TextStyle(fontWeight: FontWeight.w800, color: onSurface, letterSpacing: -1),
+        displayMedium: TextStyle(fontWeight: FontWeight.w800, color: onSurface, letterSpacing: -0.5),
+        displaySmall: TextStyle(fontWeight: FontWeight.w700, color: onSurface),
+        headlineLarge: TextStyle(fontWeight: FontWeight.w700, color: onSurface),
+        headlineMedium: TextStyle(fontWeight: FontWeight.w700, color: onSurface),
+        titleLarge: TextStyle(fontWeight: FontWeight.w600, color: onSurface),
+        titleMedium: TextStyle(fontWeight: FontWeight.w600, color: onSurface),
+        bodyLarge: TextStyle(color: onSurface, fontSize: 16),
+        bodyMedium: TextStyle(color: onSurface, fontSize: 14),
+        bodySmall: TextStyle(color: muted, fontSize: 12),
+        labelLarge: TextStyle(fontWeight: FontWeight.w600, letterSpacing: 0.2),
+      ),
+    );
+
+    return ThemeData(
       useMaterial3: true,
       brightness: brightness,
-      fontFamily: 'Inter',
-      colorScheme: scheme,
-      scaffoldBackgroundColor: background,
+      colorScheme: colorScheme,
+      scaffoldBackgroundColor: bg,
       textTheme: textTheme,
-      visualDensity: VisualDensity.standard,
-      splashFactory: InkRipple.splashFactory,
-    );
-
-    final cardShape = RoundedRectangleBorder(
-      borderRadius: BorderRadius.circular(cardRadius),
-      side: BorderSide(color: divider, width: 0.8),
-    );
-    final controlShape = RoundedRectangleBorder(
-      borderRadius: BorderRadius.circular(controlRadius),
-    );
-
-    return base.copyWith(
+      dividerTheme: DividerThemeData(color: divider, thickness: 1, space: 1),
+      
       appBarTheme: AppBarTheme(
-        backgroundColor: surface,
-        foregroundColor: onSurface,
+        backgroundColor: bg,
         surfaceTintColor: Colors.transparent,
         elevation: 0,
-        scrolledUnderElevation: 0,
         centerTitle: true,
-        toolbarHeight: 64,
-        titleTextStyle: textTheme.titleMedium?.copyWith(
+        titleTextStyle: textTheme.titleLarge?.copyWith(
+          fontSize: 18,
           fontWeight: FontWeight.w700,
-          letterSpacing: 0.15,
         ),
-        iconTheme: IconThemeData(color: onSurface, size: 24),
-        actionsIconTheme: IconThemeData(color: onSurface, size: 24),
-        shape: Border(bottom: BorderSide(color: divider, width: 0.8)),
       ),
+
       cardTheme: CardThemeData(
         color: surface,
-        surfaceTintColor: Colors.transparent,
-        shadowColor: Colors.transparent,
         elevation: 0,
-        margin: const EdgeInsets.symmetric(vertical: 6),
-        clipBehavior: Clip.antiAlias,
-        shape: cardShape,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(cardRadius),
+          side: BorderSide(color: divider, width: 1),
+        ),
+        margin: const EdgeInsets.only(bottom: 12),
       ),
+
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
-          backgroundColor: primary,
-          foregroundColor: onPrimary,
-          disabledBackgroundColor: divider,
-          disabledForegroundColor: muted,
-          minimumSize: const Size(double.infinity, 56),
-          padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 15),
+          // Beyaz metin taşıdığı için dolgu her iki temada da koyu ton.
+          backgroundColor: primaryDark,
+          foregroundColor: Colors.white,
           elevation: 0,
-          shadowColor: Colors.transparent,
-          shape: controlShape,
-          textStyle: textTheme.labelLarge,
+          minimumSize: const Size.fromHeight(56),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(buttonRadius)),
+          textStyle: textTheme.labelLarge?.copyWith(fontSize: 16),
         ),
       ),
-      filledButtonTheme: FilledButtonThemeData(
-        style: FilledButton.styleFrom(
-          backgroundColor: primary,
-          foregroundColor: onPrimary,
-          minimumSize: const Size(48, 52),
-          shape: controlShape,
-          textStyle: textTheme.labelLarge,
-        ),
-      ),
-      outlinedButtonTheme: OutlinedButtonThemeData(
-        style: OutlinedButton.styleFrom(
-          foregroundColor: onSurface,
-          backgroundColor: surface,
-          minimumSize: const Size(double.infinity, 56),
-          padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 15),
-          side: BorderSide(color: onSurface, width: 1),
-          shape: controlShape,
-          textStyle: textTheme.labelLarge,
-        ),
-      ),
-      textButtonTheme: TextButtonThemeData(
-        style: TextButton.styleFrom(
-          foregroundColor: onSurface,
-          minimumSize: const Size(48, 48),
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-          shape: controlShape,
-          textStyle: textTheme.labelLarge,
-        ),
-      ),
+
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
-        fillColor: fieldFill,
-        contentPadding:
-            const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+        fillColor: isDark ? darkSurface : Colors.white,
+        contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(controlRadius),
+          borderRadius: BorderRadius.circular(inputRadius),
           borderSide: BorderSide(color: divider),
         ),
         enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(controlRadius),
+          borderRadius: BorderRadius.circular(inputRadius),
           borderSide: BorderSide(color: divider),
         ),
         focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(controlRadius),
-          borderSide: BorderSide(color: onSurface, width: 1.5),
+          borderRadius: BorderRadius.circular(inputRadius),
+          borderSide: const BorderSide(color: primaryColor, width: 2),
         ),
-        errorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(controlRadius),
-          borderSide: BorderSide(color: scheme.error, width: 1.5),
-        ),
-        focusedErrorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(controlRadius),
-          borderSide: BorderSide(color: scheme.error, width: 2),
-        ),
-        labelStyle: textTheme.bodyMedium?.copyWith(color: muted),
-        hintStyle: textTheme.bodyMedium?.copyWith(color: muted),
-        errorStyle: textTheme.bodySmall?.copyWith(color: scheme.error),
-        floatingLabelBehavior: FloatingLabelBehavior.auto,
+        hintStyle: TextStyle(color: muted),
       ),
-      bottomNavigationBarTheme: BottomNavigationBarThemeData(
-        backgroundColor: surface,
-        selectedItemColor: onSurface,
-        unselectedItemColor: muted,
-        elevation: 0,
-        type: BottomNavigationBarType.fixed,
-        showSelectedLabels: true,
-        showUnselectedLabels: true,
-        selectedIconTheme: const IconThemeData(size: 26),
-        unselectedIconTheme: const IconThemeData(size: 24),
-        selectedLabelStyle: textTheme.labelSmall?.copyWith(
-          color: onSurface,
-          fontWeight: FontWeight.w600,
-        ),
-        unselectedLabelStyle: textTheme.labelSmall?.copyWith(color: muted),
-      ),
-      floatingActionButtonTheme: FloatingActionButtonThemeData(
-        backgroundColor: onSurface,
-        foregroundColor: surface,
-        elevation: 1,
-        focusElevation: 2,
-        hoverElevation: 2,
-        highlightElevation: 2,
-        shape: const CircleBorder(),
-      ),
-      dividerTheme: DividerThemeData(color: divider, thickness: 0.8, space: 24),
-      iconTheme: IconThemeData(color: onSurface, size: 24),
-      listTileTheme: ListTileThemeData(
-        iconColor: onSurface,
-        textColor: onSurface,
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 5),
-        minTileHeight: 56,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(cardRadius),
-        ),
-      ),
-      chipTheme: base.chipTheme.copyWith(
-        backgroundColor: surface,
-        selectedColor: onSurface,
-        labelStyle: textTheme.labelMedium,
-        secondaryLabelStyle: textTheme.labelMedium?.copyWith(color: surface),
-        side: BorderSide(color: divider),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
-        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
-      ),
-      checkboxTheme: CheckboxThemeData(
-        shape: const RoundedRectangleBorder(),
-        side: BorderSide(color: muted, width: 1),
-        fillColor: WidgetStateProperty.resolveWith(
-          (states) => states.contains(WidgetState.selected) ? onSurface : null,
-        ),
-      ),
-      switchTheme: SwitchThemeData(
-        thumbColor: WidgetStatePropertyAll(surface),
-        trackColor: WidgetStateProperty.resolveWith(
-          (states) =>
-              states.contains(WidgetState.selected) ? onSurface : divider,
-        ),
-      ),
-      progressIndicatorTheme: ProgressIndicatorThemeData(
-        color: onSurface,
-        linearTrackColor: divider,
-        circularTrackColor: divider,
-      ),
-      bottomSheetTheme: BottomSheetThemeData(
-        backgroundColor: surface,
-        surfaceTintColor: Colors.transparent,
-        showDragHandle: true,
-        shape: const RoundedRectangleBorder(
-          borderRadius:
-              BorderRadius.vertical(top: Radius.circular(sheetRadius)),
-        ),
-      ),
-      dialogTheme: DialogThemeData(
-        backgroundColor: surface,
-        surfaceTintColor: Colors.transparent,
-        elevation: 3,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(sheetRadius),
-        ),
-        titleTextStyle: textTheme.titleLarge,
-        contentTextStyle: textTheme.bodyMedium,
-      ),
-      snackBarTheme: SnackBarThemeData(
-        backgroundColor: onSurface,
-        contentTextStyle: textTheme.bodyMedium?.copyWith(color: surface),
-        behavior: SnackBarBehavior.floating,
-        elevation: 1,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(controlRadius),
-        ),
-      ),
+
       navigationBarTheme: NavigationBarThemeData(
         backgroundColor: surface,
-        surfaceTintColor: Colors.transparent,
-        indicatorColor: fieldFill,
-        elevation: 0,
-        labelTextStyle: WidgetStatePropertyAll(textTheme.labelSmall),
+        indicatorColor: primaryColor.withOpacity(0.1),
+        labelTextStyle: WidgetStatePropertyAll(
+          textTheme.labelSmall?.copyWith(fontWeight: FontWeight.w600),
+        ),
       ),
     );
   }

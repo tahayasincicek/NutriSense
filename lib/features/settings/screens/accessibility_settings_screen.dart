@@ -215,6 +215,19 @@ class _AccessibilitySettingsScreenState
             label: 'Titreşim ${_vibrationEnabled ? "açık" : "kapalı"}. '
                 'Değiştirmek için çift dokunun.',
             toggled: _vibrationEnabled,
+            onTapHint: 'Değiştirmek için çift dokunun',
+            onTap: () async {
+              final newValue = !_vibrationEnabled;
+              setState(() => _vibrationEnabled = newValue);
+              await _accessibility.setVibrationEnabled(newValue);
+
+              final text = newValue ? 'Titreşim açıldı.' : 'Titreşim kapatıldı.';
+              _accessibility.speak(text, priority: TtsPriority.high);
+
+              if (newValue) {
+                _accessibility.mediumHaptic();
+              }
+            },
             child: SwitchListTile(
               title: Text(
                 _vibrationEnabled ? 'Titreşim Açık' : 'Titreşim Kapalı',
@@ -225,7 +238,7 @@ class _AccessibilitySettingsScreenState
               ),
               subtitle: const Text('Dokunma ve komut geri bildirimi'),
               value: _vibrationEnabled,
-              activeColor: AppTheme.primaryColor,
+              activeThumbColor: AppTheme.primaryColor,
               onChanged: (value) async {
                 setState(() => _vibrationEnabled = value);
                 await _accessibility.setVibrationEnabled(value);
@@ -282,6 +295,18 @@ class _AccessibilitySettingsScreenState
             label: 'Yüksek kontrast ${_highContrast ? "açık" : "kapalı"}. '
                 'Değiştirmek için çift dokunun.',
             toggled: _highContrast,
+            onTapHint: 'Değiştirmek için çift dokunun',
+            onTap: () async {
+              final newValue = !_highContrast;
+              setState(() => _highContrast = newValue);
+              await _accessibility.setHighContrast(newValue);
+              _accessibility.speak(
+                newValue
+                    ? 'Yüksek kontrast açıldı.'
+                    : 'Yüksek kontrast kapatıldı.',
+                priority: TtsPriority.high,
+              );
+            },
             child: SwitchListTile(
               title: Text(
                 _highContrast
@@ -294,7 +319,7 @@ class _AccessibilitySettingsScreenState
               ),
               subtitle: const Text('Metin ve arka plan kontrastını artırır'),
               value: _highContrast,
-              activeColor: AppTheme.primaryColor,
+              activeThumbColor: AppTheme.primaryColor,
               onChanged: (value) async {
                 setState(() => _highContrast = value);
                 await _accessibility.setHighContrast(value);
@@ -439,7 +464,7 @@ class _AccessibilitySettingsScreenState
             ),
             selected: isActive,
             selectedColor: AppTheme.primaryColor,
-            backgroundColor: Colors.grey[200],
+            backgroundColor: Theme.of(context).colorScheme.surfaceContainerHighest,
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
             onSelected: (_) => onSelected(entry.key),
           ),

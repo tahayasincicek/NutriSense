@@ -18,9 +18,11 @@
 
 import 'dart:async';
 import 'dart:math';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:speech_to_text/speech_to_text.dart' as stt;
+import 'speech_locale_policy.dart';
 import 'package:speech_to_text/speech_recognition_result.dart';
 import 'package:speech_to_text/speech_recognition_error.dart';
 
@@ -51,7 +53,31 @@ enum VoiceCommand {
   settings('Ayarlar', ['ayarlar', 'ayarları aç', 'tercihler', 'seçenekler']),
   help('Yardım', ['yardım', 'komutlar', 'ne yapabilirim', 'ne diyebilirim']),
   yes('Evet', ['evet', 'tamam', 'olur', 'kabul', 'kaydet', 'onayla']),
-  no('Hayır', ['hayır', 'yok', 'istemiyorum', 'reddet']);
+  no('Hayır', ['hayır', 'yok', 'istemiyorum', 'reddet']),
+  
+  // Yeni Sağlık Takibi Komutları
+  addWater('Su Ekle', ['su içtim', 'su ekle', 'bir bardak su', 'su kaydet']),
+  setMood('Duygu Durumu', ['mutluyum', 'yorgunum', 'üzgünüm', 'enerjiğim', 'normal hissediyorum']),
+  logWeight('Kilo Kaydet', ['kilomu kaydet', 'kilo ekle', 'kilom']),
+  logSleep('Uyku Kaydet', [
+    'uyku kaydet',
+    'uykumu kaydet',
+    'uyku süresi',
+    'kaç saat uyudum',
+    'uyudum',
+  ]),
+
+  /// Besini adıyla kaydetme. Uygulamanın ana işlevi olduğu için hiçbir
+  /// düğme aranmadan, tek cümleyle tamamlanabilmelidir:
+  /// "köfte ekle", "yemek ekle" → ardından besin adı sorulur.
+  logFood('Besin Ekle', [
+    'besin ekle',
+    'yemek ekle',
+    'yemek kaydet',
+    'besin kaydet',
+    'yedim',
+    'öğün ekle',
+  ]);
 
   const VoiceCommand(this.displayName, this.aliases);
   final String displayName;
@@ -80,7 +106,7 @@ enum ListeningState { idle, listening, processing }
 // CALLBACK TİPLERİ
 // ═══════════════════════════════════════════════════════════════════════════════
 
-typedef OnCommandRecognized = void Function(VoiceCommand command);
+typedef OnCommandRecognized = void Function(CommandResult result);
 typedef OnListeningStateChanged = void Function(ListeningState state);
 
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -93,6 +119,7 @@ class VoiceCommandService {
 
   // ── Durum ──
   bool _isInitialized = false;
+  String? _turkishLocaleId;
   ListeningState _listeningState = ListeningState.idle;
   Timer? _restartTimer;
   Timer? _timeoutTimer;
@@ -131,6 +158,17 @@ class VoiceCommandService {
         return false;
       }
 
+      if (defaultTargetPlatform == TargetPlatform.iOS) {
+        final speechStatus = await Permission.speech.request();
+        if (!speechStatus.isGranted) {
+          await _accessibility.speakError(
+            'Konuşma tanıma izni verilmedi. '
+            'Dokunmatik veya klavye ile devam edebilirsiniz.',
+          );
+          return false;
+        }
+      }
+
       _isInitialized = await _speech.initialize(
         onError: _onError,
         onStatus: _onStatus,
@@ -140,18 +178,24 @@ class VoiceCommandService {
       if (_isInitialized) {
         // Türkçe locale kontrol
         final locales = await _speech.locales();
-        final hasTurkish = locales.any(
-          (l) => l.localeId.startsWith('tr'),
+        _turkishLocaleId = selectTurkishSpeechLocale(
+          locales.map((locale) => locale.localeId),
         );
 
-        if (!hasTurkish) {
+        if (_turkishLocaleId == null) {
           await _accessibility.speakWarning(
-            'Türkçe ses tanıma bu cihazda desteklenmiyor olabilir.',
+            'Türkçe ses tanıma bu cihazda bulunamadı. '
+            'Dokunmatik veya klavye ile devam edebilirsiniz.',
           );
         }
       } else {
+        // İzin verilmiş ama motor yine de başlamadıysa sebep izin değildir:
+        // cihazda kayıtlı bir android.speech.RecognitionService yoktur.
+        // (Google Play içermeyen emülatör imajlarında sık görülür.)
         await _accessibility.speakError(
-          AppStrings.errorMicrophonePermission,
+          'Bu cihazda konuşma tanıma servisi bulunamadı. '
+          'Sesli komutlar kullanılamıyor; dokunmatik veya klavye ile '
+          'devam edebilirsiniz.',
         );
       }
 
@@ -178,6 +222,13 @@ class VoiceCommandService {
     if (_speech.isListening) {
       await _speech.stop();
     }
+    if (_turkishLocaleId == null) {
+      await _accessibility.speakWarning(
+        'Türkçe ses tanıma kullanılamıyor. '
+        'Dokunmatik veya klavye ile devam edin.',
+      );
+      return;
+    }
 
     await _accessibility.prepareForSpeechInput();
     _setListeningState(ListeningState.listening);
@@ -187,7 +238,7 @@ class VoiceCommandService {
       onResult: _onResult,
       listenFor: _listenTimeout,
       pauseFor: const Duration(seconds: 3),
-      localeId: 'tr_TR',
+      localeId: _turkishLocaleId,
       listenMode: stt.ListenMode.confirmation,
       cancelOnError: false,
       partialResults: true,
@@ -272,7 +323,7 @@ class VoiceCommandService {
     );
 
     // Callback
-    onCommandRecognized?.call(cmd);
+    onCommandRecognized?.call(result);
   }
 
   void _handleUnrecognizedCommand(String text) {
@@ -281,6 +332,9 @@ class VoiceCommandService {
       priority: TtsPriority.normal,
     );
     _accessibility.lightHaptic();
+    
+    // Callback (UI için)
+    onCommandRecognized?.call(CommandResult(rawText: text, recognized: false));
   }
 
   // ─────────────────────────────────────────────────────────────────────────
@@ -314,7 +368,7 @@ class VoiceCommandService {
         // 2. İçeriyor mu (substring)
         if (normalized.contains(normalizedAlias) ||
             normalizedAlias.contains(normalized)) {
-          final score = 0.85;
+          const score = 0.85;
           if (score > bestScore) {
             bestScore = score;
             bestCommand = command;
@@ -409,10 +463,9 @@ class VoiceCommandService {
   void _onError(SpeechRecognitionError error) {
     _accessibility.finishSpeechInput();
     if (error.permanent) {
-      _accessibility.speakError(
-        'Sesli tanıma kalıcı olarak başarısız oldu. '
-        'Mikrofon izinlerini kontrol edin.',
-      );
+      // Sebebi izne bağlamadan önce izni gerçekten kontrol et: izin verilmişken
+      // "izinleri kontrol edin" demek kullanıcıyı yanlış yere yönlendiriyordu.
+      unawaited(_announcePermanentFailure());
       _setListeningState(ListeningState.idle);
     } else if (_continuousMode) {
       // Geçici hata — yeniden dene
@@ -421,6 +474,26 @@ class VoiceCommandService {
         if (_continuousMode) startListening();
       });
     }
+  }
+
+  /// Kalıcı tanıma hatasında doğru sebebi duyurur.
+  ///
+  /// İzin gerçekten reddedilmişse kullanıcıyı ayarlara yönlendirir; izin
+  /// varken motor çalışmıyorsa sorun cihazdadır ve kullanıcının yapabileceği
+  /// bir şey yoktur — bu durumda dokunmatik alternatife yönlendiririz.
+  Future<void> _announcePermanentFailure() async {
+    final granted = await Permission.microphone.isGranted;
+    if (!granted) {
+      await _accessibility.speakError(
+        'Mikrofon izni verilmediği için sesli komut kullanılamıyor. '
+        'Ayarlardan mikrofon iznini açabilirsiniz.',
+      );
+      return;
+    }
+    await _accessibility.speakError(
+      'Konuşma tanıma bu cihazda kullanılamıyor. '
+      'Dokunmatik veya klavye ile devam edebilirsiniz.',
+    );
   }
 
   // ─────────────────────────────────────────────────────────────────────────

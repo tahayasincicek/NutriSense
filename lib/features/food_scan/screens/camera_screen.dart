@@ -18,6 +18,7 @@ import '../../../shared/services/api_service.dart';
 import '../../../shared/services/contextual_voice_command.dart';
 import '../../../shared/services/stt_service.dart';
 import '../../../shared/widgets/accessible_button.dart';
+import '../../../shared/widgets/accessible_number_dialog.dart';
 import '../../history/state/history_controller.dart';
 import '../models/camera_state.dart';
 import '../services/image_preprocessing.dart';
@@ -25,6 +26,7 @@ import '../services/offline_recognizer.dart';
 import '../services/recognition_policy.dart';
 import '../services/turkish_portion_parser.dart';
 import '../widgets/accessible_portion_selector.dart';
+import 'nutrition_detail_screen.dart';
 
 final availableCamerasProvider = FutureProvider<List<CameraDescription>>((ref) {
   return availableCameras();
@@ -113,6 +115,8 @@ class _CameraScreenState extends ConsumerState<CameraScreen>
       _controller = null;
       _initialized = false;
       if (mounted) setState(() {});
+      if (widget.initializeHardware) unawaited(_stt.cancelListening());
+      _tts.finishSpeechInput();
       unawaited(controller?.dispose());
     } else if (state == AppLifecycleState.resumed && !_disposed) {
       unawaited(_initializeCamera());
@@ -163,7 +167,7 @@ class _CameraScreenState extends ConsumerState<CameraScreen>
       setState(() {});
       notifier.setReady();
       await _tts.speak(
-        'Kamera hazır. Besini çerçeveye yerleştirin ve tara düğmesine basın.',
+        'Kamera hazır. Telefonu besine doğru tutun ve tara deyin.',
       );
       _startAutoCapture();
     } catch (_) {
@@ -300,7 +304,7 @@ class _CameraScreenState extends ConsumerState<CameraScreen>
         return;
       }
       ref.read(cameraStateProvider.notifier).setError(offline.message);
-      await _tts.speak('${offline.message} Manuel giriş düğmesini kullanın.');
+      await _tts.speak('${offline.message} Besin adını söyleyerek de ekleyebilirsiniz.');
       return;
     }
     final message = failure?.message ??
@@ -326,14 +330,26 @@ class _CameraScreenState extends ConsumerState<CameraScreen>
         );
     await AccessibilityUtils.mediumHaptic();
     if (band == RecognitionBand.high) {
-      final nutritionNote = result.nutritionStatus == 'unverified'
-          ? 'Besin değeri yerel ve doğrulanmamış kaynaktan geliyor.'
-          : 'Besin değeri kaynağı ${result.nutritionSource}.';
-      await _tts.speak(
-        '${result.foodNameTr} bulundu. Yaklaşık ${result.totalCalories.toStringAsFixed(0)} kalori. '
-        'Tahmini ${result.portionGrams.toStringAsFixed(0)} gram; değiştirmek ister misiniz? '
-        '$nutritionNote Doğruysa onaylayın, değilse düzeltin.',
+      if (!mounted) return;
+      final action = await Navigator.of(context).push<String>(
+        MaterialPageRoute(
+          settings: const RouteSettings(name: '/nutrition-detail'),
+          builder: (_) => NutritionDetailScreen(
+            foodName: result.foodName,
+            foodNameTr: result.foodNameTr,
+            calories: result.totalCalories,
+            portionGrams: result.portionGrams,
+            confidence: result.confidence,
+            nutrients: result.nutrients,
+          ),
+        ),
       );
+      
+      if (action == 'saved') {
+        unawaited(_confirm());
+      } else {
+        _reset();
+      }
     } else {
       final names = _policy
           .candidates(result)
@@ -438,51 +454,21 @@ class _CameraScreenState extends ConsumerState<CameraScreen>
   }
 
   Future<PortionInput?> _showPortionDialog({double initialGrams = 100}) async {
-    final controller = TextEditingController(
-      text: initialGrams.toStringAsFixed(0),
-    );
-    final result = await showDialog<PortionInput>(
+    // Ortak erişilebilir diyalog: sesle söyleme, artır/azalt ve klavye.
+    final grams = await showAccessibleNumberDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Porsiyonu gram olarak girin'),
-        content: TextField(
-          controller: controller,
-          autofocus: true,
-          keyboardType: const TextInputType.numberWithOptions(decimal: true),
-          decoration: const InputDecoration(
-            labelText: 'Gram',
-            hintText: 'Örnek: 150',
-            helperText: '0 ile 2000 gram arasında olmalıdır.',
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('İptal'),
-          ),
-          FilledButton(
-            onPressed: () {
-              final value = double.tryParse(
-                controller.text.trim().replaceAll(',', '.'),
-              );
-              if (value == null ||
-                  !value.isFinite ||
-                  value <= 0 ||
-                  value > 2000) {
-                return;
-              }
-              Navigator.pop(
-                context,
-                PortionInput(value: value, unit: 'gram'),
-              );
-            },
-            child: const Text('Uygula'),
-          ),
-        ],
-      ),
+      title: 'Porsiyon',
+      fieldLabel: 'Porsiyon',
+      suffix: 'g',
+      spokenUnit: 'gram',
+      min: 1,
+      max: 2000,
+      step: 10,
+      initialValue: initialGrams,
+      fieldKey: const Key('portion_input'),
     );
-    controller.dispose();
-    return result;
+    if (grams == null) return null;
+    return PortionInput(value: grams, unit: 'gram');
   }
 
   Future<void> _editPortion() async {
@@ -552,32 +538,10 @@ class _CameraScreenState extends ConsumerState<CameraScreen>
   }
 
   Future<void> _showManualEntry({FoodCandidate? candidate}) async {
-    final controller = TextEditingController(text: candidate?.foodNameTr ?? '');
     final value = await showDialog<String>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Besini manuel girin'),
-        content: TextField(
-          controller: controller,
-          autofocus: true,
-          decoration: const InputDecoration(
-            labelText: 'Besin adı',
-            hintText: 'Örnek: simit',
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('İptal'),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.pop(context, controller.text.trim()),
-            child: const Text('Kaydet'),
-          ),
-        ],
-      ),
+      builder: (_) => _ManualEntryDialog(initialText: candidate?.foodNameTr),
     );
-    controller.dispose();
     if (value == null || value.length < 2 || !mounted) return;
     final analysis = ref.read(cameraStateProvider).analysis;
     if (analysis != null) {
@@ -1043,5 +1007,57 @@ class _CameraScreenState extends ConsumerState<CameraScreen>
       return Colors.amber;
     }
     return Colors.white70;
+  }
+}
+
+/// Manuel besin adı girişi diyaloğu.
+///
+/// [TextEditingController] burada tutulur; böylece diyalog kapanma animasyonu
+/// sürerken controller'ın atılıp "used after being disposed" hatası vermesi ve
+/// bunun alt ağacı yıkarak `_dependents.isEmpty` assert'ini tetiklemesi önlenir.
+class _ManualEntryDialog extends StatefulWidget {
+  const _ManualEntryDialog({this.initialText});
+
+  final String? initialText;
+
+  @override
+  State<_ManualEntryDialog> createState() => _ManualEntryDialogState();
+}
+
+class _ManualEntryDialogState extends State<_ManualEntryDialog> {
+  late final TextEditingController _controller =
+      TextEditingController(text: widget.initialText ?? '');
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: const Text('Besini manuel girin'),
+      content: TextField(
+        controller: _controller,
+        autofocus: true,
+        textInputAction: TextInputAction.done,
+        onSubmitted: (text) => Navigator.pop(context, text.trim()),
+        decoration: const InputDecoration(
+          labelText: 'Besin adı',
+          hintText: 'Örnek: simit',
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: const Text('İptal'),
+        ),
+        FilledButton(
+          onPressed: () => Navigator.pop(context, _controller.text.trim()),
+          child: const Text('Kaydet'),
+        ),
+      ],
+    );
   }
 }

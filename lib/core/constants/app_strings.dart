@@ -197,7 +197,7 @@ class AppStrings {
   // ═══════════════════════════════════════════════════════════════════════════
 
   static const screenScan = 'Besin tarama ekranı. '
-      'Kamerayı açmak için tara butonuna basın veya sesli komut verin.';
+      'Kamerayı açmak için tara deyin.';
 
   static const screenHistory = 'Yemek geçmişi ekranı. '
       'Son yemekleriniz ve günlük kalori özetiniz burada.';
