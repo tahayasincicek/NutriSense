@@ -36,7 +36,7 @@ def bearer(token_data: dict) -> dict[str, str]:
     return {"Authorization": f"Bearer {token_data['access_token']}"}
 
 
-def test_password_policy_is_shared_and_reset_is_explicitly_unavailable(client):
+def test_password_policy_is_shared_across_register_and_reset(client):
     weak = client.post(
         "/api/v1/auth/register",
         json={
@@ -46,9 +46,45 @@ def test_password_policy_is_shared_and_reset_is_explicitly_unavailable(client):
         },
     )
     assert weak.status_code == 422
-    reset = client.post("/api/v1/auth/password-reset")
-    assert reset.status_code == 501
-    assert "henüz kullanılamıyor" in reset.json()["error"]["message"]
+
+    # Aynı parola politikası sıfırlamada da geçerli olmalı.
+    weak_reset = client.post(
+        "/api/v1/auth/password-reset/confirm",
+        json={"token": "12345678", "new_password": "abcdefgh"},
+    )
+    assert weak_reset.status_code == 422
+
+
+def test_password_reset_does_not_disclose_account_existence(client):
+    register(client, "known-reset@example.com")
+
+    known = client.post(
+        "/api/v1/auth/password-reset",
+        json={"email": "known-reset@example.com"},
+    )
+    unknown = client.post(
+        "/api/v1/auth/password-reset",
+        json={"email": "nobody-here@example.com"},
+    )
+
+    # Hesabın varlığı ne durum kodundan ne de gövdeden anlaşılmamalı.
+    assert known.status_code == unknown.status_code == 200
+    assert known.json() == unknown.json()
+
+
+def test_password_reset_rejects_invalid_and_expired_codes(client):
+    register(client, "reset-codes@example.com")
+    client.post(
+        "/api/v1/auth/password-reset",
+        json={"email": "reset-codes@example.com"},
+    )
+
+    bogus = client.post(
+        "/api/v1/auth/password-reset/confirm",
+        json={"token": "00000000", "new_password": "GecerliSifre1"},
+    )
+    assert bogus.status_code == 400
+    assert "geçersiz" in bogus.json()["error"]["message"].lower()
 
 
 def test_login_does_not_disclose_user_existence_and_rate_limits(client):

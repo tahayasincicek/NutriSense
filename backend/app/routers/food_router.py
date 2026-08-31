@@ -15,9 +15,10 @@ import hashlib
 import io
 import json
 import logging
+import secrets
 import uuid
 import warnings
-from datetime import date, timedelta, datetime
+from datetime import date, timedelta, datetime, timezone
 from decimal import Decimal
 from typing import Annotated, Optional
 from collections import defaultdict
@@ -33,7 +34,8 @@ from sqlalchemy import func
 from ..models.database import (
     AuthAuditLog, ConsentRecord, Dietitian, DietitianAssignment,
     DietitianReport, FoodLog, NotificationDelivery, NutritionSource,
-    RecognitionAttempt, RefreshToken, User, get_db, istanbul_date, utc_now,
+    PasswordResetToken, RecognitionAttempt, RefreshToken, User, get_db,
+    istanbul_date, utc_now,
 )
 from ..models.schemas import (
     FoodAnalysisResponse, FoodCandidate, FoodAnalysisDecisionRequest,
@@ -45,6 +47,7 @@ from ..models.schemas import (
     ChannelDeliveryResponse, DietitianReportHistoryItem,
     DietitianReportPreviewRequest, DietitianReportPreviewResponse,
     AccountDeletionRequest, DietitianAssignmentRequest,
+    PasswordResetRequest, PasswordResetConfirm, PasswordResetResponse,
     DietitianAssignmentResponse, LogoutRequest, RefreshTokenRequest,
     UserCreate, UserLogin, UserProfileUpdate, UserResponse, TokenResponse,
     ErrorResponse,
@@ -64,9 +67,10 @@ from ..middleware.auth import (
 from ..services.google_vision_service import (
     GoogleVisionService, VisionAPIError, FoodNotFoundError,
 )
+from ..services.gemini_vision_service import GeminiVisionService
 from ..services.nutritionix_service import NutritionixService
 from ..services.notification_service import (
-    ChannelDeliveryError, NotificationService,
+    ChannelDeliveryError, NotificationService, build_password_reset_email,
 )
 from ..config import get_settings
 
@@ -76,11 +80,27 @@ settings = get_settings()
 router = APIRouter(prefix="/api/v1", tags=["NutriSense API"])
 
 # ── Servis singleton'ları ──
-vision_service = GoogleVisionService()
+def _build_vision_service():
+    """VISION_PROVIDER_MODE'a göre görüntü tanıma sağlayıcısını seçer."""
+    if settings.vision_provider_mode == "gemini":
+        return GeminiVisionService()
+    return GoogleVisionService()
+
+
+vision_service = _build_vision_service()
 nutrition_service = NutritionixService()
 notification_service = NotificationService()
 
 # Öğün türü Türkçe karşılıkları
+def _vision_provider_name() -> str:
+    """Analiz kaydına yazılacak sağlayıcı etiketi."""
+    return (
+        "gemini_vision"
+        if settings.vision_provider_mode == "gemini"
+        else "google_vision"
+    )
+
+
 MEAL_TYPE_TR = {
     "kahvalti": "Kahvaltı",
     "ogle": "Öğle",
@@ -348,7 +368,7 @@ def _nutrition_from_analysis_payload(payload: dict) -> dict:
     summary="Görüntüden besin tanıma ve kalori hesaplama",
     description=(
         "Multipart görüntüyü MIME/boyut doğrulaması ve EXIF temizliği sonrası "
-        "Google Vision API ile analiz eder, "
+        "yapılandırılan görüntü sağlayıcısı (Google Vision veya Gemini) ile analiz eder, "
         "besin adını tanır ve Nutritionix'ten kalori bilgisini çeker. "
         "Yemek günlüğü yalnız ayrı karar endpointinde kullanıcı onayıyla oluşur."
     ),
@@ -368,7 +388,7 @@ async def analyze_food(
     Besin tanıma ve kalori hesaplama endpoint'i.
 
     İşlem akışı:
-    1. Multipart görüntü doğrulama/EXIF temizleme → Google Vision API
+    1. Multipart görüntü doğrulama/EXIF temizleme → görüntü tanıma sağlayıcısı
     2. Etiketleri besin ismine dönüştür
     3. Nutritionix API'den kalori + besin değerlerini çek
     4. Görüntüyü saklamadan onay bekleyen analiz kaydı oluştur
@@ -385,7 +405,7 @@ async def analyze_food(
     _enforce_analysis_rate_limit(http_request, current_user.id)
     image_base64 = await _sanitized_image_base64(image)
 
-    # ── 1. Google Vision ile görüntü analizi ──
+    # ── 1. Yapılandırılan sağlayıcı ile görüntü analizi ──
     try:
         vision_result = await asyncio.wait_for(
             vision_service.analyze_image(image_base64),
@@ -456,7 +476,7 @@ async def analyze_food(
     recognition_attempt = RecognitionAttempt(
         id=str(uuid.uuid4()),
         user_id=current_user.id,
-        provider="google_vision",
+        provider=_vision_provider_name(),
         capture_id=capture_key,
         status="succeeded",
         food_name=food_name,
@@ -874,9 +894,121 @@ async def create_manual_food_log(
     )
 
 
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# BESİN ARAMA (MANUEL)
+# ═══════════════════════════════════════════════════════════════════════════════
+
+@router.get(
+    "/food/search",
+    response_model=FoodAnalysisResponse,
+    summary="Besin arama",
+    description="Metin tabanlı manuel besin arama ve kalori getirme (Nutritionix).",
+)
+async def search_food(
+    query: str = Query(..., description="Aranacak besin adı"),
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    try:
+        nutrition = await nutrition_service.get_nutrition(query)
+    except Exception as e:
+        logger.error(f"Search error: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Besin bulunamadı."
+        )
+
+    if not nutrition.get("available"):
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Besin bulunamadı."
+        )
+
+    food_name_tr = nutrition.get("food_name_tr", query.title())
+    calories_per_100g = float(nutrition.get("calories_per_100g", 0))
+    portion_value = float(nutrition.get("portion_value", 100.0))
+    total_calories = float(nutrition.get("total_calories", calories_per_100g))
+
+    nutrients = nutrition.get("nutrients", {})
+    nutrients_per_100g = nutrition.get("nutrients_per_100g", {})
+
+    applied_nutrients = NutrientData(
+        protein=nutrients.get("protein", 0),
+        carbs=nutrients.get("carb", 0),
+        fat=nutrients.get("fat", 0),
+        fiber=nutrients.get("fiber", 0),
+    )
+
+    base_nutrients = NutrientData(
+        protein=nutrients_per_100g.get("protein", 0),
+        carbs=nutrients_per_100g.get("carb", 0),
+        fat=nutrients_per_100g.get("fat", 0),
+        fiber=nutrients_per_100g.get("fiber", 0),
+    )
+
+    attempt_id = str(uuid.uuid4())
+    attempt = RecognitionAttempt(
+        id=attempt_id,
+        user_id=current_user.id,
+        provider="manual",
+        status="succeeded",
+        food_name=food_name_tr,
+        confidence=1.0,
+        analysis_payload={
+            "image_key": "manual_search",
+            "primary_candidate_name": nutrition.get("food_name", query),
+            "primary_candidate_name_tr": food_name_tr,
+            "recognition_source": "manual",
+            "nutrition_source": nutrition.get("source", "nutritionix"),
+            "nutrition_status": "available",
+            "calories_per_100g": calories_per_100g,
+            "portion_grams": portion_value,
+            "total_calories": total_calories,
+            "meal_type": "atistirmalik"
+        }
+    )
+    db.add(attempt)
+    db.commit()
+
+    tts_text = f"{food_name_tr} bulundu. Tahmini {total_calories:.0f} kalori."
+
+    return FoodAnalysisResponse(
+        analysis_id=attempt.id,
+        log_id=None,
+        food_name=nutrition.get("food_name", query),
+        food_name_tr=food_name_tr,
+        canonical_food_id=nutrition.get("canonical_food_id", "manual"),
+        normalization_version=nutrition.get("normalization_version", "1.0"),
+        confidence=1.0,
+        portion_grams=portion_value,
+        portion_value=portion_value,
+        portion_unit=nutrition.get("portion_unit", "gram"),
+        portion_method=nutrition.get("portion_method", "source_default"),
+        portion_is_estimate=nutrition.get("portion_is_estimate", False),
+        calories_per_100g=calories_per_100g,
+        total_calories=total_calories,
+        nutrients=applied_nutrients,
+        nutrients_per_100g=base_nutrients,
+        macro_calories=nutrition.get("macro_calories"),
+        macro_calorie_delta=nutrition.get("macro_calorie_delta"),
+        macro_calorie_delta_percent=nutrition.get("macro_calorie_delta_percent"),
+        meal_type="atistirmalik",
+        recognition_source="manual",
+        nutrition_source=nutrition.get("source", "nutritionix"),
+        nutrition_status="available",
+        nutrition_reliability=nutrition.get("nutrition_reliability", "verified_provider"),
+        needs_confirmation=False,
+        can_confirm=True,
+        tts_text=tts_text,
+    )
+
+
 # ═══════════════════════════════════════════════════════════════════════════════
 # YEMEK GEÇMİŞİ
 # ═══════════════════════════════════════════════════════════════════════════════
+
+
 
 @router.get(
     "/food-history/{user_id}",
@@ -2027,9 +2159,136 @@ async def delete_account(
     return None
 
 
-@router.post("/auth/password-reset", status_code=status.HTTP_501_NOT_IMPLEMENTED)
-async def password_reset_unavailable():
-    raise HTTPException(
-        status_code=status.HTTP_501_NOT_IMPLEMENTED,
-        detail="Parola sıfırlama henüz kullanılamıyor.",
+_RESET_TOKEN_TTL = timedelta(hours=1)
+
+# Yanıt her durumda aynıdır: e-posta kayıtlı olsun ya da olmasın. Aksi hâlde
+# saldırgan hangi adreslerin sistemde olduğunu öğrenebilirdi.
+_RESET_GENERIC_MESSAGE = (
+    "E-posta adresiniz kayıtlıysa sıfırlama kodu gönderildi. "
+    "Gelen kutunuzu kontrol edin."
+)
+
+
+def _hash_reset_token(token: str) -> str:
+    """Jetonun veritabanında saklanan SHA-256 özeti."""
+    return hashlib.sha256(token.encode("utf-8")).hexdigest()
+
+
+@router.post(
+    "/auth/password-reset",
+    response_model=PasswordResetResponse,
+    summary="Parola sıfırlama kodu iste",
+)
+async def request_password_reset(
+    request: PasswordResetRequest,
+    db: Session = Depends(get_db),
+):
+    """Kayıtlı bir e-posta için tek kullanımlık sıfırlama kodu gönderir."""
+    normalized_email = request.email.lower()
+    user = (
+        db.query(User)
+        .filter(func.lower(User.email) == normalized_email)
+        .first()
+    )
+
+    if user is not None and user.is_active:
+        # Bekleyen eski jetonları geçersiz kıl: aynı anda tek jeton geçerli.
+        db.query(PasswordResetToken).filter(
+            PasswordResetToken.user_id == user.id,
+            PasswordResetToken.used_at.is_(None),
+        ).update({"used_at": utc_now()}, synchronize_session=False)
+
+        # 8 haneli sayısal kod: ekran okuyucuyla dinlemesi ve sesle
+        # söylemesi uzun rastgele dizelerden çok daha kolay.
+        reset_code = f"{secrets.randbelow(10**8):08d}"
+        db.add(
+            PasswordResetToken(
+                id=str(uuid.uuid4()),
+                user_id=user.id,
+                token_hash=_hash_reset_token(reset_code),
+                expires_at=utc_now() + _RESET_TOKEN_TTL,
+            )
+        )
+        db.add(
+            AuthAuditLog(
+                user_id=user.id,
+                event="password_reset_requested",
+                email_hash=_hash_reset_token(normalized_email),
+                success=True,
+            )
+        )
+        db.commit()
+
+        try:
+            message = build_password_reset_email(
+                reset_code=reset_code,
+                destination=user.email,
+                settings=get_settings(),
+            )
+            await notification_service.send_email_message(message, user.email)
+        except ChannelDeliveryError:
+            # Gönderim başarısız olsa bile aynı yanıt döner; kullanıcıya
+            # hesabın varlığı sızdırılmaz. Hata yalnız log'a yazılır.
+            logger.warning("Parola sıfırlama e-postası gönderilemedi.")
+
+    return PasswordResetResponse(message=_RESET_GENERIC_MESSAGE)
+
+
+@router.post(
+    "/auth/password-reset/confirm",
+    response_model=PasswordResetResponse,
+    summary="Kod ile yeni parola belirle",
+)
+async def confirm_password_reset(
+    request: PasswordResetConfirm,
+    db: Session = Depends(get_db),
+):
+    """Geçerli bir kodla parolayı değiştirir ve tüm oturumları kapatır."""
+    token_hash = _hash_reset_token(request.token.strip())
+    record = (
+        db.query(PasswordResetToken)
+        .filter(PasswordResetToken.token_hash == token_hash)
+        .first()
+    )
+
+    now = utc_now()
+    if (
+        record is None
+        or record.used_at is not None
+        or record.expires_at.replace(tzinfo=record.expires_at.tzinfo or timezone.utc)
+        < now
+    ):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Kod geçersiz veya süresi dolmuş. Yeni bir kod isteyin.",
+        )
+
+    user = db.query(User).filter(User.id == record.user_id).first()
+    if user is None:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Kod geçersiz veya süresi dolmuş. Yeni bir kod isteyin.",
+        )
+
+    user.hashed_password = hash_password(request.new_password)
+    user.updated_at = now
+    record.used_at = now
+
+    # Parola değişince mevcut oturumlar güvenli değildir; hepsi iptal edilir.
+    db.query(RefreshToken).filter(
+        RefreshToken.user_id == user.id,
+        RefreshToken.revoked_at.is_(None),
+    ).update({"revoked_at": now}, synchronize_session=False)
+
+    db.add(
+        AuthAuditLog(
+            user_id=user.id,
+            event="password_reset_completed",
+            success=True,
+        )
+    )
+    db.commit()
+
+    return PasswordResetResponse(
+        message="Parolanız güncellendi. Yeni parolanızla giriş yapabilirsiniz.",
     )

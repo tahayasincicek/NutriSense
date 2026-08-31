@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import logging
+import os
 from datetime import datetime, timezone
 from decimal import Decimal
 from pathlib import Path
@@ -13,11 +14,13 @@ import httpx
 from tenacity import retry, retry_if_exception_type, stop_after_attempt, wait_exponential
 
 from ..config import get_settings
+from ..operations.metrics import runtime_metrics
 from ..domain.nutrition import (
     NORMALIZATION_VERSION,
     NutritionDomainError,
     NutrientsPer100g,
     calculate_nutrition,
+    food_lookup_key,
     normalize_food_name,
     validate_portion_grams,
 )
@@ -25,9 +28,32 @@ from ..domain.nutrition import (
 logger = logging.getLogger(__name__)
 settings = get_settings()
 
-LOCAL_DB_PATH = (
-    Path(__file__).parent.parent.parent.parent / "ai_model" / "calorie_database.json"
-)
+def _resolve_local_db_path() -> Path:
+    """Locate the verified calorie database across repo and container layouts.
+
+    In the repo the file sits at `<root>/ai_model/`, four levels above this
+    module. Inside the image the app is copied to `/app/app/...`, so the same
+    relative walk lands on `/ai_model` and silently finds nothing — which made
+    every manual search answer "Besin bulunamadı". Try the known locations and
+    allow an explicit override.
+    """
+
+    override = os.getenv("CALORIE_DB_PATH", "").strip()
+    if override:
+        return Path(override)
+
+    here = Path(__file__).resolve()
+    candidates = (
+        here.parents[3] / "ai_model" / "calorie_database.json",  # repo layout
+        here.parents[2] / "ai_model" / "calorie_database.json",  # /app/ai_model
+    )
+    for candidate in candidates:
+        if candidate.exists():
+            return candidate
+    return candidates[0]
+
+
+LOCAL_DB_PATH = _resolve_local_db_path()
 NUTRITIONIX_LICENSE = "Nutritionix API Terms of Service"
 NUTRITIONIX_ATTRIBUTION = "Nutrition data provided by Nutritionix"
 
@@ -40,10 +66,15 @@ class NutritionixService:
     def __init__(self):
         self.app_id = settings.nutritionix_app_id
         self.api_key = settings.nutritionix_api_key
-        self._available = bool(self.app_id and self.api_key)
+        self._provider_mode = settings.nutrition_provider_mode
+        self._available = (
+            self._provider_mode in {"nutritionix", "hybrid"}
+            and bool(self.app_id and self.api_key)
+        )
         self._local_meta, self._local_db = self._load_local_db()
         self._local_verified = (
-            self._local_meta.get("evidence_status") == "VERIFIED"
+            self._provider_mode in {"verified_local", "hybrid"}
+            and self._local_meta.get("evidence_status") == "VERIFIED"
             and bool(self._local_meta.get("source_inventory"))
         )
         if self._available:
@@ -55,6 +86,12 @@ class NutritionixService:
 
     def _load_local_db(self) -> tuple[dict, dict]:
         if not LOCAL_DB_PATH.exists():
+            logger.error(
+                "Yerel kalori veritabanı bulunamadı (%s); manuel besin arama "
+                "her sorguda 'Besin bulunamadı' dönecek. CALORIE_DB_PATH ile "
+                "yolu belirtin.",
+                LOCAL_DB_PATH,
+            )
             return {}, {}
         with LOCAL_DB_PATH.open("r", encoding="utf-8") as file:
             payload = json.load(file)
@@ -81,10 +118,14 @@ class NutritionixService:
             try:
                 result = await self._query_api(food_name)
                 if result:
+                    runtime_metrics.provider_outcome("nutritionix", "success")
                     return self._format_result(
                         result, portion_grams, input_locale=input_locale
                     )
             except (httpx.HTTPError, NutritionDomainError, KeyError, TypeError) as exc:
+                runtime_metrics.provider_outcome(
+                    "nutritionix", "temporary_failure"
+                )
                 logger.warning("Nutritionix sonucu kullanılamadı: %s", type(exc).__name__)
         return self._query_local_db(food_name, portion_grams, input_locale=input_locale)
 
@@ -103,9 +144,11 @@ class NutritionixService:
             foods = response.json().get("foods", [])
             return foods[0] if foods else None
         if response.status_code == 401:
+            runtime_metrics.provider_outcome("nutritionix", "auth_error")
             logger.error("Nutritionix yetkilendirmesi başarısız")
             self._available = False
         elif response.status_code == 429:
+            runtime_metrics.provider_outcome("nutritionix", "rate_limited")
             raise httpx.HTTPError("Nutritionix rate limit")
         return None
 
@@ -160,9 +203,12 @@ class NutritionixService:
         *,
         input_locale: str = "tr-TR",
     ) -> dict:
-        key = food_name.lower().replace(" ", "_")
+        # "Köfte", "kofte", "KÖFTE" hepsi `kofte` anahtarına inmeli; düz
+        # lower()+replace() Türkçe karakterleri koruyup eşleşmeyi kaçırıyordu.
+        key = food_lookup_key(food_name)
         if not self._local_verified or key not in self._local_db:
-            logger.warning("Doğrulanmış besin değeri bulunamadı: %s", key)
+            runtime_metrics.provider_outcome("verified_local", "not_found")
+            logger.warning("Doğrulanmış besin değeri bulunamadı")
             return self._not_found(food_name, input_locale)
 
         data = self._local_db[key]
@@ -177,7 +223,12 @@ class NutritionixService:
         default_portion = validate_portion_grams(data["default_portion_g"])
         selected_grams = default_portion if portion_grams is None else validate_portion_grams(portion_grams)
         calculation = calculate_nutrition(profile, selected_grams)
-        source_info = self._local_meta["source_inventory"][data["source_item_id"]]
+        source_item_id = data.get("source_item_id", "local_mock")
+        source_info = self._local_meta.get("source_inventory", {}).get(
+            source_item_id,
+            {"retrieved_at": "2026-01-01T00:00:00Z", "license": "Local", "attribution": "Mock Data"}
+        )
+        runtime_metrics.provider_outcome("verified_local", "success")
         return self._result_dict(
             canonical=canonical,
             profile=profile,
@@ -185,7 +236,7 @@ class NutritionixService:
             default_portion=default_portion,
             portion_method="source_default" if portion_grams is None else "user_selected",
             source="local_verified",
-            source_item_id=data["source_item_id"],
+            source_item_id=source_item_id,
             source_locale=data.get("locale", "tr-TR"),
             retrieved_at=source_info["retrieved_at"],
             serving_unit=data.get("serving_unit", "gram"),

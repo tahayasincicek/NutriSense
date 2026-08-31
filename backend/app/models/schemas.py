@@ -462,6 +462,36 @@ class AccountDeletionRequest(BaseModel):
     confirmation: Literal["HESABIMI SIL"]
 
 
+class PasswordResetRequest(BaseModel):
+    """Parola sıfırlama bağlantısı talebi."""
+
+    email: EmailStr
+
+
+class PasswordResetConfirm(BaseModel):
+    """Jeton ile yeni parola belirleme."""
+
+    # 8 haneli sayısal kod: ekran okuyucuyla dinlemesi ve sesle söylemesi
+    # uzun rastgele dizelerden çok daha kolay.
+    token: str = Field(..., min_length=8, max_length=128)
+    new_password: str = Field(..., min_length=8, max_length=128)
+
+    @field_validator("new_password")
+    @classmethod
+    def validate_password_strength(cls, value: str) -> str:
+        if not any(character.isalpha() for character in value):
+            raise ValueError("Şifre en az bir harf içermelidir.")
+        if not any(character.isdigit() for character in value):
+            raise ValueError("Şifre en az bir rakam içermelidir.")
+        return value
+
+
+class PasswordResetResponse(BaseModel):
+    """Her iki uçta da aynı gövde döner; hesap varlığı sızdırılmaz."""
+
+    message: str
+
+
 class DietitianAssignmentRequest(BaseModel):
     dietitian_email: EmailStr
 

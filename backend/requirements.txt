@@ -26,6 +26,7 @@ pwdlib[argon2,bcrypt]>=0.3.0
 # ── API İstemcileri ──
 httpx>=0.26.0
 google-cloud-vision>=3.5.0
+google-genai>=1.0.0
 
 # ── Bildirimler ──
 twilio>=8.12.0

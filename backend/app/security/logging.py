@@ -3,7 +3,9 @@
 from __future__ import annotations
 
 import logging
+import json
 import re
+from datetime import datetime, timezone
 
 
 _REDACTIONS = (
@@ -58,13 +60,38 @@ class SensitiveDataFilter(logging.Filter):
         return True
 
 
-def configure_secure_logging(*, debug: bool) -> None:
+class PrivacySafeJsonFormatter(logging.Formatter):
+    """Emit a small structured envelope without arbitrary record attributes."""
+
+    def format(self, record: logging.LogRecord) -> str:
+        return json.dumps(
+            {
+                "timestamp": datetime.now(timezone.utc).isoformat(),
+                "level": record.levelname,
+                "logger": record.name,
+                "event": redact_text(record.getMessage()),
+            },
+            ensure_ascii=False,
+            separators=(",", ":"),
+        )
+
+
+def configure_secure_logging(
+    *,
+    debug: bool,
+    level: str = "INFO",
+    log_format: str = "json",
+) -> None:
+    resolved_level = logging.DEBUG if debug else getattr(logging, level.upper())
     logging.basicConfig(
-        level=logging.DEBUG if debug else logging.INFO,
+        level=resolved_level,
         format="%(asctime)s | %(levelname)-8s | %(name)s | %(message)s",
         datefmt="%Y-%m-%d %H:%M:%S",
+        force=True,
     )
     root = logging.getLogger()
     for handler in root.handlers:
+        if log_format == "json":
+            handler.setFormatter(PrivacySafeJsonFormatter())
         if not any(isinstance(item, SensitiveDataFilter) for item in handler.filters):
             handler.addFilter(SensitiveDataFilter())

@@ -220,6 +220,15 @@ def _slug(value: str) -> str:
     return re.sub(r"[^a-z0-9]+", "_", ascii_text).strip("_")
 
 
+def food_lookup_key(food_name: str) -> str:
+    """Public slug used to look names up in the verified local calorie database.
+
+    Shares `_slug` so "Köfte", "kofte" and "KÖFTE" all resolve to `kofte`.
+    """
+
+    return _slug(food_name)
+
+
 def normalize_food_name(food_name: str, locale: str) -> CanonicalFood:
     """Resolve names with locale so English pasta never becomes Turkish cake."""
 

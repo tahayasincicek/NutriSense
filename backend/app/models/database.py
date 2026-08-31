@@ -445,5 +445,27 @@ class AuditEvent(Base):
     created_at = Column(UTCDateTime, default=utc_now, nullable=False, index=True)
 
 
+class PasswordResetToken(Base):
+    """Tek kullanımlık, süreli parola sıfırlama jetonu.
+
+    Jetonun kendisi veritabanında saklanmaz; yalnız SHA-256 özeti tutulur.
+    Böylece veritabanı okunsa bile jetonlar kullanılamaz.
+    """
+
+    __tablename__ = "password_reset_tokens"
+
+    id = Column(UUIDString, primary_key=True, default=lambda: str(uuid.uuid4()))
+    user_id = Column(
+        UUIDString,
+        ForeignKey("users.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+    token_hash = Column(String(64), unique=True, nullable=False, index=True)
+    expires_at = Column(UTCDateTime, nullable=False)
+    used_at = Column(UTCDateTime, nullable=True)
+    created_at = Column(UTCDateTime, default=utc_now, nullable=False)
+
+
 # Compatibility alias for existing auth code and tests.
 AuthAuditLog = AuditEvent

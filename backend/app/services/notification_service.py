@@ -18,6 +18,7 @@ import aiosmtplib
 from twilio.rest import Client as TwilioClient
 
 from ..config import Settings, get_settings
+from ..operations.metrics import runtime_metrics
 
 logger = logging.getLogger(__name__)
 
@@ -66,16 +67,55 @@ class NotificationService:
             else:
                 raise ChannelDeliveryError("UNSUPPORTED_CHANNEL", retryable=False)
         except ChannelDeliveryError:
+            runtime_metrics.provider_outcome(
+                "smtp" if channel == "email" else "twilio",
+                "rejected",
+            )
             raise
         except (TimeoutError, ConnectionError):
+            runtime_metrics.provider_outcome(
+                "smtp" if channel == "email" else "twilio",
+                "temporary_failure",
+            )
             raise ChannelDeliveryError("PROVIDER_TEMPORARY_FAILURE", retryable=True)
         except Exception:
+            runtime_metrics.provider_outcome(
+                "smtp" if channel == "email" else "twilio",
+                "rejected",
+            )
             logger.exception("Bildirim sağlayıcısı redakte edilmiş bir hatayla başarısız oldu.")
             raise ChannelDeliveryError("PROVIDER_REJECTED", retryable=False)
+        runtime_metrics.provider_outcome(
+            "smtp" if channel == "email" else "twilio",
+            "success",
+        )
         return {
             "provider_message_id": str(result.get("provider_message_id", "")) or None,
             "provider_status": str(result.get("provider_status", "accepted")),
         }
+
+    async def send_email_message(
+        self,
+        message: MIMEMultipart,
+        destination: str,
+    ) -> dict:
+        """Hazır bir e-posta iletisini gönderir (rapor biçimi dışı).
+
+        Parola sıfırlama gibi işlem e-postaları için kullanılır; rapor
+        şablonundan geçmez ama aynı mod/allowlist kısıtlarına tabidir.
+        """
+        self._assert_mode_and_allowlist("email", destination)
+        try:
+            return await self._email_transport(message, destination)
+        except ChannelDeliveryError:
+            raise
+        except (TimeoutError, ConnectionError):
+            raise ChannelDeliveryError(
+                "PROVIDER_TEMPORARY_FAILURE", retryable=True
+            )
+        except Exception:
+            logger.exception("İşlem e-postası gönderilemedi.")
+            raise ChannelDeliveryError("PROVIDER_REJECTED", retryable=False)
 
     def _assert_mode_and_allowlist(self, channel: str, destination: str) -> None:
         mode = self.settings.notification_mode.lower()
@@ -199,3 +239,35 @@ def build_safe_sms(report: dict) -> str:
         "Ayrıntılı beslenme günlüğü SMS içinde paylaşılmadı. "
         "Bu bilgi tıbbi tavsiye değildir."
     )
+
+
+def build_password_reset_email(
+    *,
+    reset_code: str,
+    destination: str,
+    settings: Settings,
+) -> MIMEMultipart:
+    """Parola sıfırlama kodunu taşıyan e-postayı hazırlar.
+
+    Kod düz metin olarak gönderilir; ekran okuyucu kullanıcıların kodu
+    rahatça dinleyebilmesi için rakamlar arasına boşluk konmaz ve
+    biçimlendirme sade tutulur.
+    """
+
+    message = MIMEMultipart("alternative")
+    message["Subject"] = "NutriSense parola sıfırlama kodu"
+    message["From"] = (
+        f"{settings.smtp_from_name} <{settings.smtp_from_email}>"
+    )
+    message["To"] = destination
+    message["Message-ID"] = make_msgid()
+
+    body = (
+        "NutriSense parola sıfırlama talebi aldık.\n\n"
+        f"Sıfırlama kodunuz: {reset_code}\n\n"
+        "Bu kod 1 saat boyunca ve yalnız bir kez geçerlidir.\n"
+        "Bu talebi siz yapmadıysanız bu iletiyi yok sayabilirsiniz; "
+        "parolanız değişmez.\n"
+    )
+    message.attach(MIMEText(body, "plain", "utf-8"))
+    return message

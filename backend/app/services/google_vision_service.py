@@ -15,6 +15,7 @@ from google.cloud import vision
 from tenacity import retry, stop_after_attempt, wait_exponential, retry_if_exception_type
 
 from ..config import get_settings
+from ..operations.metrics import runtime_metrics
 
 logger = logging.getLogger(__name__)
 settings = get_settings()
@@ -77,6 +78,12 @@ class GoogleVisionService:
 
     def __init__(self):
         """Vision API istemcisini başlatır."""
+        if settings.vision_provider_mode != "google":
+            logger.info("Google Vision sağlayıcısı yapılandırma ile kapalı")
+            runtime_metrics.provider_outcome("google_vision", "disabled")
+            self._available = False
+            self.client = None
+            return
         try:
             self.client = vision.ImageAnnotatorClient()
             self._available = True
@@ -164,12 +171,17 @@ class GoogleVisionService:
             result = self._map_labels_to_food(labels, objects)
             result["all_labels"] = labels
             result["all_objects"] = objects
-
+            runtime_metrics.provider_outcome("google_vision", "success")
             return result
 
+        except FoodNotFoundError:
+            runtime_metrics.provider_outcome("google_vision", "not_found")
+            raise
         except VisionAPIError:
+            runtime_metrics.provider_outcome("google_vision", "error")
             raise
         except Exception as exc:
+            runtime_metrics.provider_outcome("google_vision", "error")
             logger.error(
                 "Vision API çağrısı başarısız exception_type=%s",
                 type(exc).__name__,

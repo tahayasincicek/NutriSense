@@ -10,6 +10,7 @@
 # ==============================================================================
 
 import logging
+import hmac
 import re
 import uuid
 from contextlib import asynccontextmanager
@@ -28,6 +29,7 @@ from fastapi.responses import JSONResponse
 
 from .config import get_settings
 from .models.database import engine
+from .operations.metrics import runtime_metrics
 from .security.logging import configure_secure_logging
 from .routers.food_router import router as food_router
 from .routers.survey_router import router as survey_router
@@ -36,7 +38,11 @@ settings = get_settings()
 BACKEND_DIR = Path(__file__).resolve().parent.parent
 
 # ── Logging ──
-configure_secure_logging(debug=settings.debug)
+configure_secure_logging(
+    debug=settings.debug,
+    level=settings.log_level,
+    log_format=settings.log_format,
+)
 logger = logging.getLogger("nutrisense")
 REQUEST_ID_PATTERN = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._:-]{0,63}$")
 
@@ -49,10 +55,12 @@ REQUEST_ID_PATTERN = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._:-]{0,63}$")
 async def lifespan(app: FastAPI):
     """Uygulama başlangıç ve kapanış işlemleri."""
     settings.validate_security()
-    # Başlangıç
-    logger.info("=" * 60)
-    logger.info(f"  {settings.app_name} v{settings.app_version} başlatılıyor...")
-    logger.info("=" * 60)
+    logger.info(
+        "application_start version=%s revision=%s environment=%s",
+        settings.app_version,
+        settings.build_revision,
+        settings.app_environment.lower(),
+    )
 
     if settings.app_environment.lower() != "test":
         readiness = database_readiness()
@@ -62,10 +70,11 @@ async def lifespan(app: FastAPI):
             )
         logger.info("Veritabanı bağlantısı ve Alembic revision hazır")
 
-    yield
-
-    # Kapanış
-    logger.info("NutriSense kapatılıyor...")
+    try:
+        yield
+    finally:
+        logger.info("application_shutdown")
+        engine.dispose()
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -110,6 +119,7 @@ app.add_middleware(
 @app.middleware("http")
 async def request_id_middleware(request: Request, call_next):
     """İstemci request-id'sini korur veya yeni UUID üretir."""
+    metric_started = runtime_metrics.request_started()
     supplied_request_id = request.headers.get("X-Request-ID", "")
     request_id = (
         supplied_request_id
@@ -117,7 +127,46 @@ async def request_id_middleware(request: Request, call_next):
         else str(uuid.uuid4())
     )
     request.state.request_id = request_id
-    response = await call_next(request)
+    try:
+        response = await call_next(request)
+        error_class = None
+    except Exception as exc:
+        route = getattr(request.scope.get("route"), "path", "unmatched")
+        latency = runtime_metrics.request_finished(
+            started=metric_started,
+            method=request.method,
+            route=route,
+            status_code=500,
+            error_class=type(exc).__name__,
+        )
+        logger.error(
+            "http_request request_id=%s method=%s route=%s status=500 "
+            "latency_ms=%.3f error_class=%s",
+            request_id,
+            request.method,
+            route,
+            latency * 1000,
+            type(exc).__name__,
+        )
+        raise
+    route = getattr(request.scope.get("route"), "path", "unmatched")
+    if response.status_code >= 500:
+        error_class = "server_error"
+    latency = runtime_metrics.request_finished(
+        started=metric_started,
+        method=request.method,
+        route=route,
+        status_code=response.status_code,
+        error_class=error_class,
+    )
+    logger.info(
+        "http_request request_id=%s method=%s route=%s status=%s latency_ms=%.3f",
+        request_id,
+        request.method,
+        route,
+        response.status_code,
+        latency * 1000,
+    )
     response.headers["X-Request-ID"] = request_id
     response.headers["X-Content-Type-Options"] = "nosniff"
     response.headers["X-Frame-Options"] = "DENY"
@@ -248,7 +297,12 @@ def database_readiness() -> dict:
 
 @app.get("/health/live", tags=["System"])
 async def liveness_check():
-    return {"status": "alive", "app": settings.app_name, "version": settings.app_version}
+    return {
+        "status": "alive",
+        "app": settings.app_name,
+        "version": settings.app_version,
+        "revision": settings.build_revision,
+    }
 
 
 @app.get("/health/ready", tags=["System"])
@@ -256,7 +310,11 @@ async def readiness_check():
     readiness = database_readiness()
     return JSONResponse(
         status_code=200 if readiness["ready"] else 503,
-        content={"status": "ready" if readiness["ready"] else "not_ready", **readiness},
+        content={
+            "status": "ready" if readiness["ready"] else "not_ready",
+            **readiness,
+            "configuration": True,
+        },
     )
 
 
@@ -265,12 +323,53 @@ async def health_check():
     return await readiness_check()
 
 
+@app.get("/health/capabilities", tags=["System"])
+async def capability_check():
+    """Public feature state; contains modes only, never credentials."""
+    return settings.public_capabilities
+
+
+def _operations_authorized(request: Request) -> bool:
+    supplied = request.headers.get("X-Operations-Token", "")
+    return (
+        settings.metrics_enabled
+        and bool(supplied)
+        and hmac.compare_digest(supplied, settings.operations_token)
+    )
+
+
+@app.get("/operations/metrics", include_in_schema=False)
+async def operations_metrics(request: Request):
+    if not _operations_authorized(request):
+        raise HTTPException(status_code=404, detail="Kaynak bulunamadı.")
+    snapshot = runtime_metrics.snapshot()
+    try:
+        with engine.connect() as connection:
+            queue_depth = connection.execute(
+                text(
+                    "SELECT COUNT(*) FROM notification_deliveries "
+                    "WHERE status IN ('queued', 'sending')"
+                )
+            ).scalar_one()
+    except Exception as exc:
+        logger.error(
+            "metrics_queue_depth_failed exception_type=%s",
+            type(exc).__name__,
+        )
+        queue_depth = None
+    snapshot["queue_depth"] = queue_depth
+    snapshot["db_pool"] = engine.pool.status()
+    snapshot["revision"] = settings.build_revision
+    return snapshot
+
+
 @app.get("/", tags=["System"])
 async def root():
     """Kök endpoint — API bilgisi."""
     return {
         "app": settings.app_name,
         "version": settings.app_version,
-        "docs": "/docs",
+        "docs": "/docs" if settings.api_docs_enabled else None,
         "health": "/health",
+        "capabilities": "/health/capabilities",
     }

@@ -6,6 +6,9 @@ os.environ.setdefault("DEBUG", "false")
 os.environ.setdefault("APP_ENVIRONMENT", "test")
 os.environ.setdefault("MIGRATION_CHECK_ENABLED", "false")
 
+import sys
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
 import pytest
 from fastapi.testclient import TestClient
 
