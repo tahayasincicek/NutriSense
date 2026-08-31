@@ -304,7 +304,8 @@ class _CameraScreenState extends ConsumerState<CameraScreen>
         return;
       }
       ref.read(cameraStateProvider.notifier).setError(offline.message);
-      await _tts.speak('${offline.message} Besin adını söyleyerek de ekleyebilirsiniz.');
+      await _tts.speak(
+          '${offline.message} Besin adını söyleyerek de ekleyebilirsiniz.');
       return;
     }
     final message = failure?.message ??
@@ -344,7 +345,7 @@ class _CameraScreenState extends ConsumerState<CameraScreen>
           ),
         ),
       );
-      
+
       if (action == 'saved') {
         unawaited(_confirm());
       } else {
@@ -740,35 +741,39 @@ class _CameraScreenState extends ConsumerState<CameraScreen>
       );
 
   Widget _cameraBody(CameraState state) {
-    if (!_initialized || _controller == null) {
-      return Center(
-        child: state.status == CameraStatus.error
-            ? Padding(
-                padding: const EdgeInsets.all(24),
-                child: Text(
-                  state.errorMessage ?? state.statusMessage,
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(color: Colors.white, fontSize: 18),
-                ),
-              )
-            : const CircularProgressIndicator(color: Colors.white),
-      );
-    }
+    final previewReady = _initialized && _controller != null;
     return Stack(
       fit: StackFit.expand,
       children: [
-        CameraPreview(_controller!),
-        Center(
-          child: Container(
-            width: 240,
-            height: 240,
-            decoration: BoxDecoration(
-              border: Border.all(color: _statusColor(state.status), width: 3),
-              borderRadius: BorderRadius.circular(20),
+        // Önizleme hazır değilken bile analiz sonucu görünür kalmalıdır;
+        // aksi halde kamera yeniden bağlanırken sonuç kartı kaybolur.
+        if (!previewReady)
+          Center(
+            child: state.status == CameraStatus.error
+                ? Padding(
+                    padding: const EdgeInsets.all(24),
+                    child: Text(
+                      state.errorMessage ?? state.statusMessage,
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(color: Colors.white, fontSize: 18),
+                    ),
+                  )
+                : const CircularProgressIndicator(color: Colors.white),
+          )
+        else ...[
+          CameraPreview(_controller!),
+          Center(
+            child: Container(
+              width: 240,
+              height: 240,
+              decoration: BoxDecoration(
+                border: Border.all(color: _statusColor(state.status), width: 3),
+                borderRadius: BorderRadius.circular(20),
+              ),
             ),
           ),
-        ),
-        if (_busy(state.status))
+        ],
+        if (previewReady && _busy(state.status))
           Container(
             color: Colors.black54,
             child: const Center(
