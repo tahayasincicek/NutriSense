@@ -40,6 +40,8 @@ migrate_working_dir/
 **/.venv/
 **/env/
 /backend/data/*.json
+/backend/.runtime/
+/backend/backups/
 *.db
 *.sqlite
 *.sqlite3
