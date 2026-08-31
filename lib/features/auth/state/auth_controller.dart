@@ -64,6 +64,18 @@ class AuthController extends StateNotifier<AuthState> {
     return _loadAuthenticatedProfile();
   }
 
+  Future<String?> loginDietitian({
+    required String email,
+    required String password,
+  }) async {
+    final result = await _api.login(email: email, password: password);
+    if (!result.isSuccess) {
+      state = const AuthState(AuthStatus.unauthenticated);
+      return result.errorMessage ?? 'Diyetisyen girişi tamamlanamadı.';
+    }
+    return _loadAuthenticatedProfile(requiredAccountType: 'dietitian');
+  }
+
   Future<String?> register({
     required String fullName,
     required String email,
@@ -81,13 +93,41 @@ class AuthController extends StateNotifier<AuthState> {
     return _loadAuthenticatedProfile();
   }
 
-  Future<String?> _loadAuthenticatedProfile() async {
+  Future<String?> registerDietitian({
+    required String fullName,
+    required String email,
+    required String password,
+    required String specialization,
+    String? phone,
+  }) async {
+    final result = await _api.registerDietitian(
+      email: email,
+      password: password,
+      fullName: fullName,
+      specialization: specialization,
+      phone: phone,
+    );
+    if (!result.isSuccess) {
+      state = const AuthState(AuthStatus.unauthenticated);
+      return result.errorMessage ?? 'Diyetisyen hesabı oluşturulamadı.';
+    }
+    return _loadAuthenticatedProfile(requiredAccountType: 'dietitian');
+  }
+
+  Future<String?> _loadAuthenticatedProfile(
+      {String? requiredAccountType}) async {
     final profile = await _api.getCurrentUser();
     if (!profile.isSuccess || profile.data?.isActive != true) {
       await _api.logout();
       await _historyCache.clearAll();
       state = const AuthState(AuthStatus.unauthenticated);
       return profile.errorMessage ?? 'Kullanıcı profili doğrulanamadı.';
+    }
+    if (requiredAccountType != null &&
+        profile.data!.accountType != requiredAccountType) {
+      await _api.logout();
+      state = const AuthState(AuthStatus.unauthenticated);
+      return 'Bu hesap bir diyetisyen hesabı değil.';
     }
 
     // Önce loading durumuna geçir — bu LoginScreen'deki TextFormField'ların

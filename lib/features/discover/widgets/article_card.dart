@@ -62,11 +62,10 @@ class ArticleCard extends StatelessWidget {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Text(article.title,
-                            style: const TextStyle(
-                                fontWeight: FontWeight.bold)),
+                            style:
+                                const TextStyle(fontWeight: FontWeight.bold)),
                         const SizedBox(height: 2),
-                        Text(article.summary,
-                            style: theme.textTheme.bodySmall),
+                        Text(article.summary, style: theme.textTheme.bodySmall),
                       ],
                     ),
                   ),

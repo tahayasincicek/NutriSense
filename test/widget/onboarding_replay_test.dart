@@ -126,7 +126,8 @@ void main() {
       await tester.scrollUntilVisible(tile, 200,
           scrollable: find.byType(Scrollable).first);
       await tester.pumpAndSettle();
-      expect(tile, findsOneWidget, reason: 'Arastirma araci Ayarlar menusunde bulunamadi');
+      expect(tile, findsOneWidget,
+          reason: 'Arastirma araci Ayarlar menusunde bulunamadi');
 
       final listTile = tester.widget<ListTile>(tile);
       expect(listTile.onTap, isNotNull, reason: 'Arastirma araci eylemsiz');

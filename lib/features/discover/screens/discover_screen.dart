@@ -96,8 +96,8 @@ class DiscoverScreen extends StatelessWidget {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Container(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 10, vertical: 4),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                     decoration: BoxDecoration(
                       color: Colors.white.withOpacity(0.25),
                       borderRadius: BorderRadius.circular(8),
@@ -118,8 +118,8 @@ class DiscoverScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 4),
                   Text(featuredRecipe.summary,
-                      style: const TextStyle(
-                          color: Colors.white70, fontSize: 14)),
+                      style:
+                          const TextStyle(color: Colors.white70, fontSize: 14)),
                   const SizedBox(height: 12),
                   // Büyük fontta yan yana sığmayınca alt satıra kayar.
                   Wrap(
@@ -196,8 +196,8 @@ class DiscoverScreen extends StatelessWidget {
           child: Container(
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(20),
-              border: Border.all(
-                  color: theme.colorScheme.outline.withOpacity(0.2)),
+              border:
+                  Border.all(color: theme.colorScheme.outline.withOpacity(0.2)),
             ),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,

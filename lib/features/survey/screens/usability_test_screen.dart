@@ -99,7 +99,8 @@ class _UsabilityTestScreenState extends ConsumerState<UsabilityTestScreen> {
           const SizedBox(height: 8),
           Text(
             'Araştırmacı arayüzü — katılımcı görev performansını kaydedin.',
-            style: theme.textTheme.bodyLarge?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant),
+            style: theme.textTheme.bodyLarge?.copyWith(
+                color: Theme.of(context).colorScheme.onSurfaceVariant),
           ),
           const SizedBox(height: 32),
 
@@ -138,7 +139,9 @@ class _UsabilityTestScreenState extends ConsumerState<UsabilityTestScreen> {
                       padding: const EdgeInsets.symmetric(vertical: 2),
                       child: Row(
                         children: [
-                          Icon(Icons.circle, size: 8, color: Theme.of(context).colorScheme.outline),
+                          Icon(Icons.circle,
+                              size: 8,
+                              color: Theme.of(context).colorScheme.outline),
                           const SizedBox(width: 8),
                           Text(t.title, style: const TextStyle(fontSize: 14)),
                         ],
@@ -306,7 +309,8 @@ class _UsabilityTestScreenState extends ConsumerState<UsabilityTestScreen> {
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
       elevation: 1,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppTheme.cardRadius)),
+      shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppTheme.cardRadius)),
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -321,56 +325,59 @@ class _UsabilityTestScreenState extends ConsumerState<UsabilityTestScreen> {
                   '${task.description}. '
                   'Durum: ${statusLabels[task.status] ?? ""}.',
               child: Row(
-              children: [
-                Container(
-                  width: 32,
-                  height: 32,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: statusColors[task.status]?.withOpacity(0.15),
-                  ),
-                  child: Center(
-                    child: Text(
-                      '${index + 1}',
-                      style: TextStyle(
-                        fontWeight: FontWeight.w800,
-                        color: statusColors[task.status],
+                children: [
+                  Container(
+                    width: 32,
+                    height: 32,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: statusColors[task.status]?.withOpacity(0.15),
+                    ),
+                    child: Center(
+                      child: Text(
+                        '${index + 1}',
+                        style: TextStyle(
+                          fontWeight: FontWeight.w800,
+                          color: statusColors[task.status],
+                        ),
                       ),
                     ),
                   ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(task.title,
-                          style: const TextStyle(
-                              fontWeight: FontWeight.w700, fontSize: 16)),
-                      Text(task.description,
-                          style:
-                              TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant, fontSize: 13)),
-                    ],
-                  ),
-                ),
-                // Durum etiketi
-                Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                  decoration: BoxDecoration(
-                    color: statusColors[task.status]?.withOpacity(0.15),
-                    borderRadius: BorderRadius.circular(AppTheme.cardRadius),
-                  ),
-                  child: Text(
-                    statusLabels[task.status] ?? '',
-                    style: TextStyle(
-                      color: statusColors[task.status],
-                      fontWeight: FontWeight.w600,
-                      fontSize: 12,
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(task.title,
+                            style: const TextStyle(
+                                fontWeight: FontWeight.w700, fontSize: 16)),
+                        Text(task.description,
+                            style: TextStyle(
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .onSurfaceVariant,
+                                fontSize: 13)),
+                      ],
                     ),
                   ),
-                ),
-              ],
+                  // Durum etiketi
+                  Container(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: statusColors[task.status]?.withOpacity(0.15),
+                      borderRadius: BorderRadius.circular(AppTheme.cardRadius),
+                    ),
+                    child: Text(
+                      statusLabels[task.status] ?? '',
+                      style: TextStyle(
+                        color: statusColors[task.status],
+                        fontWeight: FontWeight.w600,
+                        fontSize: 12,
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
             const SizedBox(height: 12),
@@ -489,7 +496,8 @@ class _UsabilityTestScreenState extends ConsumerState<UsabilityTestScreen> {
   Widget _buildGeneralNote(ThemeData theme) {
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppTheme.cardRadius)),
+      shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppTheme.cardRadius)),
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(

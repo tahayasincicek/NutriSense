@@ -111,7 +111,8 @@ class AccessibleButton extends StatelessWidget {
     );
   }
 
-  Widget _buildButton(BuildContext context, ThemeData theme, VoidCallback? effectiveOnPressed) {
+  Widget _buildButton(
+      BuildContext context, ThemeData theme, VoidCallback? effectiveOnPressed) {
     final child = isLoading
         ? SizedBox(
             width: 24,
@@ -149,14 +150,17 @@ class AccessibleButton extends StatelessWidget {
             gradient: LinearGradient(
               colors: [
                 backgroundColor ?? theme.colorScheme.primary,
-                (backgroundColor ?? theme.colorScheme.primary).withBlue(50).withGreen(180),
+                (backgroundColor ?? theme.colorScheme.primary)
+                    .withBlue(50)
+                    .withGreen(180),
               ],
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
             ),
             boxShadow: [
               BoxShadow(
-                color: (backgroundColor ?? theme.colorScheme.primary).withOpacity(0.3),
+                color: (backgroundColor ?? theme.colorScheme.primary)
+                    .withOpacity(0.3),
                 blurRadius: 12,
                 offset: const Offset(0, 4),
               ),
@@ -177,7 +181,8 @@ class AccessibleButton extends StatelessWidget {
                     color: foregroundColor ?? theme.colorScheme.onPrimary,
                   ),
                   child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 16),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 22, vertical: 16),
                     child: child,
                   ),
                 ),
@@ -191,12 +196,14 @@ class AccessibleButton extends StatelessWidget {
             color: theme.colorScheme.surface.withOpacity(0.3),
             borderRadius: BorderRadius.circular(AppTheme.buttonRadius),
             border: Border.all(
-              color: foregroundColor?.withOpacity(0.5) ?? theme.colorScheme.primary.withOpacity(0.5),
+              color: foregroundColor?.withOpacity(0.5) ??
+                  theme.colorScheme.primary.withOpacity(0.5),
               width: 1.5,
             ),
             boxShadow: [
               BoxShadow(
-                color: (foregroundColor ?? theme.colorScheme.primary).withOpacity(0.08),
+                color: (foregroundColor ?? theme.colorScheme.primary)
+                    .withOpacity(0.08),
                 blurRadius: 10,
                 offset: const Offset(0, 2),
               ),
@@ -221,7 +228,8 @@ class AccessibleButton extends StatelessWidget {
                         color: foregroundColor ?? theme.colorScheme.primary,
                       ),
                       child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 16),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 22, vertical: 16),
                         child: child,
                       ),
                     ),

@@ -3,12 +3,14 @@ class UserProfile {
   final String email;
   final String fullName;
   final bool isActive;
+  final String accountType;
 
   const UserProfile({
     required this.id,
     required this.email,
     required this.fullName,
     required this.isActive,
+    this.accountType = 'patient',
   });
 
   factory UserProfile.fromJson(Map<String, dynamic> json) => UserProfile(
@@ -16,6 +18,7 @@ class UserProfile {
         email: json['email'] as String? ?? '',
         fullName: json['full_name'] as String? ?? '',
         isActive: json['is_active'] as bool? ?? false,
+        accountType: json['account_type'] as String? ?? 'patient',
       );
 }
 

@@ -35,7 +35,8 @@ class ActivityTrackerScreen extends ConsumerWidget {
               children: [
                 Expanded(child: _buildSleepCard(context, theme, state, ref)),
                 const SizedBox(width: 16),
-                Expanded(child: _buildWaterMiniCard(context, theme, state, ref)),
+                Expanded(
+                    child: _buildWaterMiniCard(context, theme, state, ref)),
               ],
             ),
             const SizedBox(height: 24),
@@ -43,7 +44,9 @@ class ActivityTrackerScreen extends ConsumerWidget {
             const SizedBox(height: 24),
             _buildWeightCard(context, theme, state, ref),
             const SizedBox(height: 32),
-            Text('Başarımlar ve Rozetler', style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
+            Text('Başarımlar ve Rozetler',
+                style: theme.textTheme.titleMedium
+                    ?.copyWith(fontWeight: FontWeight.bold)),
             const SizedBox(height: 12),
             _buildBadgeList(state),
             const SizedBox(height: 32),
@@ -53,17 +56,20 @@ class ActivityTrackerScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildStepCounter(BuildContext context, ThemeData theme, ActivityState state) {
+  Widget _buildStepCounter(
+      BuildContext context, ThemeData theme, ActivityState state) {
     return Semantics(
       container: true,
-      label: 'Adım Takibi. Hedef: ${state.stepGoal} adım. Atılan adım: ${state.steps}. Yüzde ${(state.stepProgress * 100).toInt()} tamamlandı.',
+      label:
+          'Adım Takibi. Hedef: ${state.stepGoal} adım. Atılan adım: ${state.steps}. Yüzde ${(state.stepProgress * 100).toInt()} tamamlandı.',
       child: ExcludeSemantics(
         child: Container(
           padding: const EdgeInsets.all(24),
           decoration: BoxDecoration(
             color: theme.colorScheme.surface,
             borderRadius: BorderRadius.circular(AppTheme.cardRadius),
-            border: Border.all(color: theme.colorScheme.outline.withOpacity(0.2)),
+            border:
+                Border.all(color: theme.colorScheme.outline.withOpacity(0.2)),
             boxShadow: [
               BoxShadow(
                 color: AppTheme.secondaryColor.withOpacity(0.05),
@@ -81,14 +87,15 @@ class ActivityTrackerScreen extends ConsumerWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text('Günlük Adım', style: theme.textTheme.titleMedium),
-                      Text('${state.steps}', 
-                        style: theme.textTheme.displaySmall?.copyWith(
-                          fontWeight: FontWeight.bold, 
-                          color: AppTheme.secondaryColor,
-                        )),
+                      Text('${state.steps}',
+                          style: theme.textTheme.displaySmall?.copyWith(
+                            fontWeight: FontWeight.bold,
+                            color: AppTheme.secondaryColor,
+                          )),
                     ],
                   ),
-                  const Icon(Icons.directions_run_rounded, size: 48, color: AppTheme.secondaryColor),
+                  const Icon(Icons.directions_run_rounded,
+                      size: 48, color: AppTheme.secondaryColor),
                 ],
               ),
               const SizedBox(height: 20),
@@ -98,13 +105,15 @@ class ActivityTrackerScreen extends ConsumerWidget {
                   value: state.stepProgress.clamp(0.0, 1.0),
                   minHeight: 12,
                   backgroundColor: AppTheme.secondaryColor.withOpacity(0.1),
-                  valueColor: const AlwaysStoppedAnimation(AppTheme.secondaryColor),
+                  valueColor:
+                      const AlwaysStoppedAnimation(AppTheme.secondaryColor),
                 ),
               ),
               const SizedBox(height: 12),
               Text(
                 'Hedef: ${state.stepGoal} adım',
-                style: theme.textTheme.bodySmall?.copyWith(fontWeight: FontWeight.w600),
+                style: theme.textTheme.bodySmall
+                    ?.copyWith(fontWeight: FontWeight.w600),
               ),
             ],
           ),
@@ -113,7 +122,8 @@ class ActivityTrackerScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildSleepCard(BuildContext context, ThemeData theme, ActivityState state, WidgetRef ref) {
+  Widget _buildSleepCard(BuildContext context, ThemeData theme,
+      ActivityState state, WidgetRef ref) {
     return Semantics(
       container: true,
       button: true,
@@ -133,7 +143,8 @@ class ActivityTrackerScreen extends ConsumerWidget {
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(AppTheme.cardRadius),
-              border: Border.all(color: theme.colorScheme.outline.withOpacity(0.2)),
+              border:
+                  Border.all(color: theme.colorScheme.outline.withOpacity(0.2)),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -141,7 +152,8 @@ class ActivityTrackerScreen extends ConsumerWidget {
               children: [
                 Row(
                   children: [
-                    const Icon(Icons.bedtime_rounded, color: Colors.indigo, size: 28),
+                    const Icon(Icons.bedtime_rounded,
+                        color: Colors.indigo, size: 28),
                     const Spacer(),
                     Icon(Icons.add_circle_outline_rounded,
                         size: 20, color: theme.colorScheme.outline),
@@ -179,7 +191,8 @@ class ActivityTrackerScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildWaterMiniCard(BuildContext context, ThemeData theme, ActivityState state, WidgetRef ref) {
+  Widget _buildWaterMiniCard(BuildContext context, ThemeData theme,
+      ActivityState state, WidgetRef ref) {
     return Semantics(
       container: true,
       button: true,
@@ -199,7 +212,8 @@ class ActivityTrackerScreen extends ConsumerWidget {
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(AppTheme.cardRadius),
-              border: Border.all(color: theme.colorScheme.outline.withOpacity(0.2)),
+              border:
+                  Border.all(color: theme.colorScheme.outline.withOpacity(0.2)),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -235,7 +249,8 @@ class ActivityTrackerScreen extends ConsumerWidget {
                     value: state.waterProgress.clamp(0.0, 1.0),
                     minHeight: 4,
                     backgroundColor: AppTheme.primaryColor.withOpacity(0.1),
-                    valueColor: const AlwaysStoppedAnimation(AppTheme.primaryColor),
+                    valueColor:
+                        const AlwaysStoppedAnimation(AppTheme.primaryColor),
                   ),
                 ),
               ],
@@ -257,7 +272,8 @@ class ActivityTrackerScreen extends ConsumerWidget {
         );
   }
 
-  Widget _buildMoodSelector(BuildContext context, ThemeData theme, ActivityState state, WidgetRef ref) {
+  Widget _buildMoodSelector(BuildContext context, ThemeData theme,
+      ActivityState state, WidgetRef ref) {
     final moods = [
       {'icon': '😊', 'label': 'Mutlu'},
       {'icon': '😐', 'label': 'Normal'},
@@ -276,7 +292,9 @@ class ActivityTrackerScreen extends ConsumerWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Bugün nasıl hissediyorsun?', style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold)),
+          Text('Bugün nasıl hissediyorsun?',
+              style: theme.textTheme.titleSmall
+                  ?.copyWith(fontWeight: FontWeight.bold)),
           const SizedBox(height: 16),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -288,7 +306,9 @@ class ActivityTrackerScreen extends ConsumerWidget {
                 label: '${m['label']} hissediyorum',
                 child: GestureDetector(
                   onTap: () {
-                    ref.read(activityProvider.notifier).setMood(m['label'] as String);
+                    ref
+                        .read(activityProvider.notifier)
+                        .setMood(m['label'] as String);
                     AccessibilityUtils.lightHaptic();
                   },
                   child: ExcludeSemantics(
@@ -296,11 +316,17 @@ class ActivityTrackerScreen extends ConsumerWidget {
                       duration: const Duration(milliseconds: 200),
                       padding: const EdgeInsets.all(12),
                       decoration: BoxDecoration(
-                        color: isSelected ? theme.colorScheme.primary.withOpacity(0.1) : Colors.transparent,
+                        color: isSelected
+                            ? theme.colorScheme.primary.withOpacity(0.1)
+                            : Colors.transparent,
                         shape: BoxShape.circle,
-                        border: Border.all(color: isSelected ? theme.colorScheme.primary : Colors.transparent),
+                        border: Border.all(
+                            color: isSelected
+                                ? theme.colorScheme.primary
+                                : Colors.transparent),
                       ),
-                      child: Text(m['icon']!, style: const TextStyle(fontSize: 24)),
+                      child: Text(m['icon']!,
+                          style: const TextStyle(fontSize: 24)),
                     ),
                   ),
                 ),
@@ -312,8 +338,8 @@ class ActivityTrackerScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildMedicationCard(
-      BuildContext context, ThemeData theme, ActivityState state, WidgetRef ref) {
+  Widget _buildMedicationCard(BuildContext context, ThemeData theme,
+      ActivityState state, WidgetRef ref) {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
@@ -342,8 +368,7 @@ class ActivityTrackerScreen extends ConsumerWidget {
             ],
           ),
           const SizedBox(height: 12),
-          ...state.medications
-              .map((med) => _buildMedItem(context, ref, med)),
+          ...state.medications.map((med) => _buildMedItem(context, ref, med)),
         ],
       ),
     );
@@ -392,9 +417,8 @@ class ActivityTrackerScreen extends ConsumerWidget {
                 child: Text(med.name,
                     style: TextStyle(
                         fontWeight: FontWeight.w600,
-                        decoration: med.isTaken
-                            ? TextDecoration.lineThrough
-                            : null)),
+                        decoration:
+                            med.isTaken ? TextDecoration.lineThrough : null)),
               ),
               const SizedBox(width: 8),
               Text(med.schedule,
@@ -406,7 +430,8 @@ class ActivityTrackerScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildWeightCard(BuildContext context, ThemeData theme, ActivityState state, WidgetRef ref) {
+  Widget _buildWeightCard(BuildContext context, ThemeData theme,
+      ActivityState state, WidgetRef ref) {
     return Container(
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
@@ -421,14 +446,19 @@ class ActivityTrackerScreen extends ConsumerWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text('Kilo Takibi', style: theme.textTheme.titleMedium),
-              IconButton(onPressed: () => _showWeightInputDialog(context, ref), icon: const Icon(Icons.add_circle_outline_rounded, color: AppTheme.primaryColor)),
+              IconButton(
+                  onPressed: () => _showWeightInputDialog(context, ref),
+                  icon: const Icon(Icons.add_circle_outline_rounded,
+                      color: AppTheme.primaryColor)),
             ],
           ),
           Row(
             crossAxisAlignment: CrossAxisAlignment.baseline,
             textBaseline: TextBaseline.alphabetic,
             children: [
-              Text('${state.currentWeight}', style: theme.textTheme.displaySmall?.copyWith(fontWeight: FontWeight.bold)),
+              Text('${state.currentWeight}',
+                  style: theme.textTheme.displaySmall
+                      ?.copyWith(fontWeight: FontWeight.bold)),
               const SizedBox(width: 4),
               const Text('kg', style: TextStyle(fontWeight: FontWeight.bold)),
             ],
@@ -447,7 +477,10 @@ class ActivityTrackerScreen extends ConsumerWidget {
                     color: AppTheme.primaryColor.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  child: Center(child: Text('${w.toInt()}', style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold))),
+                  child: Center(
+                      child: Text('${w.toInt()}',
+                          style: const TextStyle(
+                              fontSize: 10, fontWeight: FontWeight.bold))),
                 );
               }).toList(),
             ),
@@ -466,27 +499,46 @@ class ActivityTrackerScreen extends ConsumerWidget {
         itemBuilder: (context, index) {
           final badge = state.badges[index];
           return Semantics(
-            label: '${badge.title} rozeti. ${badge.isUnlocked ? 'Kazanıldı' : 'Henüz kazanılmadı'}',
+            label:
+                '${badge.title} rozeti. ${badge.isUnlocked ? 'Kazanıldı' : 'Henüz kazanılmadı'}',
             child: ExcludeSemantics(
               child: Container(
                 width: 90,
                 margin: const EdgeInsets.only(right: 16),
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: badge.isUnlocked ? Colors.white : Colors.grey.withOpacity(0.05),
+                  color: badge.isUnlocked
+                      ? Colors.white
+                      : Colors.grey.withOpacity(0.05),
                   borderRadius: BorderRadius.circular(20),
-                  border: Border.all(color: badge.isUnlocked ? AppTheme.primaryColor.withOpacity(0.3) : Colors.transparent),
-                  boxShadow: badge.isUnlocked ? [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10)] : null,
+                  border: Border.all(
+                      color: badge.isUnlocked
+                          ? AppTheme.primaryColor.withOpacity(0.3)
+                          : Colors.transparent),
+                  boxShadow: badge.isUnlocked
+                      ? [
+                          BoxShadow(
+                              color: Colors.black.withOpacity(0.05),
+                              blurRadius: 10)
+                        ]
+                      : null,
                 ),
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Opacity(
                       opacity: badge.isUnlocked ? 1.0 : 0.3,
-                      child: Text(badge.icon, style: const TextStyle(fontSize: 32)),
+                      child: Text(badge.icon,
+                          style: const TextStyle(fontSize: 32)),
                     ),
                     const SizedBox(height: 4),
-                    Text(badge.title, textAlign: TextAlign.center, style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: badge.isUnlocked ? Colors.black : Colors.grey)),
+                    Text(badge.title,
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                            fontSize: 10,
+                            fontWeight: FontWeight.bold,
+                            color:
+                                badge.isUnlocked ? Colors.black : Colors.grey)),
                   ],
                 ),
               ),
@@ -497,7 +549,8 @@ class ActivityTrackerScreen extends ConsumerWidget {
     );
   }
 
-  Future<void> _showWeightInputDialog(BuildContext context, WidgetRef ref) async {
+  Future<void> _showWeightInputDialog(
+      BuildContext context, WidgetRef ref) async {
     final value = await showAccessibleNumberDialog(
       context: context,
       title: 'Kilo Kaydet',

@@ -54,10 +54,11 @@ enum VoiceCommand {
   help('Yardım', ['yardım', 'komutlar', 'ne yapabilirim', 'ne diyebilirim']),
   yes('Evet', ['evet', 'tamam', 'olur', 'kabul', 'kaydet', 'onayla']),
   no('Hayır', ['hayır', 'yok', 'istemiyorum', 'reddet']),
-  
+
   // Yeni Sağlık Takibi Komutları
   addWater('Su Ekle', ['su içtim', 'su ekle', 'bir bardak su', 'su kaydet']),
-  setMood('Duygu Durumu', ['mutluyum', 'yorgunum', 'üzgünüm', 'enerjiğim', 'normal hissediyorum']),
+  setMood('Duygu Durumu',
+      ['mutluyum', 'yorgunum', 'üzgünüm', 'enerjiğim', 'normal hissediyorum']),
   logWeight('Kilo Kaydet', ['kilomu kaydet', 'kilo ekle', 'kilom']),
   logSleep('Uyku Kaydet', [
     'uyku kaydet',
@@ -332,7 +333,7 @@ class VoiceCommandService {
       priority: TtsPriority.normal,
     );
     _accessibility.lightHaptic();
-    
+
     // Callback (UI için)
     onCommandRecognized?.call(CommandResult(rawText: text, recognized: false));
   }

@@ -82,11 +82,9 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     _OnboardingPage(
       icon: Icons.mic_rounded,
       title: 'Sesli Kontrol',
-      description:
-          'Uygulamayı tamamen sesli komutlarla kontrol edebilirsiniz. '
+      description: 'Uygulamayı tamamen sesli komutlarla kontrol edebilirsiniz. '
           '"Tara", "Geçmiş", "Gönder", "Yardım" gibi komutları kullanın.',
-      ttsText:
-          'Bu uygulamayı tamamen sesli komutlarla kontrol edebilirsiniz. '
+      ttsText: 'Bu uygulamayı tamamen sesli komutlarla kontrol edebilirsiniz. '
           'Tara diyerek kamerayı açabilir, Geçmiş diyerek yemek kayıtlarınızı dinleyebilir, '
           'Gönder diyerek diyetisyeninize rapor gönderebilir, '
           'Yardım diyerek tüm komutları öğrenebilirsiniz. '
@@ -95,8 +93,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     _OnboardingPage(
       icon: Icons.camera_alt_rounded,
       title: 'İzinler',
-      description:
-          'Besin tanıma için kamera ve sesli komutlar için mikrofon '
+      description: 'Besin tanıma için kamera ve sesli komutlar için mikrofon '
           'izinlerini vermeniz gerekmektedir.',
       ttsText:
           'Uygulamanın çalışması için kamera ve mikrofon izinlerine ihtiyaç duyulmaktadır. '
@@ -106,11 +103,9 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     _OnboardingPage(
       icon: Icons.track_changes_rounded,
       title: 'Kalori Hedefi',
-      description:
-          'Günlük kalori hedefinizi belirleyin. '
+      description: 'Günlük kalori hedefinizi belirleyin. '
           'Bu değeri daha sonra ayarlardan değiştirebilirsiniz.',
-      ttsText:
-          'Son adım: Günlük kalori hedefinizi belirleyin. '
+      ttsText: 'Son adım: Günlük kalori hedefinizi belirleyin. '
           'Varsayılan olarak 2000 kalori ayarlanmıştır. '
           'Kaydırıcı ile değiştirebilir veya olduğu gibi bırakabilirsiniz. '
           'Başlamak için tamamla butonuna basın.',
@@ -215,8 +210,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
               child: Semantics(
-                label:
-                    'Adım ${_currentPage + 1} / ${_pages.length}',
+                label: 'Adım ${_currentPage + 1} / ${_pages.length}',
                 child: Row(
                   children: List.generate(_pages.length, (index) {
                     final isActive = index <= _currentPage;
@@ -364,8 +358,8 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
               ),
               shape: BoxShape.circle,
             ),
-            child:
-                const Icon(Icons.security_rounded, size: 56, color: Colors.white),
+            child: const Icon(Icons.security_rounded,
+                size: 56, color: Colors.white),
           ),
           const SizedBox(height: 40),
           Text(
@@ -535,12 +529,17 @@ class _PermissionRow extends StatelessWidget {
         ),
         child: Row(
           children: [
-            Icon(icon, color: granted ? AppTheme.successColor : theme.colorScheme.onSurfaceVariant),
+            Icon(icon,
+                color: granted
+                    ? AppTheme.successColor
+                    : theme.colorScheme.onSurfaceVariant),
             const SizedBox(width: 12),
             Expanded(child: Text(label, style: theme.textTheme.bodyLarge)),
             Icon(
               granted ? Icons.check_circle : Icons.circle_outlined,
-              color: granted ? AppTheme.successColor : theme.colorScheme.onSurfaceVariant,
+              color: granted
+                  ? AppTheme.successColor
+                  : theme.colorScheme.onSurfaceVariant,
             ),
           ],
         ),

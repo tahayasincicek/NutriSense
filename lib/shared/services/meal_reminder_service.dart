@@ -106,9 +106,10 @@ class MealReminderService {
   Future<void> _loadSettings() async {
     final prefs = await SharedPreferences.getInstance();
     _settings = MealReminderSettings(
-      breakfastHour:
-          prefs.getInt(MealType.breakfast.hourKey) ?? MealType.breakfast.defaultHour,
-      lunchHour: prefs.getInt(MealType.lunch.hourKey) ?? MealType.lunch.defaultHour,
+      breakfastHour: prefs.getInt(MealType.breakfast.hourKey) ??
+          MealType.breakfast.defaultHour,
+      lunchHour:
+          prefs.getInt(MealType.lunch.hourKey) ?? MealType.lunch.defaultHour,
       dinnerHour:
           prefs.getInt(MealType.dinner.hourKey) ?? MealType.dinner.defaultHour,
       breakfastEnabled: prefs.getBool(MealType.breakfast.enabledKey) ?? true,

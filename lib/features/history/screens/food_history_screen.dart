@@ -29,7 +29,6 @@ class _FoodHistoryScreenState extends ConsumerState<FoodHistoryScreen> {
   final Map<String, bool> _pendingVoiceDelete = {};
   String? _voiceStatus;
 
-
   @override
   void initState() {
     super.initState();
@@ -55,7 +54,8 @@ class _FoodHistoryScreenState extends ConsumerState<FoodHistoryScreen> {
         actions: [
           IconButton(
             icon: const Icon(Icons.bar_chart_rounded),
-            onPressed: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const NutritionStatsScreen())),
+            onPressed: () => Navigator.of(context).push(MaterialPageRoute(
+                builder: (_) => const NutritionStatsScreen())),
           ),
           IconButton(
             icon: const Icon(Icons.calendar_today_rounded, size: 20),
@@ -68,7 +68,8 @@ class _FoodHistoryScreenState extends ConsumerState<FoodHistoryScreen> {
         children: [
           _PeriodSelector(
             selected: state.period,
-            onSelected: (period) => ref.read(historyControllerProvider.notifier).setPeriod(period),
+            onSelected: (period) =>
+                ref.read(historyControllerProvider.notifier).setPeriod(period),
           ),
           if (state.isOffline && state.message != null)
             _OfflineBanner(message: state.message!, cachedAt: state.cachedAt),
@@ -185,11 +186,11 @@ class _FoodHistoryScreenState extends ConsumerState<FoodHistoryScreen> {
             children: [
               _DailySummaryCard(day: day),
               ...day.foods.map((entry) => _FoodLogCard(
-                entry: entry,
-                onDelete: () => _confirmAndDelete(entry),
-                onEdit: () => _editEntry(entry),
-                onVoice: () => _voiceCommandFor(entry),
-              )),
+                    entry: entry,
+                    onDelete: () => _confirmAndDelete(entry),
+                    onEdit: () => _editEntry(entry),
+                    onVoice: () => _voiceCommandFor(entry),
+                  )),
               const SizedBox(height: 24),
             ],
           );
@@ -214,8 +215,7 @@ class _FoodHistoryScreenState extends ConsumerState<FoodHistoryScreen> {
               const SizedBox(height: 16),
               const Text('Seçilen dönemde kayıt yok',
                   textAlign: TextAlign.center,
-                  style:
-                      TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
               const SizedBox(height: 8),
               Text('Yediklerini tarayarak başlayabilirsin.',
                   textAlign: TextAlign.center,
@@ -264,7 +264,9 @@ class _FoodHistoryScreenState extends ConsumerState<FoodHistoryScreen> {
         title: const Text('Kaydı Sil'),
         content: Text('${entry.foodNameTr} silinsin mi?'),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Vazgeç')),
+          TextButton(
+              onPressed: () => Navigator.pop(context, false),
+              child: const Text('Vazgeç')),
           FilledButton(
             key: const Key('history_delete_confirm'),
             onPressed: () => Navigator.pop(context, true),
@@ -307,13 +309,12 @@ class _FoodHistoryScreenState extends ConsumerState<FoodHistoryScreen> {
       builder: (_) => _HistoryEditDialog(entry: entry),
     );
     if (result == null || !mounted) return;
-    final outcome = await ref
-        .read(historyControllerProvider.notifier)
-        .updateEntry(
-          logId: entry.id,
-          foodNameTr: result.foodNameTr,
-          portionGrams: result.portionGrams,
-        );
+    final outcome =
+        await ref.read(historyControllerProvider.notifier).updateEntry(
+              logId: entry.id,
+              foodNameTr: result.foodNameTr,
+              portionGrams: result.portionGrams,
+            );
     if (!mounted) return;
     _accessibility.speak(outcome.message, priority: TtsPriority.high);
   }
@@ -326,8 +327,8 @@ class _FoodHistoryScreenState extends ConsumerState<FoodHistoryScreen> {
       onResult: (result) {
         if (!result.isFinal) {
           if (!mounted) return;
-          setState(() => _voiceStatus =
-              'Komut henüz çalıştırılmadı; lütfen tamamlayın.');
+          setState(() =>
+              _voiceStatus = 'Komut henüz çalıştırılmadı; lütfen tamamlayın.');
           return;
         }
         final intent = _voiceParser.parse(
@@ -352,16 +353,17 @@ class _FoodHistoryScreenState extends ConsumerState<FoodHistoryScreen> {
           _pendingVoiceDelete[entry.id] = true;
           setState(() => _voiceStatus =
               'Silmeyi onaylamak için: Mikrofon düğmesine tekrar basıp '
-              'evet deyin.');
+                  'evet deyin.');
           _accessibility.speak(_voiceStatus!, priority: TtsPriority.high);
           return;
         }
-        setState(() =>
-            _voiceStatus = 'Komut henüz çalıştırılmadı; anlaşılamadı.');
+        setState(
+            () => _voiceStatus = 'Komut henüz çalıştırılmadı; anlaşılamadı.');
       },
       onError: (_) {
         if (!mounted) return;
-        setState(() => _voiceStatus = 'Komut henüz çalıştırılmadı; ses hatası.');
+        setState(
+            () => _voiceStatus = 'Komut henüz çalıştırılmadı; ses hatası.');
       },
     );
   }
@@ -404,8 +406,7 @@ class _OfflineBanner extends StatelessWidget {
             Expanded(
               child: Text(
                 '$message$stamp',
-                style:
-                    TextStyle(color: theme.colorScheme.onTertiaryContainer),
+                style: TextStyle(color: theme.colorScheme.onTertiaryContainer),
               ),
             ),
           ],
@@ -454,8 +455,9 @@ class _HistoryEditDialogState extends State<_HistoryEditDialog> {
       context,
       _HistoryEditResult(
         foodNameTr: name.isEmpty ? null : name,
-        portionGrams:
-            (portion != null && portion > 0 && portion <= 2000) ? portion : null,
+        portionGrams: (portion != null && portion > 0 && portion <= 2000)
+            ? portion
+            : null,
       ),
     );
   }
@@ -534,15 +536,20 @@ class _PeriodSelector extends StatelessWidget {
                   duration: const Duration(milliseconds: 200),
                   padding: const EdgeInsets.symmetric(vertical: 10),
                   decoration: BoxDecoration(
-                    color: isSelected ? theme.colorScheme.primary : Colors.transparent,
+                    color: isSelected
+                        ? theme.colorScheme.primary
+                        : Colors.transparent,
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Text(
                     period.label,
                     textAlign: TextAlign.center,
                     style: TextStyle(
-                      color: isSelected ? Colors.white : theme.colorScheme.onSurfaceVariant,
-                      fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                      color: isSelected
+                          ? Colors.white
+                          : theme.colorScheme.onSurfaceVariant,
+                      fontWeight:
+                          isSelected ? FontWeight.bold : FontWeight.normal,
                     ),
                   ),
                 ),
@@ -571,16 +578,18 @@ class _DailySummaryCard extends StatelessWidget {
         children: [
           Flexible(
             child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(dateStr, style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
-              Text(
-                '${day.mealCount} kayıt • '
-                '${day.totalCalories.toStringAsFixed(0)} kcal',
-                style: theme.textTheme.bodySmall,
-              ),
-            ],
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(dateStr,
+                    style: theme.textTheme.titleMedium
+                        ?.copyWith(fontWeight: FontWeight.bold)),
+                Text(
+                  '${day.mealCount} kayıt • '
+                  '${day.totalCalories.toStringAsFixed(0)} kcal',
+                  style: theme.textTheme.bodySmall,
+                ),
+              ],
             ),
           ),
           const SizedBox(width: 8),
@@ -594,7 +603,9 @@ class _DailySummaryCard extends StatelessWidget {
               child: Text(
                 'Toplam ${day.totalCalories.toStringAsFixed(0)} kcal',
                 textAlign: TextAlign.end,
-                style: TextStyle(color: theme.colorScheme.primary, fontWeight: FontWeight.bold),
+                style: TextStyle(
+                    color: theme.colorScheme.primary,
+                    fontWeight: FontWeight.bold),
               ),
             ),
           ),
@@ -604,7 +615,20 @@ class _DailySummaryCard extends StatelessWidget {
   }
 
   String _getMonthName(int month) {
-    const names = ['Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran', 'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık'];
+    const names = [
+      'Ocak',
+      'Şubat',
+      'Mart',
+      'Nisan',
+      'Mayıs',
+      'Haziran',
+      'Temmuz',
+      'Ağustos',
+      'Eylül',
+      'Ekim',
+      'Kasım',
+      'Aralık'
+    ];
     return names[month - 1];
   }
 }
@@ -685,8 +709,8 @@ class _FoodLogCard extends StatelessWidget {
                 Text('Kaynak: ${entry.recognitionSourceTr}',
                     style: theme.textTheme.labelSmall),
                 Container(
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 8, vertical: 2),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                   decoration: BoxDecoration(
                     color: theme.colorScheme.secondaryContainer,
                     borderRadius: BorderRadius.circular(8),
@@ -729,19 +753,27 @@ class _FoodLogCard extends StatelessWidget {
 
   IconData _getMealIcon(String type) {
     switch (type) {
-      case 'kahvalti': return Icons.wb_sunny_outlined;
-      case 'ogle': return Icons.lunch_dining_outlined;
-      case 'aksam': return Icons.dark_mode_outlined;
-      default: return Icons.local_pizza_outlined;
+      case 'kahvalti':
+        return Icons.wb_sunny_outlined;
+      case 'ogle':
+        return Icons.lunch_dining_outlined;
+      case 'aksam':
+        return Icons.dark_mode_outlined;
+      default:
+        return Icons.local_pizza_outlined;
     }
   }
 
   Color _getMealColor(String type) {
     switch (type) {
-      case 'kahvalti': return Colors.orange;
-      case 'ogle': return Colors.blue;
-      case 'aksam': return Colors.indigo;
-      default: return Colors.green;
+      case 'kahvalti':
+        return Colors.orange;
+      case 'ogle':
+        return Colors.blue;
+      case 'aksam':
+        return Colors.indigo;
+      default:
+        return Colors.green;
     }
   }
 }

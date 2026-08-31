@@ -4,7 +4,8 @@ class BadgeModel {
   final String title;
   final String icon;
   final bool isUnlocked;
-  BadgeModel({required this.title, required this.icon, this.isUnlocked = false});
+  BadgeModel(
+      {required this.title, required this.icon, this.isUnlocked = false});
 }
 
 /// İlaç / takviye hatırlatması.
@@ -36,7 +37,7 @@ class ActivityState {
   final List<BadgeModel> badges;
   final String? currentMood;
   final double sleepHours; // Yeni: Uyku saati
-  final double sleepGoal;  // Yeni: Uyku hedefi
+  final double sleepGoal; // Yeni: Uyku hedefi
   final List<MedicationModel> medications;
 
   ActivityState({
@@ -90,20 +91,22 @@ class ActivityState {
 }
 
 class ActivityNotifier extends StateNotifier<ActivityState> {
-  ActivityNotifier() : super(ActivityState(
-    badges: [
-      BadgeModel(title: 'Su Avcısı', icon: '💧', isUnlocked: true),
-      BadgeModel(title: 'Yolcu', icon: '👟', isUnlocked: true),
-      BadgeModel(title: 'Uykucu', icon: '🌙', isUnlocked: true),
-    ]
-  ));
+  ActivityNotifier()
+      : super(ActivityState(badges: [
+          BadgeModel(title: 'Su Avcısı', icon: '💧', isUnlocked: true),
+          BadgeModel(title: 'Yolcu', icon: '👟', isUnlocked: true),
+          BadgeModel(title: 'Uykucu', icon: '🌙', isUnlocked: true),
+        ]));
 
-  void addWater(int ml) => state = state.copyWith(consumedWater: state.consumedWater + ml);
-  void addSteps(int count) => state = state.copyWith(steps: state.steps + count);
+  void addWater(int ml) =>
+      state = state.copyWith(consumedWater: state.consumedWater + ml);
+  void addSteps(int count) =>
+      state = state.copyWith(steps: state.steps + count);
   void updateWeight(double weight) {
     final history = List<double>.from(state.weightHistory)..add(weight);
     state = state.copyWith(currentWeight: weight, weightHistory: history);
   }
+
   void setMood(String mood) => state = state.copyWith(currentMood: mood);
 
   /// Uyku süresini saat cinsinden kaydeder. 0-24 aralığına sıkıştırılır.
@@ -121,4 +124,5 @@ class ActivityNotifier extends StateNotifier<ActivityState> {
   }
 }
 
-final activityProvider = StateNotifierProvider<ActivityNotifier, ActivityState>((ref) => ActivityNotifier());
+final activityProvider = StateNotifierProvider<ActivityNotifier, ActivityState>(
+    (ref) => ActivityNotifier());

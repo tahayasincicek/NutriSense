@@ -48,8 +48,7 @@ void main() {
     service.setScreenReaderActive(true);
     spoken.clear();
     await service.speak('bu okunmamalı');
-    expect(spoken, isEmpty,
-        reason: 'TalkBack ile çift konuşma oluşuyor');
+    expect(spoken, isEmpty, reason: 'TalkBack ile çift konuşma oluşuyor');
   });
 
   test('ekran okuyucu açıkken hatalar yine de duyulur', () async {
@@ -65,8 +64,7 @@ void main() {
     );
   });
 
-  test('açıkça izin verilen duyurular ekran okuyucuya rağmen okunur',
-      () async {
+  test('açıkça izin verilen duyurular ekran okuyucuya rağmen okunur', () async {
     final service = await ready();
     service.setScreenReaderActive(true);
     spoken.clear();

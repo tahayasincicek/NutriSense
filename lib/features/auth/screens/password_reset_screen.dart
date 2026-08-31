@@ -216,7 +216,6 @@ class _PasswordResetScreenState extends ConsumerState<PasswordResetScreen> {
                 style: theme.textTheme.bodyMedium,
               ),
               const SizedBox(height: 24),
-
               Semantics(
                 label: 'E-posta adresi giriş alanı',
                 textField: true,
@@ -232,7 +231,6 @@ class _PasswordResetScreenState extends ConsumerState<PasswordResetScreen> {
                   ),
                 ),
               ),
-
               if (onCodeStep) ...[
                 const SizedBox(height: 16),
                 Semantics(
@@ -291,7 +289,6 @@ class _PasswordResetScreenState extends ConsumerState<PasswordResetScreen> {
                   ),
                 ),
               ],
-
               if (_error != null) ...[
                 const SizedBox(height: 16),
                 Semantics(
@@ -304,13 +301,12 @@ class _PasswordResetScreenState extends ConsumerState<PasswordResetScreen> {
                     ),
                     child: Text(
                       _error!,
-                      style: TextStyle(
-                          color: theme.colorScheme.onErrorContainer),
+                      style:
+                          TextStyle(color: theme.colorScheme.onErrorContainer),
                     ),
                   ),
                 ),
               ],
-
               const SizedBox(height: 24),
               AccessibleButton(
                 key: const Key('reset_primary_action'),
@@ -319,9 +315,9 @@ class _PasswordResetScreenState extends ConsumerState<PasswordResetScreen> {
                     ? 'Yeni parolanızı kaydetmek için basın'
                     : 'Sıfırlama kodunu e-postanıza göndermek için basın',
                 isLoading: _busy,
-                onPressed: _busy ? null : (onCodeStep ? _confirm : _requestCode),
+                onPressed:
+                    _busy ? null : (onCodeStep ? _confirm : _requestCode),
               ),
-
               if (onCodeStep) ...[
                 const SizedBox(height: 12),
                 AccessibleButton(

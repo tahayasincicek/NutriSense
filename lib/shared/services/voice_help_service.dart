@@ -64,12 +64,11 @@ const _contextCommands = <HelpContext, List<VoiceCommand>>{
 const _contextTips = <HelpContext, String>{
   HelpContext.scan:
       'Tara diyerek kamerayı açabilir, ya da besin ekle deyip adını '
-      'söyleyerek doğrudan kaydedebilirsiniz.',
+          'söyleyerek doğrudan kaydedebilirsiniz.',
   HelpContext.activity:
       'Değerleri tek cümlede söyleyebilirsiniz; örneğin uyku kaydet yedi '
-      'buçuk, ya da su içtim diyebilirsiniz.',
-  HelpContext.history:
-      'Bugün diyerek günlük özetinizi dinleyebilirsiniz. '
+          'buçuk, ya da su içtim diyebilirsiniz.',
+  HelpContext.history: 'Bugün diyerek günlük özetinizi dinleyebilirsiniz. '
       'Silinen kayıt geri alınabilir.',
   HelpContext.discover: 'Tarif ve beslenme ipuçlarını dinleyebilirsiniz.',
   HelpContext.dietitian:

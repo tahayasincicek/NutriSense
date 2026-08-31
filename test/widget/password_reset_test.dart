@@ -57,8 +57,7 @@ void main() {
       await tester.pumpWidget(app(const PasswordResetScreen()));
       await tester.pump();
 
-      await tester.enterText(
-          find.byKey(const Key('reset_email')), 'gecersiz');
+      await tester.enterText(find.byKey(const Key('reset_email')), 'gecersiz');
       await tester.tap(find.byKey(const Key('reset_primary_action')));
       await tester.pumpAndSettle();
 

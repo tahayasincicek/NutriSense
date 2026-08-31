@@ -188,7 +188,8 @@ class _SurveyScreenState extends ConsumerState<SurveyScreen> {
               child: LinearProgressIndicator(
                 value: progress,
                 minHeight: 8,
-                backgroundColor: Theme.of(context).colorScheme.surfaceContainerHighest,
+                backgroundColor:
+                    Theme.of(context).colorScheme.surfaceContainerHighest,
                 valueColor: const AlwaysStoppedAnimation(AppTheme.primaryColor),
               ),
             ),
@@ -241,7 +242,9 @@ class _SurveyScreenState extends ConsumerState<SurveyScreen> {
                     : theme.colorScheme.surfaceContainer,
                 borderRadius: BorderRadius.circular(AppTheme.cardRadius),
                 border: Border.all(
-                  color: isSelected ? AppTheme.primaryColor : theme.colorScheme.outlineVariant,
+                  color: isSelected
+                      ? AppTheme.primaryColor
+                      : theme.colorScheme.outlineVariant,
                   width: isSelected ? 2 : 1,
                 ),
               ),
@@ -253,14 +256,19 @@ class _SurveyScreenState extends ConsumerState<SurveyScreen> {
                     height: 40,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      color:
-                          isSelected ? AppTheme.primaryColor : Theme.of(context).colorScheme.surfaceContainerHighest,
+                      color: isSelected
+                          ? AppTheme.primaryColor
+                          : Theme.of(context)
+                              .colorScheme
+                              .surfaceContainerHighest,
                     ),
                     child: Center(
                       child: Text(
                         '$value',
                         style: TextStyle(
-                          color: isSelected ? Colors.white : Theme.of(context).colorScheme.onSurfaceVariant,
+                          color: isSelected
+                              ? Colors.white
+                              : Theme.of(context).colorScheme.onSurfaceVariant,
                           fontWeight: FontWeight.w800,
                           fontSize: 18,
                         ),
@@ -316,7 +324,9 @@ class _SurveyScreenState extends ConsumerState<SurveyScreen> {
                     : Theme.of(context).colorScheme.surfaceContainer,
                 borderRadius: BorderRadius.circular(AppTheme.cardRadius),
                 border: Border.all(
-                  color: isSelected ? AppTheme.primaryColor : Theme.of(context).colorScheme.outlineVariant,
+                  color: isSelected
+                      ? AppTheme.primaryColor
+                      : Theme.of(context).colorScheme.outlineVariant,
                   width: isSelected ? 2 : 1,
                 ),
               ),
@@ -326,8 +336,9 @@ class _SurveyScreenState extends ConsumerState<SurveyScreen> {
                     isSelected
                         ? Icons.radio_button_checked
                         : Icons.radio_button_off,
-                    color:
-                        isSelected ? AppTheme.primaryColor : Theme.of(context).colorScheme.outline,
+                    color: isSelected
+                        ? AppTheme.primaryColor
+                        : Theme.of(context).colorScheme.outline,
                     size: 24,
                   ),
                   const SizedBox(width: 14),
@@ -440,8 +451,8 @@ class _SurveyScreenState extends ConsumerState<SurveyScreen> {
             style: const TextStyle(fontSize: 16),
             decoration: InputDecoration(
               hintText: 'Yanıtınızı buraya yazın...',
-              border:
-                  OutlineInputBorder(borderRadius: BorderRadius.circular(AppTheme.cardRadius)),
+              border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(AppTheme.cardRadius)),
               filled: true,
               fillColor: Theme.of(context).colorScheme.surfaceContainer,
             ),
@@ -508,7 +519,9 @@ class _SurveyScreenState extends ConsumerState<SurveyScreen> {
                           ? Icons.star_rounded
                           : Icons.star_outline_rounded,
                       size: 48,
-                      color: isActive ? AppTheme.warningColor : Theme.of(context).colorScheme.outlineVariant,
+                      color: isActive
+                          ? AppTheme.warningColor
+                          : Theme.of(context).colorScheme.outlineVariant,
                     ),
                   ),
                 ),
@@ -618,8 +631,8 @@ class _SurveyScreenState extends ConsumerState<SurveyScreen> {
             Text(
               'Katılımınız için teşekkür ederiz.\n'
               'Yanıtlarınız araştırmaya önemli katkı sağlayacaktır.',
-              style:
-                  theme.textTheme.bodyLarge?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant),
+              style: theme.textTheme.bodyLarge?.copyWith(
+                  color: Theme.of(context).colorScheme.onSurfaceVariant),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 40),

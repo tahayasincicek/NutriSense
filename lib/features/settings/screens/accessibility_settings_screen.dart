@@ -221,7 +221,8 @@ class _AccessibilitySettingsScreenState
               setState(() => _vibrationEnabled = newValue);
               await _accessibility.setVibrationEnabled(newValue);
 
-              final text = newValue ? 'Titreşim açıldı.' : 'Titreşim kapatıldı.';
+              final text =
+                  newValue ? 'Titreşim açıldı.' : 'Titreşim kapatıldı.';
               _accessibility.speak(text, priority: TtsPriority.high);
 
               if (newValue) {
@@ -464,7 +465,8 @@ class _AccessibilitySettingsScreenState
             ),
             selected: isActive,
             selectedColor: AppTheme.primaryColor,
-            backgroundColor: Theme.of(context).colorScheme.surfaceContainerHighest,
+            backgroundColor:
+                Theme.of(context).colorScheme.surfaceContainerHighest,
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
             onSelected: (_) => onSelected(entry.key),
           ),

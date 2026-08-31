@@ -157,7 +157,8 @@ void main() {
       await tester.pumpWidget(_app(container));
       await tester.pump();
 
-      await tester.ensureVisible(find.byIcon(Icons.add_circle_outline_rounded).last);
+      await tester
+          .ensureVisible(find.byIcon(Icons.add_circle_outline_rounded).last);
       await tester.pumpAndSettle();
       await tester.tap(find.byIcon(Icons.add_circle_outline_rounded).last);
       await tester.pumpAndSettle();

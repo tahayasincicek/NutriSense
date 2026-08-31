@@ -7,6 +7,7 @@ import '../../../shared/widgets/accessible_button.dart';
 import '../state/auth_controller.dart';
 import 'password_reset_screen.dart';
 import 'register_screen.dart';
+import '../../dietitian/screens/dietitian_access_screen.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
@@ -33,14 +34,18 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
           Positioned(
             top: -100,
             right: -50,
-            child: CircleAvatar(radius: 150, backgroundColor: AppTheme.primaryColor.withOpacity(0.1)),
+            child: CircleAvatar(
+                radius: 150,
+                backgroundColor: AppTheme.primaryColor.withOpacity(0.1)),
           ),
           Positioned(
             bottom: -50,
             left: -50,
-            child: CircleAvatar(radius: 100, backgroundColor: AppTheme.secondaryColor.withOpacity(0.05)),
+            child: CircleAvatar(
+                radius: 100,
+                backgroundColor: AppTheme.secondaryColor.withOpacity(0.05)),
           ),
-          
+
           SafeArea(
             child: Center(
               child: SingleChildScrollView(
@@ -55,7 +60,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         color: AppTheme.primaryColor.withOpacity(0.1),
                         shape: BoxShape.circle,
                       ),
-                      child: const Icon(Icons.restaurant_menu_rounded, size: 64, color: AppTheme.primaryColor),
+                      child: const Icon(Icons.restaurant_menu_rounded,
+                          size: 64, color: AppTheme.primaryColor),
                     ),
                     const SizedBox(height: 24),
                     // Ekran okuyucuya sayfa başlığı olarak sunulur; VoiceOver
@@ -69,10 +75,12 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                               fontWeight: FontWeight.w900,
                               color: AppTheme.primaryDark)),
                     ),
-                    Text('Beslenmeni Akıllıca Yönet', style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant)),
-                    
+                    Text('Beslenmeni Akıllıca Yönet',
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                            color: theme.colorScheme.onSurfaceVariant)),
+
                     const SizedBox(height: 48),
-                    
+
                     // Form Section
                     Form(
                       key: _formKey,
@@ -90,7 +98,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                 prefixIcon: Icon(Icons.email_outlined),
                                 hintText: 'ornek@email.com',
                               ),
-                              validator: (v) => (v == null || !v.contains('@')) ? 'Geçerli bir e-posta girin' : null,
+                              validator: (v) => (v == null || !v.contains('@'))
+                                  ? 'Geçerli bir e-posta girin'
+                                  : null,
                             ),
                           ),
                           const SizedBox(height: 16),
@@ -104,16 +114,22 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                               autofillHints: const [AutofillHints.password],
                               decoration: InputDecoration(
                                 labelText: 'Şifre',
-                                prefixIcon: const Icon(Icons.lock_outline_rounded),
+                                prefixIcon:
+                                    const Icon(Icons.lock_outline_rounded),
                                 suffixIcon: IconButton(
-                                  icon: Icon(_obscurePassword ? Icons.visibility_off : Icons.visibility),
+                                  icon: Icon(_obscurePassword
+                                      ? Icons.visibility_off
+                                      : Icons.visibility),
                                   tooltip: _obscurePassword
                                       ? 'Şifreyi göster'
                                       : 'Şifreyi gizle',
-                                  onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
+                                  onPressed: () => setState(() =>
+                                      _obscurePassword = !_obscurePassword),
                                 ),
                               ),
-                              validator: (v) => (v == null || v.length < 6) ? 'Şifre çok kısa' : null,
+                              validator: (v) => (v == null || v.length < 6)
+                                  ? 'Şifre çok kısa'
+                                  : null,
                             ),
                           ),
                           const SizedBox(height: 12),
@@ -126,11 +142,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                               excludeSemantics: true,
                               child: TextButton(
                                 key: const Key('forgot_password'),
-                                onPressed: () =>
-                                    Navigator.of(context).push(
+                                onPressed: () => Navigator.of(context).push(
                                   MaterialPageRoute(
                                     builder: (_) => PasswordResetScreen(
-                                      initialEmail: _emailController.text.trim(),
+                                      initialEmail:
+                                          _emailController.text.trim(),
                                     ),
                                   ),
                                 ),
@@ -139,7 +155,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                             ),
                           ),
                           const SizedBox(height: 24),
-                          
                           AccessibleButton(
                             label: 'Giriş Yap',
                             semanticLabel: 'Hesabınıza giriş yapmak için basın',
@@ -147,7 +162,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                             onPressed: _handleLogin,
                           ),
                           const SizedBox(height: 16),
-                          
                           Semantics(
                             button: true,
                             label: 'Yeni bir hesap oluşturmak için basın',
@@ -158,10 +172,43 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                       builder: (_) => const RegisterScreen())),
                               style: OutlinedButton.styleFrom(
                                 minimumSize: const Size.fromHeight(56),
-                                side:
-                                    BorderSide(color: theme.colorScheme.outline),
+                                side: BorderSide(
+                                    color: theme.colorScheme.outline),
                               ),
                               child: const Text('Hesap Oluştur'),
+                            ),
+                          ),
+                          const SizedBox(height: 20),
+                          Row(
+                            children: [
+                              const Expanded(child: Divider()),
+                              Padding(
+                                padding:
+                                    const EdgeInsets.symmetric(horizontal: 12),
+                                child: Text(
+                                  'veya',
+                                  style: theme.textTheme.bodySmall,
+                                ),
+                              ),
+                              const Expanded(child: Divider()),
+                            ],
+                          ),
+                          const SizedBox(height: 20),
+                          Semantics(
+                            button: true,
+                            label: 'Diyetisyen giriş portalını aç',
+                            child: OutlinedButton.icon(
+                              key: const Key('dietitian_login'),
+                              onPressed: () => Navigator.of(context).push(
+                                MaterialPageRoute(
+                                  builder: (_) => const DietitianAccessScreen(),
+                                ),
+                              ),
+                              icon: const Icon(Icons.medical_services_outlined),
+                              label: const Text('Diyetisyen Girişi'),
+                              style: OutlinedButton.styleFrom(
+                                minimumSize: const Size.fromHeight(56),
+                              ),
                             ),
                           ),
                         ],
@@ -179,10 +226,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
   Future<void> _handleLogin() async {
     if (!_formKey.currentState!.validate()) return;
-    
+
     // Önceki hatadan kalan uyarı (SnackBar) mesajlarını temizliyoruz
     ScaffoldMessenger.of(context).clearSnackBars();
-    
+
     // Olası odak ve klavye sorunlarını önlemek için klavyeyi kapatıyoruz
     FocusScope.of(context).unfocus();
 
@@ -192,11 +239,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     if (!mounted) return;
 
     setState(() => _isLoading = true);
-    
+
     final error = await ref.read(authControllerProvider.notifier).login(
-      email: _emailController.text.trim(),
-      password: _passwordController.text,
-    );
+          email: _emailController.text.trim(),
+          password: _passwordController.text,
+        );
 
     if (!mounted) return;
 
@@ -204,7 +251,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       AccessibilityUtils.announceSuccess('Giriş başarılı');
     } else {
       setState(() => _isLoading = false);
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(error)));
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(error)));
     }
   }
 }

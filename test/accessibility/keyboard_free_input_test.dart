@@ -117,8 +117,7 @@ void main() {
     testWidgets('sınır dışı değer kaydedilmez', (tester) async {
       await openDialog(tester, initial: 10, min: 0, max: 24);
 
-      await tester.enterText(
-          find.byKey(const Key('number_input_field')), '99');
+      await tester.enterText(find.byKey(const Key('number_input_field')), '99');
       await tester.tap(find.byKey(const Key('number_input_save')));
       await tester.pumpAndSettle();
 

@@ -11,6 +11,7 @@ import 'package:uuid/uuid.dart';
 import '../../core/config/app_config.dart';
 import '../models/food_analysis_model.dart';
 import '../models/auth_model.dart';
+import '../../features/dietitian/models/dietitian_dashboard_models.dart';
 
 enum ApiCallState { idle, loading, success, error }
 
@@ -386,6 +387,32 @@ class ApiService {
         return auth;
       });
 
+  Future<ApiResult<AuthTokenResult>> registerDietitian({
+    required String email,
+    required String password,
+    required String fullName,
+    required String specialization,
+    String? phone,
+    CancelToken? cancelToken,
+  }) =>
+      _safeCall(() async {
+        final response = await _dio.post<Map<String, dynamic>>(
+          '/auth/register-dietitian',
+          data: {
+            'email': email,
+            'password': password,
+            'full_name': fullName,
+            'phone': phone,
+            'specialization': specialization,
+          },
+          cancelToken: cancelToken,
+          options: Options(extra: const {_skipAuthKey: true}),
+        );
+        final auth = AuthTokenResult.fromJson(response.data ?? const {});
+        await _saveAuth(auth);
+        return auth;
+      });
+
   Future<ApiResult<AuthTokenResult>> login({
     required String email,
     required String password,
@@ -426,6 +453,33 @@ class ApiService {
           cancelToken: cancelToken,
         );
         return UserProfile.fromJson(response.data ?? const {});
+      });
+
+  Future<ApiResult<DietitianDashboardData>> getDietitianDashboard({
+    CancelToken? cancelToken,
+  }) =>
+      _safeCall(() async {
+        final response = await _dio.get<Map<String, dynamic>>(
+          '/dietitian/dashboard',
+          cancelToken: cancelToken,
+        );
+        return DietitianDashboardData.fromJson(response.data ?? const {});
+      });
+
+  Future<ApiResult<DietitianPatientHistoryData>> getDietitianPatientHistory({
+    required String patientId,
+    int days = 30,
+    CancelToken? cancelToken,
+  }) =>
+      _safeCall(() async {
+        final response = await _dio.get<Map<String, dynamic>>(
+          '/dietitian/patients/$patientId/history',
+          queryParameters: {'days': days},
+          cancelToken: cancelToken,
+        );
+        return DietitianPatientHistoryData.fromJson(
+          response.data ?? const {},
+        );
       });
 
   /// Parola sıfırlama kodu ister.

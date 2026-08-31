@@ -22,7 +22,8 @@ void main() async {
   SystemChrome.setSystemUIOverlayStyle(
     const SystemUiOverlayStyle(
       statusBarColor: Colors.transparent,
-      statusBarIconBrightness: Brightness.dark, // Açık renk arka plan için koyu ikonlar
+      statusBarIconBrightness:
+          Brightness.dark, // Açık renk arka plan için koyu ikonlar
       systemNavigationBarColor: Colors.white,
       systemNavigationBarIconBrightness: Brightness.dark,
     ),

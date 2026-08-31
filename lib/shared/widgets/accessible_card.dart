@@ -101,74 +101,74 @@ class AccessibleCard extends StatelessWidget {
                 onLongPress: onLongPress,
                 borderRadius: BorderRadius.circular(AppTheme.cardRadius),
                 child: Padding(
-            padding: padding ?? const EdgeInsets.all(16),
-            child: Row(
-              children: [
-                // Sol ikon veya görsel
-                if (leading != null) ...[
-                  SizedBox(
-                    width: A11yConstants.minTouchTarget,
-                    height: A11yConstants.minTouchTarget,
-                    child: Center(child: leading!),
-                  ),
-                  const SizedBox(width: 16),
-                ],
-
-                // Başlık ve alt başlık
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisSize: MainAxisSize.min,
+                  padding: padding ?? const EdgeInsets.all(16),
+                  child: Row(
                     children: [
-                      // Başlık — ExcludeSemantics çünkü kart seviyesinde
-                      // label zaten okunuyor
-                      ExcludeSemantics(
-                        child: Text(
-                          title,
-                          style: theme.textTheme.titleMedium,
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
+                      // Sol ikon veya görsel
+                      if (leading != null) ...[
+                        SizedBox(
+                          width: A11yConstants.minTouchTarget,
+                          height: A11yConstants.minTouchTarget,
+                          child: Center(child: leading!),
+                        ),
+                        const SizedBox(width: 16),
+                      ],
+
+                      // Başlık ve alt başlık
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            // Başlık — ExcludeSemantics çünkü kart seviyesinde
+                            // label zaten okunuyor
+                            ExcludeSemantics(
+                              child: Text(
+                                title,
+                                style: theme.textTheme.titleMedium,
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                            if (subtitle != null) ...[
+                              const SizedBox(height: 4),
+                              ExcludeSemantics(
+                                child: Text(
+                                  subtitle!,
+                                  style: theme.textTheme.bodyMedium?.copyWith(
+                                    color: theme.colorScheme.onSurfaceVariant,
+                                  ),
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                            ],
+                          ],
                         ),
                       ),
-                      if (subtitle != null) ...[
-                        const SizedBox(height: 4),
-                        ExcludeSemantics(
-                          child: Text(
-                            subtitle!,
-                            style: theme.textTheme.bodyMedium?.copyWith(
-                              color: theme.colorScheme.onSurfaceVariant,
+
+                      // Sağ taraf (kalori bilgisi, ok ikonu vb.)
+                      if (trailing != null || trailingWidget != null) ...[
+                        const SizedBox(width: 12),
+                        trailingWidget ??
+                            ExcludeSemantics(
+                              child: Text(
+                                trailing!,
+                                style: theme.textTheme.titleLarge?.copyWith(
+                                  color: theme.colorScheme.primary,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
                             ),
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
                       ],
                     ],
                   ),
-                ),
-
-                // Sağ taraf (kalori bilgisi, ok ikonu vb.)
-                if (trailing != null || trailingWidget != null) ...[
-                  const SizedBox(width: 12),
-                  trailingWidget ??
-                      ExcludeSemantics(
-                        child: Text(
-                          trailing!,
-                          style: theme.textTheme.titleLarge?.copyWith(
-                            color: theme.colorScheme.primary,
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
-                      ),
-                ],
-              ],
-            ),
-          ), // Padding
-        ), // InkWell
-      ), // Material
-    ), // BackdropFilter
-  ), // ClipRRect
-), // Container
-); // Semantics
+                ), // Padding
+              ), // InkWell
+            ), // Material
+          ), // BackdropFilter
+        ), // ClipRRect
+      ), // Container
+    ); // Semantics
   }
 }

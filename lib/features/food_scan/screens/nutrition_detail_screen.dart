@@ -41,8 +41,7 @@ class NutritionDetailScreen extends ConsumerStatefulWidget {
       _NutritionDetailScreenState();
 }
 
-class _NutritionDetailScreenState
-    extends ConsumerState<NutritionDetailScreen> {
+class _NutritionDetailScreenState extends ConsumerState<NutritionDetailScreen> {
   late final AccessibilityService _accessibility;
 
   @override
@@ -219,7 +218,8 @@ class _NutritionDetailScreenState
                 unit: 'g',
                 color: const Color(0xFF4CAF50),
                 maxValue: 50,
-                ttsLabel: '${nutrients.protein.toStringAsFixed(1)} gram protein',
+                ttsLabel:
+                    '${nutrients.protein.toStringAsFixed(1)} gram protein',
               ),
               const SizedBox(height: 10),
               _NutrientBar(

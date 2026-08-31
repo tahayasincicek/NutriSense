@@ -47,8 +47,7 @@ void main() {
     handle.dispose();
   });
 
-  testWidgets('görev kartları göreve özgü eylem etiketi taşır',
-      (tester) async {
+  testWidgets('görev kartları göreve özgü eylem etiketi taşır', (tester) async {
     final handle = tester.ensureSemantics();
     await tester.pumpWidget(app());
     await tester.pump();
