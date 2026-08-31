@@ -28,15 +28,14 @@ class StatsExportService {
           '${dailyLog.date.year}-${dailyLog.date.month.toString().padLeft(2, '0')}-${dailyLog.date.day.toString().padLeft(2, '0')}';
 
       for (final entry in dailyLog.foods) {
-        final mealType = entry.mealType ?? 'Belirtilmemiş';
-        final foodName =
-            _escapeCSV(entry.foodNameTr ?? entry.foodName ?? 'Bilinmeyen');
+        final mealType = entry.mealType;
+        final foodName = _escapeCSV(entry.foodNameTr);
         final portion = entry.portionG.toStringAsFixed(1);
         final calories = entry.calories.toStringAsFixed(1);
         final protein = entry.nutrients.protein.toStringAsFixed(1);
-        final carbs = entry.nutrients.carbs.toStringAsFixed(1) ?? '-';
-        final fat = entry.nutrients.fat.toStringAsFixed(1) ?? '-';
-        final fiber = entry.nutrients.fiber.toStringAsFixed(1) ?? '-';
+        final carbs = entry.nutrients.carbs.toStringAsFixed(1);
+        final fat = entry.nutrients.fat.toStringAsFixed(1);
+        final fiber = entry.nutrients.fiber.toStringAsFixed(1);
 
         buffer.writeln(
             '$dateStr,$mealType,$foodName,$portion,$calories,$protein,$carbs,$fat,$fiber');
@@ -46,10 +45,8 @@ class StatsExportService {
     // Özet satırı
     buffer.writeln();
     buffer.writeln('ÖZET');
-    buffer.writeln(
-        'Toplam Gün,${history.totalDays}');
-    buffer.writeln(
-        'Toplam Kalori,${history.totalCalories.toStringAsFixed(0)}');
+    buffer.writeln('Toplam Gün,${history.totalDays}');
+    buffer.writeln('Toplam Kalori,${history.totalCalories.toStringAsFixed(0)}');
     buffer.writeln(
         'Günlük Ortalama Kalori,${history.averageDailyCalories.toStringAsFixed(0)}');
     buffer.writeln('Toplam Kayıt,${history.totalLogCount}');
@@ -88,7 +85,7 @@ class StatsExportService {
       buffer.write('Besinler: ');
       for (var i = 0; i < dailyLog.foods.length && i < 5; i++) {
         final entry = dailyLog.foods[i];
-        final name = entry.foodNameTr ?? entry.foodName;
+        final name = entry.foodNameTr;
         final cal = entry.calories.toStringAsFixed(0);
         buffer.write('$name $cal kalori');
         if (i < dailyLog.foods.length - 1 && i < 4) buffer.write(', ');

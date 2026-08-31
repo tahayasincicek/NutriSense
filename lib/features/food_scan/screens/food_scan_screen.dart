@@ -7,7 +7,6 @@ import '../../../shared/services/meal_reminder_service.dart';
 import '../../settings/screens/settings_screen.dart';
 import '../../history/state/daily_goal_provider.dart';
 import '../../water_tracker/state/water_provider.dart';
-import '../models/camera_state.dart';
 import 'camera_screen.dart';
 import 'manual_food_entry_screen.dart';
 import '../../../shared/widgets/accessible_button.dart';
@@ -24,8 +23,7 @@ class _FoodScanScreenState extends ConsumerState<FoodScanScreen> {
   void _showReminderSummary() {
     final settings = ref.read(mealReminderServiceProvider).settings;
     final lines = <String>[
-      if (settings.breakfastEnabled)
-        'Kahvaltı ${settings.breakfastHour}:00',
+      if (settings.breakfastEnabled) 'Kahvaltı ${settings.breakfastHour}:00',
       if (settings.lunchEnabled) 'Öğle ${settings.lunchHour}:00',
       if (settings.dinnerEnabled) 'Akşam ${settings.dinnerHour}:00',
     ];
@@ -63,7 +61,8 @@ class _FoodScanScreenState extends ConsumerState<FoodScanScreen> {
                 padding: const EdgeInsets.all(2),
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  border: Border.all(color: theme.colorScheme.primary, width: 2),
+                  border:
+                      Border.all(color: theme.colorScheme.primary, width: 2),
                 ),
                 child: CircleAvatar(
                   radius: 16,
@@ -121,21 +120,23 @@ class _FoodScanScreenState extends ConsumerState<FoodScanScreen> {
           children: [
             // --- Scan Hero Section ---
             _ScanHero(onTap: _openCamera),
-            
+
             const SizedBox(height: 16),
             AccessibleButton(
               label: 'Manuel Besin Ekle',
-              semanticLabel: 'Besinleri yazarak veya sesle manuel olarak ekleyin',
+              semanticLabel:
+                  'Besinleri yazarak veya sesle manuel olarak ekleyin',
               icon: Icons.edit_note_rounded,
               onPressed: () {
                 Navigator.of(context).push(
-                  MaterialPageRoute(builder: (_) => const ManualFoodEntryScreen()),
+                  MaterialPageRoute(
+                      builder: (_) => const ManualFoodEntryScreen()),
                 );
               },
             ),
-            
+
             const SizedBox(height: 24),
-            
+
             // --- Dashboard Highlights ---
             Row(
               children: [
@@ -162,14 +163,14 @@ class _FoodScanScreenState extends ConsumerState<FoodScanScreen> {
                 ),
               ],
             ),
-            
+
             const SizedBox(height: 32),
-            
+
             // --- Calorie Goal ---
             _buildCalorieProgress(theme, goal),
-            
+
             const SizedBox(height: 32),
-            
+
             // --- Daily Tasks ---
             Semantics(
               header: true,
@@ -191,21 +192,21 @@ class _FoodScanScreenState extends ConsumerState<FoodScanScreen> {
             ),
             const SizedBox(height: 12),
             _buildTaskCard(
-              theme, 
-              'Öğle Yemeğini Kaydet', 
-              'Dengeli bir öğün planla.', 
-              Icons.restaurant_rounded, 
+              theme,
+              'Öğle Yemeğini Kaydet',
+              'Dengeli bir öğün planla.',
+              Icons.restaurant_rounded,
               Colors.orange,
             ),
             const SizedBox(height: 12),
             _buildTaskCard(
-              theme, 
-              '10 Dakika Meditasyon', 
-              'Zihnini dinlendir.', 
-              Icons.spa_rounded, 
+              theme,
+              '10 Dakika Meditasyon',
+              'Zihnini dinlendir.',
+              Icons.spa_rounded,
               Colors.purple,
             ),
-            
+
             const SizedBox(height: 24),
             _buildVoiceTip(theme),
           ],
@@ -261,13 +262,16 @@ class _FoodScanScreenState extends ConsumerState<FoodScanScreen> {
             ),
           ),
           const SizedBox(height: 8),
-          Text('${goal.remainingCalories.toStringAsFixed(0)} kcal daha tüketebilirsin.', style: theme.textTheme.bodySmall),
+          Text(
+              '${goal.remainingCalories.toStringAsFixed(0)} kcal daha tüketebilirsin.',
+              style: theme.textTheme.bodySmall),
         ],
       ),
     );
   }
 
-  Widget _buildTaskCard(ThemeData theme, String title, String desc, IconData icon, Color color) {
+  Widget _buildTaskCard(
+      ThemeData theme, String title, String desc, IconData icon, Color color) {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -279,7 +283,8 @@ class _FoodScanScreenState extends ConsumerState<FoodScanScreen> {
         children: [
           Container(
             padding: const EdgeInsets.all(10),
-            decoration: BoxDecoration(color: color.withOpacity(0.1), shape: BoxShape.circle),
+            decoration: BoxDecoration(
+                color: color.withOpacity(0.1), shape: BoxShape.circle),
             child: Icon(icon, color: color, size: 24),
           ),
           const SizedBox(width: 16),
@@ -287,12 +292,14 @@ class _FoodScanScreenState extends ConsumerState<FoodScanScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(title, style: const TextStyle(fontWeight: FontWeight.bold)),
+                Text(title,
+                    style: const TextStyle(fontWeight: FontWeight.bold)),
                 Text(desc, style: theme.textTheme.bodySmall),
               ],
             ),
           ),
-          Checkbox(value: false, onChanged: (v) {}, shape: const CircleBorder()),
+          Checkbox(
+              value: false, onChanged: (v) {}, shape: const CircleBorder()),
         ],
       ),
     );
@@ -313,8 +320,11 @@ class _FoodScanScreenState extends ConsumerState<FoodScanScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Sesli Komut İpucu', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-                Text('"Su ekle" veya "Neredeyim?" diye sorabilirsin.', style: TextStyle(color: Colors.white70, fontSize: 12)),
+                Text('Sesli Komut İpucu',
+                    style: TextStyle(
+                        color: Colors.white, fontWeight: FontWeight.bold)),
+                Text('"Su ekle" veya "Neredeyim?" diye sorabilirsin.',
+                    style: TextStyle(color: Colors.white70, fontSize: 12)),
               ],
             ),
           ),
@@ -326,7 +336,8 @@ class _FoodScanScreenState extends ConsumerState<FoodScanScreen> {
   Future<void> _openCamera() async {
     await AccessibilityUtils.mediumHaptic();
     if (!mounted) return;
-    await Navigator.of(context).push(MaterialPageRoute(builder: (_) => const CameraScreen()));
+    await Navigator.of(context)
+        .push(MaterialPageRoute(builder: (_) => const CameraScreen()));
   }
 }
 
@@ -337,7 +348,13 @@ class _DashboardMiniCard extends StatelessWidget {
   final IconData icon;
   final Color color;
   final double progress;
-  const _DashboardMiniCard({required this.title, required this.value, required this.unit, required this.icon, required this.color, required this.progress});
+  const _DashboardMiniCard(
+      {required this.title,
+      required this.value,
+      required this.unit,
+      required this.icon,
+      required this.color,
+      required this.progress});
 
   @override
   Widget build(BuildContext context) {
@@ -354,12 +371,18 @@ class _DashboardMiniCard extends StatelessWidget {
         children: [
           Icon(icon, color: color, size: 28),
           const SizedBox(height: 16),
-          Text(value, style: theme.textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w900, color: color)),
+          Text(value,
+              style: theme.textTheme.headlineSmall
+                  ?.copyWith(fontWeight: FontWeight.w900, color: color)),
           Text('$unit $title', style: theme.textTheme.labelSmall),
           const SizedBox(height: 12),
           ClipRRect(
             borderRadius: BorderRadius.circular(4),
-            child: LinearProgressIndicator(value: progress.clamp(0.0, 1.0), minHeight: 4, backgroundColor: color.withOpacity(0.1), valueColor: AlwaysStoppedAnimation(color)),
+            child: LinearProgressIndicator(
+                value: progress.clamp(0.0, 1.0),
+                minHeight: 4,
+                backgroundColor: color.withOpacity(0.1),
+                valueColor: AlwaysStoppedAnimation(color)),
           ),
         ],
       ),
@@ -396,11 +419,20 @@ class _ScanHero extends StatelessWidget {
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
             ),
-            boxShadow: [BoxShadow(color: AppTheme.primaryColor.withOpacity(0.3), blurRadius: 20, offset: const Offset(0, 10))],
+            boxShadow: [
+              BoxShadow(
+                  color: AppTheme.primaryColor.withOpacity(0.3),
+                  blurRadius: 20,
+                  offset: const Offset(0, 10))
+            ],
           ),
           child: Stack(
             children: [
-              Positioned(right: -10, bottom: -10, child: Icon(Icons.camera_alt_rounded, size: 140, color: Colors.white.withOpacity(0.15))),
+              Positioned(
+                  right: -10,
+                  bottom: -10,
+                  child: Icon(Icons.camera_alt_rounded,
+                      size: 140, color: Colors.white.withOpacity(0.15))),
               Padding(
                 padding: const EdgeInsets.all(24),
                 child: Column(
@@ -409,13 +441,25 @@ class _ScanHero extends StatelessWidget {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                      decoration: BoxDecoration(color: Colors.white.withOpacity(0.2), borderRadius: BorderRadius.circular(8)),
-                      child: const Text('HIZLI TARAMA', style: TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold)),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 10, vertical: 4),
+                      decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.2),
+                          borderRadius: BorderRadius.circular(8)),
+                      child: const Text('HIZLI TARAMA',
+                          style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 10,
+                              fontWeight: FontWeight.bold)),
                     ),
                     const SizedBox(height: 12),
-                    Text('Besinini Tanı', style: theme.textTheme.headlineMedium?.copyWith(color: Colors.white, fontWeight: FontWeight.w900)),
-                    Text('Kamerayı yemeğine tut ve sonucu dinle.', style: TextStyle(color: Colors.white.withOpacity(0.8), fontSize: 13)),
+                    Text('Besinini Tanı',
+                        style: theme.textTheme.headlineMedium?.copyWith(
+                            color: Colors.white, fontWeight: FontWeight.w900)),
+                    Text('Kamerayı yemeğine tut ve sonucu dinle.',
+                        style: TextStyle(
+                            color: Colors.white.withOpacity(0.8),
+                            fontSize: 13)),
                   ],
                 ),
               ),

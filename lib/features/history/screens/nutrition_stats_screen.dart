@@ -1,16 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/app_theme.dart';
-import '../../../core/utils/accessibility_utils.dart';
 import '../../../shared/models/food_analysis_model.dart';
-import '../../../shared/services/accessibility_service.dart';
 import '../state/history_controller.dart';
 
 class NutritionStatsScreen extends ConsumerStatefulWidget {
   const NutritionStatsScreen({super.key});
 
   @override
-  ConsumerState<NutritionStatsScreen> createState() => _NutritionStatsScreenState();
+  ConsumerState<NutritionStatsScreen> createState() =>
+      _NutritionStatsScreenState();
 }
 
 class _NutritionStatsScreenState extends ConsumerState<NutritionStatsScreen> {
@@ -35,18 +34,27 @@ class _NutritionStatsScreenState extends ConsumerState<NutritionStatsScreen> {
                 children: [
                   _buildAITipCard(theme),
                   const SizedBox(height: 24),
-                  
-                  Semantics(header: true, child: Text('Genel Özet', style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold))),
+                  Semantics(
+                      header: true,
+                      child: Text('Genel Özet',
+                          style: theme.textTheme.titleMedium
+                              ?.copyWith(fontWeight: FontWeight.bold))),
                   const SizedBox(height: 12),
                   _buildSummaryGrid(theme, state.history!),
-                  
                   const SizedBox(height: 32),
-                  Semantics(header: true, child: Text('Haftalık Kalori Trendi', style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold))),
+                  Semantics(
+                      header: true,
+                      child: Text('Haftalık Kalori Trendi',
+                          style: theme.textTheme.titleMedium
+                              ?.copyWith(fontWeight: FontWeight.bold))),
                   const SizedBox(height: 12),
                   _buildModernChart(theme, state.history!),
-                  
                   const SizedBox(height: 32),
-                  Semantics(header: true, child: Text('Makro Dağılımı', style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold))),
+                  Semantics(
+                      header: true,
+                      child: Text('Makro Dağılımı',
+                          style: theme.textTheme.titleMedium
+                              ?.copyWith(fontWeight: FontWeight.bold))),
                   const SizedBox(height: 12),
                   _buildMacroCard(theme, state.history!),
                 ],
@@ -60,12 +68,20 @@ class _NutritionStatsScreenState extends ConsumerState<NutritionStatsScreen> {
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         gradient: LinearGradient(
-          colors: [theme.colorScheme.secondary, theme.colorScheme.secondary.withBlue(200)],
+          colors: [
+            theme.colorScheme.secondary,
+            theme.colorScheme.secondary.withBlue(200)
+          ],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
         borderRadius: BorderRadius.circular(AppTheme.cardRadius),
-        boxShadow: [BoxShadow(color: theme.colorScheme.secondary.withOpacity(0.3), blurRadius: 15, offset: const Offset(0, 8))],
+        boxShadow: [
+          BoxShadow(
+              color: theme.colorScheme.secondary.withOpacity(0.3),
+              blurRadius: 15,
+              offset: const Offset(0, 8))
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -74,13 +90,20 @@ class _NutritionStatsScreenState extends ConsumerState<NutritionStatsScreen> {
             children: [
               const Icon(Icons.auto_awesome, color: Colors.white, size: 20),
               const SizedBox(width: 8),
-              Text('GÜNÜN TAVSİYESİ', style: theme.textTheme.labelLarge?.copyWith(color: Colors.white.withOpacity(0.9), letterSpacing: 1.2)),
+              Text('GÜNÜN TAVSİYESİ',
+                  style: theme.textTheme.labelLarge?.copyWith(
+                      color: Colors.white.withOpacity(0.9),
+                      letterSpacing: 1.2)),
             ],
           ),
           const SizedBox(height: 12),
           const Text(
             'Bugün protein alımın biraz düşük kalmış. Akşam yemeğinde mercimek veya tavuk tercih ederek dengeliyebilirsin.',
-            style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w600, height: 1.4),
+            style: TextStyle(
+                color: Colors.white,
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+                height: 1.4),
           ),
         ],
       ),
@@ -96,13 +119,21 @@ class _NutritionStatsScreenState extends ConsumerState<NutritionStatsScreen> {
       crossAxisSpacing: 12,
       childAspectRatio: 1.5,
       children: [
-        _buildStatTile(theme, 'Ortalama', '${history.averageDailyCalories.toStringAsFixed(0)}', 'kcal', Icons.speed_rounded, AppTheme.primaryColor),
-        _buildStatTile(theme, 'Toplam', '${history.totalLogCount}', 'kayıt', Icons.inventory_2_outlined, Colors.orange),
+        _buildStatTile(
+            theme,
+            'Ortalama',
+            '${history.averageDailyCalories.toStringAsFixed(0)}',
+            'kcal',
+            Icons.speed_rounded,
+            AppTheme.primaryColor),
+        _buildStatTile(theme, 'Toplam', '${history.totalLogCount}', 'kayıt',
+            Icons.inventory_2_outlined, Colors.orange),
       ],
     );
   }
 
-  Widget _buildStatTile(ThemeData theme, String label, String value, String unit, IconData icon, Color color) {
+  Widget _buildStatTile(ThemeData theme, String label, String value,
+      String unit, IconData icon, Color color) {
     // Parça parça "1850", "kcal", "Ortalama" okumak yerine tek anlamlı
     // cümle: "Ortalama: 1850 kcal".
     return Semantics(
@@ -172,34 +203,49 @@ class _NutritionStatsScreenState extends ConsumerState<NutritionStatsScreen> {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           crossAxisAlignment: CrossAxisAlignment.end,
-          children: days.map((log) {
-            double heightFactor = (log.totalCalories / 2500).clamp(0.1, 1.0);
-            return Column(
-              mainAxisAlignment: MainAxisAlignment.end,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Container(
-                  width: 12,
-                  height: 120 * heightFactor,
-                  decoration: BoxDecoration(
-                    color: theme.colorScheme.primary,
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Text('${log.date.day}/${log.date.month}',
-                    style: theme.textTheme.labelSmall),
-              ],
-            );
-          }).toList().reversed.toList(),
+          children: days
+              .map((log) {
+                double heightFactor =
+                    (log.totalCalories / 2500).clamp(0.1, 1.0);
+                return Column(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Container(
+                      width: 12,
+                      height: 120 * heightFactor,
+                      decoration: BoxDecoration(
+                        color: theme.colorScheme.primary,
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text('${log.date.day}/${log.date.month}',
+                        style: theme.textTheme.labelSmall),
+                  ],
+                );
+              })
+              .toList()
+              .reversed
+              .toList(),
         ),
       ),
     );
   }
 
   static String _monthName(int month) => const [
-        'Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran',
-        'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık',
+        'Ocak',
+        'Şubat',
+        'Mart',
+        'Nisan',
+        'Mayıs',
+        'Haziran',
+        'Temmuz',
+        'Ağustos',
+        'Eylül',
+        'Ekim',
+        'Kasım',
+        'Aralık',
       ][month - 1];
 
   Widget _buildMacroCard(ThemeData theme, FoodHistoryResult history) {
@@ -258,9 +304,11 @@ class _NutritionStatsScreenState extends ConsumerState<NutritionStatsScreen> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.analytics_outlined, size: 80, color: theme.colorScheme.outline),
+          Icon(Icons.analytics_outlined,
+              size: 80, color: theme.colorScheme.outline),
           const SizedBox(height: 16),
-          const Text('Henüz veri yok', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+          const Text('Henüz veri yok',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
         ],
       ),
     );

@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/theme_controller.dart';
-import '../../../core/utils/accessibility_utils.dart';
 import '../../../shared/services/accessibility_service.dart';
 import '../../../shared/services/contextual_voice_command.dart';
 import '../../../shared/services/stt_service.dart';
@@ -12,7 +11,6 @@ import '../../history/state/daily_goal_provider.dart';
 import '../../onboarding/screens/onboarding_screen.dart';
 import '../../survey/screens/survey_screen.dart';
 import '../../survey/screens/usability_test_screen.dart';
-import '../../../shared/services/meal_reminder_service.dart';
 import '../../../shared/widgets/accessible_number_dialog.dart';
 
 class SettingsScreen extends ConsumerStatefulWidget {
@@ -51,8 +49,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       onResult: (result) {
         if (!mounted) return;
         if (!result.isFinal) {
-          setState(() => _voiceStatus =
-              'Komut henüz çalıştırılmadı; lütfen tamamlayın.');
+          setState(() =>
+              _voiceStatus = 'Komut henüz çalıştırılmadı; lütfen tamamlayın.');
           return;
         }
         final intent = _voiceParser.parse(
@@ -77,17 +75,17 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           _pendingVoiceLogout = true;
           setState(() => _voiceStatus =
               'Çıkışı onaylamak için: Mikrofon düğmesine tekrar basıp '
-              'evet deyin.');
+                  'evet deyin.');
           _accessibility.speak(_voiceStatus!, priority: TtsPriority.high);
           return;
         }
-        setState(() =>
-            _voiceStatus = 'Komut henüz çalıştırılmadı; anlaşılamadı.');
+        setState(
+            () => _voiceStatus = 'Komut henüz çalıştırılmadı; anlaşılamadı.');
       },
       onError: (_) {
         if (!mounted) return;
-        setState(() =>
-            _voiceStatus = 'Komut henüz çalıştırılmadı; ses hatası.');
+        setState(
+            () => _voiceStatus = 'Komut henüz çalıştırılmadı; ses hatası.');
       },
     );
   }
@@ -137,7 +135,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             ),
           _buildProfileHeader(),
           const SizedBox(height: 32),
-          
+
           _buildSectionTitle('Erişilebilirlik'),
           _buildSettingCard([
             _buildSwitchTile(
@@ -225,12 +223,13 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               onTap: _confirmDeleteAccount,
             ),
           ]),
-          
+
           const SizedBox(height: 40),
           Center(
             child: Text(
               'NutriSense v1.0.0',
-              style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant.withOpacity(0.5)),
+              style: theme.textTheme.bodySmall?.copyWith(
+                  color: theme.colorScheme.onSurfaceVariant.withOpacity(0.5)),
             ),
           ),
         ],
@@ -266,8 +265,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Text('Kullanıcı Profili',
-                      style: theme.textTheme.titleLarge),
+                  Text('Kullanıcı Profili', style: theme.textTheme.titleLarge),
                   Text('Premium Üye',
                       style: theme.textTheme.bodyMedium?.copyWith(
                           color: theme.colorScheme.primary,
@@ -284,7 +282,11 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   Widget _buildSectionTitle(String title) {
     return Padding(
       padding: const EdgeInsets.only(left: 8, bottom: 12),
-      child: Text(title, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: AppTheme.primaryDark)),
+      child: Text(title,
+          style: const TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 16,
+              color: AppTheme.primaryDark)),
     );
   }
 
@@ -300,7 +302,12 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     );
   }
 
-  Widget _buildSwitchTile({required String title, required String subtitle, required IconData icon, required bool value, required ValueChanged<bool> onChanged}) {
+  Widget _buildSwitchTile(
+      {required String title,
+      required String subtitle,
+      required IconData icon,
+      required bool value,
+      required ValueChanged<bool> onChanged}) {
     return ListTile(
       leading: Icon(icon, color: AppTheme.primaryColor),
       title: Text(title),
@@ -309,7 +316,11 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     );
   }
 
-  Widget _buildSliderTile({required String title, required IconData icon, required double value, required ValueChanged<double> onChanged}) {
+  Widget _buildSliderTile(
+      {required String title,
+      required IconData icon,
+      required double value,
+      required ValueChanged<double> onChanged}) {
     // Kaydırıcı tek yol olmamalı: yüzde değerini sesle de söyleyebilmeli.
     final percent = (value * 100).round();
     return ListTile(
@@ -386,8 +397,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             ),
             Text('${calories.toStringAsFixed(0)} kcal',
                 style: const TextStyle(
-                    fontWeight: FontWeight.bold,
-                    color: AppTheme.primaryColor)),
+                    fontWeight: FontWeight.bold, color: AppTheme.primaryColor)),
           ],
         ),
         trailing: IconButton(
@@ -454,8 +464,12 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         title: const Text('Çıkış Yap'),
         content: const Text('Emin misiniz?'),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Vazgeç')),
-          FilledButton(onPressed: () => Navigator.pop(context, true), child: const Text('Çıkış Yap')),
+          TextButton(
+              onPressed: () => Navigator.pop(context, false),
+              child: const Text('Vazgeç')),
+          FilledButton(
+              onPressed: () => Navigator.pop(context, true),
+              child: const Text('Çıkış Yap')),
         ],
       ),
     );
@@ -530,8 +544,8 @@ class _DeleteAccountDialogState extends State<_DeleteAccountDialog> {
               decoration: InputDecoration(
                 labelText: 'Şifre',
                 suffixIcon: IconButton(
-                  icon: Icon(
-                      _obscure ? Icons.visibility_off : Icons.visibility),
+                  icon:
+                      Icon(_obscure ? Icons.visibility_off : Icons.visibility),
                   tooltip: _obscure ? 'Şifreyi göster' : 'Şifreyi gizle',
                   onPressed: () => setState(() => _obscure = !_obscure),
                 ),

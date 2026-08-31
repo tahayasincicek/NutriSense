@@ -5,6 +5,7 @@ import '../../../app.dart';
 import '../../../shared/widgets/accessible_button.dart';
 import '../state/auth_controller.dart';
 import '../../onboarding/screens/onboarding_screen.dart';
+import '../../dietitian/screens/dietitian_dashboard_screen.dart';
 import 'login_screen.dart';
 
 class AuthGate extends ConsumerWidget {
@@ -13,11 +14,13 @@ class AuthGate extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final auth = ref.watch(authControllerProvider);
-    
+
     Widget currentWidget;
     switch (auth.status) {
       case AuthStatus.authenticated:
-        currentWidget = const _OnboardingGate();
+        currentWidget = auth.user?.accountType == 'dietitian'
+            ? const DietitianDashboardScreen()
+            : const _OnboardingGate();
         break;
       case AuthStatus.unauthenticated:
         currentWidget = const LoginScreen();
@@ -57,7 +60,6 @@ class AuthGate extends ConsumerWidget {
         break;
       case AuthStatus.unknown:
       case AuthStatus.loading:
-      default:
         currentWidget = Scaffold(
           body: Center(
             child: Semantics(

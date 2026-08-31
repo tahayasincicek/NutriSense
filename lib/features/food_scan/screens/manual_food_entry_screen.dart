@@ -11,6 +11,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:uuid/uuid.dart';
 
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/accessibility_utils.dart';
@@ -30,6 +31,7 @@ class ManualFoodEntryScreen extends ConsumerStatefulWidget {
 }
 
 class _ManualFoodEntryScreenState extends ConsumerState<ManualFoodEntryScreen> {
+  static const _uuid = Uuid();
   final _searchController = TextEditingController();
   final _focusNode = FocusNode();
   late final AccessibilityService _accessibility;
@@ -123,8 +125,8 @@ class _ManualFoodEntryScreenState extends ConsumerState<ManualFoodEntryScreen> {
     if (result.isSuccess && result.data != null) {
       final analysis = result.data!;
       final searchResult = FoodSearchResult(
-        foodName: analysis.foodNameTr ?? query, // fallback to query
-        displayName: analysis.foodNameTr ?? query,
+        foodName: analysis.foodNameTr,
+        displayName: analysis.foodNameTr,
         caloriesPer100g: analysis.caloriesPer100g,
       );
 
@@ -182,7 +184,7 @@ class _ManualFoodEntryScreenState extends ConsumerState<ManualFoodEntryScreen> {
 
     final api = ref.read(apiServiceProvider);
     final result = await api.createManualFoodLog(
-      captureId: 'manual_${DateTime.now().millisecondsSinceEpoch}',
+      captureId: _uuid.v4(),
       foodName: _selectedResult!.foodName,
       foodNameTr: _selectedResult!.displayName,
       portionValue: _portionGrams,
@@ -277,8 +279,9 @@ class _ManualFoodEntryScreenState extends ConsumerState<ManualFoodEntryScreen> {
               label: 'Ara',
               semanticLabel: 'Girilen besin adını ara',
               icon: Icons.search_rounded,
-              onPressed:
-                  _isSearching ? null : () => _searchFood(_searchController.text),
+              onPressed: _isSearching
+                  ? null
+                  : () => _searchFood(_searchController.text),
             ),
 
             // Dinleme göstergesi
@@ -417,8 +420,7 @@ class _ManualFoodEntryScreenState extends ConsumerState<ManualFoodEntryScreen> {
                           max: 1000,
                           divisions: 99,
                           label: '${_portionGrams.toStringAsFixed(0)}g',
-                          onChanged: (v) =>
-                              setState(() => _portionGrams = v),
+                          onChanged: (v) => setState(() => _portionGrams = v),
                           onChangeEnd: (v) {
                             _accessibility.speak(
                               '${v.toStringAsFixed(0)} gram. '
@@ -503,7 +505,8 @@ class FoodSearchResult {
   factory FoodSearchResult.fromJson(Map<String, dynamic> json) {
     return FoodSearchResult(
       foodName: json['food_name'] as String? ?? '',
-      displayName: json['display_name'] as String? ?? json['food_name'] as String? ?? '',
+      displayName:
+          json['display_name'] as String? ?? json['food_name'] as String? ?? '',
       caloriesPer100g: (json['calories_per_100g'] as num?)?.toDouble() ?? 0,
       defaultPortionGrams:
           (json['default_portion_grams'] as num?)?.toDouble() ?? 100,

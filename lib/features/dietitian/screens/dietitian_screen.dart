@@ -7,6 +7,7 @@ import '../../../shared/services/accessibility_service.dart';
 import '../../../shared/services/api_service.dart';
 import '../../../shared/widgets/accessible_button.dart';
 import 'send_report_wizard.dart';
+import 'dietitian_access_screen.dart';
 
 class DietitianScreen extends ConsumerStatefulWidget {
   const DietitianScreen({super.key});
@@ -46,7 +47,10 @@ class _DietitianScreenState extends ConsumerState<DietitianScreen> {
   }
 
   Future<void> _load() async {
-    setState(() { _loading = true; _error = null; });
+    setState(() {
+      _loading = true;
+      _error = null;
+    });
     final result = await _api.getDietitianAssignment();
     if (!mounted) return;
     setState(() {
@@ -76,12 +80,22 @@ class _DietitianScreenState extends ConsumerState<DietitianScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     return Scaffold(
       backgroundColor: Colors.transparent,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         title: const Text('Diyetisyen Paneli'),
+        actions: [
+          IconButton(
+            tooltip: 'Diyetisyen portalına giriş',
+            onPressed: () => Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (_) => const DietitianAccessScreen(),
+              ),
+            ),
+            icon: const Icon(Icons.admin_panel_settings_outlined),
+          ),
+        ],
       ),
       body: _loading
           ? const Center(child: CircularProgressIndicator())
@@ -93,7 +107,10 @@ class _DietitianScreenState extends ConsumerState<DietitianScreen> {
                   if (_error != null) _buildErrorCard(_error!),
                   _buildHeader(),
                   const SizedBox(height: 24),
-                  if (_assignment == null) _buildSetupCard() else _buildAssignmentCard(),
+                  if (_assignment == null)
+                    _buildSetupCard()
+                  else
+                    _buildAssignmentCard(),
                 ],
               ),
             ),
@@ -115,7 +132,8 @@ class _DietitianScreenState extends ConsumerState<DietitianScreen> {
           const SizedBox(height: 8),
           Text(
             'Beslenme programını bir uzmanla paylaşarak daha hızlı sonuç alabilirsin.',
-            style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant),
+            style: theme.textTheme.bodyMedium
+                ?.copyWith(color: theme.colorScheme.onSurfaceVariant),
           ),
         ],
       ),
@@ -132,8 +150,8 @@ class _DietitianScreenState extends ConsumerState<DietitianScreen> {
             borderRadius: BorderRadius.circular(12),
             border: Border.all(color: AppTheme.errorColor.withOpacity(0.3)),
           ),
-          child: Text(message,
-              style: const TextStyle(color: AppTheme.errorColor)),
+          child:
+              Text(message, style: const TextStyle(color: AppTheme.errorColor)),
         ),
       );
 
@@ -145,19 +163,27 @@ class _DietitianScreenState extends ConsumerState<DietitianScreen> {
         color: theme.colorScheme.surface,
         borderRadius: BorderRadius.circular(AppTheme.cardRadius),
         border: Border.all(color: theme.colorScheme.outline.withOpacity(0.5)),
-        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 20, offset: const Offset(0, 8))],
+        boxShadow: [
+          BoxShadow(
+              color: Colors.black.withOpacity(0.05),
+              blurRadius: 20,
+              offset: const Offset(0, 8))
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          const Icon(Icons.person_search_rounded, size: 48, color: AppTheme.primaryColor),
+          const Icon(Icons.person_search_rounded,
+              size: 48, color: AppTheme.primaryColor),
           const SizedBox(height: 16),
-          Text('Diyetisyen Atama', style: theme.textTheme.titleLarge, textAlign: TextAlign.center),
+          Text('Diyetisyen Atama',
+              style: theme.textTheme.titleLarge, textAlign: TextAlign.center),
           const SizedBox(height: 12),
           Text(
             'Diyetisyeninin e-posta adresini yazarak bağlantı isteği gönderebilirsin.',
             textAlign: TextAlign.center,
-            style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant),
+            style: theme.textTheme.bodyMedium
+                ?.copyWith(color: theme.colorScheme.onSurfaceVariant),
           ),
           const SizedBox(height: 24),
           Semantics(
@@ -202,7 +228,10 @@ class _DietitianScreenState extends ConsumerState<DietitianScreen> {
       decoration: BoxDecoration(
         color: theme.colorScheme.surface,
         borderRadius: BorderRadius.circular(AppTheme.cardRadius),
-        border: Border.all(color: isApproved ? theme.colorScheme.primary.withOpacity(0.3) : theme.colorScheme.outline),
+        border: Border.all(
+            color: isApproved
+                ? theme.colorScheme.primary.withOpacity(0.3)
+                : theme.colorScheme.outline),
       ),
       child: Column(
         children: [
@@ -230,8 +259,8 @@ class _DietitianScreenState extends ConsumerState<DietitianScreen> {
                     style: theme.textTheme.titleLarge),
                 const SizedBox(height: 4),
                 Container(
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 12, vertical: 4),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
                   decoration: BoxDecoration(
                     color: isApproved
                         ? theme.colorScheme.primary.withOpacity(0.1)
@@ -344,8 +373,7 @@ class _DietitianScreenState extends ConsumerState<DietitianScreen> {
           ),
           FilledButton(
             key: const Key('dietitian_cancel_confirm'),
-            style: FilledButton.styleFrom(
-                backgroundColor: AppTheme.errorColor),
+            style: FilledButton.styleFrom(backgroundColor: AppTheme.errorColor),
             onPressed: () => Navigator.pop(context, true),
             child: const Text('Evet, kaldır'),
           ),
@@ -371,6 +399,7 @@ class _DietitianScreenState extends ConsumerState<DietitianScreen> {
   }
 
   Future<void> _sendReport() async {
-    await Navigator.of(context).push(MaterialPageRoute(builder: (_) => SendReportWizard(assignment: _assignment!)));
+    await Navigator.of(context).push(MaterialPageRoute(
+        builder: (_) => SendReportWizard(assignment: _assignment!)));
   }
 }

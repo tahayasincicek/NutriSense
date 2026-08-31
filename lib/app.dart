@@ -18,7 +18,6 @@ import 'features/water_tracker/screens/water_tracker_screen.dart'; // Bu dosya A
 import 'features/dietitian/screens/dietitian_screen.dart';
 import 'features/settings/screens/settings_screen.dart';
 import 'features/water_tracker/state/water_provider.dart';
-import 'core/theme/app_theme.dart';
 
 final currentTabProvider = StateProvider<int>((ref) => 0);
 
@@ -29,7 +28,8 @@ class AppShell extends ConsumerStatefulWidget {
   ConsumerState<AppShell> createState() => _AppShellState();
 }
 
-class _AppShellState extends ConsumerState<AppShell> with WidgetsBindingObserver {
+class _AppShellState extends ConsumerState<AppShell>
+    with WidgetsBindingObserver {
   static const _voiceParser = ContextualVoiceCommandParser();
 
   ListeningState _listeningState = ListeningState.idle;
@@ -75,7 +75,7 @@ class _AppShellState extends ConsumerState<AppShell> with WidgetsBindingObserver
     super.initState();
     WidgetsBinding.instance.addObserver(this);
     _voiceCmdService = ref.read(voiceCommandServiceProvider);
-    
+
     _voiceCmdService.onCommandRecognized = (result) {
       if (mounted) {
         setState(() {
@@ -154,14 +154,14 @@ class _AppShellState extends ConsumerState<AppShell> with WidgetsBindingObserver
                 );
           }
         });
-        
+
         _statusTimer?.cancel();
         _statusTimer = Timer(const Duration(seconds: 3), () {
           if (mounted) setState(() => _voiceStatus = null);
         });
       }
     };
-    
+
     _voiceCmdService.onListeningStateChanged = (state) {
       if (mounted) setState(() => _listeningState = state);
     };
@@ -200,20 +200,20 @@ class _AppShellState extends ConsumerState<AppShell> with WidgetsBindingObserver
         priority: TtsPriority.high,
       );
       await ref.read(sttServiceProvider).startListening(
-        onResult: (result) {
-          if (!result.isFinal) return;
-          final spoken = result.text.trim();
-          if (spoken.length < 2) {
-            accessibility.speakError('Besin adı anlaşılamadı.');
-            return;
-          }
-          unawaited(_searchAndConfirmFood(spoken));
-        },
-        onError: (_) => accessibility.speakError(
-          'Ses tanıma kullanılamıyor. Tara sekmesinden manuel '
-          'besin ekleyebilirsiniz.',
-        ),
-      );
+            onResult: (result) {
+              if (!result.isFinal) return;
+              final spoken = result.text.trim();
+              if (spoken.length < 2) {
+                accessibility.speakError('Besin adı anlaşılamadı.');
+                return;
+              }
+              unawaited(_searchAndConfirmFood(spoken));
+            },
+            onError: (_) => accessibility.speakError(
+              'Ses tanıma kullanılamıyor. Tara sekmesinden manuel '
+              'besin ekleyebilirsiniz.',
+            ),
+          );
       return;
     }
 
@@ -238,7 +238,7 @@ class _AppShellState extends ConsumerState<AppShell> with WidgetsBindingObserver
     }
 
     final food = search.data!;
-    final label = food.foodNameTr ?? query;
+    final label = food.foodNameTr;
     final calories = food.caloriesPer100g;
 
     accessibility.speak(
@@ -250,21 +250,22 @@ class _AppShellState extends ConsumerState<AppShell> with WidgetsBindingObserver
     // Kaydetmeden önce ayrı bir onay alınır; yanlış tanınan bir besin
     // sessizce günlüğe eklenmemeli.
     await ref.read(sttServiceProvider).startListening(
-      onResult: (result) {
-        if (!result.isFinal || !mounted) return;
-        final intent = _voiceParser.parse(
-          result.text,
-          context: VoiceInteractionContext.scanConfirmation,
+          onResult: (result) {
+            if (!result.isFinal || !mounted) return;
+            final intent = _voiceParser.parse(
+              result.text,
+              context: VoiceInteractionContext.scanConfirmation,
+            );
+            if (intent.action != ContextualVoiceAction.yes) {
+              accessibility.speak('Kayıt iptal edildi.',
+                  priority: TtsPriority.high);
+              return;
+            }
+            unawaited(_saveFoodLog(label: label, foodName: query));
+          },
+          onError: (_) =>
+              accessibility.speakError('Onay alınamadı, kaydedilmedi.'),
         );
-        if (intent.action != ContextualVoiceAction.yes) {
-          accessibility.speak('Kayıt iptal edildi.',
-              priority: TtsPriority.high);
-          return;
-        }
-        unawaited(_saveFoodLog(label: label, foodName: query));
-      },
-      onError: (_) => accessibility.speakError('Onay alınamadı, kaydedilmedi.'),
-    );
   }
 
   Future<void> _saveFoodLog({
@@ -333,21 +334,21 @@ class _AppShellState extends ConsumerState<AppShell> with WidgetsBindingObserver
     // Sayı söylenmemiş; ikinci turda sadece değeri dinliyoruz.
     accessibility.speak(prompt, priority: TtsPriority.high);
     await ref.read(sttServiceProvider).startListening(
-      onResult: (result) {
-        if (!result.isFinal) return;
-        final value = parseTurkishNumber(result.text);
-        if (value == null) {
-          accessibility.speakError(
-            'Sayı anlaşılamadı. Aktivite ekranından da girebilirsiniz.',
-          );
-          return;
-        }
-        apply(value);
-      },
-      onError: (_) => accessibility.speakError(
-        'Ses tanıma kullanılamıyor. Aktivite ekranından girebilirsiniz.',
-      ),
-    );
+          onResult: (result) {
+            if (!result.isFinal) return;
+            final value = parseTurkishNumber(result.text);
+            if (value == null) {
+              accessibility.speakError(
+                'Sayı anlaşılamadı. Aktivite ekranından da girebilirsiniz.',
+              );
+              return;
+            }
+            apply(value);
+          },
+          onError: (_) => accessibility.speakError(
+            'Ses tanıma kullanılamıyor. Aktivite ekranından girebilirsiniz.',
+          ),
+        );
   }
 
   /// Bulunulan sekmeye göre kullanılabilir sesli komutları okur.
@@ -377,9 +378,11 @@ class _AppShellState extends ConsumerState<AppShell> with WidgetsBindingObserver
           Positioned(
             top: -100,
             left: -100,
-            child: CircleAvatar(radius: 200, backgroundColor: theme.colorScheme.primary.withOpacity(0.05)),
+            child: CircleAvatar(
+                radius: 200,
+                backgroundColor: theme.colorScheme.primary.withOpacity(0.05)),
           ),
-          
+
           IndexedStack(
             index: currentIndex,
             children: [
@@ -390,7 +393,7 @@ class _AppShellState extends ConsumerState<AppShell> with WidgetsBindingObserver
               const DietitianScreen(),
             ],
           ),
-          
+
           // TTS Failure Banner
           Positioned(
             top: 0,
@@ -398,7 +401,8 @@ class _AppShellState extends ConsumerState<AppShell> with WidgetsBindingObserver
             right: 0,
             child: SafeArea(
               child: ValueListenableBuilder<String?>(
-                valueListenable: ref.read(accessibilityServiceProvider).ttsFailureListenable,
+                valueListenable:
+                    ref.read(accessibilityServiceProvider).ttsFailureListenable,
                 builder: (context, failure, _) {
                   if (failure == null) return const SizedBox.shrink();
                   return Semantics(
@@ -414,7 +418,8 @@ class _AppShellState extends ConsumerState<AppShell> with WidgetsBindingObserver
                           onPressed: () {
                             Navigator.push(
                               context,
-                              MaterialPageRoute(builder: (context) => const SettingsScreen()),
+                              MaterialPageRoute(
+                                  builder: (context) => const SettingsScreen()),
                             );
                           },
                           child: const Text('Ayarları Aç'),
@@ -426,7 +431,7 @@ class _AppShellState extends ConsumerState<AppShell> with WidgetsBindingObserver
               ),
             ),
           ),
-          
+
           // Voice Command Status Overlay
           if (_voiceStatus != null)
             Positioned(
@@ -464,7 +469,12 @@ class _AppShellState extends ConsumerState<AppShell> with WidgetsBindingObserver
         label: 'Ana navigasyon çubuğu, ${_tabs.length} sekme',
         child: Container(
           decoration: BoxDecoration(
-            boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 20, offset: const Offset(0, -5))],
+            boxShadow: [
+              BoxShadow(
+                  color: Colors.black.withOpacity(0.05),
+                  blurRadius: 20,
+                  offset: const Offset(0, -5))
+            ],
           ),
           child: ClipRRect(
             child: BackdropFilter(
@@ -513,7 +523,8 @@ class _AppShellState extends ConsumerState<AppShell> with WidgetsBindingObserver
           label: _listeningState == ListeningState.listening
               ? 'Sesli komut butonu, dinleniyor. Durdurmak için çift dokunun.'
               : 'Sesli komut butonu. Komut söylemek için çift dokunun.',
-          hint: 'Kullanabileceğiniz komutları dinlemek için çift dokunup basılı tutun',
+          hint:
+              'Kullanabileceğiniz komutları dinlemek için çift dokunup basılı tutun',
           onLongPress: _announceHelp,
           child: GestureDetector(
             onLongPress: _announceHelp,
@@ -521,7 +532,11 @@ class _AppShellState extends ConsumerState<AppShell> with WidgetsBindingObserver
               onPressed: () => _voiceCmdService.toggleListening(),
               tooltip: 'Sesli komut. Uzun basınca yardım okunur.',
               backgroundColor: theme.colorScheme.primary,
-              child: Icon(_listeningState == ListeningState.listening ? Icons.mic : Icons.mic_none_rounded, color: Colors.white),
+              child: Icon(
+                  _listeningState == ListeningState.listening
+                      ? Icons.mic
+                      : Icons.mic_none_rounded,
+                  color: Colors.white),
             ),
           ),
         ),
@@ -535,5 +550,9 @@ class _TabInfo {
   final IconData activeIcon;
   final String label;
   final String ttsAnnouncement;
-  const _TabInfo({required this.icon, required this.activeIcon, required this.label, required this.ttsAnnouncement});
+  const _TabInfo(
+      {required this.icon,
+      required this.activeIcon,
+      required this.label,
+      required this.ttsAnnouncement});
 }
