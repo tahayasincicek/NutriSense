@@ -129,6 +129,41 @@ void main() {
       expect(spoken, contains(featuredRecipe.ingredients.first));
     });
 
+    test('her kategoride en az üç tarif var', () {
+      // Kategoriye girip tek tarif görmek "boş" hissi veriyordu.
+      for (final category in discoverCategories) {
+        expect(
+          articlesForCategory(category.id).length,
+          greaterThanOrEqualTo(3),
+          reason: '${category.title} kategorisinde yeterli tarif yok',
+        );
+      }
+    });
+
+    test('her tarif malzeme, adım, süre ve kalori taşır', () {
+      final recipes = [
+        featuredRecipe,
+        ...discoverArticles.where((article) => article.isRecipe),
+      ];
+      for (final recipe in recipes) {
+        expect(recipe.ingredients, isNotEmpty, reason: recipe.id);
+        expect(recipe.steps.length, greaterThanOrEqualTo(3), reason: recipe.id);
+        expect(recipe.prepMinutes, isNotNull, reason: recipe.id);
+        expect(recipe.calories, isNotNull, reason: recipe.id);
+        // Kalori değerleri makul aralıkta olmalı.
+        expect(recipe.calories! >= 80 && recipe.calories! <= 900, isTrue,
+            reason: '${recipe.id} kalori değeri şüpheli');
+      }
+    });
+
+    test('her tarifin kategorisi tanımlı bir kategoriye ait', () {
+      final ids = discoverCategories.map((c) => c.id).toSet();
+      for (final article in discoverArticles) {
+        if (article.category == null) continue;
+        expect(ids, contains(article.category), reason: article.id);
+      }
+    });
+
     test('günün ipuçları yalnızca tarif olmayanları listeler', () {
       expect(dailyTips, isNotEmpty);
       for (final tip in dailyTips) {
