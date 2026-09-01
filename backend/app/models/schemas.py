@@ -402,6 +402,9 @@ class DietitianReportHistoryItem(BaseModel):
     created_at: datetime
     completed_at: Optional[datetime] = None
     channels: list[ChannelDeliveryResponse]
+    # Diyetisyen cevabı; hasta kendi rapor geçmişinde görür.
+    dietitian_reply: Optional[str] = None
+    dietitian_replied_at: Optional[datetime] = None
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -470,6 +473,135 @@ class DietitianDashboardPatient(BaseModel):
     today_calories: float
     seven_day_meals: int
     last_log_at: Optional[datetime] = None
+    # Hedefle karşılaştırma ve takip uyarısı istemcide hesaplanır.
+    daily_calorie_target: float = 2000.0
+    # Diyetisyenin bağı sonlandırabilmesi için.
+    assignment_id: Optional[UUID] = None
+
+
+class DietitianReceivedReport(BaseModel):
+    """Diyetisyenin aldığı, danışan onaylı beslenme raporu."""
+    report_id: UUID
+    patient_id: UUID
+    patient_name: str
+    report_type: str
+    from_date: date
+    to_date: date
+    record_count: int
+    total_meals: int
+    total_calories: float
+    status: str
+    created_at: datetime
+    delivered_via_email: bool
+    delivered_via_sms: bool
+
+
+class DietitianReceivedReportList(BaseModel):
+    reports: list[DietitianReceivedReport]
+
+
+class DietitianReportRecord(BaseModel):
+    """Rapor içindeki tek besin kaydı.
+
+    Alanlar proje raporunun diyetisyene vaat ettiği kümedir: besin adı,
+    miktar, tarih/saat ve kalori değeri.
+    """
+    food_name_tr: str
+    portion_grams: float
+    portion_is_estimate: bool
+    total_calories: float
+    protein: float
+    carbs: float
+    fat: float
+    meal_type: str
+    logged_at: datetime
+    is_corrected: bool
+
+
+class DietitianReportDay(BaseModel):
+    date: date
+    calories: float
+    record_count: int
+
+
+class DietitianReportDetail(BaseModel):
+    report_id: UUID
+    patient_name: str
+    report_type: str
+    from_date: date
+    to_date: date
+    record_count: int
+    total_calories: float
+    average_daily_calories: float
+    estimated_portion_count: int
+    status: str
+    created_at: datetime
+    disclaimer: str
+    # Danışanın gönderim sırasında yazdığı isteğe bağlı not/soru.
+    patient_note: Optional[str] = None
+    # Diyetisyenin bu rapora yazdığı cevap.
+    dietitian_reply: Optional[str] = None
+    dietitian_replied_at: Optional[datetime] = None
+    records: list[DietitianReportRecord]
+    daily_breakdown: list[DietitianReportDay]
+
+
+class HealthMetricUpdate(BaseModel):
+    """Günlük ölçüm güncellemesi. Yalnız gönderilen alanlar değişir."""
+    water_ml: Optional[int] = Field(default=None, ge=0, le=100000)
+    steps: Optional[int] = Field(default=None, ge=0, le=500000)
+    sleep_hours: Optional[float] = Field(default=None, ge=0, le=24)
+    mood: Optional[str] = Field(default=None, max_length=32)
+
+
+class HealthMetricResponse(BaseModel):
+    log_date: date
+    water_ml: int
+    steps: int
+    sleep_hours: float
+    mood: Optional[str] = None
+
+
+class WeightMeasurementCreate(BaseModel):
+    weight_kg: float = Field(..., gt=0, le=500)
+
+
+class WeightMeasurementItem(BaseModel):
+    measurement_id: UUID
+    weight_kg: float
+    measured_at: datetime
+
+
+class WeightHistoryResponse(BaseModel):
+    current_weight: Optional[float] = None
+    measurements: list[WeightMeasurementItem]
+
+
+class DietitianReplyRequest(BaseModel):
+    """Diyetisyenin rapora yazdığı cevap."""
+    reply: str = Field(..., min_length=2, max_length=2000)
+
+
+class DietitianProfileUpdate(BaseModel):
+    """Diyetisyenin kendi profilinde değiştirebildiği alanlar."""
+    full_name: Optional[str] = Field(default=None, min_length=2, max_length=255)
+    specialization: Optional[str] = Field(
+        default=None, min_length=2, max_length=255
+    )
+    phone: Optional[str] = Field(default=None, pattern=r"^\+?[1-9][0-9]{7,14}$")
+
+
+class DietitianPendingRequest(BaseModel):
+    """Diyetisyenin kabul/ret bekleyen eşleşme isteği."""
+    assignment_id: UUID
+    patient_name: str
+    patient_email_masked: str
+    requested_at: datetime
+    patient_approved: bool
+
+
+class DietitianPendingRequestList(BaseModel):
+    requests: list[DietitianPendingRequest]
 
 
 class DietitianDashboardResponse(BaseModel):
@@ -481,6 +613,8 @@ class DietitianDashboardResponse(BaseModel):
     pending_assignments: int
     reports_received: int
     patients: list[DietitianDashboardPatient]
+    pending_requests: list[DietitianPendingRequest] = []
+    recent_reports: list[DietitianReceivedReport] = []
 
 
 class DietitianPatientLogItem(BaseModel):
@@ -565,6 +699,10 @@ class DietitianAssignmentResponse(BaseModel):
     phone_verified: bool
     email_masked: Optional[str] = None
     phone_masked: Optional[str] = None
+    # Bağın hangi onayı beklediğini istemcinin doğru anlatabilmesi için.
+    patient_approved: bool = False
+    dietitian_accepted: bool = False
+    awaiting: Optional[str] = None
 
 
 class TokenResponse(BaseModel):

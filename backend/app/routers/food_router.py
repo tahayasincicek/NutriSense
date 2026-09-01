@@ -34,8 +34,8 @@ from sqlalchemy import func
 from ..models.database import (
     AuthAuditLog, ConsentRecord, Dietitian, DietitianAssignment,
     DietitianReport, FoodLog, NotificationDelivery, NutritionSource,
-    PasswordResetToken, RecognitionAttempt, RefreshToken, User, get_db,
-    istanbul_date, utc_now,
+    HealthMetric, PasswordResetToken, RecognitionAttempt, RefreshToken,
+    User, WeightMeasurement, get_db, istanbul_date, utc_now,
 )
 from ..models.schemas import (
     FoodAnalysisResponse, FoodCandidate, FoodAnalysisDecisionRequest,
@@ -48,6 +48,12 @@ from ..models.schemas import (
     DietitianReportPreviewRequest, DietitianReportPreviewResponse,
     AccountDeletionRequest, DietitianAssignmentRequest,
     DietitianCreate, DietitianDashboardResponse,
+    DietitianPendingRequest, DietitianPendingRequestList,
+    DietitianReceivedReport, DietitianReceivedReportList,
+    DietitianReportDetail, DietitianReportRecord, DietitianReportDay,
+    DietitianReplyRequest, DietitianProfileUpdate,
+    HealthMetricUpdate, HealthMetricResponse,
+    WeightMeasurementCreate, WeightMeasurementItem, WeightHistoryResponse,
     DietitianPatientHistoryResponse, DietitianPatientLogItem,
     PasswordResetRequest, PasswordResetConfirm, PasswordResetResponse,
     DietitianAssignmentResponse, LogoutRequest, RefreshTokenRequest,
@@ -1391,6 +1397,34 @@ async def request_dietitian_assignment(
     )
     db.add(assignment)
     db.commit()
+    return _assignment_response(assignment, dietitian)
+
+
+def _assignment_awaiting(assignment: DietitianAssignment) -> str | None:
+    """Bağın hangi tarafın onayını beklediğini döndürür."""
+    if assignment.status != "pending":
+        return None
+    if assignment.approved_at is None and assignment.dietitian_accepted_at is None:
+        return "both"
+    if assignment.approved_at is None:
+        return "patient"
+    return "dietitian"
+
+
+def _settle_assignment(assignment: DietitianAssignment, user: User) -> None:
+    """İki onay da tamamlandıysa bağı kurar.
+
+    Hasta rızası ve diyetisyen kabulü ayrı ayrı zorunludur; biri eksikken
+    hastanın sağlık verisi diyetisyene açılmaz.
+    """
+    if assignment.approved_at is not None and assignment.dietitian_accepted_at is not None:
+        assignment.status = "approved"
+        user.dietitian_id = assignment.dietitian_id
+
+
+def _assignment_response(
+    assignment: DietitianAssignment, dietitian: Dietitian
+) -> DietitianAssignmentResponse:
     return DietitianAssignmentResponse(
         assignment_id=assignment.id,
         status=assignment.status,
@@ -1400,6 +1434,9 @@ async def request_dietitian_assignment(
         phone_verified=dietitian.phone_verified,
         email_masked=mask_email(dietitian.email) if dietitian.email_verified else None,
         phone_masked=mask_phone(dietitian.phone) if dietitian.phone_verified else None,
+        patient_approved=assignment.approved_at is not None,
+        dietitian_accepted=assignment.dietitian_accepted_at is not None,
+        awaiting=_assignment_awaiting(assignment),
     )
 
 
@@ -1426,20 +1463,11 @@ async def approve_dietitian_assignment(
         dietitian.email_verified or dietitian.phone_verified
     ):
         raise HTTPException(status_code=409, detail="Diyetisyen doğrulaması geçersiz.")
-    assignment.status = "approved"
+    # Hasta rızası kaydedilir; bağ yalnız diyetisyen de kabul edince kurulur.
     assignment.approved_at = utc_now()
-    current_user.dietitian_id = dietitian.id
+    _settle_assignment(assignment, current_user)
     db.commit()
-    return DietitianAssignmentResponse(
-        assignment_id=assignment.id,
-        status=assignment.status,
-        dietitian_id=dietitian.id,
-        dietitian_name=dietitian.full_name,
-        email_verified=dietitian.email_verified,
-        phone_verified=dietitian.phone_verified,
-        email_masked=mask_email(dietitian.email) if dietitian.email_verified else None,
-        phone_masked=mask_phone(dietitian.phone) if dietitian.phone_verified else None,
-    )
+    return _assignment_response(assignment, dietitian)
 
 
 @router.delete(
@@ -1836,6 +1864,8 @@ async def dietitian_report_history(
             created_at=report.created_at,
             completed_at=report.completed_at,
             channels=[_delivery_response(item) for item in deliveries],
+            dietitian_reply=report.dietitian_reply,
+            dietitian_replied_at=report.dietitian_replied_at,
         ))
     return result
 
@@ -2056,6 +2086,444 @@ async def get_me(
     )
 
 
+# ═══════════════════════════════════════════════════════════════════════════════
+# DİYETİSYEN TARAFI EŞLEŞME KABULÜ
+# ═══════════════════════════════════════════════════════════════════════════════
+
+def _pending_requests_for(db: Session, dietitian_id: str) -> list[DietitianPendingRequest]:
+    """Diyetisyenin kabul/ret bekleyen isteklerini hasta kimliği maskeli döner."""
+    rows = db.query(DietitianAssignment).filter(
+        DietitianAssignment.dietitian_id == dietitian_id,
+        DietitianAssignment.status == "pending",
+        DietitianAssignment.dietitian_accepted_at.is_(None),
+    ).order_by(DietitianAssignment.created_at.asc()).all()
+    requests: list[DietitianPendingRequest] = []
+    for row in rows:
+        patient = db.query(User).filter(User.id == row.user_id).first()
+        if patient is None or not patient.is_active:
+            continue
+        requests.append(DietitianPendingRequest(
+            assignment_id=row.id,
+            patient_name=patient.full_name,
+            patient_email_masked=mask_email(patient.email),
+            requested_at=row.created_at,
+            patient_approved=row.approved_at is not None,
+        ))
+    return requests
+
+
+@router.get(
+    "/dietitian/assignments/pending",
+    response_model=DietitianPendingRequestList,
+    summary="Diyetisyenin bekleyen eşleşme istekleri",
+)
+async def list_pending_dietitian_assignments(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    profile = _dietitian_profile_for_user(db, current_user)
+    return DietitianPendingRequestList(
+        requests=_pending_requests_for(db, profile.id)
+    )
+
+
+@router.post(
+    "/dietitian/assignments/{assignment_id}/accept",
+    response_model=DietitianAssignmentResponse,
+    summary="Eşleşme isteğini kabul et",
+)
+async def accept_dietitian_assignment(
+    assignment_id: str,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    profile = _dietitian_profile_for_user(db, current_user)
+    assignment = db.query(DietitianAssignment).filter(
+        DietitianAssignment.id == assignment_id,
+        DietitianAssignment.dietitian_id == profile.id,
+        DietitianAssignment.status == "pending",
+    ).first()
+    if assignment is None:
+        raise HTTPException(status_code=404, detail="Bekleyen istek bulunamadı.")
+    patient = db.query(User).filter(User.id == assignment.user_id).first()
+    if patient is None or not patient.is_active:
+        raise HTTPException(status_code=409, detail="Hasta hesabı aktif değil.")
+    assignment.dietitian_accepted_at = utc_now()
+    _settle_assignment(assignment, patient)
+    db.commit()
+    return _assignment_response(assignment, profile)
+
+
+@router.post(
+    "/dietitian/assignments/{assignment_id}/reject",
+    response_model=DietitianAssignmentResponse,
+    summary="Eşleşme isteğini reddet",
+)
+async def reject_dietitian_assignment(
+    assignment_id: str,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    profile = _dietitian_profile_for_user(db, current_user)
+    assignment = db.query(DietitianAssignment).filter(
+        DietitianAssignment.id == assignment_id,
+        DietitianAssignment.dietitian_id == profile.id,
+        DietitianAssignment.status == "pending",
+    ).first()
+    if assignment is None:
+        raise HTTPException(status_code=404, detail="Bekleyen istek bulunamadı.")
+    assignment.status = "rejected"
+    assignment.rejected_at = utc_now()
+    patient = db.query(User).filter(User.id == assignment.user_id).first()
+    if patient is not None and patient.dietitian_id == profile.id:
+        patient.dietitian_id = None
+    db.commit()
+    return _assignment_response(assignment, profile)
+
+
+def _received_reports_for(
+    db: Session, dietitian_id: str, limit: int = 20
+) -> list[DietitianReceivedReport]:
+    """Diyetisyene ulaşmış, danışan onaylı raporları en yeniden eskiye döner."""
+    rows = db.query(DietitianReport).filter(
+        DietitianReport.dietitian_id == dietitian_id,
+        DietitianReport.status.in_(("sent", "partial_failed")),
+    ).order_by(DietitianReport.created_at.desc()).limit(limit).all()
+    reports: list[DietitianReceivedReport] = []
+    for row in rows:
+        patient = db.query(User).filter(User.id == row.user_id).first()
+        if patient is None:
+            continue
+        reports.append(DietitianReceivedReport(
+            report_id=row.id,
+            patient_id=patient.id,
+            patient_name=patient.full_name,
+            report_type=row.report_type,
+            from_date=row.date_from,
+            to_date=row.date_to,
+            record_count=row.record_count,
+            total_meals=row.total_meals,
+            total_calories=row.total_calories,
+            status=row.status,
+            created_at=row.created_at,
+            delivered_via_email=bool(row.sent_via_email),
+            delivered_via_sms=bool(row.sent_via_sms),
+        ))
+    return reports
+
+
+@router.get(
+    "/dietitian/reports",
+    response_model=DietitianReceivedReportList,
+    summary="Diyetisyene ulaşan beslenme raporları",
+)
+async def list_received_dietitian_reports(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    profile = _dietitian_profile_for_user(db, current_user)
+    return DietitianReceivedReportList(
+        reports=_received_reports_for(db, profile.id)
+    )
+
+
+@router.get(
+    "/dietitian/reports/{report_id}",
+    response_model=DietitianReportDetail,
+    summary="Rapor içeriği: besin adı, miktar, tarih/saat ve kalori",
+)
+async def read_received_dietitian_report(
+    report_id: str,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """Diyetisyenin kendi raporunun ayrıntısını döndürür.
+
+    Rapor yalnız gönderilmişse okunabilir; kuyruktaki bir rapor henüz
+    danışanın onayladığı teslimat değildir.
+    """
+    profile = _dietitian_profile_for_user(db, current_user)
+    report = db.query(DietitianReport).filter(
+        DietitianReport.id == report_id,
+        DietitianReport.dietitian_id == profile.id,
+        DietitianReport.status.in_(("sent", "partial_failed")),
+    ).first()
+    if report is None:
+        raise HTTPException(status_code=404, detail="Rapor bulunamadı.")
+    return _report_detail_response(db, report)
+
+
+def _report_detail_response(
+    db: Session, report: DietitianReport
+) -> DietitianReportDetail:
+    """Rapor kaydını ayrıntı yanıtına dönüştürür."""
+    payload = report.payload_json or {}
+    records = [
+        DietitianReportRecord(
+            food_name_tr=item.get("food_name_tr") or "Bilinmeyen besin",
+            portion_grams=float(item.get("portion_grams") or 0),
+            portion_is_estimate=bool(item.get("portion_is_estimate")),
+            total_calories=float(item.get("total_calories") or 0),
+            protein=float(item.get("protein") or 0),
+            carbs=float(item.get("carbs") or 0),
+            fat=float(item.get("fat") or 0),
+            meal_type=item.get("meal_type") or "atistirmalik",
+            logged_at=item["logged_at"],
+            is_corrected=bool(item.get("is_corrected")),
+        )
+        for item in payload.get("records", [])
+        if item.get("logged_at")
+    ]
+    daily = [
+        DietitianReportDay(
+            date=item["date"],
+            calories=float(item.get("calories") or 0),
+            record_count=int(item.get("record_count") or 0),
+        )
+        for item in payload.get("daily_breakdown", [])
+        if item.get("date")
+    ]
+    patient = db.query(User).filter(User.id == report.user_id).first()
+    return DietitianReportDetail(
+        report_id=report.id,
+        patient_name=(
+            payload.get("patient_name")
+            or (patient.full_name if patient else "Bilinmeyen danışan")
+        ),
+        report_type=report.report_type,
+        from_date=report.date_from,
+        to_date=report.date_to,
+        record_count=report.record_count,
+        total_calories=report.total_calories,
+        average_daily_calories=float(payload.get("average_daily_calories") or 0),
+        estimated_portion_count=int(payload.get("estimated_portion_count") or 0),
+        status=report.status,
+        created_at=report.created_at,
+        disclaimer=payload.get("disclaimer")
+        or "Bu rapor tahmini beslenme bilgisi içerir; tıbbi tavsiye değildir.",
+        patient_note=(payload.get("message") or "").strip() or None,
+        dietitian_reply=report.dietitian_reply,
+        dietitian_replied_at=report.dietitian_replied_at,
+        records=records,
+        daily_breakdown=daily,
+    )
+
+
+@router.delete(
+    "/dietitian/assignments/{assignment_id}",
+    status_code=status.HTTP_204_NO_CONTENT,
+    summary="Diyetisyen kendi tarafından eşleşmeyi sonlandırır",
+)
+async def end_dietitian_assignment(
+    assignment_id: str,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """Kurulu bağı diyetisyen tarafından sonlandırır.
+
+    Hastanın iptal hakkının simetriğidir; bağ koptuğunda hastanın verisi
+    diyetisyene kapanır. Geçmiş raporlar teslim edilmiş kayıtlar olduğu için
+    silinmez.
+    """
+    profile = _dietitian_profile_for_user(db, current_user)
+    assignment = db.query(DietitianAssignment).filter(
+        DietitianAssignment.id == assignment_id,
+        DietitianAssignment.dietitian_id == profile.id,
+        DietitianAssignment.status == "approved",
+    ).first()
+    if assignment is None:
+        raise HTTPException(status_code=404, detail="Aktif eşleşme bulunamadı.")
+    assignment.status = "cancelled"
+    assignment.cancelled_at = utc_now()
+    patient = db.query(User).filter(User.id == assignment.user_id).first()
+    if patient is not None and patient.dietitian_id == profile.id:
+        patient.dietitian_id = None
+    db.commit()
+    return None
+
+
+@router.post(
+    "/dietitian/reports/{report_id}/reply",
+    response_model=DietitianReportDetail,
+    summary="Rapora cevap yaz",
+)
+async def reply_to_dietitian_report(
+    report_id: str,
+    request: DietitianReplyRequest,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """Diyetisyenin kendi raporuna tek cevabını kaydeder.
+
+    Cevap yalnız raporu gönderen hastaya görünür. Yeniden yazmak önceki
+    cevabın üzerine yazar; geçmiş sürüm tutulmaz.
+    """
+    profile = _dietitian_profile_for_user(db, current_user)
+    report = db.query(DietitianReport).filter(
+        DietitianReport.id == report_id,
+        DietitianReport.dietitian_id == profile.id,
+        DietitianReport.status.in_(("sent", "partial_failed")),
+    ).first()
+    if report is None:
+        raise HTTPException(status_code=404, detail="Rapor bulunamadı.")
+    report.dietitian_reply = request.reply.strip()
+    report.dietitian_replied_at = utc_now()
+    db.commit()
+    return _report_detail_response(db, report)
+
+
+@router.patch(
+    "/dietitian/profile",
+    response_model=DietitianDashboardResponse,
+    summary="Diyetisyen kendi profilini günceller",
+)
+async def update_dietitian_profile(
+    request: DietitianProfileUpdate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """Uzmanlık alanı, ad ve telefon kayıttan sonra da değiştirilebilir.
+
+    E-posta kimlik doğrulamasına bağlı olduğu için burada değiştirilemez.
+    """
+    profile = _dietitian_profile_for_user(db, current_user)
+    if request.full_name is not None:
+        profile.full_name = request.full_name.strip()
+        current_user.full_name = profile.full_name
+    if request.specialization is not None:
+        profile.specialization = request.specialization.strip()
+    if request.phone is not None:
+        profile.phone = request.phone
+        # Numara değişince önceki doğrulama geçersizdir.
+        profile.phone_verified = False
+    db.commit()
+    return await dietitian_dashboard(db=db, current_user=current_user)
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# SAĞLIK ÖLÇÜMLERİ (SU, ADIM, UYKU, RUH HÂLİ, KİLO)
+# ═══════════════════════════════════════════════════════════════════════════════
+
+def _health_metric_for(db: Session, user_id: str, day) -> HealthMetric:
+    """Güne ait ölçüm satırını döner; yoksa oluşturur."""
+    row = db.query(HealthMetric).filter(
+        HealthMetric.user_id == user_id,
+        HealthMetric.log_date == day,
+    ).first()
+    if row is None:
+        row = HealthMetric(
+            id=str(uuid.uuid4()),
+            user_id=user_id,
+            log_date=day,
+        )
+        db.add(row)
+    return row
+
+
+def _health_metric_response(row: HealthMetric) -> HealthMetricResponse:
+    return HealthMetricResponse(
+        log_date=row.log_date,
+        water_ml=row.water_ml or 0,
+        steps=row.steps or 0,
+        sleep_hours=float(row.sleep_hours or 0),
+        mood=row.mood,
+    )
+
+
+@router.get(
+    "/health-metrics/today",
+    response_model=HealthMetricResponse,
+    summary="Bugünün su, adım, uyku ve ruh hâli ölçümleri",
+)
+async def read_today_health_metrics(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    row = _health_metric_for(db, current_user.id, istanbul_date())
+    db.commit()
+    return _health_metric_response(row)
+
+
+@router.put(
+    "/health-metrics/today",
+    response_model=HealthMetricResponse,
+    summary="Bugünün ölçümlerini günceller",
+)
+async def update_today_health_metrics(
+    request: HealthMetricUpdate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """Yalnız gönderilen alanlar değişir; gün başına tek satır tutulur."""
+    row = _health_metric_for(db, current_user.id, istanbul_date())
+    if request.water_ml is not None:
+        row.water_ml = request.water_ml
+    if request.steps is not None:
+        row.steps = request.steps
+    if request.sleep_hours is not None:
+        row.sleep_hours = request.sleep_hours
+    if request.mood is not None:
+        # Boş metin "seçim yok" demektir.
+        row.mood = request.mood.strip() or None
+    db.commit()
+    return _health_metric_response(row)
+
+
+@router.get(
+    "/health-metrics/weight",
+    response_model=WeightHistoryResponse,
+    summary="Kilo ölçüm geçmişi",
+)
+async def read_weight_history(
+    limit: int = Query(default=30, ge=1, le=365),
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    return _weight_history_response(db, current_user.id, limit)
+
+
+def _weight_history_response(
+    db: Session, user_id: str, limit: int = 30
+) -> WeightHistoryResponse:
+    """Kilo serisini eskiden yeniye sıralı döner."""
+    rows = db.query(WeightMeasurement).filter(
+        WeightMeasurement.user_id == user_id,
+    ).order_by(WeightMeasurement.measured_at.desc()).limit(limit).all()
+    ordered = list(reversed(rows))
+    return WeightHistoryResponse(
+        current_weight=float(ordered[-1].weight_kg) if ordered else None,
+        measurements=[
+            WeightMeasurementItem(
+                measurement_id=item.id,
+                weight_kg=float(item.weight_kg),
+                measured_at=item.measured_at,
+            )
+            for item in ordered
+        ],
+    )
+
+
+@router.post(
+    "/health-metrics/weight",
+    response_model=WeightHistoryResponse,
+    status_code=status.HTTP_201_CREATED,
+    summary="Yeni kilo ölçümü ekler",
+)
+async def add_weight_measurement(
+    request: WeightMeasurementCreate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    db.add(WeightMeasurement(
+        id=str(uuid.uuid4()),
+        user_id=current_user.id,
+        weight_kg=request.weight_kg,
+        measured_at=utc_now(),
+    ))
+    db.commit()
+    return _weight_history_response(db, current_user.id)
+
+
 @router.get("/dietitian/dashboard", response_model=DietitianDashboardResponse)
 async def dietitian_dashboard(
     db: Session = Depends(get_db),
@@ -2092,6 +2560,8 @@ async def dietitian_dashboard(
             "today_calories": float(today_calories or 0),
             "seven_day_meals": seven_day_meals,
             "last_log_at": last_log.logged_at if last_log else None,
+            "daily_calorie_target": float(patient.daily_calorie_target or 2000),
+            "assignment_id": assignment.id,
         })
 
     pending = db.query(DietitianAssignment).filter(
@@ -2110,6 +2580,8 @@ async def dietitian_dashboard(
         pending_assignments=pending,
         reports_received=report_count,
         patients=patients,
+        pending_requests=_pending_requests_for(db, profile.id),
+        recent_reports=_received_reports_for(db, profile.id, limit=5),
     )
 
 

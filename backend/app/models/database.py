@@ -150,9 +150,13 @@ class DietitianAssignment(Base):
     id = Column(UUIDString, primary_key=True, default=lambda: str(uuid.uuid4()))
     user_id = Column(UUIDString, ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
     dietitian_id = Column(UUIDString, ForeignKey("dietitians.id", ondelete="RESTRICT"), nullable=False, index=True)
-    status = Column(Enum("pending", "approved", "cancelled", name="assignment_status_enum"), default="pending", nullable=False)
+    status = Column(Enum("pending", "approved", "cancelled", "rejected", name="assignment_status_enum"), default="pending", nullable=False)
     created_at = Column(UTCDateTime, default=utc_now, nullable=False)
+    # Bağ yalnız iki taraf da onay verdiğinde kurulur: hasta sağlık verisinin
+    # paylaşımına rıza gösterir, diyetisyen de hastayı kabul eder.
     approved_at = Column(UTCDateTime, nullable=True)
+    dietitian_accepted_at = Column(UTCDateTime, nullable=True)
+    rejected_at = Column(UTCDateTime, nullable=True)
     cancelled_at = Column(UTCDateTime, nullable=True)
 
 
@@ -291,6 +295,11 @@ class DietitianReport(Base):
     created_at = Column(UTCDateTime, default=utc_now, nullable=False)
     sent_at = Column(UTCDateTime, nullable=True)
     completed_at = Column(UTCDateTime, nullable=True)
+    # Diyetisyenin rapora yazdığı tek cevap. Sağlık verisi üzerinden yazışma
+    # olduğu için içerik yalnız rapor sahibi hasta ve raporu alan diyetisyene
+    # açıktır; ayrı bir rıza/KVKK değerlendirmesi gerektirir.
+    dietitian_reply = Column(Text, nullable=True)
+    dietitian_replied_at = Column(UTCDateTime, nullable=True)
     __table_args__ = (UniqueConstraint("user_id", "idempotency_key", name="uq_report_user_idempotency"),)
 
 
@@ -315,6 +324,41 @@ class NotificationDelivery(Base):
     attempted_at = Column(UTCDateTime, nullable=True)
     sent_at = Column(UTCDateTime, nullable=True)
     __table_args__ = (UniqueConstraint("report_id", "channel", name="uq_report_delivery_channel"),)
+
+
+class HealthMetric(Base):
+    """Kullanıcının bir güne ait sağlık ölçümleri.
+
+    Su, adım, uyku ve ruh hâli günlük tek satırda tutulur; aynı gün için
+    ikinci kayıt açılmaz, mevcut satır güncellenir.
+    """
+
+    __tablename__ = "health_metrics"
+
+    id = Column(UUIDString, primary_key=True, default=lambda: str(uuid.uuid4()))
+    user_id = Column(UUIDString, ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
+    log_date = Column(Date, nullable=False, index=True)
+    water_ml = Column(Integer, default=0, nullable=False)
+    steps = Column(Integer, default=0, nullable=False)
+    sleep_hours = Column(Float, default=0.0, nullable=False)
+    mood = Column(String(32), nullable=True)
+    created_at = Column(UTCDateTime, default=utc_now, nullable=False)
+    updated_at = Column(UTCDateTime, default=utc_now, onupdate=utc_now, nullable=False)
+
+    __table_args__ = (
+        UniqueConstraint("user_id", "log_date", name="uq_health_metric_user_day"),
+    )
+
+
+class WeightMeasurement(Base):
+    """Kilo ölçüm serisi. Günlük değil, ölçüm başına bir satırdır."""
+
+    __tablename__ = "weight_measurements"
+
+    id = Column(UUIDString, primary_key=True, default=lambda: str(uuid.uuid4()))
+    user_id = Column(UUIDString, ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
+    weight_kg = Column(Float, nullable=False)
+    measured_at = Column(UTCDateTime, default=utc_now, nullable=False, index=True)
 
 
 class SurveyVersion(Base):

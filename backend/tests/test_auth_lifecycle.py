@@ -11,6 +11,7 @@ from app.models.database import (
     FoodLog,
     SessionLocal,
     User,
+    utc_now,
 )
 from app.routers import food_router
 from app.routers.survey_router import SurveySubmissionSchema
@@ -227,7 +228,23 @@ def test_dietitian_assignment_consent_and_idor_guards(client, monkeypatch):
         headers=bearer(first),
     )
     assert approved.status_code == 200
-    assert approved.json()["status"] == "approved"
+    # Bağ iki taraflıdır: hasta rızası tek başına atamayı kurmaz.
+    assert approved.json()["status"] == "pending"
+    assert approved.json()["patient_approved"] is True
+    assert approved.json()["awaiting"] == "dietitian"
+
+    db = SessionLocal()
+    try:
+        assignment = db.query(DietitianAssignment).filter(
+            DietitianAssignment.id == assignment_id
+        ).first()
+        assignment.dietitian_accepted_at = utc_now()
+        assignment.status = "approved"
+        owner = db.query(User).filter(User.id == first["user_id"]).first()
+        owner.dietitian_id = dietitian_id
+        db.commit()
+    finally:
+        db.close()
 
     no_consent = client.post(
         "/api/v1/send-to-dietitian",
