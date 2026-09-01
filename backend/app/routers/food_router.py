@@ -2686,6 +2686,12 @@ async def export_my_data(
     assignments = db.query(DietitianAssignment).filter(
         DietitianAssignment.user_id == current_user.id
     ).all()
+    health_metrics = db.query(HealthMetric).filter(
+        HealthMetric.user_id == current_user.id,
+    ).order_by(HealthMetric.log_date.asc()).all()
+    weights = db.query(WeightMeasurement).filter(
+        WeightMeasurement.user_id == current_user.id,
+    ).order_by(WeightMeasurement.measured_at.asc()).all()
     reports = db.query(DietitianReport).filter(
         DietitianReport.user_id == current_user.id
     ).all()
@@ -2770,6 +2776,25 @@ async def export_my_data(
             }
             for item in consents
         ],
+        # Sağlık ölçümleri de kişisel veridir; taşınabilirlik kapsamında
+        # dışa aktarıma dahil edilir.
+        "health_metrics": [
+            {
+                "log_date": item.log_date.isoformat(),
+                "water_ml": item.water_ml,
+                "steps": item.steps,
+                "sleep_hours": float(item.sleep_hours or 0),
+                "mood": item.mood,
+            }
+            for item in health_metrics
+        ],
+        "weight_measurements": [
+            {
+                "weight_kg": float(item.weight_kg),
+                "measured_at": item.measured_at.isoformat(),
+            }
+            for item in weights
+        ],
     }
     db.add(AuthAuditLog(
         event="personal_data_exported",
@@ -2781,6 +2806,8 @@ async def export_my_data(
             "food_log_count": len(logs),
             "report_count": len(reports),
             "consent_count": len(consents),
+            "health_metric_count": len(health_metrics),
+            "weight_measurement_count": len(weights),
         },
     ))
     db.commit()
