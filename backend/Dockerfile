@@ -1,4 +1,4 @@
-ARG PYTHON_IMAGE=python:3.11.11-slim-bookworm@sha256:081075da77b2b55c23c088251026fb69a7b2bf92471e491ff5fd75c192fd38e5
+ARG PYTHON_IMAGE=python:3.11-slim-bookworm@sha256:528257d48c1da0dcecc2e725d1ae34498d60c965f1241e39cd6a85a8859bdf84
 
 FROM ${PYTHON_IMAGE} AS wheels
 
@@ -45,6 +45,11 @@ RUN python -m pip install \
       --require-hashes \
       --requirement requirements.lock \
     && rm -rf /wheels
+
+# Temel imajla gelen paketleme araçları çalışma zamanında kullanılmıyor ama
+# zafiyet taramasında görünüyor. Uygulama için gereksiz olduklarından
+# kaldırılır; bu hem bulguyu hem saldırı yüzeyini ortadan kaldırır.
+RUN python -m pip uninstall --yes setuptools wheel
 
 COPY --chown=10001:10001 app ./app
 COPY --chown=10001:10001 migrations ./migrations
