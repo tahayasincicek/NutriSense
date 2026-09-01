@@ -177,7 +177,7 @@ jobs:
   android-integration:
     name: Android P0 Fixture Yolculuğu
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    timeout-minutes: 45
     needs: flutter-test
 
     steps:
@@ -217,14 +217,32 @@ jobs:
           sudo apt-get clean
           df -h /
 
+      # Emülatör bazen açılıyor fakat adb bağlantısı hazır olmadan action'ın
+      # kendi kurulum komutları çalışıyor ve "adb: device offline" ile
+      # düşüyor. Bu ürün hatası değil, runner altyapısı kararsızlığıdır;
+      # bu yüzden bir kez yeniden denenir. İkinci deneme de düşerse iş
+      # kırmızı döner, yani gerçek bir gerileme gizlenmez.
       - name: API 35 emulator üzerinde P0 integration testi
+        id: p0
+        continue-on-error: true
         uses: reactivecircus/android-emulator-runner@0a638108440efd5c7f980e6ba145dbcdd8f32009
         with:
           api-level: 35
           arch: x86_64
           profile: pixel_4
           disable-animations: true
-          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none -no-metrics
+          emulator-options: -no-window -no-snapshot -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none -no-metrics
+          script: flutter test integration_test/p0_fixture_journey_test.dart -d emulator-5554 --flavor dev --dart-define=APP_ENV=dev
+
+      - name: P0 testini yeniden dene
+        if: steps.p0.outcome == 'failure'
+        uses: reactivecircus/android-emulator-runner@0a638108440efd5c7f980e6ba145dbcdd8f32009
+        with:
+          api-level: 35
+          arch: x86_64
+          profile: pixel_4
+          disable-animations: true
+          emulator-options: -no-window -no-snapshot -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none -no-metrics
           script: flutter test integration_test/p0_fixture_journey_test.dart -d emulator-5554 --flavor dev --dart-define=APP_ENV=dev
 
   ml-validation:
