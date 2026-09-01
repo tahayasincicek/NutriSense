@@ -490,6 +490,33 @@ class ApiService {
         return DietitianDashboardData.fromJson(response.data ?? const {});
       });
 
+  /// Kullanıcının amaç bazlı rıza durumunu getirir.
+  Future<ApiResult<Map<String, dynamic>>> getConsents({
+    CancelToken? cancelToken,
+  }) =>
+      _safeCall(() async {
+        final response = await _dio.get<Map<String, dynamic>>(
+          '/consents',
+          cancelToken: cancelToken,
+        );
+        return response.data ?? const <String, dynamic>{};
+      });
+
+  /// Tek bir amaç için rıza verir veya geri çeker.
+  Future<ApiResult<Map<String, dynamic>>> updateConsent({
+    required String consentType,
+    required bool granted,
+    CancelToken? cancelToken,
+  }) =>
+      _safeCall(() async {
+        final response = await _dio.put<Map<String, dynamic>>(
+          '/consents',
+          data: {'consent_type': consentType, 'granted': granted},
+          cancelToken: cancelToken,
+        );
+        return response.data ?? const <String, dynamic>{};
+      });
+
   /// Bugünün su, adım, uyku ve ruh hâli ölçümlerini getirir.
   Future<ApiResult<Map<String, dynamic>>> getTodayHealthMetrics({
     CancelToken? cancelToken,

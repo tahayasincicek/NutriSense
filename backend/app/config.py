@@ -99,6 +99,9 @@ class Settings(BaseSettings):
     research_mode: str = "synthetic"
     research_protocol_version: str = ""
     research_consent_version: str = ""
+    # Ürün tarafı aydınlatma metni sürümü. Rıza kayıtları bu sürümle
+    # damgalanır; metin değişince yeni rıza istenebilmesi için gereklidir.
+    privacy_notice_version: str = "taslak-yayinlanmadi"
     research_approval_reference: str = ""
     research_audio_consent_approved: bool = False
     migration_check_enabled: bool = True

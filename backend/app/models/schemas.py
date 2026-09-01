@@ -577,6 +577,35 @@ class WeightHistoryResponse(BaseModel):
     measurements: list[WeightMeasurementItem]
 
 
+class ProductConsentUpdate(BaseModel):
+    """Amaç bazlı ürün rızası.
+
+    Aydınlatma metninden ayrı olarak, her amaç için tek tek alınır; KVKK
+    açık rızanın belirli bir konuya ilişkin olmasını arar.
+    """
+    consent_type: Literal[
+        "health_data_processing",
+        "image_cross_border_transfer",
+    ]
+    granted: bool
+
+
+class ProductConsentItem(BaseModel):
+    consent_type: str
+    granted: bool
+    policy_version: str
+    updated_at: datetime
+
+
+class ProductConsentState(BaseModel):
+    policy_version: str
+    consents: list[ProductConsentItem]
+
+    # İstemcinin akışı kurabilmesi için özet bayraklar.
+    health_data_processing: bool = False
+    image_cross_border_transfer: bool = False
+
+
 class DietitianReplyRequest(BaseModel):
     """Diyetisyenin rapora yazdığı cevap."""
     reply: str = Field(..., min_length=2, max_length=2000)

@@ -4,6 +4,7 @@ import 'dart:ui';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/accessibility_utils.dart';
 import '../../../shared/widgets/accessible_button.dart';
+import 'privacy_consent_screen.dart';
 import '../../../shared/widgets/auth_mode_switch.dart';
 import '../state/auth_controller.dart';
 
@@ -190,6 +191,11 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     setState(() => _loading = false);
     if (error == null) {
       AccessibilityUtils.announceSuccess('Kayıt başarılı');
+      // Aydınlatma ve açık rıza, veri işlenmeye başlamadan önce sunulur.
+      await Navigator.of(context).push(
+        MaterialPageRoute(builder: (_) => const PrivacyConsentScreen()),
+      );
+      if (!mounted) return;
       Navigator.of(context).pop();
     } else {
       ScaffoldMessenger.of(context)

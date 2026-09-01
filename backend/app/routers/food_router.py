@@ -53,6 +53,7 @@ from ..models.schemas import (
     DietitianReportDetail, DietitianReportRecord, DietitianReportDay,
     DietitianReplyRequest, DietitianProfileUpdate,
     HealthMetricUpdate, HealthMetricResponse,
+    ProductConsentUpdate, ProductConsentItem, ProductConsentState,
     WeightMeasurementCreate, WeightMeasurementItem, WeightHistoryResponse,
     DietitianPatientHistoryResponse, DietitianPatientLogItem,
     PasswordResetRequest, PasswordResetConfirm, PasswordResetResponse,
@@ -412,6 +413,20 @@ async def analyze_food(
         return FoodAnalysisResponse.model_validate(existing.analysis_payload)
 
     _enforce_analysis_rate_limit(http_request, current_user.id)
+    # Görüntü yurtdışındaki bir sağlayıcıya gidiyorsa bu ayrı bir aktarımdır;
+    # kullanıcı rıza vermediyse görüntü hiç işlenmez ve dışarı çıkmaz.
+    # Kullanıcı manuel besin girişiyle uygulamayı kullanmaya devam edebilir.
+    if settings.vision_provider_mode in _CROSS_BORDER_VISION_MODES and not _has_consent(
+        db, current_user.id, "image_cross_border_transfer"
+    ):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail=(
+                "Fotoğrafın analiz için yurt dışındaki sağlayıcıya "
+                "gönderilmesine izin vermediniz. Besini elle girebilir veya "
+                "ayarlardan bu izni verebilirsiniz."
+            ),
+        )
     image_base64 = await _sanitized_image_base64(image)
 
     # ── 1. Yapılandırılan sağlayıcı ile görüntü analizi ──
@@ -2522,6 +2537,110 @@ async def add_weight_measurement(
     ))
     db.commit()
     return _weight_history_response(db, current_user.id)
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# ÜRÜN RIZALARI (AYDINLATMADAN AYRI, AMAÇ BAZLI)
+# ═══════════════════════════════════════════════════════════════════════════════
+
+# Görüntüyü yurt dışına aktaran sağlayıcılar; KVKK m.9 kapsamındadır.
+_CROSS_BORDER_VISION_MODES = frozenset({"google", "gemini"})
+
+PRODUCT_CONSENT_TYPES = (
+    "health_data_processing",
+    "image_cross_border_transfer",
+)
+
+
+def _latest_consent(
+    db: Session, user_id: str, consent_type: str
+) -> ConsentRecord | None:
+    """Bir amaç için en güncel rıza kaydını döner."""
+    return db.query(ConsentRecord).filter(
+        ConsentRecord.user_id == user_id,
+        ConsentRecord.consent_type == consent_type,
+    ).order_by(ConsentRecord.granted_at.desc()).first()
+
+
+def _has_consent(db: Session, user_id: str, consent_type: str) -> bool:
+    """Rıza verilmiş ve geri çekilmemiş mi.
+
+    Kayıt yoksa rıza yok sayılır; sessiz kabul edilmez.
+    """
+    record = _latest_consent(db, user_id, consent_type)
+    return bool(record and record.granted and record.revoked_at is None)
+
+
+def _consent_state(db: Session, user_id: str) -> ProductConsentState:
+    items = []
+    flags = {}
+    for consent_type in PRODUCT_CONSENT_TYPES:
+        record = _latest_consent(db, user_id, consent_type)
+        granted = bool(record and record.granted and record.revoked_at is None)
+        flags[consent_type] = granted
+        if record is not None:
+            items.append(ProductConsentItem(
+                consent_type=consent_type,
+                granted=granted,
+                policy_version=record.policy_version,
+                updated_at=record.granted_at,
+            ))
+    return ProductConsentState(
+        policy_version=settings.privacy_notice_version,
+        consents=items,
+        health_data_processing=flags["health_data_processing"],
+        image_cross_border_transfer=flags["image_cross_border_transfer"],
+    )
+
+
+@router.get(
+    "/consents",
+    response_model=ProductConsentState,
+    summary="Kullanıcının amaç bazlı rıza durumu",
+)
+async def read_product_consents(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    return _consent_state(db, current_user.id)
+
+
+@router.put(
+    "/consents",
+    response_model=ProductConsentState,
+    summary="Bir amaç için rıza ver veya geri çek",
+)
+async def update_product_consent(
+    request: ProductConsentUpdate,
+    http_request: Request,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """Rızayı kaydeder.
+
+    Geri çekme kaydı silmez; yeni bir kayıt yazılır ki rızanın ne zaman
+    verilip ne zaman geri alındığı kanıtlanabilsin.
+    """
+    db.add(ConsentRecord(
+        id=str(uuid.uuid4()),
+        user_id=current_user.id,
+        consent_type=request.consent_type,
+        policy_version=settings.privacy_notice_version,
+        granted=request.granted,
+        request_id=getattr(http_request.state, "request_id", None),
+        granted_at=utc_now(),
+        revoked_at=None if request.granted else utc_now(),
+    ))
+    db.add(AuthAuditLog(
+        event="product_consent_updated",
+        success=True,
+        user_id=current_user.id,
+        ip_address=http_request.client.host if http_request.client else None,
+        reason=f"{request.consent_type}:{'granted' if request.granted else 'revoked'}",
+        metadata_json={"policy_version": settings.privacy_notice_version},
+    ))
+    db.commit()
+    return _consent_state(db, current_user.id)
 
 
 @router.get("/dietitian/dashboard", response_model=DietitianDashboardResponse)

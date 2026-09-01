@@ -9,6 +9,7 @@ import '../../../shared/services/stt_service.dart';
 import '../../auth/state/auth_controller.dart';
 import '../../history/state/daily_goal_provider.dart';
 import '../../onboarding/screens/onboarding_screen.dart';
+import '../../auth/screens/privacy_consent_screen.dart';
 import '../../survey/screens/survey_screen.dart';
 import '../../survey/screens/usability_test_screen.dart';
 import '../../../shared/widgets/accessible_number_dialog.dart';
@@ -187,6 +188,17 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           // kullanılabilirlik testi verilerini toplamak için kullanılır.
           _buildSectionTitle('Araştırma'),
           _buildSettingCard([
+            _buildActionTile(
+              key: const Key('settings_open_privacy'),
+              title: 'Kişisel Verilerim ve İzinler',
+              icon: Icons.shield_outlined,
+              color: AppTheme.primaryColor,
+              onTap: () => Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (_) => const PrivacyConsentScreen(),
+                ),
+              ),
+            ),
             _buildActionTile(
               key: const Key('settings_open_survey'),
               title: 'Anket',
