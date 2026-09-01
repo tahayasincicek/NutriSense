@@ -215,6 +215,8 @@ class FlutterSecureStorageTokenStore implements TokenStore {
 
 /// Uygulamadaki tek kanonik HTTP istemcisi.
 class ApiService {
+  static const Duration _tokenStoreTimeout = Duration(seconds: 5);
+
   static const _maxImageBytes = 5 * 1024 * 1024;
   static const _retryCountKey = 'idempotent_retry_count';
   static const _authRetriedKey = 'auth_retried';
@@ -257,18 +259,40 @@ class ApiService {
   Future<void> initialize() => _initialization;
 
   Future<void> _restoreSession() async {
-    _session = await _tokenStore.read();
+    try {
+      _session = await _tokenStore.read().timeout(_tokenStoreTimeout);
+    } catch (_) {
+      // Bozuk/eski Android Keystore kayıtları uygulamayı açılış ekranında
+      // sonsuza kadar bekletmemeli. Kullanıcı güvenli biçimde yeniden giriş
+      // yapabilir; geçersiz oturum belleğe alınmaz.
+      _session = null;
+    }
   }
 
   Future<void> _saveAuth(AuthTokenResult auth) async {
     final session = AuthSession.fromAuth(auth);
-    await _tokenStore.write(session);
+    // Profil isteği hemen bu oturumu kullanır. Android Keystore migrasyonu
+    // yavaşlasa bile başarılı girişin arayüzü kilitlemesini engelle.
     _session = session;
+    try {
+      await _tokenStore.write(session).timeout(_tokenStoreTimeout);
+    } on TimeoutException {
+      // Future.timeout alttaki yazmayı iptal etmez; yazma arka planda
+      // tamamlanabilir. Bu süreçte oturum yalnızca bellekte geçerlidir.
+    } catch (_) {
+      _session = null;
+      rethrow;
+    }
   }
 
   Future<void> _clearSession() async {
     _session = null;
-    await _tokenStore.clear();
+    try {
+      await _tokenStore.clear().timeout(_tokenStoreTimeout);
+    } on TimeoutException {
+      // Bellekteki oturum zaten silindi; depolama katmanının gecikmesi çıkış
+      // ekranını kilitlememeli.
+    }
   }
 
   Future<void> _onRequest(
@@ -464,6 +488,171 @@ class ApiService {
           cancelToken: cancelToken,
         );
         return DietitianDashboardData.fromJson(response.data ?? const {});
+      });
+
+  /// Bugünün su, adım, uyku ve ruh hâli ölçümlerini getirir.
+  Future<ApiResult<Map<String, dynamic>>> getTodayHealthMetrics({
+    CancelToken? cancelToken,
+  }) =>
+      _safeCall(() async {
+        final response = await _dio.get<Map<String, dynamic>>(
+          '/health-metrics/today',
+          cancelToken: cancelToken,
+        );
+        return response.data ?? const <String, dynamic>{};
+      });
+
+  /// Yalnız verilen alanları günceller; diğerleri sunucuda korunur.
+  Future<ApiResult<Map<String, dynamic>>> updateTodayHealthMetrics({
+    int? waterMl,
+    int? steps,
+    double? sleepHours,
+    String? mood,
+    CancelToken? cancelToken,
+  }) =>
+      _safeCall(() async {
+        final response = await _dio.put<Map<String, dynamic>>(
+          '/health-metrics/today',
+          data: {
+            if (waterMl != null) 'water_ml': waterMl,
+            if (steps != null) 'steps': steps,
+            if (sleepHours != null) 'sleep_hours': sleepHours,
+            if (mood != null) 'mood': mood,
+          },
+          cancelToken: cancelToken,
+        );
+        return response.data ?? const <String, dynamic>{};
+      });
+
+  /// Kilo ölçüm geçmişini eskiden yeniye getirir.
+  Future<ApiResult<Map<String, dynamic>>> getWeightHistory({
+    CancelToken? cancelToken,
+  }) =>
+      _safeCall(() async {
+        final response = await _dio.get<Map<String, dynamic>>(
+          '/health-metrics/weight',
+          cancelToken: cancelToken,
+        );
+        return response.data ?? const <String, dynamic>{};
+      });
+
+  /// Yeni kilo ölçümü ekler ve güncel seriyi döner.
+  Future<ApiResult<Map<String, dynamic>>> addWeightMeasurement({
+    required double weightKg,
+    CancelToken? cancelToken,
+  }) =>
+      _safeCall(() async {
+        final response = await _dio.post<Map<String, dynamic>>(
+          '/health-metrics/weight',
+          data: {'weight_kg': weightKg},
+          cancelToken: cancelToken,
+        );
+        return response.data ?? const <String, dynamic>{};
+      });
+
+  /// Rapora diyetisyen cevabı yazar; önceki cevabın üzerine yazılır.
+  Future<ApiResult<DietitianReportDetail>> replyToDietitianReport({
+    required String reportId,
+    required String reply,
+    CancelToken? cancelToken,
+  }) =>
+      _safeCall(() async {
+        final response = await _dio.post<Map<String, dynamic>>(
+          '/dietitian/reports/$reportId/reply',
+          data: {'reply': reply},
+          cancelToken: cancelToken,
+        );
+        return DietitianReportDetail.fromJson(response.data ?? const {});
+      });
+
+  /// Diyetisyenin kendi profilini günceller; güncel panel verisini döner.
+  Future<ApiResult<DietitianDashboardData>> updateDietitianProfile({
+    String? fullName,
+    String? specialization,
+    String? phone,
+    CancelToken? cancelToken,
+  }) =>
+      _safeCall(() async {
+        final response = await _dio.patch<Map<String, dynamic>>(
+          '/dietitian/profile',
+          data: {
+            if (fullName != null) 'full_name': fullName,
+            if (specialization != null) 'specialization': specialization,
+            if (phone != null) 'phone': phone,
+          },
+          cancelToken: cancelToken,
+        );
+        return DietitianDashboardData.fromJson(response.data ?? const {});
+      });
+
+  /// Tek bir raporun içeriğini getirir: besin adı, miktar, saat ve kalori.
+  Future<ApiResult<DietitianReportDetail>> getDietitianReportDetail({
+    required String reportId,
+    CancelToken? cancelToken,
+  }) =>
+      _safeCall(() async {
+        final response = await _dio.get<Map<String, dynamic>>(
+          '/dietitian/reports/$reportId',
+          cancelToken: cancelToken,
+        );
+        return DietitianReportDetail.fromJson(response.data ?? const {});
+      });
+
+  /// Kurulu eşleşmeyi diyetisyen tarafından sonlandırır.
+  Future<ApiResult<void>> endAssignmentAsDietitian({
+    required String assignmentId,
+    CancelToken? cancelToken,
+  }) =>
+      _safeCall(() async {
+        await _dio.delete<void>(
+          '/dietitian/assignments/$assignmentId',
+          cancelToken: cancelToken,
+        );
+      });
+
+  /// Diyetisyene ulaşmış, danışan onaylı beslenme raporlarını getirir.
+  Future<ApiResult<List<DietitianReceivedReport>>> getReceivedDietitianReports({
+    CancelToken? cancelToken,
+  }) =>
+      _safeCall(() async {
+        final response = await _dio.get<Map<String, dynamic>>(
+          '/dietitian/reports',
+          cancelToken: cancelToken,
+        );
+        final raw = response.data?['reports'] as List<dynamic>? ?? const [];
+        return raw
+            .whereType<Map<String, dynamic>>()
+            .map(DietitianReceivedReport.fromJson)
+            .toList(growable: false);
+      });
+
+  /// Bekleyen eşleşme isteğini diyetisyen adına kabul eder.
+  ///
+  /// Bağ yalnız hasta da rıza verdiyse kurulur; aksi halde istek hastanın
+  /// onayını beklemeye devam eder.
+  Future<ApiResult<DietitianAssignmentInfo>> acceptAssignmentAsDietitian({
+    required String assignmentId,
+    CancelToken? cancelToken,
+  }) =>
+      _safeCall(() async {
+        final response = await _dio.post<Map<String, dynamic>>(
+          '/dietitian/assignments/$assignmentId/accept',
+          cancelToken: cancelToken,
+        );
+        return DietitianAssignmentInfo.fromJson(response.data ?? const {});
+      });
+
+  /// Bekleyen eşleşme isteğini reddeder; hastaya bağ kurulmaz.
+  Future<ApiResult<DietitianAssignmentInfo>> rejectAssignmentAsDietitian({
+    required String assignmentId,
+    CancelToken? cancelToken,
+  }) =>
+      _safeCall(() async {
+        final response = await _dio.post<Map<String, dynamic>>(
+          '/dietitian/assignments/$assignmentId/reject',
+          cancelToken: cancelToken,
+        );
+        return DietitianAssignmentInfo.fromJson(response.data ?? const {});
       });
 
   Future<ApiResult<DietitianPatientHistoryData>> getDietitianPatientHistory({

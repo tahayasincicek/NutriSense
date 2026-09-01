@@ -32,6 +32,15 @@ class DietitianAssignmentInfo {
   final String? emailMasked;
   final String? phoneMasked;
 
+  /// Hasta rızasını verdi mi.
+  final bool patientApproved;
+
+  /// Diyetisyen isteği kabul etti mi.
+  final bool dietitianAccepted;
+
+  /// Hangi tarafın onayı bekleniyor: 'both', 'patient', 'dietitian' veya null.
+  final String? awaiting;
+
   const DietitianAssignmentInfo({
     required this.assignmentId,
     required this.status,
@@ -41,9 +50,15 @@ class DietitianAssignmentInfo {
     required this.phoneVerified,
     this.emailMasked,
     this.phoneMasked,
+    this.patientApproved = false,
+    this.dietitianAccepted = false,
+    this.awaiting,
   });
 
   bool get isApproved => status == 'approved';
+  bool get isRejected => status == 'rejected';
+  bool get awaitingDietitian => awaiting == 'dietitian';
+  bool get awaitingPatient => awaiting == 'patient' || awaiting == 'both';
   bool get hasVerifiedContact => emailVerified || phoneVerified;
 
   factory DietitianAssignmentInfo.fromJson(Map<String, dynamic> json) =>
@@ -56,5 +71,8 @@ class DietitianAssignmentInfo {
         phoneVerified: json['phone_verified'] as bool? ?? false,
         emailMasked: json['email_masked'] as String?,
         phoneMasked: json['phone_masked'] as String?,
+        patientApproved: json['patient_approved'] as bool? ?? false,
+        dietitianAccepted: json['dietitian_accepted'] as bool? ?? false,
+        awaiting: json['awaiting'] as String?,
       );
 }

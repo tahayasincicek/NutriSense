@@ -1,9 +1,12 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/accessibility_utils.dart';
 import '../../../shared/widgets/accessible_button.dart';
+import '../../../shared/widgets/auth_mode_switch.dart';
 import '../../auth/state/auth_controller.dart';
 
 class DietitianAccessScreen extends ConsumerStatefulWidget {
@@ -38,162 +41,227 @@ class _DietitianAccessScreenState extends ConsumerState<DietitianAccessScreen> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return Scaffold(
-      appBar: AppBar(title: const Text('Diyetisyen Portalı')),
-      body: SafeArea(
-        child: Center(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.all(24),
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 520),
-              child: Form(
-                key: _formKey,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    Container(
-                      width: 84,
-                      height: 84,
-                      decoration: BoxDecoration(
-                        color: AppTheme.primaryColor.withOpacity(0.12),
-                        shape: BoxShape.circle,
+      body: Stack(
+        children: [
+          Positioned(
+            top: -120,
+            right: -85,
+            child: CircleAvatar(
+              radius: 190,
+              backgroundColor: AppTheme.primaryColor.withValues(alpha: 0.09),
+            ),
+          ),
+          Positioned(
+            top: 115,
+            right: 26,
+            child: CircleAvatar(
+              radius: 68,
+              backgroundColor: AppTheme.primaryColor.withValues(alpha: 0.09),
+            ),
+          ),
+          Positioned(
+            bottom: -100,
+            left: -80,
+            child: CircleAvatar(
+              radius: 150,
+              backgroundColor: AppTheme.secondaryColor.withValues(alpha: 0.05),
+            ),
+          ),
+          SafeArea(
+            child: Column(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(12, 8, 20, 0),
+                  child: Row(
+                    children: [
+                      IconButton.filledTonal(
+                        tooltip: 'Hasta girişine dön',
+                        onPressed:
+                            _loading ? null : () => Navigator.pop(context),
+                        icon: const Icon(Icons.arrow_back_rounded),
                       ),
-                      child: const Icon(
-                        Icons.medical_information_outlined,
-                        size: 44,
-                        color: AppTheme.primaryColor,
+                      const Spacer(),
+                      const Icon(
+                        Icons.eco_rounded,
+                        size: 20,
+                        color: AppTheme.primaryDark,
                       ),
-                    ),
-                    const SizedBox(height: 20),
-                    Semantics(
-                      header: true,
-                      child: Text(
-                        _registering
-                            ? 'Diyetisyen hesabı oluştur'
-                            : 'Diyetisyen girişi',
-                        textAlign: TextAlign.center,
-                        style: theme.textTheme.headlineSmall?.copyWith(
+                      const SizedBox(width: 7),
+                      Text(
+                        'NutriSense Pro',
+                        style: theme.textTheme.titleMedium?.copyWith(
+                          color: AppTheme.primaryDark,
                           fontWeight: FontWeight.w800,
                         ),
                       ),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      'Danışanlarınızı ve paylaşılan beslenme kayıtlarını '
-                      'tek ekrandan takip edin.',
-                      textAlign: TextAlign.center,
-                      style: theme.textTheme.bodyMedium?.copyWith(
-                        color: theme.colorScheme.onSurfaceVariant,
-                      ),
-                    ),
-                    const SizedBox(height: 24),
-                    SegmentedButton<bool>(
-                      segments: const [
-                        ButtonSegment(
-                          value: false,
-                          label: Text('Giriş'),
-                          icon: Icon(Icons.login),
-                        ),
-                        ButtonSegment(
-                          value: true,
-                          label: Text('Kayıt'),
-                          icon: Icon(Icons.person_add_alt_1),
-                        ),
-                      ],
-                      selected: {_registering},
-                      onSelectionChanged: _loading
-                          ? null
-                          : (selection) => setState(
-                                () => _registering = selection.first,
-                              ),
-                    ),
-                    const SizedBox(height: 24),
-                    if (_registering) ...[
-                      TextFormField(
-                        controller: _nameController,
-                        textInputAction: TextInputAction.next,
-                        decoration: const InputDecoration(
-                          labelText: 'Ad soyad',
-                          prefixIcon: Icon(Icons.badge_outlined),
-                        ),
-                        validator: (value) => (value?.trim().length ?? 0) < 2
-                            ? 'Ad soyad gereklidir'
-                            : null,
-                      ),
-                      const SizedBox(height: 16),
-                      TextFormField(
-                        controller: _specializationController,
-                        textInputAction: TextInputAction.next,
-                        decoration: const InputDecoration(
-                          labelText: 'Uzmanlık alanı',
-                          prefixIcon: Icon(Icons.workspace_premium_outlined),
-                        ),
-                        validator: (value) => (value?.trim().length ?? 0) < 2
-                            ? 'Uzmanlık alanı gereklidir'
-                            : null,
-                      ),
-                      const SizedBox(height: 16),
                     ],
-                    TextFormField(
-                      controller: _emailController,
-                      keyboardType: TextInputType.emailAddress,
-                      textInputAction: TextInputAction.next,
-                      autofillHints: const [AutofillHints.email],
-                      decoration: const InputDecoration(
-                        labelText: 'Mesleki e-posta',
-                        prefixIcon: Icon(Icons.email_outlined),
-                      ),
-                      validator: (value) => value?.contains('@') == true
-                          ? null
-                          : 'Geçerli bir e-posta girin',
-                    ),
-                    const SizedBox(height: 16),
-                    TextFormField(
-                      controller: _passwordController,
-                      obscureText: _obscurePassword,
-                      textInputAction: TextInputAction.done,
-                      autofillHints: const [AutofillHints.password],
-                      onFieldSubmitted: (_) => _submit(),
-                      decoration: InputDecoration(
-                        labelText: 'Şifre',
-                        prefixIcon: const Icon(Icons.lock_outline),
-                        suffixIcon: IconButton(
-                          tooltip: _obscurePassword
-                              ? 'Şifreyi göster'
-                              : 'Şifreyi gizle',
-                          onPressed: () => setState(
-                            () => _obscurePassword = !_obscurePassword,
-                          ),
-                          icon: Icon(
-                            _obscurePassword
-                                ? Icons.visibility_off
-                                : Icons.visibility,
+                  ),
+                ),
+                Expanded(
+                  child: Center(
+                    child: SingleChildScrollView(
+                      padding: const EdgeInsets.fromLTRB(24, 24, 24, 36),
+                      child: ConstrainedBox(
+                        constraints: const BoxConstraints(maxWidth: 520),
+                        child: Form(
+                          key: _formKey,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              Align(
+                                child: Container(
+                                  width: 88,
+                                  height: 88,
+                                  decoration: BoxDecoration(
+                                    color: AppTheme.primaryColor
+                                        .withValues(alpha: 0.11),
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: const Icon(
+                                    Icons.medical_information_outlined,
+                                    size: 44,
+                                    color: AppTheme.primaryColor,
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(height: 22),
+                              Semantics(
+                                header: true,
+                                child: Text(
+                                  _registering
+                                      ? 'Uzman hesabını oluştur'
+                                      : 'Diyetisyen Portalı',
+                                  textAlign: TextAlign.center,
+                                  style: theme.textTheme.displaySmall?.copyWith(
+                                    color: AppTheme.primaryDark,
+                                    fontWeight: FontWeight.w900,
+                                    letterSpacing: -0.8,
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(height: 9),
+                              Text(
+                                _registering
+                                    ? 'NutriSense ile danışanlarını tek ve güvenli bir yerden takip etmeye başla.'
+                                    : 'Danışanlarını ve paylaşılan beslenme kayıtlarını tek ekrandan takip et.',
+                                textAlign: TextAlign.center,
+                                style: theme.textTheme.bodyLarge?.copyWith(
+                                  color: theme.colorScheme.onSurfaceVariant,
+                                  height: 1.5,
+                                ),
+                              ),
+                              const SizedBox(height: 28),
+                              AuthModeSwitch(
+                                registering: _registering,
+                                enabled: !_loading,
+                                onChanged: (value) =>
+                                    setState(() => _registering = value),
+                              ),
+                              const SizedBox(height: 24),
+                              if (_registering) ...[
+                                TextFormField(
+                                  controller: _nameController,
+                                  textInputAction: TextInputAction.next,
+                                  decoration: const InputDecoration(
+                                    labelText: 'Ad soyad',
+                                    prefixIcon: Icon(Icons.badge_outlined),
+                                  ),
+                                  validator: (value) =>
+                                      (value?.trim().length ?? 0) < 2
+                                          ? 'Ad soyad gereklidir'
+                                          : null,
+                                ),
+                                const SizedBox(height: 16),
+                                TextFormField(
+                                  controller: _specializationController,
+                                  textInputAction: TextInputAction.next,
+                                  decoration: const InputDecoration(
+                                    labelText: 'Uzmanlık alanı',
+                                    prefixIcon: Icon(
+                                      Icons.workspace_premium_outlined,
+                                    ),
+                                  ),
+                                  validator: (value) =>
+                                      (value?.trim().length ?? 0) < 2
+                                          ? 'Uzmanlık alanı gereklidir'
+                                          : null,
+                                ),
+                                const SizedBox(height: 16),
+                              ],
+                              TextFormField(
+                                controller: _emailController,
+                                keyboardType: TextInputType.emailAddress,
+                                textInputAction: TextInputAction.next,
+                                autofillHints: const [AutofillHints.email],
+                                decoration: const InputDecoration(
+                                  labelText: 'Mesleki e-posta',
+                                  prefixIcon: Icon(Icons.email_outlined),
+                                ),
+                                validator: (value) =>
+                                    value?.contains('@') == true
+                                        ? null
+                                        : 'Geçerli bir e-posta girin',
+                              ),
+                              const SizedBox(height: 16),
+                              TextFormField(
+                                controller: _passwordController,
+                                obscureText: _obscurePassword,
+                                textInputAction: TextInputAction.done,
+                                autofillHints: const [AutofillHints.password],
+                                onFieldSubmitted: (_) => _submit(),
+                                decoration: InputDecoration(
+                                  labelText: 'Şifre',
+                                  prefixIcon: const Icon(Icons.lock_outline),
+                                  suffixIcon: IconButton(
+                                    tooltip: _obscurePassword
+                                        ? 'Şifreyi göster'
+                                        : 'Şifreyi gizle',
+                                    onPressed: () => setState(
+                                      () =>
+                                          _obscurePassword = !_obscurePassword,
+                                    ),
+                                    icon: Icon(
+                                      _obscurePassword
+                                          ? Icons.visibility_off
+                                          : Icons.visibility,
+                                    ),
+                                  ),
+                                ),
+                                validator: (value) => (value?.length ?? 0) < 8
+                                    ? 'Şifre en az 8 karakter olmalıdır'
+                                    : null,
+                              ),
+                              const SizedBox(height: 24),
+                              AccessibleButton(
+                                label: _registering
+                                    ? 'Diyetisyen Hesabı Oluştur'
+                                    : 'Panele Giriş Yap',
+                                icon: _registering
+                                    ? Icons.person_add_alt_1_rounded
+                                    : Icons.login_rounded,
+                                isLoading: _loading,
+                                onPressed: _submit,
+                              ),
+                              const SizedBox(height: 16),
+                              AccessibleButton(
+                                label: 'Hasta Girişine Dön',
+                                icon: Icons.person_outline_rounded,
+                                type: AccessibleButtonType.outlined,
+                                onPressed: _loading
+                                    ? null
+                                    : () => Navigator.pop(context),
+                              ),
+                            ],
                           ),
                         ),
                       ),
-                      validator: (value) => (value?.length ?? 0) < 8
-                          ? 'Şifre en az 8 karakter olmalıdır'
-                          : null,
                     ),
-                    const SizedBox(height: 24),
-                    AccessibleButton(
-                      label: _registering
-                          ? 'Diyetisyen Hesabı Oluştur'
-                          : 'Panele Giriş Yap',
-                      isLoading: _loading,
-                      onPressed: _submit,
-                    ),
-                    const SizedBox(height: 16),
-                    TextButton.icon(
-                      onPressed: _loading ? null : () => Navigator.pop(context),
-                      icon: const Icon(Icons.arrow_back),
-                      label: const Text('Hasta girişine dön'),
-                    ),
-                  ],
+                  ),
                 ),
-              ),
+              ],
             ),
           ),
-        ),
+        ],
       ),
     );
   }
@@ -203,29 +271,39 @@ class _DietitianAccessScreenState extends ConsumerState<DietitianAccessScreen> {
     FocusScope.of(context).unfocus();
     setState(() => _loading = true);
     final controller = ref.read(authControllerProvider.notifier);
-    final String? error;
-    if (_registering) {
-      error = await controller.registerDietitian(
-        fullName: _nameController.text.trim(),
-        email: _emailController.text.trim(),
-        password: _passwordController.text,
-        specialization: _specializationController.text.trim(),
-      );
-    } else {
-      error = await controller.loginDietitian(
-        email: _emailController.text.trim(),
-        password: _passwordController.text,
-      );
+    String? error;
+    try {
+      if (_registering) {
+        error = await controller.registerDietitian(
+          fullName: _nameController.text.trim(),
+          email: _emailController.text.trim(),
+          password: _passwordController.text,
+          specialization: _specializationController.text.trim(),
+        );
+      } else {
+        error = await controller.loginDietitian(
+          email: _emailController.text.trim(),
+          password: _passwordController.text,
+        );
+      }
+    } on TimeoutException {
+      error = 'Giriş isteği zaman aşımına uğradı. Lütfen tekrar deneyin.';
+    } catch (_) {
+      error = 'Giriş sırasında beklenmeyen bir hata oluştu. Tekrar deneyin.';
     }
     if (!mounted) return;
+    setState(() => _loading = false);
     if (error != null) {
-      setState(() => _loading = false);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(error)),
       );
       AccessibilityUtils.announceError(error);
     } else {
       AccessibilityUtils.announceSuccess('Diyetisyen paneli açıldı');
+      // Bu ekran giriş sayfasının üstüne push edildiği için AuthGate altta
+      // paneli hazırlasa bile görünür kalıyordu. Başarılı girişte portal
+      // rotasını kapatıp alttaki diyetisyen panelini hemen göster.
+      Navigator.of(context).pop();
     }
   }
 }
