@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:nutrisense/core/theme/app_theme.dart';
 import 'package:nutrisense/features/water_tracker/screens/water_tracker_screen.dart';
 import 'package:nutrisense/features/water_tracker/state/water_provider.dart';
@@ -33,7 +34,19 @@ void main() {
 
   late ProviderContainer container;
 
-  setUp(() => container = ProviderContainer());
+  setUp(() async {
+    // Varsayılan durum artık boş; testler ölçümleri kendisi kurar. Eskiden
+    // sağlayıcıda gömülü olan uydurma değerlere dayanıyorlardı.
+    SharedPreferences.setMockInitialValues({});
+    container = ProviderContainer();
+    // Sağlayıcı yapıcıda kayıtlı durumu asenkron okur; tohumlama bunun
+    // üzerine yazılmasın diye önce o iş bitirilir.
+    container.read(activityProvider);
+    await Future<void>.delayed(Duration.zero);
+    container.read(activityProvider.notifier)
+      ..setSleep(6.5)
+      ..addMedication('D Vitamini', 'Öğle - Tok');
+  });
   tearDown(() => container.dispose());
 
   group('Aktivite ekranı işlevleri', () {
@@ -182,10 +195,23 @@ void main() {
 
     test('toggleMedication yalnızca hedef ilacı değiştirir', () {
       final notifier = container.read(activityProvider.notifier);
+      notifier.addMedication('Omega 3', 'Sabah - Tok');
       notifier.toggleMedication('D Vitamini');
+
       final meds = container.read(activityProvider).medications;
       expect(meds.firstWhere((m) => m.name == 'D Vitamini').isTaken, isTrue);
-      expect(meds.firstWhere((m) => m.name == 'Omega 3').isTaken, isTrue);
+      // Diğer takviye etkilenmemelidir.
+      expect(meds.firstWhere((m) => m.name == 'Omega 3').isTaken, isFalse);
+    });
+
+    test('eklenen takviye alındı olarak başlamaz', () {
+      final notifier = container.read(activityProvider.notifier);
+      notifier.addMedication('Magnezyum', 'Akşam');
+      final added = container
+          .read(activityProvider)
+          .medications
+          .firstWhere((m) => m.name == 'Magnezyum');
+      expect(added.isTaken, isFalse);
     });
   });
 }

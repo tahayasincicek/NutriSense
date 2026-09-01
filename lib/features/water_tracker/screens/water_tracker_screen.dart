@@ -361,13 +361,22 @@ class ActivityTrackerScreen extends ConsumerWidget {
                           ?.copyWith(fontWeight: FontWeight.bold)),
                 ),
               ),
-              const ExcludeSemantics(
-                child: Icon(Icons.medication_rounded,
-                    color: Colors.redAccent, size: 24),
+              IconButton(
+                tooltip: 'Takviye ekle',
+                onPressed: () => _showMedicationDialog(context, ref),
+                icon: const Icon(Icons.add_circle_outline_rounded,
+                    color: Colors.redAccent),
               ),
             ],
           ),
           const SizedBox(height: 12),
+          if (state.medications.isEmpty)
+            Text(
+              'Takip etmek istediğiniz ilaç veya takviyeyi ekleyin.',
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
+            ),
           ...state.medications.map((med) => _buildMedItem(context, ref, med)),
         ],
       ),
@@ -452,17 +461,29 @@ class ActivityTrackerScreen extends ConsumerWidget {
                       color: AppTheme.primaryColor)),
             ],
           ),
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.baseline,
-            textBaseline: TextBaseline.alphabetic,
-            children: [
-              Text('${state.currentWeight}',
-                  style: theme.textTheme.displaySmall
-                      ?.copyWith(fontWeight: FontWeight.bold)),
-              const SizedBox(width: 4),
-              const Text('kg', style: TextStyle(fontWeight: FontWeight.bold)),
-            ],
-          ),
+          if (!state.hasWeight)
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 8),
+              child: Text(
+                'Henüz kilo ölçümü eklemediniz. Sağ üstteki artı ile '
+                'ilk ölçümünüzü kaydedin.',
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
+              ),
+            )
+          else
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.baseline,
+              textBaseline: TextBaseline.alphabetic,
+              children: [
+                Text(state.currentWeight!.toStringAsFixed(1),
+                    style: theme.textTheme.displaySmall
+                        ?.copyWith(fontWeight: FontWeight.bold)),
+                const SizedBox(width: 4),
+                const Text('kg', style: TextStyle(fontWeight: FontWeight.bold)),
+              ],
+            ),
           const SizedBox(height: 16),
           SizedBox(
             height: 40,
@@ -499,8 +520,8 @@ class ActivityTrackerScreen extends ConsumerWidget {
         itemBuilder: (context, index) {
           final badge = state.badges[index];
           return Semantics(
-            label:
-                '${badge.title} rozeti. ${badge.isUnlocked ? 'Kazanıldı' : 'Henüz kazanılmadı'}',
+            label: '${badge.title} rozeti. ${badge.description}. '
+                '${badge.isUnlocked ? 'Kazanıldı' : 'Henüz kazanılmadı'}',
             child: ExcludeSemantics(
               child: Container(
                 width: 90,
@@ -547,6 +568,64 @@ class ActivityTrackerScreen extends ConsumerWidget {
         },
       ),
     );
+  }
+
+  /// Takip edilecek yeni bir ilaç veya takviye ekler.
+  Future<void> _showMedicationDialog(
+      BuildContext context, WidgetRef ref) async {
+    final nameController = TextEditingController();
+    final scheduleController = TextEditingController();
+    final saved = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('Takviye ekle'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Semantics(
+              textField: true,
+              label: 'İlaç veya takviye adı',
+              child: TextField(
+                controller: nameController,
+                decoration: const InputDecoration(labelText: 'Ad'),
+              ),
+            ),
+            const SizedBox(height: 12),
+            Semantics(
+              textField: true,
+              label: 'Kullanım zamanı',
+              child: TextField(
+                controller: scheduleController,
+                decoration: const InputDecoration(
+                  labelText: 'Zaman',
+                  hintText: 'Örnek: Sabah - Tok',
+                ),
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(false),
+            child: const Text('Vazgeç'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(true),
+            child: const Text('Ekle'),
+          ),
+        ],
+      ),
+    );
+    final name = nameController.text.trim();
+    final schedule = scheduleController.text.trim();
+    nameController.dispose();
+    scheduleController.dispose();
+    if (saved != true || name.isEmpty || !context.mounted) return;
+    ref.read(activityProvider.notifier).addMedication(name, schedule);
+    ref.read(accessibilityServiceProvider).speak(
+          '$name takip listesine eklendi.',
+          priority: TtsPriority.high,
+        );
   }
 
   Future<void> _showWeightInputDialog(
