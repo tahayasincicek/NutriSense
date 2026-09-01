@@ -4,6 +4,7 @@ import 'dart:ui';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/accessibility_utils.dart';
 import '../../../shared/widgets/accessible_button.dart';
+import '../../../shared/widgets/auth_mode_switch.dart';
 import '../state/auth_controller.dart';
 
 class RegisterScreen extends ConsumerStatefulWidget {
@@ -65,7 +66,21 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                   Text('Sağlıklı yaşam yolculuğuna başla.',
                       style: theme.textTheme.bodyMedium?.copyWith(
                           color: theme.colorScheme.onSurfaceVariant)),
-                  const SizedBox(height: 40),
+                  const SizedBox(height: 28),
+
+                  // Giriş ekranıyla aynı denetim; seçili segment bulunduğun
+                  // ekranı gösterir.
+                  AuthModeSwitch(
+                    registering: true,
+                    enabled: !_loading,
+                    loginSemanticLabel: 'Giriş ekranına dönmek için basın',
+                    onChanged: (registering) {
+                      if (registering) return;
+                      Navigator.pop(context);
+                    },
+                  ),
+
+                  const SizedBox(height: 28),
                   Form(
                     key: _formKey,
                     child: Column(

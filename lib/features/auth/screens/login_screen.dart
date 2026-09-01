@@ -4,6 +4,7 @@ import 'dart:ui';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/accessibility_utils.dart';
 import '../../../shared/widgets/accessible_button.dart';
+import '../../../shared/widgets/auth_mode_switch.dart';
 import '../state/auth_controller.dart';
 import 'password_reset_screen.dart';
 import 'register_screen.dart';
@@ -79,7 +80,25 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         style: theme.textTheme.bodyMedium?.copyWith(
                             color: theme.colorScheme.onSurfaceVariant)),
 
-                    const SizedBox(height: 48),
+                    const SizedBox(height: 32),
+
+                    // Giriş / kayıt seçimi: diyetisyen ekranıyla aynı denetim.
+                    AuthModeSwitch(
+                      registering: false,
+                      enabled: !_isLoading,
+                      registerSemanticLabel:
+                          'Yeni bir hesap oluşturmak için basın',
+                      onChanged: (registering) {
+                        if (!registering) return;
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (_) => const RegisterScreen(),
+                          ),
+                        );
+                      },
+                    ),
+
+                    const SizedBox(height: 28),
 
                     // Form Section
                     Form(
@@ -160,23 +179,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                             semanticLabel: 'Hesabınıza giriş yapmak için basın',
                             isLoading: _isLoading,
                             onPressed: _handleLogin,
-                          ),
-                          const SizedBox(height: 16),
-                          Semantics(
-                            button: true,
-                            label: 'Yeni bir hesap oluşturmak için basın',
-                            excludeSemantics: true,
-                            child: OutlinedButton(
-                              onPressed: () => Navigator.of(context).push(
-                                  MaterialPageRoute(
-                                      builder: (_) => const RegisterScreen())),
-                              style: OutlinedButton.styleFrom(
-                                minimumSize: const Size.fromHeight(56),
-                                side: BorderSide(
-                                    color: theme.colorScheme.outline),
-                              ),
-                              child: const Text('Hesap Oluştur'),
-                            ),
                           ),
                           const SizedBox(height: 20),
                           Row(
