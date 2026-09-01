@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'core/utils/accessibility_utils.dart';
 import 'shared/services/accessibility_service.dart';
+import 'shared/services/shake_detector.dart';
+import 'shared/services/shake_preference.dart';
 import 'shared/services/api_service.dart';
 import 'shared/services/contextual_voice_command.dart';
 import 'shared/services/stt_service.dart';
@@ -34,6 +36,7 @@ class _AppShellState extends ConsumerState<AppShell>
 
   ListeningState _listeningState = ListeningState.idle;
   late final VoiceCommandService _voiceCmdService;
+  late final ShakeDetector _shakeDetector;
   String? _voiceStatus;
   Timer? _statusTimer;
 
@@ -75,6 +78,7 @@ class _AppShellState extends ConsumerState<AppShell>
     super.initState();
     WidgetsBinding.instance.addObserver(this);
     _voiceCmdService = ref.read(voiceCommandServiceProvider);
+    _shakeDetector = ShakeDetector();
 
     _voiceCmdService.onCommandRecognized = (result) {
       if (mounted) {
@@ -165,6 +169,40 @@ class _AppShellState extends ConsumerState<AppShell>
     _voiceCmdService.onListeningStateChanged = (state) {
       if (mounted) setState(() => _listeningState = state);
     };
+  }
+
+  /// Sallayarak sesli komut. Kullanıcı ekranda düğme aramadan komut verebilir;
+  /// mikrofon sürekli açık kalmaz, yalnız sallama anında dinleme başlar.
+  void _onShake() {
+    if (!mounted || _voiceCmdService.isListening) return;
+    ref.read(accessibilityServiceProvider).mediumHaptic();
+    _voiceCmdService.startListening();
+  }
+
+  void _syncShakeDetector(bool enabled) {
+    if (enabled && !_shakeDetector.isRunning) {
+      _shakeDetector.start(_onShake);
+    } else if (!enabled && _shakeDetector.isRunning) {
+      unawaited(_shakeDetector.stop());
+    }
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    super.didChangeAppLifecycleState(state);
+    // Arka planda sensör dinlemek pil tüketir ve kullanıcı ekranı görmezken
+    // istemsiz komut başlatabilir.
+    if (state == AppLifecycleState.resumed) {
+      _syncShakeDetector(ref.read(shakeToListenProvider));
+    } else {
+      unawaited(_shakeDetector.stop());
+    }
+  }
+
+  @override
+  void dispose() {
+    unawaited(_shakeDetector.stop());
+    super.dispose();
   }
 
   @override
@@ -368,6 +406,8 @@ class _AppShellState extends ConsumerState<AppShell>
   Widget build(BuildContext context) {
     final currentIndex = ref.watch(currentTabProvider);
     final theme = Theme.of(context);
+    // Tercih değişince sensör dinlemesi buna göre açılır/kapanır.
+    _syncShakeDetector(ref.watch(shakeToListenProvider));
 
     return Scaffold(
       extendBody: true,

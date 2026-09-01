@@ -13,6 +13,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/constants/app_strings.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../shared/services/accessibility_service.dart';
+import '../../../shared/services/shake_preference.dart';
 import '../../../shared/widgets/accessible_button.dart';
 
 class AccessibilitySettingsScreen extends ConsumerStatefulWidget {
@@ -60,6 +61,7 @@ class _AccessibilitySettingsScreenState
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final shakeEnabled = ref.watch(shakeToListenProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -329,6 +331,47 @@ class _AccessibilitySettingsScreenState
                   value
                       ? 'Yüksek kontrast açıldı.'
                       : 'Yüksek kontrast kapatıldı.',
+                  priority: TtsPriority.high,
+                );
+              },
+            ),
+          ),
+          const SizedBox(height: 16),
+
+          // ── Sallayarak sesli komut ──
+          Semantics(
+            toggled: shakeEnabled,
+            label: 'Sallayarak sesli komut. '
+                '${shakeEnabled ? 'Açık' : 'Kapalı'}. '
+                'Telefonu iki kez sallayınca mikrofon açılır ve komut '
+                'dinlenir. Ekranda düğme aramanız gerekmez.',
+            excludeSemantics: true,
+            child: SwitchListTile(
+              key: const Key('settings_shake_to_listen'),
+              title: Text(
+                shakeEnabled
+                    ? 'Sallayarak Komut Açık'
+                    : 'Sallayarak Komut Kapalı',
+                style: theme.textTheme.bodyLarge?.copyWith(
+                  fontWeight: FontWeight.w600,
+                  fontSize: 18,
+                ),
+              ),
+              subtitle: const Text(
+                'Telefonu sallayınca sesli komut başlar; '
+                'mikrofon sürekli açık kalmaz',
+              ),
+              value: shakeEnabled,
+              activeThumbColor: AppTheme.primaryColor,
+              onChanged: (value) async {
+                await ref
+                    .read(shakeToListenProvider.notifier)
+                    .setEnabled(value);
+                _accessibility.speak(
+                  value
+                      ? 'Sallayarak komut açıldı. Telefonu iki kez '
+                          'sallayarak deneyebilirsiniz.'
+                      : 'Sallayarak komut kapatıldı.',
                   priority: TtsPriority.high,
                 );
               },

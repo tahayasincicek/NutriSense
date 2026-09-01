@@ -44,6 +44,10 @@ dependencies:
 
   # ---------- UI & Erişilebilirlik ----------
   vibration: ^2.0.0
+
+  # Sallayarak sesli komut başlatma; mikrofonu sürekli açık tutmadan
+  # dokunmasız tetikleme sağlar.
+  sensors_plus: ^6.1.1
   google_fonts: ^6.2.1
 
   # ---------- Yardımcılar ----------
