@@ -16,6 +16,7 @@ on:
     branches: [main, develop]
   pull_request:
     branches: [main]
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -529,13 +530,13 @@ jobs:
           echo "✅ Erişilebilirlik denetimi tamamlandı"
 
   # ═══════════════════════════════════════════════════════════════════════════
-  # iOS DERLEME (sadece main; macOS runner özel depoda 10x dakika harcar)
+  # iOS DERLEME (yalnız elle tetiklenir; macOS runner 10x dakika harcar)
   # ═══════════════════════════════════════════════════════════════════════════
 
   ios-build:
     name: iOS Derleme
     runs-on: macos-latest
-    if: github.ref == 'refs/heads/main'
+    if: github.event_name == 'workflow_dispatch'
 
     steps:
       - name: Checkout
