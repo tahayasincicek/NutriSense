@@ -190,6 +190,22 @@
             "title": "Assignment Id",
             "type": "string"
           },
+          "awaiting": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Awaiting"
+          },
+          "dietitian_accepted": {
+            "default": false,
+            "title": "Dietitian Accepted",
+            "type": "boolean"
+          },
           "dietitian_id": {
             "format": "uuid",
             "title": "Dietitian Id",
@@ -212,6 +228,11 @@
           },
           "email_verified": {
             "title": "Email Verified",
+            "type": "boolean"
+          },
+          "patient_approved": {
+            "default": false,
+            "title": "Patient Approved",
             "type": "boolean"
           },
           "phone_masked": {
@@ -295,6 +316,23 @@
       },
       "DietitianDashboardPatient": {
         "properties": {
+          "assignment_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Assignment Id"
+          },
+          "daily_calorie_target": {
+            "default": 2000.0,
+            "title": "Daily Calorie Target",
+            "type": "number"
+          },
           "email": {
             "format": "email",
             "title": "Email",
@@ -369,6 +407,22 @@
           "pending_assignments": {
             "title": "Pending Assignments",
             "type": "integer"
+          },
+          "pending_requests": {
+            "default": [],
+            "items": {
+              "$ref": "#/components/schemas/DietitianPendingRequest"
+            },
+            "title": "Pending Requests",
+            "type": "array"
+          },
+          "recent_reports": {
+            "default": [],
+            "items": {
+              "$ref": "#/components/schemas/DietitianReceivedReport"
+            },
+            "title": "Recent Reports",
+            "type": "array"
           },
           "reports_received": {
             "title": "Reports Received",
@@ -486,6 +540,360 @@
         "title": "DietitianPatientLogItem",
         "type": "object"
       },
+      "DietitianPendingRequest": {
+        "description": "Diyetisyenin kabul/ret bekleyen eşleşme isteği.",
+        "properties": {
+          "assignment_id": {
+            "format": "uuid",
+            "title": "Assignment Id",
+            "type": "string"
+          },
+          "patient_approved": {
+            "title": "Patient Approved",
+            "type": "boolean"
+          },
+          "patient_email_masked": {
+            "title": "Patient Email Masked",
+            "type": "string"
+          },
+          "patient_name": {
+            "title": "Patient Name",
+            "type": "string"
+          },
+          "requested_at": {
+            "format": "date-time",
+            "title": "Requested At",
+            "type": "string"
+          }
+        },
+        "required": [
+          "assignment_id",
+          "patient_name",
+          "patient_email_masked",
+          "requested_at",
+          "patient_approved"
+        ],
+        "title": "DietitianPendingRequest",
+        "type": "object"
+      },
+      "DietitianPendingRequestList": {
+        "properties": {
+          "requests": {
+            "items": {
+              "$ref": "#/components/schemas/DietitianPendingRequest"
+            },
+            "title": "Requests",
+            "type": "array"
+          }
+        },
+        "required": [
+          "requests"
+        ],
+        "title": "DietitianPendingRequestList",
+        "type": "object"
+      },
+      "DietitianProfileUpdate": {
+        "description": "Diyetisyenin kendi profilinde değiştirebildiği alanlar.",
+        "properties": {
+          "full_name": {
+            "anyOf": [
+              {
+                "maxLength": 255,
+                "minLength": 2,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Full Name"
+          },
+          "phone": {
+            "anyOf": [
+              {
+                "pattern": "^\\+?[1-9][0-9]{7,14}$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Phone"
+          },
+          "specialization": {
+            "anyOf": [
+              {
+                "maxLength": 255,
+                "minLength": 2,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Specialization"
+          }
+        },
+        "title": "DietitianProfileUpdate",
+        "type": "object"
+      },
+      "DietitianReceivedReport": {
+        "description": "Diyetisyenin aldığı, danışan onaylı beslenme raporu.",
+        "properties": {
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "delivered_via_email": {
+            "title": "Delivered Via Email",
+            "type": "boolean"
+          },
+          "delivered_via_sms": {
+            "title": "Delivered Via Sms",
+            "type": "boolean"
+          },
+          "from_date": {
+            "format": "date",
+            "title": "From Date",
+            "type": "string"
+          },
+          "patient_id": {
+            "format": "uuid",
+            "title": "Patient Id",
+            "type": "string"
+          },
+          "patient_name": {
+            "title": "Patient Name",
+            "type": "string"
+          },
+          "record_count": {
+            "title": "Record Count",
+            "type": "integer"
+          },
+          "report_id": {
+            "format": "uuid",
+            "title": "Report Id",
+            "type": "string"
+          },
+          "report_type": {
+            "title": "Report Type",
+            "type": "string"
+          },
+          "status": {
+            "title": "Status",
+            "type": "string"
+          },
+          "to_date": {
+            "format": "date",
+            "title": "To Date",
+            "type": "string"
+          },
+          "total_calories": {
+            "title": "Total Calories",
+            "type": "number"
+          },
+          "total_meals": {
+            "title": "Total Meals",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "report_id",
+          "patient_id",
+          "patient_name",
+          "report_type",
+          "from_date",
+          "to_date",
+          "record_count",
+          "total_meals",
+          "total_calories",
+          "status",
+          "created_at",
+          "delivered_via_email",
+          "delivered_via_sms"
+        ],
+        "title": "DietitianReceivedReport",
+        "type": "object"
+      },
+      "DietitianReceivedReportList": {
+        "properties": {
+          "reports": {
+            "items": {
+              "$ref": "#/components/schemas/DietitianReceivedReport"
+            },
+            "title": "Reports",
+            "type": "array"
+          }
+        },
+        "required": [
+          "reports"
+        ],
+        "title": "DietitianReceivedReportList",
+        "type": "object"
+      },
+      "DietitianReplyRequest": {
+        "description": "Diyetisyenin rapora yazdığı cevap.",
+        "properties": {
+          "reply": {
+            "maxLength": 2000,
+            "minLength": 2,
+            "title": "Reply",
+            "type": "string"
+          }
+        },
+        "required": [
+          "reply"
+        ],
+        "title": "DietitianReplyRequest",
+        "type": "object"
+      },
+      "DietitianReportDay": {
+        "properties": {
+          "calories": {
+            "title": "Calories",
+            "type": "number"
+          },
+          "date": {
+            "format": "date",
+            "title": "Date",
+            "type": "string"
+          },
+          "record_count": {
+            "title": "Record Count",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "date",
+          "calories",
+          "record_count"
+        ],
+        "title": "DietitianReportDay",
+        "type": "object"
+      },
+      "DietitianReportDetail": {
+        "properties": {
+          "average_daily_calories": {
+            "title": "Average Daily Calories",
+            "type": "number"
+          },
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "daily_breakdown": {
+            "items": {
+              "$ref": "#/components/schemas/DietitianReportDay"
+            },
+            "title": "Daily Breakdown",
+            "type": "array"
+          },
+          "dietitian_replied_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Dietitian Replied At"
+          },
+          "dietitian_reply": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Dietitian Reply"
+          },
+          "disclaimer": {
+            "title": "Disclaimer",
+            "type": "string"
+          },
+          "estimated_portion_count": {
+            "title": "Estimated Portion Count",
+            "type": "integer"
+          },
+          "from_date": {
+            "format": "date",
+            "title": "From Date",
+            "type": "string"
+          },
+          "patient_name": {
+            "title": "Patient Name",
+            "type": "string"
+          },
+          "patient_note": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Patient Note"
+          },
+          "record_count": {
+            "title": "Record Count",
+            "type": "integer"
+          },
+          "records": {
+            "items": {
+              "$ref": "#/components/schemas/DietitianReportRecord"
+            },
+            "title": "Records",
+            "type": "array"
+          },
+          "report_id": {
+            "format": "uuid",
+            "title": "Report Id",
+            "type": "string"
+          },
+          "report_type": {
+            "title": "Report Type",
+            "type": "string"
+          },
+          "status": {
+            "title": "Status",
+            "type": "string"
+          },
+          "to_date": {
+            "format": "date",
+            "title": "To Date",
+            "type": "string"
+          },
+          "total_calories": {
+            "title": "Total Calories",
+            "type": "number"
+          }
+        },
+        "required": [
+          "report_id",
+          "patient_name",
+          "report_type",
+          "from_date",
+          "to_date",
+          "record_count",
+          "total_calories",
+          "average_daily_calories",
+          "estimated_portion_count",
+          "status",
+          "created_at",
+          "disclaimer",
+          "records",
+          "daily_breakdown"
+        ],
+        "title": "DietitianReportDetail",
+        "type": "object"
+      },
       "DietitianReportHistoryItem": {
         "properties": {
           "channels": {
@@ -511,6 +919,29 @@
             "format": "date-time",
             "title": "Created At",
             "type": "string"
+          },
+          "dietitian_replied_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Dietitian Replied At"
+          },
+          "dietitian_reply": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Dietitian Reply"
           },
           "from_date": {
             "format": "date",
@@ -697,6 +1128,66 @@
           "accessibility_summary"
         ],
         "title": "DietitianReportPreviewResponse",
+        "type": "object"
+      },
+      "DietitianReportRecord": {
+        "description": "Rapor içindeki tek besin kaydı.\n\nAlanlar proje raporunun diyetisyene vaat ettiği kümedir: besin adı,\nmiktar, tarih/saat ve kalori değeri.",
+        "properties": {
+          "carbs": {
+            "title": "Carbs",
+            "type": "number"
+          },
+          "fat": {
+            "title": "Fat",
+            "type": "number"
+          },
+          "food_name_tr": {
+            "title": "Food Name Tr",
+            "type": "string"
+          },
+          "is_corrected": {
+            "title": "Is Corrected",
+            "type": "boolean"
+          },
+          "logged_at": {
+            "format": "date-time",
+            "title": "Logged At",
+            "type": "string"
+          },
+          "meal_type": {
+            "title": "Meal Type",
+            "type": "string"
+          },
+          "portion_grams": {
+            "title": "Portion Grams",
+            "type": "number"
+          },
+          "portion_is_estimate": {
+            "title": "Portion Is Estimate",
+            "type": "boolean"
+          },
+          "protein": {
+            "title": "Protein",
+            "type": "number"
+          },
+          "total_calories": {
+            "title": "Total Calories",
+            "type": "number"
+          }
+        },
+        "required": [
+          "food_name_tr",
+          "portion_grams",
+          "portion_is_estimate",
+          "total_calories",
+          "protein",
+          "carbs",
+          "fat",
+          "meal_type",
+          "logged_at",
+          "is_corrected"
+        ],
+        "title": "DietitianReportRecord",
         "type": "object"
       },
       "ErrorDetail": {
@@ -1521,6 +2012,104 @@
           }
         },
         "title": "HTTPValidationError",
+        "type": "object"
+      },
+      "HealthMetricResponse": {
+        "properties": {
+          "log_date": {
+            "format": "date",
+            "title": "Log Date",
+            "type": "string"
+          },
+          "mood": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Mood"
+          },
+          "sleep_hours": {
+            "title": "Sleep Hours",
+            "type": "number"
+          },
+          "steps": {
+            "title": "Steps",
+            "type": "integer"
+          },
+          "water_ml": {
+            "title": "Water Ml",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "log_date",
+          "water_ml",
+          "steps",
+          "sleep_hours"
+        ],
+        "title": "HealthMetricResponse",
+        "type": "object"
+      },
+      "HealthMetricUpdate": {
+        "description": "Günlük ölçüm güncellemesi. Yalnız gönderilen alanlar değişir.",
+        "properties": {
+          "mood": {
+            "anyOf": [
+              {
+                "maxLength": 32,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Mood"
+          },
+          "sleep_hours": {
+            "anyOf": [
+              {
+                "maximum": 24.0,
+                "minimum": 0.0,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sleep Hours"
+          },
+          "steps": {
+            "anyOf": [
+              {
+                "maximum": 500000.0,
+                "minimum": 0.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Steps"
+          },
+          "water_ml": {
+            "anyOf": [
+              {
+                "maximum": 100000.0,
+                "minimum": 0.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Water Ml"
+          }
+        },
+        "title": "HealthMetricUpdate",
         "type": "object"
       },
       "LogoutRequest": {
@@ -2880,6 +3469,73 @@
         ],
         "title": "ValidationError",
         "type": "object"
+      },
+      "WeightHistoryResponse": {
+        "properties": {
+          "current_weight": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Current Weight"
+          },
+          "measurements": {
+            "items": {
+              "$ref": "#/components/schemas/WeightMeasurementItem"
+            },
+            "title": "Measurements",
+            "type": "array"
+          }
+        },
+        "required": [
+          "measurements"
+        ],
+        "title": "WeightHistoryResponse",
+        "type": "object"
+      },
+      "WeightMeasurementCreate": {
+        "properties": {
+          "weight_kg": {
+            "exclusiveMinimum": 0.0,
+            "maximum": 500.0,
+            "title": "Weight Kg",
+            "type": "number"
+          }
+        },
+        "required": [
+          "weight_kg"
+        ],
+        "title": "WeightMeasurementCreate",
+        "type": "object"
+      },
+      "WeightMeasurementItem": {
+        "properties": {
+          "measured_at": {
+            "format": "date-time",
+            "title": "Measured At",
+            "type": "string"
+          },
+          "measurement_id": {
+            "format": "uuid",
+            "title": "Measurement Id",
+            "type": "string"
+          },
+          "weight_kg": {
+            "title": "Weight Kg",
+            "type": "number"
+          }
+        },
+        "required": [
+          "measurement_id",
+          "weight_kg",
+          "measured_at"
+        ],
+        "title": "WeightMeasurementItem",
+        "type": "object"
       }
     },
     "securitySchemes": {
@@ -3401,6 +4057,167 @@
         ]
       }
     },
+    "/api/v1/dietitian/assignments/pending": {
+      "get": {
+        "operationId": "list_pending_dietitian_assignments_api_v1_dietitian_assignments_pending_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DietitianPendingRequestList"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Diyetisyenin bekleyen eşleşme istekleri",
+        "tags": [
+          "NutriSense API"
+        ]
+      }
+    },
+    "/api/v1/dietitian/assignments/{assignment_id}": {
+      "delete": {
+        "description": "Kurulu bağı diyetisyen tarafından sonlandırır.\n\nHastanın iptal hakkının simetriğidir; bağ koptuğunda hastanın verisi\ndiyetisyene kapanır. Geçmiş raporlar teslim edilmiş kayıtlar olduğu için\nsilinmez.",
+        "operationId": "end_dietitian_assignment_api_v1_dietitian_assignments__assignment_id__delete",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "assignment_id",
+            "required": true,
+            "schema": {
+              "title": "Assignment Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Diyetisyen kendi tarafından eşleşmeyi sonlandırır",
+        "tags": [
+          "NutriSense API"
+        ]
+      }
+    },
+    "/api/v1/dietitian/assignments/{assignment_id}/accept": {
+      "post": {
+        "operationId": "accept_dietitian_assignment_api_v1_dietitian_assignments__assignment_id__accept_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "assignment_id",
+            "required": true,
+            "schema": {
+              "title": "Assignment Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DietitianAssignmentResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Eşleşme isteğini kabul et",
+        "tags": [
+          "NutriSense API"
+        ]
+      }
+    },
+    "/api/v1/dietitian/assignments/{assignment_id}/reject": {
+      "post": {
+        "operationId": "reject_dietitian_assignment_api_v1_dietitian_assignments__assignment_id__reject_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "assignment_id",
+            "required": true,
+            "schema": {
+              "title": "Assignment Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DietitianAssignmentResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Eşleşme isteğini reddet",
+        "tags": [
+          "NutriSense API"
+        ]
+      }
+    },
     "/api/v1/dietitian/dashboard": {
       "get": {
         "operationId": "dietitian_dashboard_api_v1_dietitian_dashboard_get",
@@ -3481,6 +4298,185 @@
           }
         ],
         "summary": "Dietitian Patient History",
+        "tags": [
+          "NutriSense API"
+        ]
+      }
+    },
+    "/api/v1/dietitian/profile": {
+      "patch": {
+        "description": "Uzmanlık alanı, ad ve telefon kayıttan sonra da değiştirilebilir.\n\nE-posta kimlik doğrulamasına bağlı olduğu için burada değiştirilemez.",
+        "operationId": "update_dietitian_profile_api_v1_dietitian_profile_patch",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DietitianProfileUpdate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DietitianDashboardResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Diyetisyen kendi profilini günceller",
+        "tags": [
+          "NutriSense API"
+        ]
+      }
+    },
+    "/api/v1/dietitian/reports": {
+      "get": {
+        "operationId": "list_received_dietitian_reports_api_v1_dietitian_reports_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DietitianReceivedReportList"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Diyetisyene ulaşan beslenme raporları",
+        "tags": [
+          "NutriSense API"
+        ]
+      }
+    },
+    "/api/v1/dietitian/reports/{report_id}": {
+      "get": {
+        "description": "Diyetisyenin kendi raporunun ayrıntısını döndürür.\n\nRapor yalnız gönderilmişse okunabilir; kuyruktaki bir rapor henüz\ndanışanın onayladığı teslimat değildir.",
+        "operationId": "read_received_dietitian_report_api_v1_dietitian_reports__report_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "report_id",
+            "required": true,
+            "schema": {
+              "title": "Report Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DietitianReportDetail"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Rapor içeriği: besin adı, miktar, tarih/saat ve kalori",
+        "tags": [
+          "NutriSense API"
+        ]
+      }
+    },
+    "/api/v1/dietitian/reports/{report_id}/reply": {
+      "post": {
+        "description": "Diyetisyenin kendi raporuna tek cevabını kaydeder.\n\nCevap yalnız raporu gönderen hastaya görünür. Yeniden yazmak önceki\ncevabın üzerine yazar; geçmiş sürüm tutulmaz.",
+        "operationId": "reply_to_dietitian_report_api_v1_dietitian_reports__report_id__reply_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "report_id",
+            "required": true,
+            "schema": {
+              "title": "Report Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DietitianReplyRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DietitianReportDetail"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Rapora cevap yaz",
         "tags": [
           "NutriSense API"
         ]
@@ -4116,6 +5112,171 @@
           }
         ],
         "summary": "Besin arama",
+        "tags": [
+          "NutriSense API"
+        ]
+      }
+    },
+    "/api/v1/health-metrics/today": {
+      "get": {
+        "operationId": "read_today_health_metrics_api_v1_health_metrics_today_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HealthMetricResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Bugünün su, adım, uyku ve ruh hâli ölçümleri",
+        "tags": [
+          "NutriSense API"
+        ]
+      },
+      "put": {
+        "description": "Yalnız gönderilen alanlar değişir; gün başına tek satır tutulur.",
+        "operationId": "update_today_health_metrics_api_v1_health_metrics_today_put",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HealthMetricUpdate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HealthMetricResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Bugünün ölçümlerini günceller",
+        "tags": [
+          "NutriSense API"
+        ]
+      }
+    },
+    "/api/v1/health-metrics/weight": {
+      "get": {
+        "operationId": "read_weight_history_api_v1_health_metrics_weight_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 30,
+              "maximum": 365,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WeightHistoryResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Kilo ölçüm geçmişi",
+        "tags": [
+          "NutriSense API"
+        ]
+      },
+      "post": {
+        "operationId": "add_weight_measurement_api_v1_health_metrics_weight_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WeightMeasurementCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WeightHistoryResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Yeni kilo ölçümü ekler",
         "tags": [
           "NutriSense API"
         ]
