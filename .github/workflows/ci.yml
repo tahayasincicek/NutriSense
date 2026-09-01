@@ -511,6 +511,50 @@ jobs:
           echo "✅ Erişilebilirlik denetimi tamamlandı"
 
   # ═══════════════════════════════════════════════════════════════════════════
+  # iOS DERLEME (sadece main; macOS runner özel depoda 10x dakika harcar)
+  # ═══════════════════════════════════════════════════════════════════════════
+
+  ios-build:
+    name: iOS Derleme
+    runs-on: macos-latest
+    if: github.ref == 'refs/heads/main'
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Flutter kurulumu
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+
+      - name: Bağımlılıkları yükle
+        run: flutter pub get
+
+      # İmzasız derleme: sertifika/provisioning profili gerektirmez, bu yüzden
+      # depoda hiçbir imzalama sırrı tutulmaz. Kaynağın gerçekten Xcode ile
+      # derlendiğini kanıtlar; App Store arşivi kanıtlamaz.
+      - name: iOS derleme (imzasız)
+        shell: bash
+        run: |
+          set -euo pipefail
+          flutter build ios --debug --no-codesign \
+            --dart-define=APP_ENV=dev \
+            --no-tree-shake-icons
+          test -d build/ios/iphoneos/Runner.app
+
+      - name: Derlenen uygulamanın kimliğini doğrula
+        shell: bash
+        run: |
+          set -euo pipefail
+          plist=build/ios/iphoneos/Runner.app/Info.plist
+          bundle_id=$(/usr/libexec/PlistBuddy -c "Print :CFBundleIdentifier" "$plist")
+          echo "CFBundleIdentifier=$bundle_id"
+          test -n "$bundle_id"
+
+  # ═══════════════════════════════════════════════════════════════════════════
   # BUILD KONTROLÜ (sadece main)
   # ═══════════════════════════════════════════════════════════════════════════
 
