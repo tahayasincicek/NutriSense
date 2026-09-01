@@ -258,7 +258,9 @@ class ActivityNotifier extends StateNotifier<ActivityState> {
   /// uygulama silinse de veri kaybolmaz.
   Future<void> _pullFromServer() async {
     final api = _api;
-    if (api == null) return;
+    // Oturum açılmadan ölçüm çekmek anlamsız; kimlik doğrulaması yoksa
+    // yalnız cihazdaki kayıt kullanılır.
+    if (api == null || !api.isAuthenticated) return;
     final daily = await api.getTodayHealthMetrics();
     final weights = await api.getWeightHistory();
     if (!mounted) return;

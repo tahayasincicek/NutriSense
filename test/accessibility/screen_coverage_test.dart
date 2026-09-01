@@ -2,12 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+
+import '../support/platform_channel_mocks.dart';
 import 'package:nutrisense/core/theme/app_theme.dart';
 import 'package:nutrisense/features/dietitian/screens/dietitian_screen.dart';
 import 'package:nutrisense/features/history/screens/nutrition_stats_screen.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
+
+  setUp(mockSecureStorage);
 
   setUpAll(() {
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
@@ -33,9 +37,11 @@ void main() {
 
       // Oturum yoksa kurulum kartı görünür.
       if (find.byKey(const Key('dietitian_email')).evaluate().isNotEmpty) {
+        // TextField kendi semantiğiyle birleştiği için etiket başka metinle
+        // birlikte okunur; varlığını içerik eşleşmesiyle doğruluyoruz.
         expect(
-          find.bySemanticsLabel('Diyetisyen e-posta adresi giriş alanı'),
-          findsOneWidget,
+          find.bySemanticsLabel(RegExp('Diyetisyen e-posta adresi')),
+          findsWidgets,
         );
         expect(find.byKey(const Key('dietitian_request')), findsOneWidget);
       }

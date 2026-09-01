@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+
+import '../support/platform_channel_mocks.dart';
 import 'package:nutrisense/core/theme/app_theme.dart';
 import 'package:nutrisense/features/onboarding/screens/onboarding_screen.dart';
 import 'package:nutrisense/features/settings/screens/settings_screen.dart';
@@ -11,6 +13,9 @@ import 'package:nutrisense/features/settings/screens/settings_screen.dart';
 /// Tekrar izlemede mevcut ayarlar değiştirilmemeli.
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
+
+  setUpAll(mockSecureStorage);
+  tearDownAll(resetSecureStorageMock);
 
   late List<MethodCall> permissionCalls;
 

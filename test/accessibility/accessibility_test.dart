@@ -4,6 +4,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+
+import '../support/platform_channel_mocks.dart';
 import 'package:nutrisense/app.dart';
 import 'package:nutrisense/core/theme/app_theme.dart';
 import 'package:nutrisense/features/food_scan/screens/food_scan_screen.dart';
@@ -13,8 +15,12 @@ import 'package:nutrisense/shared/services/accessibility_service.dart';
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
-  Widget realApp() => const ProviderScope(
-        child: NutriSenseApp(
+  setUp(mockSecureStorage);
+  tearDown(resetSecureStorageMock);
+
+  Widget realApp() => ProviderScope(
+        overrides: [memoryTokenStoreOverride()],
+        child: const NutriSenseApp(
           initializePlatformServices: false,
           bypassAuthenticationForTests: true,
         ),
@@ -37,6 +43,9 @@ void main() {
     );
     expect(find.bySemanticsLabel(RegExp('Sesli komut butonu')), findsOneWidget);
     semantics.dispose();
+
+    // Açılış zaman aşımının süresi dolsun.
+    await tester.pump(const Duration(seconds: 6));
   });
 
   testWidgets('gerçek AppShell yüzde 200 fontta kritik taşma üretmez',
@@ -64,6 +73,9 @@ void main() {
     );
     // Material 3 NavigationBar kullanılıyor (eski BottomNavigationBar değil).
     expect(find.byType(NavigationBar), findsOneWidget);
+
+    // Açılış zaman aşımının süresi dolsun.
+    await tester.pump(const Duration(seconds: 6));
   });
 
   testWidgets('gerçek AppShell görünür ikon eylemleri en az 48dp',
@@ -74,6 +86,9 @@ void main() {
     final fab = tester.getSize(find.byType(FloatingActionButton));
     expect(fab.width, greaterThanOrEqualTo(48));
     expect(fab.height, greaterThanOrEqualTo(48));
+
+    // Açılış zaman aşımının süresi dolsun.
+    await tester.pump(const Duration(seconds: 6));
   });
 
   testWidgets(
@@ -99,6 +114,9 @@ void main() {
       findsOneWidget,
     );
     expect(find.text('Ayarları Aç'), findsOneWidget);
+
+    // Açılış zaman aşımının süresi dolsun.
+    await tester.pump(const Duration(seconds: 6));
   });
 
   test('tema ana metin kontrastı WCAG AA hedefini karşılar', () {
