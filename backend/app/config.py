@@ -77,6 +77,10 @@ class Settings(BaseSettings):
     twilio_account_sid: str = ""
     twilio_auth_token: str = ""
     twilio_phone_number: str = ""
+    # SMS sağlayıcısı. local_outbox gerçek operatöre çıkmaz; mesajı dosyaya
+    # yazar ve teslimat kaydı üretir. E-postadaki Mailpit'in karşılığıdır.
+    sms_provider_mode: str = "disabled"
+    sms_outbox_path: str = ".runtime/sms_outbox.jsonl"
     notification_mode: str = "disabled"
     notification_sandbox_email_allowlist: str = ""
     notification_sandbox_phone_allowlist: str = ""
@@ -184,6 +188,30 @@ class Settings(BaseSettings):
             raise RuntimeError("Access token süresi 1-60 dakika arasında olmalıdır.")
         if not 1 <= self.jwt_refresh_token_expire_days <= 30:
             raise RuntimeError("Refresh token süresi 1-30 gün arasında olmalıdır.")
+        if self.sms_provider_mode not in {"disabled", "twilio", "local_outbox"}:
+            raise RuntimeError(
+                "SMS_PROVIDER_MODE disabled, twilio veya local_outbox olmalıdır."
+            )
+        if self.sms_provider_mode == "twilio":
+            # Placeholder değerler kimlik sayılmaz; aksi hâlde "yapılandırıldı"
+            # sanılıp gönderim çalışma zamanında sessizce düşer.
+            placeholder = any(
+                _unsafe_secret(value) or value.lower().startswith("your")
+                for value in (self.twilio_account_sid, self.twilio_auth_token)
+            )
+            if placeholder or not self.twilio_phone_number.startswith("+"):
+                raise RuntimeError(
+                    "SMS_PROVIDER_MODE=twilio ise gerçek Twilio kimlik "
+                    "bilgileri ve + ile başlayan gönderici numarası gereklidir."
+                )
+        if (
+            self.app_environment.lower() in {"staging", "prod"}
+            and self.sms_provider_mode == "local_outbox"
+        ):
+            raise RuntimeError(
+                "local_outbox yalnız geliştirme içindir; gerçek alıcıya SMS "
+                "göndermez."
+            )
         if self.notification_mode not in {"disabled", "sandbox", "production"}:
             raise RuntimeError("NOTIFICATION_MODE disabled, sandbox veya production olmalıdır.")
         if self.vision_provider_mode not in {"disabled", "google", "gemini"}:
@@ -341,6 +369,7 @@ class Settings(BaseSettings):
             "notifications": {
                 "enabled": self.notification_mode != "disabled",
                 "mode": self.notification_mode,
+                "sms": self.sms_provider_mode,
             },
             "offline_ml": {
                 "enabled": self.ml_artifact_enabled,

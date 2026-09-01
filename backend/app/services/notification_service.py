@@ -7,7 +7,10 @@ human delivery. Provider secrets and unmasked destinations are never logged.
 from __future__ import annotations
 
 import inspect
+import json
 import logging
+import uuid
+from pathlib import Path
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from email.utils import make_msgid
@@ -18,6 +21,7 @@ import aiosmtplib
 from twilio.rest import Client as TwilioClient
 
 from ..config import Settings, get_settings
+from ..models.database import utc_now
 from ..operations.metrics import runtime_metrics
 
 logger = logging.getLogger(__name__)
@@ -44,7 +48,7 @@ class NotificationService:
     ) -> None:
         self.settings = settings_override or get_settings()
         self._email_transport = email_transport or self._smtp_send
-        self._sms_transport = sms_transport or self._twilio_send
+        self._sms_transport = sms_transport or self._select_sms_transport()
 
     async def send_channel(
         self,
@@ -148,6 +152,53 @@ class NotificationService:
         return {
             "provider_message_id": message["Message-ID"],
             "provider_status": "accepted",
+        }
+
+    def _select_sms_transport(self) -> SmsTransport:
+        """Yapılandırmaya göre SMS taşıyıcısını seçer."""
+        if self.settings.sms_provider_mode == "local_outbox":
+            return self._local_outbox_send
+        return self._twilio_send
+
+    def _local_outbox_send(self, body: str, destination: str) -> dict:
+        """Mesajı yerel kutuya yazar; operatöre çıkmaz.
+
+        E-posta tarafındaki Mailpit'in karşılığıdır: hattın tamamı
+        (rıza, rapor, kanal seçimi, teslimat kaydı) gerçekten çalışır, yalnız
+        son adımda mesaj gerçek telefona gitmez. Geliştirme ve kanıt üretmek
+        içindir; staging/production'da yapılandırma reddedilir.
+        """
+        path = Path(self.settings.sms_outbox_path)
+        message_id = f"local-{uuid.uuid4()}"
+        record = {
+            "message_id": message_id,
+            "to": destination,
+            "body": body,
+            "queued_at": utc_now().isoformat(),
+        }
+        try:
+            path.parent.mkdir(parents=True, exist_ok=True)
+            with path.open("a", encoding="utf-8") as handle:
+                handle.write(json.dumps(record, ensure_ascii=False) + chr(10))
+        except OSError as exc:
+            # Container'da /app salt okunurdur; yol yazılabilir bir dizine
+            # ayarlanmalıdır. Genel sağlayıcı hatası gibi görünmesin.
+            logger.error(
+                "SMS yerel kutusuna yazılamadı path=%s hata=%s",
+                path,
+                type(exc).__name__,
+            )
+            raise ChannelDeliveryError(
+                "SMS_OUTBOX_NOT_WRITABLE", retryable=False
+            ) from None
+        logger.info(
+            "SMS yerel kutuya yazıldı message_id=%s uzunluk=%s",
+            message_id,
+            len(body),
+        )
+        return {
+            "provider_message_id": message_id,
+            "provider_status": "queued_local_outbox",
         }
 
     def _twilio_send(self, body: str, destination: str) -> dict:
