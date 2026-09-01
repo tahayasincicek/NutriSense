@@ -2397,6 +2397,89 @@
         "title": "PortionOption",
         "type": "object"
       },
+      "ProductConsentItem": {
+        "properties": {
+          "consent_type": {
+            "title": "Consent Type",
+            "type": "string"
+          },
+          "granted": {
+            "title": "Granted",
+            "type": "boolean"
+          },
+          "policy_version": {
+            "title": "Policy Version",
+            "type": "string"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "title": "Updated At",
+            "type": "string"
+          }
+        },
+        "required": [
+          "consent_type",
+          "granted",
+          "policy_version",
+          "updated_at"
+        ],
+        "title": "ProductConsentItem",
+        "type": "object"
+      },
+      "ProductConsentState": {
+        "properties": {
+          "consents": {
+            "items": {
+              "$ref": "#/components/schemas/ProductConsentItem"
+            },
+            "title": "Consents",
+            "type": "array"
+          },
+          "health_data_processing": {
+            "default": false,
+            "title": "Health Data Processing",
+            "type": "boolean"
+          },
+          "image_cross_border_transfer": {
+            "default": false,
+            "title": "Image Cross Border Transfer",
+            "type": "boolean"
+          },
+          "policy_version": {
+            "title": "Policy Version",
+            "type": "string"
+          }
+        },
+        "required": [
+          "policy_version",
+          "consents"
+        ],
+        "title": "ProductConsentState",
+        "type": "object"
+      },
+      "ProductConsentUpdate": {
+        "description": "Amaç bazlı ürün rızası.\n\nAydınlatma metninden ayrı olarak, her amaç için tek tek alınır; KVKK\naçık rızanın belirli bir konuya ilişkin olmasını arar.",
+        "properties": {
+          "consent_type": {
+            "enum": [
+              "health_data_processing",
+              "image_cross_border_transfer"
+            ],
+            "title": "Consent Type",
+            "type": "string"
+          },
+          "granted": {
+            "title": "Granted",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "consent_type",
+          "granted"
+        ],
+        "title": "ProductConsentUpdate",
+        "type": "object"
+      },
       "RefreshTokenRequest": {
         "description": "Tek kullanımlık, rotation uygulanan refresh token isteği.",
         "properties": {
@@ -3929,6 +4012,77 @@
           }
         },
         "summary": "Diyetisyen hesabı oluştur",
+        "tags": [
+          "NutriSense API"
+        ]
+      }
+    },
+    "/api/v1/consents": {
+      "get": {
+        "operationId": "read_product_consents_api_v1_consents_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProductConsentState"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Kullanıcının amaç bazlı rıza durumu",
+        "tags": [
+          "NutriSense API"
+        ]
+      },
+      "put": {
+        "description": "Rızayı kaydeder.\n\nGeri çekme kaydı silmez; yeni bir kayıt yazılır ki rızanın ne zaman\nverilip ne zaman geri alındığı kanıtlanabilsin.",
+        "operationId": "update_product_consent_api_v1_consents_put",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProductConsentUpdate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProductConsentState"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Bir amaç için rıza ver veya geri çek",
         "tags": [
           "NutriSense API"
         ]
