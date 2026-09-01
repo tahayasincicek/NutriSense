@@ -3,6 +3,12 @@
 > **Snapshot notu:** Bu matris API kanonikleştirmesinden önceki denetim
 > durumunu kaydeder. Kamera/backend sözleşmesinin güncel uygulama ve test
 > kanıtı için `docs/api_contract.md` ve ADR-001'e bakılmalıdır.
+>
+> **Güncellik uyarısı:** Aşağıdaki durumlar 17 Temmuz 2026 tarihlidir ve
+> bilerek değiştirilmemiştir. Birçok satır o tarihten sonra kapandı. Bugünkü
+> durum için `docs/audit/tubitak_requirement_reaudit_2026-09.md` belgesine
+> bakılmalıdır; iki belgenin farkı `OZ-08`'in istediği iteratif geliştirme
+> kanıtıdır.
 
 **Denetim tarihi:** 17 Temmuz 2026  
 **Kaynak:** `C:\Users\TAHA\Desktop\2209\Tübitak-2209-a_rapor 1 (1).pdf` (10 sayfa; görsel ve metinsel olarak bütünüyle incelendi)  
