@@ -1,0 +1,1082 @@
+{
+  "created_at": "2026-09-02T08:13:43.543418Z",
+  "data_root_hint": "C:/Users/TAHA/Desktop/2209/nutrisense/ml/data/raw",
+  "dataset_version": "1cc07ec705f54849e2e8a55af0aa7b24e8dc1de76fe332b2f7acfea4cfd64d9c",
+  "distribution": [
+    {
+      "count": 300,
+      "label": "__ood__",
+      "split": "test",
+      "status": "ok"
+    },
+    {
+      "count": 300,
+      "label": "__ood__",
+      "split": "validation",
+      "status": "ok"
+    },
+    {
+      "count": 28,
+      "label": "asure",
+      "split": "test",
+      "status": "ok"
+    },
+    {
+      "count": 171,
+      "label": "asure",
+      "split": "train",
+      "status": "ok"
+    },
+    {
+      "count": 30,
+      "label": "asure",
+      "split": "validation",
+      "status": "ok"
+    },
+    {
+      "count": 227,
+      "label": "baklava",
+      "split": "test",
+      "status": "ok"
+    },
+    {
+      "count": 1098,
+      "label": "baklava",
+      "split": "train",
+      "status": "ok"
+    },
+    {
+      "count": 226,
+      "label": "baklava",
+      "split": "validation",
+      "status": "ok"
+    },
+    {
+      "count": 81,
+      "label": "biber_dolmasi",
+      "split": "test",
+      "status": "ok"
+    },
+    {
+      "count": 336,
+      "label": "biber_dolmasi",
+      "split": "train",
+      "status": "ok"
+    },
+    {
+      "count": 68,
+      "label": "biber_dolmasi",
+      "split": "validation",
+      "status": "ok"
+    },
+    {
+      "count": 115,
+      "label": "borek",
+      "split": "test",
+      "status": "ok"
+    },
+    {
+      "count": 513,
+      "label": "borek",
+      "split": "train",
+      "status": "ok"
+    },
+    {
+      "count": 131,
+      "label": "borek",
+      "split": "validation",
+      "status": "ok"
+    },
+    {
+      "count": 53,
+      "label": "cig_kofte",
+      "split": "test",
+      "status": "ok"
+    },
+    {
+      "count": 221,
+      "label": "cig_kofte",
+      "split": "train",
+      "status": "ok"
+    },
+    {
+      "count": 54,
+      "label": "cig_kofte",
+      "split": "validation",
+      "status": "ok"
+    },
+    {
+      "count": 78,
+      "label": "enginar",
+      "split": "test",
+      "status": "ok"
+    },
+    {
+      "count": 311,
+      "label": "enginar",
+      "split": "train",
+      "status": "ok"
+    },
+    {
+      "count": 67,
+      "label": "enginar",
+      "split": "validation",
+      "status": "ok"
+    },
+    {
+      "count": 60,
+      "label": "et_sote",
+      "split": "test",
+      "status": "ok"
+    },
+    {
+      "count": 302,
+      "label": "et_sote",
+      "split": "train",
+      "status": "ok"
+    },
+    {
+      "count": 77,
+      "label": "et_sote",
+      "split": "validation",
+      "status": "ok"
+    },
+    {
+      "count": 142,
+      "label": "french_fries",
+      "split": "test",
+      "status": "ok"
+    },
+    {
+      "count": 706,
+      "label": "french_fries",
+      "split": "train",
+      "status": "ok"
+    },
+    {
+      "count": 152,
+      "label": "french_fries",
+      "split": "validation",
+      "status": "ok"
+    },
+    {
+      "count": 76,
+      "label": "gozleme",
+      "split": "test",
+      "status": "ok"
+    },
+    {
+      "count": 351,
+      "label": "gozleme",
+      "split": "train",
+      "status": "ok"
+    },
+    {
+      "count": 90,
+      "label": "gozleme",
+      "split": "validation",
+      "status": "ok"
+    },
+    {
+      "count": 153,
+      "label": "hamburger",
+      "split": "test",
+      "status": "ok"
+    },
+    {
+      "count": 687,
+      "label": "hamburger",
+      "split": "train",
+      "status": "ok"
+    },
+    {
+      "count": 160,
+      "label": "hamburger",
+      "split": "validation",
+      "status": "ok"
+    },
+    {
+      "count": 50,
+      "label": "hamsi",
+      "split": "test",
+      "status": "ok"
+    },
+    {
+      "count": 240,
+      "label": "hamsi",
+      "split": "train",
+      "status": "ok"
+    },
+    {
+      "count": 47,
+      "label": "hamsi",
+      "split": "validation",
+      "status": "ok"
+    },
+    {
+      "count": 46,
+      "label": "hunkar_begendi",
+      "split": "test",
+      "status": "ok"
+    },
+    {
+      "count": 225,
+      "label": "hunkar_begendi",
+      "split": "train",
+      "status": "ok"
+    },
+    {
+      "count": 43,
+      "label": "hunkar_begendi",
+      "split": "validation",
+      "status": "ok"
+    },
+    {
+      "count": 83,
+      "label": "icli_kofte",
+      "split": "test",
+      "status": "ok"
+    },
+    {
+      "count": 349,
+      "label": "icli_kofte",
+      "split": "train",
+      "status": "ok"
+    },
+    {
+      "count": 84,
+      "label": "icli_kofte",
+      "split": "validation",
+      "status": "ok"
+    },
+    {
+      "count": 42,
+      "label": "ispanak",
+      "split": "test",
+      "status": "ok"
+    },
+    {
+      "count": 181,
+      "label": "ispanak",
+      "split": "train",
+      "status": "ok"
+    },
+    {
+      "count": 49,
+      "label": "ispanak",
+      "split": "validation",
+      "status": "ok"
+    },
+    {
+      "count": 79,
+      "label": "izmir_kofte",
+      "split": "test",
+      "status": "ok"
+    },
+    {
+      "count": 308,
+      "label": "izmir_kofte",
+      "split": "train",
+      "status": "ok"
+    },
+    {
+      "count": 66,
+      "label": "izmir_kofte",
+      "split": "validation",
+      "status": "ok"
+    },
+    {
+      "count": 57,
+      "label": "karniyarik",
+      "split": "test",
+      "status": "ok"
+    },
+    {
+      "count": 293,
+      "label": "karniyarik",
+      "split": "train",
+      "status": "ok"
+    },
+    {
+      "count": 63,
+      "label": "karniyarik",
+      "split": "validation",
+      "status": "ok"
+    },
+    {
+      "count": 126,
+      "label": "kebap",
+      "split": "test",
+      "status": "ok"
+    },
+    {
+      "count": 617,
+      "label": "kebap",
+      "split": "train",
+      "status": "ok"
+    },
+    {
+      "count": 128,
+      "label": "kebap",
+      "split": "validation",
+      "status": "ok"
+    },
+    {
+      "count": 66,
+      "label": "kisir",
+      "split": "test",
+      "status": "ok"
+    },
+    {
+      "count": 356,
+      "label": "kisir",
+      "split": "train",
+      "status": "ok"
+    },
+    {
+      "count": 78,
+      "label": "kisir",
+      "split": "validation",
+      "status": "ok"
+    },
+    {
+      "count": 54,
+      "label": "kuru_fasulye",
+      "split": "test",
+      "status": "ok"
+    },
+    {
+      "count": 342,
+      "label": "kuru_fasulye",
+      "split": "train",
+      "status": "ok"
+    },
+    {
+      "count": 86,
+      "label": "kuru_fasulye",
+      "split": "validation",
+      "status": "ok"
+    },
+    {
+      "count": 37,
+      "label": "lahmacun",
+      "split": "test",
+      "status": "ok"
+    },
+    {
+      "count": 151,
+      "label": "lahmacun",
+      "split": "train",
+      "status": "ok"
+    },
+    {
+      "count": 39,
+      "label": "lahmacun",
+      "split": "validation",
+      "status": "ok"
+    },
+    {
+      "count": 103,
+      "label": "lokum",
+      "split": "test",
+      "status": "ok"
+    },
+    {
+      "count": 478,
+      "label": "lokum",
+      "split": "train",
+      "status": "ok"
+    },
+    {
+      "count": 102,
+      "label": "lokum",
+      "split": "validation",
+      "status": "ok"
+    },
+    {
+      "count": 69,
+      "label": "manti",
+      "split": "test",
+      "status": "ok"
+    },
+    {
+      "count": 291,
+      "label": "manti",
+      "split": "train",
+      "status": "ok"
+    },
+    {
+      "count": 62,
+      "label": "manti",
+      "split": "validation",
+      "status": "ok"
+    },
+    {
+      "count": 71,
+      "label": "mucver",
+      "split": "test",
+      "status": "ok"
+    },
+    {
+      "count": 316,
+      "label": "mucver",
+      "split": "train",
+      "status": "ok"
+    },
+    {
+      "count": 61,
+      "label": "mucver",
+      "split": "validation",
+      "status": "ok"
+    },
+    {
+      "count": 148,
+      "label": "omelette",
+      "split": "test",
+      "status": "ok"
+    },
+    {
+      "count": 718,
+      "label": "omelette",
+      "split": "train",
+      "status": "ok"
+    },
+    {
+      "count": 134,
+      "label": "omelette",
+      "split": "validation",
+      "status": "ok"
+    },
+    {
+      "count": 63,
+      "label": "pirinc_pilavi",
+      "split": "test",
+      "status": "ok"
+    },
+    {
+      "count": 333,
+      "label": "pirinc_pilavi",
+      "split": "train",
+      "status": "ok"
+    },
+    {
+      "count": 69,
+      "label": "pirinc_pilavi",
+      "split": "validation",
+      "status": "ok"
+    },
+    {
+      "count": 162,
+      "label": "pizza",
+      "split": "test",
+      "status": "ok"
+    },
+    {
+      "count": 696,
+      "label": "pizza",
+      "split": "train",
+      "status": "ok"
+    },
+    {
+      "count": 142,
+      "label": "pizza",
+      "split": "validation",
+      "status": "ok"
+    },
+    {
+      "count": 67,
+      "label": "simit",
+      "split": "test",
+      "status": "ok"
+    },
+    {
+      "count": 353,
+      "label": "simit",
+      "split": "train",
+      "status": "ok"
+    },
+    {
+      "count": 55,
+      "label": "simit",
+      "split": "validation",
+      "status": "ok"
+    },
+    {
+      "count": 45,
+      "label": "taze_fasulye",
+      "split": "test",
+      "status": "ok"
+    },
+    {
+      "count": 224,
+      "label": "taze_fasulye",
+      "split": "train",
+      "status": "ok"
+    },
+    {
+      "count": 37,
+      "label": "taze_fasulye",
+      "split": "validation",
+      "status": "ok"
+    },
+    {
+      "count": 86,
+      "label": "yaprak_sarma",
+      "split": "test",
+      "status": "ok"
+    },
+    {
+      "count": 349,
+      "label": "yaprak_sarma",
+      "split": "train",
+      "status": "ok"
+    },
+    {
+      "count": 68,
+      "label": "yaprak_sarma",
+      "split": "validation",
+      "status": "ok"
+    }
+  ],
+  "exact_or_near_duplicates": 146,
+  "manifest": "data/versions/tr29_v1/manifest.csv",
+  "ood_check": {
+    "ready": true,
+    "samples": 600,
+    "violations": []
+  },
+  "samples_corrupt": 0,
+  "samples_total": 17051,
+  "samples_valid": 17051,
+  "schema_version": 1,
+  "scope_checks": [
+    {
+      "groups": 229,
+      "label": "asure",
+      "licenses": [
+        "turkishfoods25"
+      ],
+      "ready": true,
+      "samples": 229,
+      "sources": [
+        "turkishfoods25"
+      ],
+      "splits": {
+        "test": 28,
+        "train": 171,
+        "validation": 30
+      },
+      "violations": []
+    },
+    {
+      "groups": 1551,
+      "label": "baklava",
+      "licenses": [
+        "food101_official",
+        "turkishfoods25"
+      ],
+      "ready": true,
+      "samples": 1551,
+      "sources": [
+        "food101_official",
+        "turkishfoods25"
+      ],
+      "splits": {
+        "test": 227,
+        "train": 1098,
+        "validation": 226
+      },
+      "violations": []
+    },
+    {
+      "groups": 485,
+      "label": "biber_dolmasi",
+      "licenses": [
+        "turkishfoods25"
+      ],
+      "ready": true,
+      "samples": 485,
+      "sources": [
+        "turkishfoods25"
+      ],
+      "splits": {
+        "test": 81,
+        "train": 336,
+        "validation": 68
+      },
+      "violations": []
+    },
+    {
+      "groups": 759,
+      "label": "borek",
+      "licenses": [
+        "turkishfoods25"
+      ],
+      "ready": true,
+      "samples": 759,
+      "sources": [
+        "turkishfoods25"
+      ],
+      "splits": {
+        "test": 115,
+        "train": 513,
+        "validation": 131
+      },
+      "violations": []
+    },
+    {
+      "groups": 328,
+      "label": "cig_kofte",
+      "licenses": [
+        "turkishfoods25"
+      ],
+      "ready": true,
+      "samples": 328,
+      "sources": [
+        "turkishfoods25"
+      ],
+      "splits": {
+        "test": 53,
+        "train": 221,
+        "validation": 54
+      },
+      "violations": []
+    },
+    {
+      "groups": 456,
+      "label": "enginar",
+      "licenses": [
+        "turkishfoods25"
+      ],
+      "ready": true,
+      "samples": 456,
+      "sources": [
+        "turkishfoods25"
+      ],
+      "splits": {
+        "test": 78,
+        "train": 311,
+        "validation": 67
+      },
+      "violations": []
+    },
+    {
+      "groups": 439,
+      "label": "et_sote",
+      "licenses": [
+        "turkishfoods25"
+      ],
+      "ready": true,
+      "samples": 439,
+      "sources": [
+        "turkishfoods25"
+      ],
+      "splits": {
+        "test": 60,
+        "train": 302,
+        "validation": 77
+      },
+      "violations": []
+    },
+    {
+      "groups": 1000,
+      "label": "french_fries",
+      "licenses": [
+        "food101_official"
+      ],
+      "ready": true,
+      "samples": 1000,
+      "sources": [
+        "food101_official"
+      ],
+      "splits": {
+        "test": 142,
+        "train": 706,
+        "validation": 152
+      },
+      "violations": []
+    },
+    {
+      "groups": 517,
+      "label": "gozleme",
+      "licenses": [
+        "turkishfoods25"
+      ],
+      "ready": true,
+      "samples": 517,
+      "sources": [
+        "turkishfoods25"
+      ],
+      "splits": {
+        "test": 76,
+        "train": 351,
+        "validation": 90
+      },
+      "violations": []
+    },
+    {
+      "groups": 1000,
+      "label": "hamburger",
+      "licenses": [
+        "food101_official"
+      ],
+      "ready": true,
+      "samples": 1000,
+      "sources": [
+        "food101_official"
+      ],
+      "splits": {
+        "test": 153,
+        "train": 687,
+        "validation": 160
+      },
+      "violations": []
+    },
+    {
+      "groups": 337,
+      "label": "hamsi",
+      "licenses": [
+        "turkishfoods25"
+      ],
+      "ready": true,
+      "samples": 337,
+      "sources": [
+        "turkishfoods25"
+      ],
+      "splits": {
+        "test": 50,
+        "train": 240,
+        "validation": 47
+      },
+      "violations": []
+    },
+    {
+      "groups": 314,
+      "label": "hunkar_begendi",
+      "licenses": [
+        "turkishfoods25"
+      ],
+      "ready": true,
+      "samples": 314,
+      "sources": [
+        "turkishfoods25"
+      ],
+      "splits": {
+        "test": 46,
+        "train": 225,
+        "validation": 43
+      },
+      "violations": []
+    },
+    {
+      "groups": 516,
+      "label": "icli_kofte",
+      "licenses": [
+        "turkishfoods25"
+      ],
+      "ready": true,
+      "samples": 516,
+      "sources": [
+        "turkishfoods25"
+      ],
+      "splits": {
+        "test": 83,
+        "train": 349,
+        "validation": 84
+      },
+      "violations": []
+    },
+    {
+      "groups": 272,
+      "label": "ispanak",
+      "licenses": [
+        "turkishfoods25"
+      ],
+      "ready": true,
+      "samples": 272,
+      "sources": [
+        "turkishfoods25"
+      ],
+      "splits": {
+        "test": 42,
+        "train": 181,
+        "validation": 49
+      },
+      "violations": []
+    },
+    {
+      "groups": 453,
+      "label": "izmir_kofte",
+      "licenses": [
+        "turkishfoods25"
+      ],
+      "ready": true,
+      "samples": 453,
+      "sources": [
+        "turkishfoods25"
+      ],
+      "splits": {
+        "test": 79,
+        "train": 308,
+        "validation": 66
+      },
+      "violations": []
+    },
+    {
+      "groups": 413,
+      "label": "karniyarik",
+      "licenses": [
+        "turkishfoods25"
+      ],
+      "ready": true,
+      "samples": 413,
+      "sources": [
+        "turkishfoods25"
+      ],
+      "splits": {
+        "test": 57,
+        "train": 293,
+        "validation": 63
+      },
+      "violations": []
+    },
+    {
+      "groups": 871,
+      "label": "kebap",
+      "licenses": [
+        "turkishfoods25"
+      ],
+      "ready": true,
+      "samples": 871,
+      "sources": [
+        "turkishfoods25"
+      ],
+      "splits": {
+        "test": 126,
+        "train": 617,
+        "validation": 128
+      },
+      "violations": []
+    },
+    {
+      "groups": 500,
+      "label": "kisir",
+      "licenses": [
+        "turkishfoods25"
+      ],
+      "ready": true,
+      "samples": 500,
+      "sources": [
+        "turkishfoods25"
+      ],
+      "splits": {
+        "test": 66,
+        "train": 356,
+        "validation": 78
+      },
+      "violations": []
+    },
+    {
+      "groups": 482,
+      "label": "kuru_fasulye",
+      "licenses": [
+        "turkishfoods25"
+      ],
+      "ready": true,
+      "samples": 482,
+      "sources": [
+        "turkishfoods25"
+      ],
+      "splits": {
+        "test": 54,
+        "train": 342,
+        "validation": 86
+      },
+      "violations": []
+    },
+    {
+      "groups": 227,
+      "label": "lahmacun",
+      "licenses": [
+        "turkishfoods25"
+      ],
+      "ready": true,
+      "samples": 227,
+      "sources": [
+        "turkishfoods25"
+      ],
+      "splits": {
+        "test": 37,
+        "train": 151,
+        "validation": 39
+      },
+      "violations": []
+    },
+    {
+      "groups": 683,
+      "label": "lokum",
+      "licenses": [
+        "turkishfoods25"
+      ],
+      "ready": true,
+      "samples": 683,
+      "sources": [
+        "turkishfoods25"
+      ],
+      "splits": {
+        "test": 103,
+        "train": 478,
+        "validation": 102
+      },
+      "violations": []
+    },
+    {
+      "groups": 422,
+      "label": "manti",
+      "licenses": [
+        "turkishfoods25"
+      ],
+      "ready": true,
+      "samples": 422,
+      "sources": [
+        "turkishfoods25"
+      ],
+      "splits": {
+        "test": 69,
+        "train": 291,
+        "validation": 62
+      },
+      "violations": []
+    },
+    {
+      "groups": 448,
+      "label": "mucver",
+      "licenses": [
+        "turkishfoods25"
+      ],
+      "ready": true,
+      "samples": 448,
+      "sources": [
+        "turkishfoods25"
+      ],
+      "splits": {
+        "test": 71,
+        "train": 316,
+        "validation": 61
+      },
+      "violations": []
+    },
+    {
+      "groups": 1000,
+      "label": "omelette",
+      "licenses": [
+        "food101_official"
+      ],
+      "ready": true,
+      "samples": 1000,
+      "sources": [
+        "food101_official"
+      ],
+      "splits": {
+        "test": 148,
+        "train": 718,
+        "validation": 134
+      },
+      "violations": []
+    },
+    {
+      "groups": 465,
+      "label": "pirinc_pilavi",
+      "licenses": [
+        "turkishfoods25"
+      ],
+      "ready": true,
+      "samples": 465,
+      "sources": [
+        "turkishfoods25"
+      ],
+      "splits": {
+        "test": 63,
+        "train": 333,
+        "validation": 69
+      },
+      "violations": []
+    },
+    {
+      "groups": 1000,
+      "label": "pizza",
+      "licenses": [
+        "food101_official"
+      ],
+      "ready": true,
+      "samples": 1000,
+      "sources": [
+        "food101_official"
+      ],
+      "splits": {
+        "test": 162,
+        "train": 696,
+        "validation": 142
+      },
+      "violations": []
+    },
+    {
+      "groups": 475,
+      "label": "simit",
+      "licenses": [
+        "turkishfoods25"
+      ],
+      "ready": true,
+      "samples": 475,
+      "sources": [
+        "turkishfoods25"
+      ],
+      "splits": {
+        "test": 67,
+        "train": 353,
+        "validation": 55
+      },
+      "violations": []
+    },
+    {
+      "groups": 306,
+      "label": "taze_fasulye",
+      "licenses": [
+        "turkishfoods25"
+      ],
+      "ready": true,
+      "samples": 306,
+      "sources": [
+        "turkishfoods25"
+      ],
+      "splits": {
+        "test": 45,
+        "train": 224,
+        "validation": 37
+      },
+      "violations": []
+    },
+    {
+      "groups": 503,
+      "label": "yaprak_sarma",
+      "licenses": [
+        "turkishfoods25"
+      ],
+      "ready": true,
+      "samples": 503,
+      "sources": [
+        "turkishfoods25"
+      ],
+      "splits": {
+        "test": 86,
+        "train": 349,
+        "validation": 68
+      },
+      "violations": []
+    }
+  ],
+  "scope_id": "nutrisense-tr29-v1",
+  "scope_ready_for_training": true,
+  "seed": 2209,
+  "status": "prepared"
+}

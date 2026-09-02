@@ -1,38 +1,70 @@
 {
   "schema_version": 1,
-  "experiment_id": "20260902T061831Z-3a32310432",
-  "scope_id": "nutrisense-food101-5-v1",
+  "experiment_id": "20260902T090009Z-7871b6adb5",
+  "scope_id": "nutrisense-tr29-v1",
   "model_file": "nutrisense_food.tflite",
   "model_format": "float16",
-  "model_sha256": "cb7a7be7765ffd9e27d52f7cc07db98534e87c4148169e6285ab47c36aefafad",
+  "model_sha256": "74e155e2508eb3a3d58fda0d7faf41d1ac01f7082edca361d470b4e0e0209b57",
   "labels_file": "labels.txt",
   "input": {
-    "shape": [1, 224, 224, 3],
+    "shape": [
+      1,
+      224,
+      224,
+      3
+    ],
     "color_space": "RGB",
-    "range": [0.0, 255.0],
+    "range": [
+      0.0,
+      255.0
+    ],
     "resize": "bilinear_center_crop"
   },
   "output": {
     "type": "softmax_probabilities"
   },
   "decision": {
-    "threshold": 0.9772836565971375,
+    "threshold": 0.8068686868686868,
     "threshold_source": "validation decision.json",
     "below_threshold": "unknown_needs_manual_confirmation"
   },
   "test_metrics": {
-    "accuracy": 0.9266666666666666,
-    "macro_f1": 0.9264197172030476,
-    "top3_accuracy": 0.9906666666666667,
-    "coverage_at_threshold": 0.6933333333333334,
-    "selective_error": 0.09632224168126094
+    "accuracy": 0.837454398054317,
+    "macro_f1": 0.826776751070184,
+    "top3_accuracy": 0.9497365220916092,
+    "coverage_at_threshold": 0.7454398054316984,
+    "selective_error": 0.10309278350515463
   },
   "labels_tr": {
+    "asure": "aşure",
     "baklava": "baklava",
+    "biber_dolmasi": "biber dolması",
+    "borek": "börek",
+    "cig_kofte": "çiğ köfte",
+    "enginar": "enginar",
+    "et_sote": "et sote",
+    "french_fries": "patates kızartması",
+    "gozleme": "gözleme",
     "hamburger": "hamburger",
-    "pizza": "pizza",
+    "hamsi": "hamsi",
+    "hunkar_begendi": "hünkar beğendi",
+    "icli_kofte": "içli köfte",
+    "ispanak": "ıspanak",
+    "izmir_kofte": "İzmir köfte",
+    "karniyarik": "karnıyarık",
+    "kebap": "kebap",
+    "kisir": "kısır",
+    "kuru_fasulye": "kuru fasulye",
+    "lahmacun": "lahmacun",
+    "lokum": "lokum",
+    "manti": "mantı",
+    "mucver": "mücver",
     "omelette": "omlet",
-    "french_fries": "patates kızartması"
+    "pirinc_pilavi": "pirinç pilavı",
+    "pizza": "pizza",
+    "simit": "simit",
+    "taze_fasulye": "taze fasulye",
+    "yaprak_sarma": "yaprak sarma"
   },
-  "notes": "Kapsam yalnız bu beş sınıftır. Kapsam dışı yemekler eşik altında kalıp manuel onaya düşmelidir. Model besin değeri üretmez; kalori doğrulanmış kaynaktan gelir."
+  "notes": "Kapsam bu 29 sinifla sinirlidir. Kapsam disi yemekler esik altinda kalip manuel onaya dusmelidir. Model besin degeri uretmez; kalori dogrulanmis kaynaktan gelir."
 }

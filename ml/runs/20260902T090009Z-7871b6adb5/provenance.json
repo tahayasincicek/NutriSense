@@ -1,0 +1,18 @@
+{
+  "config_sha256": "63859e637141c38bc83fd04bc1043cfa08a9d4f7c0a5d3d8419708bde41326b0",
+  "data_root_at_training": "C:/Users/TAHA/Desktop/2209/nutrisense/ml/data/raw",
+  "dataset_version": "1cc07ec705f54849e2e8a55af0aa7b24e8dc1de76fe332b2f7acfea4cfd64d9c",
+  "experiment_id": "20260902T090009Z-7871b6adb5",
+  "numpy": "1.26.4",
+  "physical_devices": [
+    "CPU:/physical_device:CPU:0"
+  ],
+  "platform": "Windows-10-10.0.26200-SP0",
+  "python": "3.11.15 (main, May 10 2026, 19:31:25) [MSC v.1944 64 bit (AMD64)]",
+  "requirements_lock_sha256": "6fcf8154e1edf64d2480f5b77043df467931de27776288018f51b8656ddde073",
+  "schema_version": 1,
+  "seed": 2209,
+  "started_at": "2026-09-02T09:00:09.110466Z",
+  "tensorflow": "2.18.0",
+  "test_samples_read_during_training": 0
+}
