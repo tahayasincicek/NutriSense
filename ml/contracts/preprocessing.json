@@ -1,6 +1,7 @@
 {
   "schema_version": 1,
   "scope_id": "nutrisense-mvp-tr-10-v1",
+  "applies_to": "Planlanan 10 sınıflık kapsam. Uygulamaya paketlenen model bu değildir; dağıtılan modelin sözleşmesi assets/models/model_manifest.json dosyasındadır ve 5 sınıf içerir.",
   "labels_file": "labels.txt",
   "input": {
     "shape": [1, 224, 224, 3],

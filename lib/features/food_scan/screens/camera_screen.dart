@@ -317,7 +317,8 @@ class _CameraScreenState extends ConsumerState<CameraScreen>
   ///
   /// Model yalnız sınıf önerir; kalori söylenmez ve kayıt kullanıcı onayı
   /// olmadan oluşmaz.
-  Future<void> _runOnDeviceModel(Uint8List processedBytes, int generation) async {
+  Future<void> _runOnDeviceModel(
+      Uint8List processedBytes, int generation) async {
     final outcome = await _offline.recognize(processedBytes);
     if (!_isCurrent(generation)) return;
 
