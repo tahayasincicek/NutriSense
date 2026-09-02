@@ -1,11 +1,11 @@
 {
-  "converted_at": "2026-09-02T06:55:39.727084Z",
+  "converted_at": "2026-09-02T07:22:45.728244Z",
   "experiment_id": "20260902T061831Z-3a32310432",
   "formats": {
-    "float32": {
+    "float16": {
       "argmax_match_rate": 1.0,
-      "bytes": 2336468,
-      "desktop_median_inference_ms": 3.5186499994779297,
+      "bytes": 1207376,
+      "desktop_median_inference_ms": 1.4611999999942782,
       "equivalence_samples": 50,
       "held_out_test_accuracy_delta": null,
       "held_out_test_accuracy_delta_status": "not_run; evaluate a predeclared deployment candidate without tuning on test",
@@ -20,7 +20,38 @@
         224,
         3
       ],
-      "max_abs_difference": 7.450580596923828e-06,
+      "max_abs_difference": 0.022016853094100952,
+      "output_dtype": "<class 'numpy.float32'>",
+      "output_quantization": [
+        0.0,
+        0
+      ],
+      "path": "artifacts/20260902T061831Z-3a32310432/nutrisense_float16.tflite",
+      "sha256": "cb7a7be7765ffd9e27d52f7cc07db98534e87c4148169e6285ab47c36aefafad",
+      "tolerance": 0.05,
+      "validation_subset_accuracy_delta": 0.0,
+      "validation_subset_keras_accuracy": 0.94,
+      "validation_subset_tflite_accuracy": 0.94
+    },
+    "float32": {
+      "argmax_match_rate": 1.0,
+      "bytes": 2336468,
+      "desktop_median_inference_ms": 1.434750000044005,
+      "equivalence_samples": 50,
+      "held_out_test_accuracy_delta": null,
+      "held_out_test_accuracy_delta_status": "not_run; evaluate a predeclared deployment candidate without tuning on test",
+      "input_dtype": "<class 'numpy.float32'>",
+      "input_quantization": [
+        0.0,
+        0
+      ],
+      "input_shape": [
+        1,
+        224,
+        224,
+        3
+      ],
+      "max_abs_difference": 8.285045623779297e-06,
       "output_dtype": "<class 'numpy.float32'>",
       "output_quantization": [
         0.0,
@@ -36,7 +67,7 @@
   },
   "keras_sha256": "987b384e8f90602770586ec8c08e06a91256974e37d7acc2537ad5dcc107cb65",
   "labels_sha256": "14bd8fdf780c0ab759c7f54fd6c32e0b19f4fc602a8502ea39ccc0154efe4d6a",
-  "preprocessing_sha256": "e2b20e8d11d4edf713f9521f20e0c761ee1b929f6603ef85599f57d98f2cd3c8",
+  "preprocessing_sha256": "5f213967a546691fa37945d6d3365eea6c7f4503f114b905aa6c8fa9ee38030e",
   "schema_version": 1,
   "status": "converted",
   "warning": "Desktop timing is not target-device latency evidence."

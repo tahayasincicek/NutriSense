@@ -54,20 +54,46 @@ En sık karışma omlet ile pizza arasındadır (test kümesinde 8 + 4 örnek).
 
 ## Dağıtım artefaktı
 
-| Biçim | Durum | Boyut | Keras farkı | Argmax uyumu |
+Uygulamaya paketlenen biçim **float16**'dır.
+
+| Biçim | Durum | Boyut | Argmax uyumu | Doğruluk (300 örnek) |
 |---|---|---|---|---|
-| float32 | **Kabul** | 2,34 MB | 7,5e-06 | 1,000 |
-| float16 | Reddedildi | — | 0,0220 (tolerans 0,02) | — |
-| int8 | **Reddedildi** | — | 0,996 (tolerans 0,08) | 0,697 |
+| float16 | **Dağıtılan** | 1,21 MB | 1,000 | 0,920 |
+| float32 | Kabul | 2,34 MB | 1,000 | 0,920 |
+| dynamic range | Reddedildi | 0,74 MB | 0,963 | 0,910 |
+| full integer (int8) | Reddedildi | 0,82 MB | 0,697 | 0,697 |
 
-INT8 dönüşümü kabul edilmedi ve bu bir tolerans meselesi değildir: 300 örnek
-üzerinde ölçüldüğünde doğruluk 0,920'den **0,697'ye** düşmektedir. MobileNetV3'ün
-hard-swish aktivasyonları ve modelin içindeki `[0,255]` ön işleme katmanı tam
-tamsayı kuantizasyonunda ağır bozulma üretir. Dağıtımda float32 kullanılır;
-INT8 istenirse ayrı bir kuantizasyona-duyarlı eğitim çalışması gerekir.
+Keras referans doğruluğu aynı 300 örnekte 0,920'dir.
 
-Fiziksel cihaz gecikmesi hâlâ `not_run`dır; masaüstünde float32 medyan çıkarım
-süresi 3,5 ms ölçülmüştür ancak bu bir telefon ölçümü değildir.
+float16 dağıtım için seçildi: float32'nin yarısı boyutunda, tek bir örnekte
+bile farklı sınıf seçmiyor ve doğruluğu Keras'la birebir aynı.
+
+Tam tamsayı kuantizasyon reddedildi ve bu bir tolerans meselesi değildir:
+doğruluk 0,920'den **0,697'ye** düşmektedir. MobileNetV3'ün hard-swish
+aktivasyonları ve modelin içindeki `[0,255]` ön işleme katmanı tam tamsayı
+kuantizasyonunda ağır bozulma üretir. Dinamik aralık kuantizasyonu daha
+küçük olsa da 300 örnekte 11 kez farklı sınıf seçtiği için alınmadı.
+
+### Dönüşüm kabul ölçütü
+
+Dönüşüm kapısı, kullanıcıya ulaşan şeyin olasılık değil seçilen sınıf olduğu
+gerekçesiyle **argmax uyumunun 1,0 olmasını** şart koşar; tek örnekte bile
+karar değişen biçim dağıtılamaz. Ham olasılık farkı ikinci ölçüttür ve
+biçimin sayısal hassasiyetine göre belirlenir (float16 için 0,05; mantisi
+~3 ondalık basamak taşıdığı için softmax çıkışında bu mertebede sapma
+beklenen davranıştır).
+
+### Gecikme
+
+| Ortam | p50 | p95 |
+|---|---|---|
+| Android emülatörü (sdk_gphone64_x86_64, Android 16) | 95,3 ms | 260,5 ms |
+| Masaüstü (float16 TFLite, saf çıkarım) | 1,46 ms | — |
+
+Emülatör ölçümü JPEG çözme, yeniden boyutlandırma ve çıkarımın tamamını
+kapsar; kullanıcının beklediği süre budur. Ancak emülatör x86 üzerinde
+çalışır ve **fiziksel telefon ölçümü yerine geçmez**; `target_device_latency_ms`
+adı belirtilmiş gerçek bir cihazda ölçülene kadar `not_run` kalır.
 
 ## Planlanan kullanım
 

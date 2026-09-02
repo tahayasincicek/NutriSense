@@ -3,7 +3,8 @@
   "experiment_id": "20260902T061831Z-3a32310432",
   "scope_id": "nutrisense-food101-5-v1",
   "model_file": "nutrisense_food.tflite",
-  "model_sha256": "d6822f46e3cf7b23f2bffd5e39eaf96f4d35a3010b91f92ee3cbae79392d9396",
+  "model_format": "float16",
+  "model_sha256": "cb7a7be7765ffd9e27d52f7cc07db98534e87c4148169e6285ab47c36aefafad",
   "labels_file": "labels.txt",
   "input": {
     "shape": [1, 224, 224, 3],

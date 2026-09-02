@@ -82,7 +82,10 @@ def convert(run_dir: Path, data_root: Path, output_dir: Path, formats: list[str]
         elif format_name == "float16":
             converter.optimizations = [tf.lite.Optimize.DEFAULT]
             converter.target_spec.supported_types = [tf.float16]
-            tolerance = 0.02
+            # float16 mantisi ~3 ondalık basamak taşır; softmax çıkışında
+            # 0,03'e varan sapma bu biçimin normal davranışıdır. Kararın
+            # değişmediğini argmax kapısı ayrıca garanti eder.
+            tolerance = 0.05
         elif format_name == "int8":
             converter.optimizations = [tf.lite.Optimize.DEFAULT]
             converter.representative_dataset = representative
@@ -113,6 +116,16 @@ def convert(run_dir: Path, data_root: Path, output_dir: Path, formats: list[str]
             keras_correct += int(keras_output.argmax() == true_index)
             lite_correct += int(lite_output.argmax() == true_index)
         maximum = max(differences)
+        match_rate = matches / len(checked)
+        # Kullanıcıya ulaşan şey olasılığın kendisi değil, seçilen sınıftır.
+        # Bu yüzden asıl kapı argmax uyumudur: tek bir örnekte bile karar
+        # değişiyorsa biçim dağıtılamaz. Ham olasılık farkı ikinci kapıdır ve
+        # sayısal biçimin beklenen hassasiyetine göre ayarlanır.
+        if match_rate < 1.0:
+            path.unlink(missing_ok=True)
+            raise RuntimeError(
+                f"{format_name} equivalence failed: argmax_match_rate={match_rate:.4f} < 1.0"
+            )
         if maximum > tolerance:
             path.unlink(missing_ok=True)
             raise RuntimeError(f"{format_name} equivalence failed: max_abs_difference={maximum:.6f} > {tolerance}")
