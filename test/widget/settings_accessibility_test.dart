@@ -10,9 +10,29 @@ import 'package:nutrisense/shared/services/api_service.dart';
 import 'package:nutrisense/shared/services/stt_service.dart';
 
 void main() {
-  testWidgets('sesli çıkış tam komut ve ayrı tam evet olmadan çalışmaz',
+  testWidgets('tek başına çıkış komutu oturumu kapatmaz, onay ister',
       (tester) async {
     final auth = _FakeAuthController();
+    // Yalnız komut var, onay yok: oturum kapanmamalı.
+    final stt = _FakeSttService([
+      const SttResult(text: 'çıkış yap', confidence: 1, isFinal: true),
+    ]);
+    await tester.pumpWidget(_app(auth: auth, stt: stt));
+    await tester.pumpAndSettle();
+
+    _invokeVoiceButton(tester);
+    await tester.pumpAndSettle();
+
+    expect(auth.logoutCount, 0);
+    expect(find.textContaining('evet deyin'), findsOneWidget);
+    // Kullanıcıya göremediği bir düğme tarif edilmemeli.
+    expect(find.textContaining('Mikrofon düğmesine'), findsNothing);
+  });
+
+  testWidgets('komuttan sonra söylenen evet oturumu kapatır', (tester) async {
+    final auth = _FakeAuthController();
+    // Onay için mikrofon kendiliğinden yeniden açıldığından ikinci bir
+    // düğmeye basış gerekmez; ayrı bir "evet" söylenmesi hâlâ zorunludur.
     final stt = _FakeSttService([
       const SttResult(text: 'çıkış yap', confidence: 1, isFinal: true),
       const SttResult(text: 'evet', confidence: 1, isFinal: true),
@@ -22,12 +42,7 @@ void main() {
 
     _invokeVoiceButton(tester);
     await tester.pumpAndSettle();
-    expect(auth.logoutCount, 0);
-    expect(
-        find.textContaining('Mikrofon düğmesine tekrar basıp'), findsOneWidget);
 
-    _invokeVoiceButton(tester);
-    await tester.pumpAndSettle();
     expect(auth.logoutCount, 1);
   });
 

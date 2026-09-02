@@ -45,6 +45,16 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   ///
   /// Tek adımda çıkış yapmak, yanlış tanımada kullanıcıyı oturumundan eder;
   /// bu yüzden komut ve onay ayrı ayrı alınır.
+  /// Onay sorusunu seslendirir ve hemen ardından yeniden dinlemeye geçer.
+  Future<void> _confirmLogoutByVoice() async {
+    await _accessibility.speak(
+      'Çıkışı onaylamak için evet deyin.',
+      priority: TtsPriority.high,
+    );
+    if (!mounted) return;
+    await _voiceCommand();
+  }
+
   Future<void> _voiceCommand() async {
     final pending = _pendingVoiceLogout;
     await _stt.startListening(
@@ -75,10 +85,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         }
         if (intent.action == ContextualVoiceAction.logout) {
           _pendingVoiceLogout = true;
-          setState(() => _voiceStatus =
-              'Çıkışı onaylamak için: Mikrofon düğmesine tekrar basıp '
-                  'evet deyin.');
-          _accessibility.speak(_voiceStatus!, priority: TtsPriority.high);
+          setState(() => _voiceStatus = 'Çıkışı onaylamak için evet deyin.');
+          // Onay için mikrofon kendiliğinden yeniden açılır.
+          unawaited(_confirmLogoutByVoice());
           return;
         }
         setState(

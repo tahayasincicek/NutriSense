@@ -395,11 +395,16 @@ class _AppShellState extends ConsumerState<AppShell>
     ref.read(voiceHelpServiceProvider).announce(context);
   }
 
-  void _onTabChanged(int index) {
+  Future<void> _onTabChanged(int index) async {
     if (index == ref.read(currentTabProvider)) return;
     AccessibilityUtils.lightHaptic();
     ref.read(currentTabProvider.notifier).state = index;
-    ref.read(accessibilityServiceProvider).speak(_tabs[index].ttsAnnouncement);
+
+    // Sekme değişince önceki sekmenin kalan cümleleri susar. Aksi hâlde
+    // kullanıcı artık ekranda olmayan bir içeriği dinlemeye devam eder.
+    final accessibility = ref.read(accessibilityServiceProvider);
+    await accessibility.stop();
+    await accessibility.speak(_tabs[index].ttsAnnouncement);
   }
 
   @override

@@ -164,9 +164,32 @@ void main() {
       expect(find.text('Elma'), findsOneWidget);
     });
 
-    testWidgets('sesli silme tam komut ve ayrı tam evet olmadan çalışmaz',
+    testWidgets('tek başına silme komutu kaydı silmez, onay ister',
         (tester) async {
       final repository = _FakeHistoryRepository(_fixtureHistory());
+      // Yalnız komut var, onay yok: kayıt silinmemeli.
+      final stt = _FakeSttService([
+        const SttResult(text: 'kaydı sil', confidence: 1, isFinal: true),
+      ]);
+      await tester.pumpWidget(_app(repository, stt: stt));
+      await _load(tester);
+      await _revealActions(tester);
+
+      await tester.ensureVisible(find.byKey(const Key('voice_$_logId')));
+      await tester.pumpAndSettle();
+      _invokeVoiceButton(tester);
+      await tester.pumpAndSettle();
+
+      expect(repository.deleteCount, 0);
+      expect(find.textContaining('evet deyin'), findsOneWidget);
+      // Kullanıcıya göremediği bir düğme tarif edilmemeli.
+      expect(find.textContaining('Mikrofon düğmesine'), findsNothing);
+    });
+
+    testWidgets('komuttan sonra söylenen evet kaydı siler', (tester) async {
+      final repository = _FakeHistoryRepository(_fixtureHistory());
+      // Onay için mikrofon kendiliğinden yeniden açılır; ayrı bir "evet"
+      // söylenmesi hâlâ zorunludur.
       final stt = _FakeSttService([
         const SttResult(text: 'kaydı sil', confidence: 1, isFinal: true),
         const SttResult(text: 'evet', confidence: 1, isFinal: true),
@@ -179,15 +202,7 @@ void main() {
       await tester.pumpAndSettle();
       _invokeVoiceButton(tester);
       await tester.pumpAndSettle();
-      expect(stt.startCount, 1);
-      expect(repository.deleteCount, 0);
-      expect(find.textContaining('Mikrofon düğmesine tekrar basıp'),
-          findsOneWidget);
 
-      await tester.ensureVisible(find.byKey(const Key('voice_$_logId')));
-      await tester.pumpAndSettle();
-      _invokeVoiceButton(tester);
-      await tester.pumpAndSettle();
       expect(repository.deleteCount, 1);
       expect(find.text('Geri al'), findsOneWidget);
     });

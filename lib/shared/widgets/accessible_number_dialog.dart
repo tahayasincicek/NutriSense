@@ -120,14 +120,7 @@ class _AccessibleNumberDialogState
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _accessibility.speak(
-        '${widget.title}. ${widget.helper} '
-        'Değeri söylemek için mikrofon düğmesine basın, '
-        'ya da artır ve azalt düğmelerini kullanın.',
-        priority: TtsPriority.high,
-      );
-    });
+    WidgetsBinding.instance.addPostFrameCallback((_) => _openWithVoice());
   }
 
   @override
@@ -159,6 +152,27 @@ class _AccessibleNumberDialogState
   }
 
   /// Sesle değer girme. STT yoksa diğer iki yol çalışmaya devam eder.
+  /// Diyalog açılır açılmaz dinlemeye geçer.
+  ///
+  /// Görme engelli kullanıcıya "mikrofon düğmesine basın" demek, göremediği
+  /// bir düğmeyi aramasını istemektir. Bunun yerine mikrofon kendiliğinden
+  /// açılır; kullanıcı yalnız değeri söyler.
+  ///
+  /// Ekran okuyucu açıkken otomatik dinleme yapılmaz: TalkBack alanı kendisi
+  /// seslendirir ve kullanıcının kendi akışı vardır, mikrofonu habersiz
+  /// açmak onu keser.
+  Future<void> _openWithVoice() async {
+    final screenReader = _accessibility.screenReaderActive;
+    await _accessibility.speak(
+      screenReader
+          ? '${widget.title}. ${widget.helper}'
+          : '${widget.title}. ${widget.helper} Değeri söyleyin.',
+      priority: TtsPriority.high,
+    );
+    if (!mounted || screenReader) return;
+    await _listen();
+  }
+
   Future<void> _listen() async {
     setState(() => _listening = true);
     _accessibility.speak('Dinliyorum. Değeri söyleyin.',

@@ -321,6 +321,16 @@ class _FoodHistoryScreenState extends ConsumerState<FoodHistoryScreen> {
 
   /// Sesli düzeltme/silme. Silme iki aşamalıdır: önce komut, sonra ayrı bir
   /// "evet" onayı. Tek adımda silmek yanlış tanımada veri kaybı demek olurdu.
+  /// Onay sorusunu seslendirir ve hemen ardından yeniden dinlemeye geçer.
+  Future<void> _confirmByVoice(FoodLogEntry entry) async {
+    await _accessibility.speak(
+      'Silmeyi onaylamak için evet deyin.',
+      priority: TtsPriority.high,
+    );
+    if (!mounted) return;
+    await _voiceCommandFor(entry);
+  }
+
   Future<void> _voiceCommandFor(FoodLogEntry entry) async {
     final pending = _pendingVoiceDelete[entry.id] ?? false;
     await _stt.startListening(
@@ -351,10 +361,10 @@ class _FoodHistoryScreenState extends ConsumerState<FoodHistoryScreen> {
         }
         if (intent.action == ContextualVoiceAction.deleteEntry) {
           _pendingVoiceDelete[entry.id] = true;
-          setState(() => _voiceStatus =
-              'Silmeyi onaylamak için: Mikrofon düğmesine tekrar basıp '
-                  'evet deyin.');
-          _accessibility.speak(_voiceStatus!, priority: TtsPriority.high);
+          setState(() => _voiceStatus = 'Silmeyi onaylamak için evet deyin.');
+          // Onay için mikrofon kendiliğinden yeniden açılır; kullanıcıdan
+          // göremediği bir düğmeyi bulması istenmez.
+          unawaited(_confirmByVoice(entry));
           return;
         }
         setState(

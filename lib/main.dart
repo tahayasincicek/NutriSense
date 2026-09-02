@@ -11,6 +11,7 @@ import 'core/config/app_config.dart';
 import 'core/theme/app_theme.dart';
 import 'core/theme/theme_controller.dart';
 import 'shared/services/accessibility_service.dart';
+import 'shared/services/speech_route_observer.dart';
 import 'app.dart';
 import 'features/auth/screens/auth_gate.dart';
 
@@ -69,6 +70,11 @@ class _NutriSenseAppState extends ConsumerState<NutriSenseApp> {
     return MaterialApp(
       title: 'NutriSense',
       debugShowCheckedModeBanner: false,
+
+      // Ekran değişince önceki ekranın sesli anlatımı susar.
+      navigatorObservers: [
+        SpeechRouteObserver(ref.read(accessibilityServiceProvider)),
+      ],
 
       // --- Yeni Premium Tema ---
       theme: AppTheme.lightTheme,
