@@ -11,6 +11,14 @@
       "required_action": "Non-commercial academic research only; cite Bossard, Guillaumin and Van Gool (2014). No redistribution."
     },
     {
+      "id": "turkishfoods25",
+      "official_url": "https://huggingface.co/datasets/yunusserhat/TurkishFoods-25",
+      "declared_terms": "Apache-2.0. Training, modification and derivative works permitted with attribution and notice retention.",
+      "allowed_for_training": true,
+      "redistribution": true,
+      "required_action": "Attribute TurkishFoods-25 (TurkSofrasi-25) and keep the Apache-2.0 notice. Images are web-sourced stock photographs; label noise and watermarks exist and must be reported in the model card."
+    },
+    {
       "id": "uecfood256_official",
       "official_url": "https://foodcam.mobi/dataset256.html",
       "declared_terms": "Non-commercial research use only; other purposes require contacting the publisher.",
