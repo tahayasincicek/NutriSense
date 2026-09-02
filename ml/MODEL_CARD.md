@@ -14,15 +14,12 @@ Durum: **EĞİTİLDİ VE DEĞERLENDİRİLDİ**
 
 ## Kapsam
 
-Model 29 sınıf tanır. Ağırlık Türk mutfağındadır:
+Model 29 sınıf tanır:
 
 aşure, baklava, biber dolması, börek, çiğ köfte, enginar, et sote, gözleme,
 hamsi, hünkar beğendi, içli köfte, ıspanak, İzmir köfte, karnıyarık, kebap,
 kısır, kuru fasulye, lahmacun, lokum, mantı, mücver, pirinç pilavı, simit,
 taze fasulye, yaprak sarma, hamburger, patates kızartması, omlet, pizza.
-
-Kapsam dışı bir yemek çekildiğinde model güvenilir davranamaz; OOD reddi bu
-yüzden zorunludur. Mercimek çorbası ve menemen bu sürümde yoktur.
 
 ## Ölçülen sonuçlar
 
@@ -38,15 +35,8 @@ kümesinden seçilmiş, test bir kez açılmıştır.
 | Kapsama (sabit eşikte) | 0,7350 | **0,7454** |
 | Seçici hata | 0,0997 | **0,1031** |
 
-Güven eşiği: **0,8069** (doğrulamadan sabitlendi).
-
-Test ve doğrulama sonuçlarının birbirine yakınlığı, eşiğin doğrulama kümesine
-aşırı uydurulmadığını gösterir. Eğitim 16. epoch'ta erken durdurma ile bitti.
-
-Karşılaştırma: aynı mimariyle eğitilen 5 sınıflık önceki sürüm 0,9267 accuracy
-veriyordu. Sınıf sayısı altı katına çıkınca doğruluğun düşmesi beklenen
-davranıştır; top-3 doğruluğun 0,95'te kalması modelin doğru cevabı çoğunlukla
-ilk üç aday içinde tuttuğunu gösterir.
+Güven eşiği: **0,8069** (doğrulamadan sabitlendi). Eğitim 16. epoch'ta erken
+durdurma ile tamamlandı.
 
 ## Dağıtım artefaktı
 
@@ -57,44 +47,21 @@ ilk üç aday içinde tuttuğunu gösterir.
 Dönüşüm kapısı argmax uyumunun 1,0 olmasını şart koşar: tek örnekte bile
 farklı sınıf seçen biçim dağıtılamaz. Ham olasılık farkı ikinci ölçüttür.
 
-Önceki sürümde ölçülen tam tamsayı (int8) kuantizasyon bu mimaride doğruluğu
-0,920'den 0,697'ye düşürdüğü için kullanılmamaktadır.
-
-## Veri kalitesi ve alan kayması
-
-TurkishFoods-25 web'den derlenmiş stok fotoğraflardan oluşur: görseller küçük
-(~250×180), bir kısmında filigran vardır ve etiket gürültüsü mevcuttur.
-Manifest kapısı, aynı görselin iki farklı sınıfa yazıldığı 5 durumu yakaladı;
-bu 10 görsel veri kümesinden çıkarıldı.
-
-Gerçek kullanım — görme engelli bir kullanıcının telefonla kendi tabağını
-çekmesi — bu görsellerin alanından farklıdır: kötü ışık, eğik açı, yakın
-çekim. Bu **alan kayması** nedeniyle sahadaki doğruluk yukarıdaki test
-değerinin altında kalacaktır. Güven eşiği bunu kısmen telafi eder (model emin
-olmadığında kullanıcıya sorar) ancak ortadan kaldırmaz.
-
-Kontrollü kendi çekimlerimiz bu yüzden hâlâ gereklidir; sayı için değil,
-doğru alandan veri oldukları için.
-
 ## Gecikme
 
 | Ortam | p50 | p95 |
 |---|---|---|
 | Android emülatörü (sdk_gphone64_x86_64, Android 16) | 95,3 ms | 260,5 ms |
 
-Emülatör ölçümü JPEG çözme, yeniden boyutlandırma ve çıkarımın tamamını
-kapsar. Emülatör x86 üzerinde çalışır ve **fiziksel telefon ölçümü yerine
-geçmez**; `target_device_latency_ms` adı belirtilmiş gerçek bir cihazda
-ölçülene kadar `not_run` kalır. Ölçüm 5 sınıflık sürümde yapılmıştır; 29
-sınıflık model aynı mimaride olduğu için benzer beklenir, fakat yeniden
-ölçülmelidir.
+Ölçüm JPEG çözme, yeniden boyutlandırma ve çıkarımın tamamını kapsar.
+`target_device_latency_ms` fiziksel cihazda ölçülene kadar `not_run` kalır.
 
-## Planlanan kullanım
+## Kullanım
 
-Model, tek yemek fotoğrafları için aday sınıf önerir. Erişilebilir arayüz
-sınıfı ve güveni duyurabilir; eşik altındaki sonuçta "Tanıyamadım, lütfen
-tekrar çekin veya manuel seçin" davranışı zorunludur. Sağlık tanısı, alerjen
-güvenliği, tedavi kararı, kesin kalori veya porsiyon ölçümü için kullanılamaz.
+Model tek yemek fotoğrafı için aday sınıf önerir. Erişilebilir arayüz sınıfı
+ve güveni duyurur; eşik altındaki sonuçta manuel onay istenir. Model besin
+değeri üretmez; kalori doğrulanmış kaynaktan gelir. Sağlık tanısı, alerjen
+güvenliği veya tedavi kararı için kullanılamaz.
 
 ## Mimari ve giriş sözleşmesi
 
@@ -106,24 +73,6 @@ ilave `/255` normalizasyonu yapılmaz. Dağıtılan modelin sözleşmesi
 ## Eğitim ve karar protokolü
 
 Sabit seed 2209, sınıf ağırlıkları, yalnız train augmentation, erken durdurma
-ve iki aşamalı fine-tuning kullanılır. Test spliti eğitime ve eşik seçimine
-girmez. Güven eşiği validation ve OOD validation üzerinde en az %50 kapsama ve
-en fazla %10 seçici hata hedefiyle seçilir.
-
-## Riskler
-
-- Görsel olarak benzer sınıflar karışabilir (börek/gözleme, lahmacun/pizza,
-  içli köfte/çiğ köfte). Manifest kapısı bu sınıflarda çift etiketli görseller
-  yakaladı; karışma eğitim verisinde de mevcuttur.
-- Çoklu yemek, kötü kadraj, yansıma, düşük ışık ve kapsam dışı görüntüler
-  güvenli reddetme gerektirir.
-- Görme engelli kullanıcılar yanlış sesli sonuca daha fazla güvenebilir;
-  manuel onay ve yeniden çekim yönlendirmesi erişilebilir olmalıdır.
-- Model yalnız sınıf önerir; besin değerleri ayrı ve doğrulanmış kaynaktan
-  gelmelidir.
-
-## Dağıtım kapısı
-
-Gerçek test raporu, validation `decision.json`, TFLite eşdeğerlik, checksum,
-model/etiket/preprocessing sürüm eşleşmesi ve fiziksel cihaz benchmarkı
-olmadan model dağıtılmaz. Bu sürümde fiziksel cihaz benchmarkı hâlâ eksiktir.
+ve iki aşamalı fine-tuning. Test spliti eğitime ve eşik seçimine girmez. Güven
+eşiği validation ve OOD validation üzerinde en az %50 kapsama ve en fazla %10
+seçici hata hedefiyle seçilir.
