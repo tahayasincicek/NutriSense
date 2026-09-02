@@ -110,8 +110,9 @@ integration_test/     Emülatörde koşan uçtan uca test
 docs/                 Mimari, gizlilik, erişilebilirlik ve denetim belgeleri
 ```
 
-Not: `ai_model/` klasörü projenin ilk döneminden kalma taslak betikler içerir
-ve hiçbir yerden çağrılmaz. Güncel model hattı `ml/` altındadır.
+Not: `ai_model/` klasöründeki betikler geriye dönük uyumluluk giriş
+noktalarıdır; kendileri iş yapmaz, `ml/` altındaki hattı çağırırlar. Yeni
+çalışmalar doğrudan `ml/` üzerinden yürütülmelidir.
 
 ## Test
 

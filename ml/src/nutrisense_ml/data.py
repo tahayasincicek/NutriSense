@@ -30,7 +30,13 @@ def center_crop_resize(path: str, height: int, width: int):
     from PIL import Image, ImageOps
 
     def decode(value):
-        resolved = Path(value.numpy().decode("utf-8"))
+        # tf.numpy_function geri çağrıya EagerTensor değil NumPy değeri verir;
+        # bu 0 boyutlu dizi ya da bytes olabilir. .numpy() yalnız
+        # tf.py_function kullanılsaydı doğru olurdu.
+        raw = value.numpy() if hasattr(value, "numpy") else value
+        if isinstance(raw, np.ndarray):
+            raw = raw.item()
+        resolved = Path(raw.decode("utf-8") if isinstance(raw, bytes) else str(raw))
         with Image.open(resolved) as opened:
             rgb = ImageOps.exif_transpose(opened).convert("RGB")
             fitted = ImageOps.fit(rgb, (width, height), method=Image.Resampling.BILINEAR, centering=(0.5, 0.5))
