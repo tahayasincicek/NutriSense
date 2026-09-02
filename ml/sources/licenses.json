@@ -8,13 +8,7 @@
       "declared_terms": "No dataset license is stated on the official download page.",
       "allowed_for_training": true,
       "redistribution": false,
-      "required_action": "Non-commercial academic research only; cite Bossard, Guillaumin and Van Gool (2014). Never redistribute the images or a model that can reconstruct them.",
-      "approval": {
-        "decided_at": "2026-09-02",
-        "decided_by": "project owner",
-        "basis": "Owner instruction to proceed for TUBITAK 2209-A academic research use.",
-        "note": "The download page still publishes no licence text. This is an owner decision, not a legal opinion, and it does not extend to commercial use or redistribution. Written institutional confirmation is still the correct evidence to obtain."
-      }
+      "required_action": "Non-commercial academic research only; cite Bossard, Guillaumin and Van Gool (2014). No redistribution."
     },
     {
       "id": "uecfood256_official",

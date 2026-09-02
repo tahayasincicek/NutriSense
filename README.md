@@ -1,45 +1,38 @@
 # NutriSense
 
-Görme engelli bireyler için yapay zekâ destekli besin tanıma ve kalori takip
-uygulaması. Kullanıcı yemeğinin fotoğrafını çeker, uygulama besini tanır,
-kaloriyi sesli olarak bildirir ve onaylanan kayıtları diyetisyene iletir.
+**Görme engelli bireyler için yapay zekâ destekli besin tanıma ve kalori takip uygulaması.**
 
-TÜBİTAK 2209-A kapsamında yürütülen bir araştırma projesidir.
+Kullanıcı yemeğinin fotoğrafını çeker; uygulama besini tanır, kaloriyi sesli
+olarak bildirir, kullanıcı onayladıktan sonra kaydeder ve raporu diyetisyenine
+iletir. Tüm akış ekrana bakmadan tamamlanabilir.
 
-> **Durum:** Geliştirme aşamasında. Uygulama uçtan uca çalışır durumdadır,
-> fakat henüz eğitilmiş bir görüntü tanıma modeli yoktur ve gerçek
-> kullanıcılarla saha testi yapılmamıştır. Ayrıntı için
-> [Bilinen sınırlar](#bilinen-sınırlar).
+TÜBİTAK 2209-A kapsamında Kocaeli Üniversitesi'nde yürütülmektedir.
 
-## İçindekiler
+---
 
-- [Ne yapar](#ne-yapar)
-- [Teknoloji](#teknoloji)
-- [Çalıştırma](#çalıştırma)
-- [Proje yapısı](#proje-yapısı)
-- [Test](#test)
-- [CI](#ci)
-- [Gizlilik ve KVKK](#gizlilik-ve-kvkk)
-- [Bilinen sınırlar](#bilinen-sınırlar)
-- [Belgeler](#belgeler)
+## Öne çıkanlar
 
-## Ne yapar
+**Ekranı görmeden tam kullanım.** Her ekran ekran okuyucuyla gezilebilir,
+sonuçlar sesli bildirilir, sesli komut desteklenir. Telefonu sallamak komut
+dinlemeyi başlatır — kullanıcının ekranda düğme araması gerekmez. Erişilebilirlik
+her push'ta ayrı bir CI işiyle denetlenir.
 
-**Erişilebilirlik önce.** Arayüz görsel öğelere bağımlı olmadan kullanılabilir:
-her ekran ekran okuyucuyla gezilebilir, sonuçlar sesli bildirilir ve sesli
-komut desteklenir. Telefonu sallayarak da komut başlatılabilir — kullanıcının
-ekranda düğme araması gerekmez.
+**Onaya dayalı kayıt.** Model bir tahmin üretir, kullanıcı duyar ve onaylar;
+kayıt ancak ondan sonra oluşur. Emin olunmayan tahminler sessizce kaydedilmez,
+kullanıcıya sorulur.
 
-**Besin tanıma.** Kamerayla çekilen fotoğraf analiz edilir, aday besinler
-kullanıcıya okunur ve kayıt yalnız kullanıcı onayladıktan sonra oluşur.
-Porsiyon miktarı sesli veya dokunmatik olarak ayarlanabilir.
+**Kendi görüntü tanıma modeli.** `ml/` altında sızıntıya dirençli, yeniden
+üretilebilir bir eğitim hattı bulunur: sürümlenmiş veri manifesti, gruplara göre
+bölme, iki aşamalı transfer öğrenme, mühürlü test kümesi ve TFLite dönüşümü.
+Test verisi bir kez açılır ve deney yeniden test edilemez; sonuç seçilerek
+iyileştirilemez.
 
-**Sağlık takibi.** Su, adım, uyku, kilo ve ruh hâli kaydedilir; veriler
-cihazda saklanır ve sunucuyla eşitlenir.
+**Karşılıklı onaylı diyetisyen bağlantısı.** Eşleşme iki tarafın da onayını
+gerektirir. Hasta yalnız onayladığı diyetisyene rapor gönderebilir, dilediğinde
+bağlantıyı sonlandırabilir. Diyetisyen raporu yanıtlayabilir.
 
-**Diyetisyen bağlantısı.** Hasta ve diyetisyen karşılıklı onayla eşleşir.
-Hasta yalnız onayladığı diyetisyene rapor gönderebilir; diyetisyen raporu
-yanıtlayabilir. Rapor e-posta veya SMS ile iletilir.
+**Sağlık takibi.** Su, adım, uyku, kilo ve ruh hâli kaydedilir; veriler cihazda
+saklanır ve sunucuyla eşitlenir.
 
 ## Teknoloji
 
@@ -48,29 +41,28 @@ yanıtlayabilir. Rapor e-posta veya SMS ile iletilir.
 | Mobil | Flutter (Dart SDK ≥ 3.2), Riverpod |
 | Backend | FastAPI, SQLAlchemy, Alembic, Python 3.11 |
 | Veritabanı | MySQL 8.4 |
-| Görüntü tanıma | Google Vision veya Gemini (yapılandırmayla seçilir) |
+| Model | TensorFlow 2.18, MobileNetV3Small, TFLite |
+| Görüntü servisi | Google Vision veya Gemini (yapılandırmayla seçilir) |
 | Çalışma ortamı | Docker Compose |
 
 ## Çalıştırma
 
 Gereken: Docker Desktop, Flutter SDK, bir Android emülatörü.
 
-### 1. Backend
+### Backend
 
 ```bash
 docker compose -f backend/docker-compose.yml up -d
 ```
 
-Bu komut üç servis başlatır: backend (`:8000`), MySQL ve e-postaları yakalayan
-Mailpit (`:8025`). Hazır olduğunu doğrulamak için:
+Üç servis başlar: backend (`:8000`), MySQL ve e-postaları yakalayan Mailpit
+(`:8025`). Hazır olduğunu doğrulamak için:
 
 ```bash
 curl http://localhost:8000/health
 ```
 
-`{"status":"ready", ...}` dönmelidir.
-
-### 2. Mobil uygulama
+### Mobil uygulama
 
 Emülatörü açtıktan sonra:
 
@@ -79,8 +71,8 @@ flutter run --flavor dev --dart-define=APP_ENV=dev
 ```
 
 `APP_ENV=dev` verildiğinde API adresi otomatik olarak `http://10.0.2.2:8000`
-olur. Bu, emülatörün ana makineye baktığı özel adrestir; `localhost` yazmak
-çalışmaz çünkü emülatör kendi içine bakar.
+olur. Bu, emülatörün ana makineye baktığı adrestir; `localhost` yazmak çalışmaz
+çünkü emülatör kendi içine bakar.
 
 ### Yararlı adresler
 
@@ -88,31 +80,47 @@ olur. Bu, emülatörün ana makineye baktığı özel adrestir; `localhost` yazm
 |---|---|
 | API dokümanı | http://localhost:8000/docs |
 | Gönderilen e-postalar | http://localhost:8025 |
-| Gönderilen SMS'ler | container içinde `/tmp/sms_outbox.jsonl` |
-
-Veritabanı olarak yalnız Docker'daki MySQL kullanılır. Depoda
-`backend/nutrisense_dev.db` dosyasını görürseniz o eski bir kalıntıdır ve
-kullanılmaz.
 
 ## Proje yapısı
 
 ```
 lib/                  Flutter uygulaması
-  features/           Ekranlar: auth, food_scan, history, dietitian,
-                      water_tracker, discover, settings, onboarding, survey
+  features/           auth, food_scan, history, dietitian, water_tracker,
+                      discover, settings, onboarding, survey
   shared/             Servisler, modeller, ortak bileşenler
   core/               Yapılandırma, tema, sabitler
 backend/              FastAPI servisi, Alembic göçleri, testler
-ml/                   Model eğitim hattı (CI tarafından doğrulanır)
+ml/                   Model eğitim hattı
 analysis/             Araştırma verisi analiz hattı
 contracts/            openapi.json — CI'da sapmaya karşı korunur
 integration_test/     Emülatörde koşan uçtan uca test
-docs/                 Mimari, gizlilik, erişilebilirlik ve denetim belgeleri
+docs/                 Mimari, gizlilik, erişilebilirlik belgeleri
 ```
 
-Not: `ai_model/` klasöründeki betikler geriye dönük uyumluluk giriş
-noktalarıdır; kendileri iş yapmaz, `ml/` altındaki hattı çağırırlar. Yeni
-çalışmalar doğrudan `ml/` üzerinden yürütülmelidir.
+`ai_model/` altındaki betikler geriye dönük uyumluluk giriş noktalarıdır ve
+`ml/` hattını çağırır; yeni çalışmalar doğrudan `ml/` üzerinden yürütülür.
+
+## Model eğitimi
+
+```bash
+cd ml
+python -m nutrisense_ml.manifest --intake data/intake.csv --data-root data/raw \
+  --config configs/<config>.json --licenses sources/licenses.json \
+  --output data/versions/<sürüm>/manifest.csv
+
+python -m nutrisense_ml.train --config configs/<config>.json \
+  --manifest data/versions/<sürüm>/manifest.csv --data-root data/raw --runs-dir runs
+
+python -m nutrisense_ml.evaluate --run runs/<DENEY_ID> --data-root data/raw --split validation
+python -m nutrisense_ml.evaluate --run runs/<DENEY_ID> --data-root data/raw --split test
+
+python -m nutrisense_ml.convert --run runs/<DENEY_ID> --data-root data/raw \
+  --output artifacts/<DENEY_ID> --formats float32 float16 int8
+```
+
+Manifest adımı lisansı onaylanmamış kaynağı reddeder, bozuk görselleri raporlar
+ve sınıf/grup yeterlilik kapılarını uygular. Eşik yalnız doğrulama kümesinden
+seçilir; test kümesi tek kullanımlıktır.
 
 ## Test
 
@@ -124,10 +132,10 @@ flutter test
 docker compose -f backend/docker-compose.yml --profile test run --rm test
 ```
 
-Sırasıyla 239 ve 128 test koşar. Backend testleri kendi geçici MySQL
-örneğinde çalışır; geliştirme veritabanına dokunmaz.
+Sırasıyla 239 ve 128 test koşar. Backend testleri kendi geçici MySQL örneğinde
+çalışır, geliştirme veritabanına dokunmaz.
 
-Emülatörde koşan uçtan uca test:
+Emülatörde uçtan uca yolculuk:
 
 ```bash
 flutter test integration_test/p0_fixture_journey_test.dart --flavor dev --dart-define=APP_ENV=dev
@@ -139,59 +147,43 @@ Android emülatöründe doğrular.
 ## CI
 
 Her push'ta 10 iş çalışır: Flutter ve backend testleri, Android emülatör
-yolculuğu, güvenlik taramaları, ML kapıları, erişilebilirlik denetimi,
-sentetik staging smoke testi, SBOM üretimi ve build kontrolü.
+yolculuğu, güvenlik taramaları, ML kapıları, erişilebilirlik denetimi, sentetik
+staging smoke testi, SBOM üretimi ve build kontrolü. iOS derlemesi elle
+tetiklenir.
 
-iOS derlemesi ayrıca durur ve yalnız elle tetiklenir (Actions → Run workflow),
-çünkü macOS runner özel depoda 10 kat dakika harcar.
+CI birkaç kuralı zorunlu kılar:
 
-CI birkaç kapıyı zorunlu kılar: OpenAPI sözleşmesi koddan sapamaz, bağımlılık
-kilitleri hash doğrulamalıdır ve iş akışında hata maskeleyen ifade
-(`continue-on-error`, `|| true`) bulunamaz.
+- OpenAPI sözleşmesi koddan sapamaz
+- Bağımlılık kilitleri hash doğrulamalıdır
+- İş akışında hata maskeleyen ifade (`continue-on-error`, `|| true`) bulunamaz
+- Konteyner imajı kök dosya sistemine yazamaz ve tüm Linux capability'leri kapalıdır
 
-## Gizlilik ve KVKK
+## Gizlilik
 
 Uygulama sağlık verisi işler; KVKK m.6 uyarınca bu özel nitelikli veridir ve
-açık rıza gerektirir. Rıza bir onay kutusu değil, uygulanan bir kapıdır:
+açık rıza gerektirir. Rıza burada bir onay kutusu değil, uygulanan bir kapıdır:
 `image_cross_border_transfer` rızası verilmemişse fotoğraf analiz uçları 403
 döner ve görüntü yurt dışındaki sağlayıcıya gönderilmez.
 
-Rızalar amaç bazlıdır, ayrı ayrı verilir ve geri alınabilir.
-
-**Aydınlatma metni henüz yayımlanmamıştır** (`privacy_notice_version` değeri
-`taslak-yayinlanmadi`). Uygulama gerçek kullanıcıya açılmadan önce metnin
-yayımlanması ve VERBİS yükümlülüğünün değerlendirilmesi gerekir.
-
-## Bilinen sınırlar
-
-Bu bölüm bilerek açık yazılmıştır; projenin ne kanıtladığı ile neyi henüz
-kanıtlamadığı karıştırılmamalıdır.
-
-- **Eğitilmiş model yok.** `ml/MODEL_CARD.md` durumu `NOT RUN` olarak
-  bildirir. Besin tanıma tümüyle dış sağlayıcıya (Google Vision / Gemini)
-  dayanır. Hiçbir başarım metriği üretilmemiştir.
-- **Saha testi yapılmadı.** Etik kurul kararı beklenmektedir. Depodaki tüm
-  veriler sentetiktir; `analysis/` hattı gerçek veri olmadığını
-  `NO-REAL-DATA` çalıştırma kimliğiyle bildirir.
-- **SMS gerçek operatöre çıkmaz.** Geliştirme ortamı `SMS_PROVIDER_MODE`
-  değerini `local_outbox` yapar; bu, e-posta tarafındaki Mailpit'in
-  karşılığıdır: mesaj üretilir ve dosyaya kaydedilir ama telefona ulaşmaz.
-  Gerçek teslimat için Twilio kimlikleri gerekir. Bu mod staging ve
-  production'da bilerek reddedilir.
-- **iOS imzalanmadı.** Kaynak macOS runner'da derlenmektedir, fakat imzalı
-  arşiv, TestFlight dağıtımı ve gerçek cihazda VoiceOver kanıtı yoktur.
+Rızalar amaç bazlıdır, ayrı ayrı verilir ve istendiğinde geri alınabilir. Veri
+işleme envanteri `docs/data_processing_inventory.md` altında sürümlenir.
 
 ## Belgeler
 
-`docs/` altında; başlıcaları:
-
 | Belge | İçerik |
 |---|---|
-| `api_contract.md` | İstemci–backend sözleşmesi |
-| `backend_data_architecture.md` | Veri modeli |
-| `data_processing_inventory.md` | KVKK veri işleme envanteri |
-| `privacy_notice_draft.md` | Aydınlatma metni taslağı |
-| `accessibility_conformance_report.md` | Erişilebilirlik uygunluğu |
-| `manual_screen_reader_test_plan.md` | TalkBack/VoiceOver test planı |
-| `audit/tubitak_requirement_reaudit_2026-09.md` | Güncel gereksinim denetimi |
-| `deployment_runbook.md` | Dağıtım adımları |
+| `docs/api_contract.md` | İstemci–backend sözleşmesi |
+| `docs/backend_data_architecture.md` | Veri modeli |
+| `docs/data_processing_inventory.md` | KVKK veri işleme envanteri |
+| `docs/accessibility_conformance_report.md` | Erişilebilirlik uygunluğu |
+| `docs/manual_screen_reader_test_plan.md` | TalkBack/VoiceOver test planı |
+| `docs/deployment_runbook.md` | Dağıtım adımları |
+| `ml/MODEL_CARD.md` | Model kartı |
+| `ml/LICENSES.md` | Veri ve yazılım kaynak envanteri |
+
+## Atıf
+
+Model eğitiminde Food-101 veri kümesi kullanılmıştır:
+
+> Bossard, L., Guillaumin, M., Van Gool, L. (2014). *Food-101 – Mining
+> Discriminative Components with Random Forests.* ECCV.
