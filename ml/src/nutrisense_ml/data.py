@@ -47,12 +47,30 @@ def center_crop_resize(path: str, height: int, width: int):
     return image
 
 
-def build_dataset(rows, labels: list[str], height: int, width: int, batch_size: int, training: bool, seed: int):
+def build_dataset(
+    rows,
+    labels: list[str],
+    height: int,
+    width: int,
+    batch_size: int,
+    training: bool,
+    seed: int,
+    allow_unknown_labels: bool = False,
+):
+    """Görselleri okuyan tf.data hattını kurar.
+
+    `allow_unknown_labels` yalnız etiketin kullanılmadığı çağrılar içindir;
+    OOD satırları sınıf listesinde bulunmaz. Varsayılan kapalıdır, böylece
+    eğitimde yanlış yazılmış bir etiket sessizce geçmez.
+    """
     import tensorflow as tf
 
     label_to_index = {label: index for index, label in enumerate(labels)}
     paths = [row["path"] for row in rows]
-    indices = [label_to_index[row["label"]] for row in rows]
+    if allow_unknown_labels:
+        indices = [label_to_index.get(row["label"], -1) for row in rows]
+    else:
+        indices = [label_to_index[row["label"]] for row in rows]
     ds = tf.data.Dataset.from_tensor_slices((paths, indices))
     if training:
         ds = ds.shuffle(len(rows), seed=seed, reshuffle_each_iteration=True)

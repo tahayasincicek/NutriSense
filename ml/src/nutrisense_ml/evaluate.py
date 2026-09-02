@@ -47,7 +47,18 @@ def _predict(model, rows, labels, config):
 
     if not rows:
         return np.empty((0, len(labels)), dtype=np.float32)
-    ds = build_dataset(rows, labels, config["image"]["height"], config["image"]["width"], int(config["model"]["batch_size"]), False, int(config["seed"]))
+    # Etiketler burada atılır; OOD satırları sınıf listesinde yer almadığı için
+    # eşleşmeyen etikete izin verilir.
+    ds = build_dataset(
+        rows,
+        labels,
+        config["image"]["height"],
+        config["image"]["width"],
+        int(config["model"]["batch_size"]),
+        False,
+        int(config["seed"]),
+        allow_unknown_labels=True,
+    )
     images = ds.map(lambda image, _: image)
     return model.predict(images, verbose=0)
 
