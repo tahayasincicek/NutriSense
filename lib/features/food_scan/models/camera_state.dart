@@ -124,6 +124,17 @@ class CameraNotifier extends StateNotifier<CameraState> {
         statusMessage: 'Çevrimdışı model deneniyor...',
       );
 
+  /// Cihaz üstü modelin önerisi. Model yalnız sınıf üretir; kalori
+  /// bilinmediği için [calories] doldurulmaz ve kullanıcı onayı zorunludur.
+  void setOnDeviceSuggestion(String foodNameTr, double confidence) =>
+      state = state.copyWith(
+        status: CameraStatus.confirmationRequired,
+        statusMessage: 'Cihaz üstü model: $foodNameTr. Onaylayın veya '
+            'manuel giriş yapın.',
+        recognizedFood: foodNameTr,
+        confidence: confidence,
+      );
+
   void setQualityWarning(String message, double brightness, bool blurry) =>
       state = state.copyWith(
         status: CameraStatus.qualityWarning,

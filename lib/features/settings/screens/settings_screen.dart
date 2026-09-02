@@ -10,6 +10,7 @@ import '../../auth/state/auth_controller.dart';
 import '../../history/state/daily_goal_provider.dart';
 import '../../onboarding/screens/onboarding_screen.dart';
 import '../../auth/screens/privacy_consent_screen.dart';
+import '../../food_scan/state/on_device_model_preference.dart';
 import '../../survey/screens/survey_screen.dart';
 import '../../survey/screens/usability_test_screen.dart';
 import '../../../shared/widgets/accessible_number_dialog.dart';
@@ -166,6 +167,28 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           ]),
 
           const SizedBox(height: 24),
+          _buildSectionTitle('Besin Tanıma'),
+          _buildSettingCard([
+            _buildSwitchTile(
+              key: const Key('settings_on_device_model'),
+              title: 'Cihaz Üstü Model',
+              subtitle: 'İnternetsiz tanır; kaloriyi siz onaylarsınız',
+              icon: Icons.memory_rounded,
+              value: ref.watch(onDeviceModelProvider),
+              onChanged: (v) {
+                ref.read(onDeviceModelProvider.notifier).setEnabled(v);
+                _accessibility.speak(
+                  v
+                      ? 'Cihaz üstü model açıldı. Tarama internete gitmez, '
+                          'yalnız yemek adı önerilir.'
+                      : 'Cihaz üstü model kapatıldı. Tarama sunucuda yapılır.',
+                  priority: TtsPriority.high,
+                );
+              },
+            ),
+          ]),
+
+          const SizedBox(height: 24),
           _buildSectionTitle('Beslenme Hedefleri'),
           _buildSettingCard([
             _buildGoalSlider(),
@@ -315,12 +338,14 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   }
 
   Widget _buildSwitchTile(
-      {required String title,
+      {Key? key,
+      required String title,
       required String subtitle,
       required IconData icon,
       required bool value,
       required ValueChanged<bool> onChanged}) {
     return ListTile(
+      key: key,
       leading: Icon(icon, color: AppTheme.primaryColor),
       title: Text(title),
       subtitle: Text(subtitle, style: const TextStyle(fontSize: 12)),

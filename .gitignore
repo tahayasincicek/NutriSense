@@ -111,3 +111,6 @@ app.*.map.json
 *.h5
 *.tflite
 *.ckpt
+
+# Doğrulanmış dağıtım modeli uygulamayla birlikte paketlenir.
+!/assets/models/*.tflite

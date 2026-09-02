@@ -25,6 +25,7 @@ import '../services/image_preprocessing.dart';
 import '../services/offline_recognizer.dart';
 import '../services/recognition_policy.dart';
 import '../services/turkish_portion_parser.dart';
+import '../state/on_device_model_preference.dart';
 import '../widgets/accessible_portion_selector.dart';
 import 'nutrition_detail_screen.dart';
 
@@ -253,6 +254,14 @@ class _CameraScreenState extends ConsumerState<CameraScreen>
         );
         return;
       }
+      // Kullanıcı cihaz üstü modeli seçtiyse sunucuya hiç gidilmez; bu,
+      // modeli bağlantıyı kesmeden denemenin yoludur.
+      if (ref.read(onDeviceModelProvider)) {
+        notifier.setOfflineInference();
+        await _runOnDeviceModel(processed.processedBytes, generation);
+        return;
+      }
+
       notifier.setUploading();
       final response = await ref.read(apiServiceProvider).analyzeFood(
             imageBytes: processed.processedBytes,
@@ -295,23 +304,48 @@ class _CameraScreenState extends ConsumerState<CameraScreen>
     if (failure?.kind == ApiFailureKind.connection ||
         failure?.kind == ApiFailureKind.timeout) {
       ref.read(cameraStateProvider.notifier).setOfflineInference();
-      final offline = await _offline.recognize(processedBytes);
-      if (offline.status == OfflineRecognitionStatus.success) {
-        const message =
-            'Çevrimdışı model doğrulama kapısından geçmedi. Manuel giriş kullanın.';
-        ref.read(cameraStateProvider.notifier).setError(message);
-        await _tts.speakError(message);
-        return;
-      }
-      ref.read(cameraStateProvider.notifier).setError(offline.message);
-      await _tts.speak(
-          '${offline.message} Besin adını söyleyerek de ekleyebilirsiniz.');
+      await _runOnDeviceModel(processedBytes, _generation);
       return;
     }
     final message = failure?.message ??
         'Analiz hizmeti kullanılamıyor. Manuel giriş yapabilirsiniz.';
     ref.read(cameraStateProvider.notifier).setError(message);
     await _tts.speakError(message);
+  }
+
+  /// Cihaz üstü modeli çalıştırır ve sonucu erişilebilir biçimde duyurur.
+  ///
+  /// Model yalnız sınıf önerir; kalori söylenmez ve kayıt kullanıcı onayı
+  /// olmadan oluşmaz.
+  Future<void> _runOnDeviceModel(Uint8List processedBytes, int generation) async {
+    final outcome = await _offline.recognize(processedBytes);
+    if (!_isCurrent(generation)) return;
+
+    if (outcome.status == OfflineRecognitionStatus.success) {
+      final name = outcome.foodNameTr!;
+      final percent = (outcome.confidence! * 100).round();
+      ref
+          .read(cameraStateProvider.notifier)
+          .setOnDeviceSuggestion(name, outcome.confidence!);
+      await _tts.speak(
+        'Cihaz üstü model bunu $name olarak tanıdı. Güven yüzde $percent. '
+        'Kalori için bağlantı gerekiyor; onaylayabilir veya manuel giriş '
+        'yapabilirsiniz.',
+      );
+      return;
+    }
+
+    if (outcome.status == OfflineRecognitionStatus.rejected) {
+      ref.read(cameraStateProvider.notifier).setRejected();
+      await _tts.speak(outcome.message);
+      await AccessibilityUtils.errorHaptic();
+      return;
+    }
+
+    ref.read(cameraStateProvider.notifier).setError(outcome.message);
+    await _tts.speak(
+      '${outcome.message} Besin adını söyleyerek de ekleyebilirsiniz.',
+    );
   }
 
   Future<void> _presentAnalysis(FoodAnalysisResult result) async {

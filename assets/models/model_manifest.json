@@ -1,0 +1,37 @@
+{
+  "schema_version": 1,
+  "experiment_id": "20260902T061831Z-3a32310432",
+  "scope_id": "nutrisense-food101-5-v1",
+  "model_file": "nutrisense_food.tflite",
+  "model_sha256": "d6822f46e3cf7b23f2bffd5e39eaf96f4d35a3010b91f92ee3cbae79392d9396",
+  "labels_file": "labels.txt",
+  "input": {
+    "shape": [1, 224, 224, 3],
+    "color_space": "RGB",
+    "range": [0.0, 255.0],
+    "resize": "bilinear_center_crop"
+  },
+  "output": {
+    "type": "softmax_probabilities"
+  },
+  "decision": {
+    "threshold": 0.9772836565971375,
+    "threshold_source": "validation decision.json",
+    "below_threshold": "unknown_needs_manual_confirmation"
+  },
+  "test_metrics": {
+    "accuracy": 0.9266666666666666,
+    "macro_f1": 0.9264197172030476,
+    "top3_accuracy": 0.9906666666666667,
+    "coverage_at_threshold": 0.6933333333333334,
+    "selective_error": 0.09632224168126094
+  },
+  "labels_tr": {
+    "baklava": "baklava",
+    "hamburger": "hamburger",
+    "pizza": "pizza",
+    "omelette": "omlet",
+    "french_fries": "patates kızartması"
+  },
+  "notes": "Kapsam yalnız bu beş sınıftır. Kapsam dışı yemekler eşik altında kalıp manuel onaya düşmelidir. Model besin değeri üretmez; kalori doğrulanmış kaynaktan gelir."
+}
