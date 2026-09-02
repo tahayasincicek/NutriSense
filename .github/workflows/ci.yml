@@ -226,7 +226,11 @@ jobs:
           api-level: 35
           arch: x86_64
           profile: pixel_4
-          disable-animations: true
+          # Animasyon kapatma adimi acilistan hemen sonra adb ile ayar yazar
+          # ve "device offline" ile duser. Test pumpAndSettle kullandigi icin
+          # animasyonlarin acik kalmasi sonucu etkilemez.
+          disable-animations: false
+          emulator-boot-timeout: 900
           emulator-options: -no-window -no-snapshot -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none -no-metrics
           script: flutter test integration_test/p0_fixture_journey_test.dart -d emulator-5554 --flavor dev --dart-define=APP_ENV=dev
 
