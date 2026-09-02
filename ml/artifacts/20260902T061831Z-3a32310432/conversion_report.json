@@ -1,0 +1,43 @@
+{
+  "converted_at": "2026-09-02T06:55:39.727084Z",
+  "experiment_id": "20260902T061831Z-3a32310432",
+  "formats": {
+    "float32": {
+      "argmax_match_rate": 1.0,
+      "bytes": 2336468,
+      "desktop_median_inference_ms": 3.5186499994779297,
+      "equivalence_samples": 50,
+      "held_out_test_accuracy_delta": null,
+      "held_out_test_accuracy_delta_status": "not_run; evaluate a predeclared deployment candidate without tuning on test",
+      "input_dtype": "<class 'numpy.float32'>",
+      "input_quantization": [
+        0.0,
+        0
+      ],
+      "input_shape": [
+        1,
+        224,
+        224,
+        3
+      ],
+      "max_abs_difference": 7.450580596923828e-06,
+      "output_dtype": "<class 'numpy.float32'>",
+      "output_quantization": [
+        0.0,
+        0
+      ],
+      "path": "artifacts/20260902T061831Z-3a32310432/nutrisense_float32.tflite",
+      "sha256": "d6822f46e3cf7b23f2bffd5e39eaf96f4d35a3010b91f92ee3cbae79392d9396",
+      "tolerance": 0.0001,
+      "validation_subset_accuracy_delta": 0.0,
+      "validation_subset_keras_accuracy": 0.94,
+      "validation_subset_tflite_accuracy": 0.94
+    }
+  },
+  "keras_sha256": "987b384e8f90602770586ec8c08e06a91256974e37d7acc2537ad5dcc107cb65",
+  "labels_sha256": "14bd8fdf780c0ab759c7f54fd6c32e0b19f4fc602a8502ea39ccc0154efe4d6a",
+  "preprocessing_sha256": "e2b20e8d11d4edf713f9521f20e0c761ee1b929f6603ef85599f57d98f2cd3c8",
+  "schema_version": 1,
+  "status": "converted",
+  "warning": "Desktop timing is not target-device latency evidence."
+}

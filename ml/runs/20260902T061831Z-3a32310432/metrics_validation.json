@@ -1,0 +1,107 @@
+{
+  "accuracy": 0.928,
+  "confusion_matrix": [
+    [
+      145,
+      6,
+      0,
+      5,
+      0
+    ],
+    [
+      3,
+      130,
+      1,
+      4,
+      4
+    ],
+    [
+      2,
+      0,
+      146,
+      7,
+      1
+    ],
+    [
+      5,
+      3,
+      7,
+      134,
+      0
+    ],
+    [
+      0,
+      5,
+      0,
+      1,
+      141
+    ]
+  ],
+  "dataset_version": "e0a618475df7d548ab13cef15999c7943da52fbb8af58f1eae0d3aa46a936642",
+  "decision": {
+    "coverage": 0.7253333333333334,
+    "ood_false_accepts": 56,
+    "selective_error": 0.1,
+    "threshold": 0.9772836565971375
+  },
+  "deployment_status": "threshold_selected_on_validation; test remains sealed",
+  "ece_15_bins": 0.021960027257601385,
+  "evaluated_at": "2026-09-02T06:50:42.285945Z",
+  "experiment_id": "20260902T061831Z-3a32310432",
+  "macro_f1": 0.9278585896847084,
+  "model_size_bytes": 5581934,
+  "ood_samples": 300,
+  "per_class": {
+    "accuracy": 0.928,
+    "baklava": {
+      "f1-score": 0.932475884244373,
+      "precision": 0.9354838709677419,
+      "recall": 0.9294871794871795,
+      "support": 156.0
+    },
+    "french_fries": {
+      "f1-score": 0.962457337883959,
+      "precision": 0.9657534246575342,
+      "recall": 0.9591836734693877,
+      "support": 147.0
+    },
+    "hamburger": {
+      "f1-score": 0.9090909090909091,
+      "precision": 0.9027777777777778,
+      "recall": 0.9154929577464789,
+      "support": 142.0
+    },
+    "macro avg": {
+      "f1-score": 0.9278585896847084,
+      "precision": 0.9278968479996097,
+      "recall": 0.927878021132177,
+      "support": 750.0
+    },
+    "omelette": {
+      "f1-score": 0.8933333333333333,
+      "precision": 0.8874172185430463,
+      "recall": 0.8993288590604027,
+      "support": 149.0
+    },
+    "pizza": {
+      "f1-score": 0.9419354838709677,
+      "precision": 0.948051948051948,
+      "recall": 0.9358974358974359,
+      "support": 156.0
+    },
+    "weighted avg": {
+      "f1-score": 0.9281159704700144,
+      "precision": 0.9282892682654501,
+      "recall": 0.928,
+      "support": 750.0
+    }
+  },
+  "samples": 750,
+  "schema_version": 1,
+  "split": "validation",
+  "status": "evaluated",
+  "target_device_latency_ms": null,
+  "target_device_latency_status": "not_run; must be measured on named physical Android/iOS hardware",
+  "top_k": 3,
+  "top_k_accuracy": 0.9906666666666667
+}

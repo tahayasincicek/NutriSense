@@ -1,0 +1,216 @@
+{
+  "created_at": "2026-09-02T06:16:40.750242Z",
+  "data_root_hint": "C:/Users/TAHA/Desktop/2209/nutrisense/ml/data/raw",
+  "dataset_version": "e0a618475df7d548ab13cef15999c7943da52fbb8af58f1eae0d3aa46a936642",
+  "distribution": [
+    {
+      "count": 300,
+      "label": "__ood__",
+      "split": "test",
+      "status": "ok"
+    },
+    {
+      "count": 300,
+      "label": "__ood__",
+      "split": "validation",
+      "status": "ok"
+    },
+    {
+      "count": 150,
+      "label": "baklava",
+      "split": "test",
+      "status": "ok"
+    },
+    {
+      "count": 694,
+      "label": "baklava",
+      "split": "train",
+      "status": "ok"
+    },
+    {
+      "count": 156,
+      "label": "baklava",
+      "split": "validation",
+      "status": "ok"
+    },
+    {
+      "count": 153,
+      "label": "french_fries",
+      "split": "test",
+      "status": "ok"
+    },
+    {
+      "count": 700,
+      "label": "french_fries",
+      "split": "train",
+      "status": "ok"
+    },
+    {
+      "count": 147,
+      "label": "french_fries",
+      "split": "validation",
+      "status": "ok"
+    },
+    {
+      "count": 143,
+      "label": "hamburger",
+      "split": "test",
+      "status": "ok"
+    },
+    {
+      "count": 715,
+      "label": "hamburger",
+      "split": "train",
+      "status": "ok"
+    },
+    {
+      "count": 142,
+      "label": "hamburger",
+      "split": "validation",
+      "status": "ok"
+    },
+    {
+      "count": 151,
+      "label": "omelette",
+      "split": "test",
+      "status": "ok"
+    },
+    {
+      "count": 700,
+      "label": "omelette",
+      "split": "train",
+      "status": "ok"
+    },
+    {
+      "count": 149,
+      "label": "omelette",
+      "split": "validation",
+      "status": "ok"
+    },
+    {
+      "count": 153,
+      "label": "pizza",
+      "split": "test",
+      "status": "ok"
+    },
+    {
+      "count": 691,
+      "label": "pizza",
+      "split": "train",
+      "status": "ok"
+    },
+    {
+      "count": 156,
+      "label": "pizza",
+      "split": "validation",
+      "status": "ok"
+    }
+  ],
+  "exact_or_near_duplicates": 5,
+  "manifest": "data/versions/food101_5class_v1/manifest.csv",
+  "ood_check": {
+    "ready": true,
+    "samples": 600,
+    "violations": []
+  },
+  "samples_corrupt": 0,
+  "samples_total": 5600,
+  "samples_valid": 5600,
+  "schema_version": 1,
+  "scope_checks": [
+    {
+      "groups": 1000,
+      "label": "baklava",
+      "licenses": [
+        "food101_official"
+      ],
+      "ready": true,
+      "samples": 1000,
+      "sources": [
+        "food101_official"
+      ],
+      "splits": {
+        "test": 150,
+        "train": 694,
+        "validation": 156
+      },
+      "violations": []
+    },
+    {
+      "groups": 1000,
+      "label": "hamburger",
+      "licenses": [
+        "food101_official"
+      ],
+      "ready": true,
+      "samples": 1000,
+      "sources": [
+        "food101_official"
+      ],
+      "splits": {
+        "test": 143,
+        "train": 715,
+        "validation": 142
+      },
+      "violations": []
+    },
+    {
+      "groups": 1000,
+      "label": "pizza",
+      "licenses": [
+        "food101_official"
+      ],
+      "ready": true,
+      "samples": 1000,
+      "sources": [
+        "food101_official"
+      ],
+      "splits": {
+        "test": 153,
+        "train": 691,
+        "validation": 156
+      },
+      "violations": []
+    },
+    {
+      "groups": 1000,
+      "label": "omelette",
+      "licenses": [
+        "food101_official"
+      ],
+      "ready": true,
+      "samples": 1000,
+      "sources": [
+        "food101_official"
+      ],
+      "splits": {
+        "test": 151,
+        "train": 700,
+        "validation": 149
+      },
+      "violations": []
+    },
+    {
+      "groups": 1000,
+      "label": "french_fries",
+      "licenses": [
+        "food101_official"
+      ],
+      "ready": true,
+      "samples": 1000,
+      "sources": [
+        "food101_official"
+      ],
+      "splits": {
+        "test": 153,
+        "train": 700,
+        "validation": 147
+      },
+      "violations": []
+    }
+  ],
+  "scope_id": "nutrisense-food101-5-v1",
+  "scope_ready_for_training": true,
+  "seed": 2209,
+  "status": "prepared"
+}

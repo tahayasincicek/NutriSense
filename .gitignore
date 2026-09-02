@@ -95,9 +95,13 @@ app.*.map.json
 
 # Reproducible ML pipeline: data and generated evidence stay out of Git.
 /ml/data/
+# Deney kanitlari (metrik, karar, provenance) depoda kalir; yalniz agir
+# model ikilileri disarida tutulur.
 /ml/runs/*
+!/ml/runs/*/
 !/ml/runs/NOT_RUN/
 /ml/artifacts/*
+!/ml/artifacts/*/
 !/ml/artifacts/index.example.json
 # Human-participant analysis inputs and generated run artefacts.
 /analysis/data/real/

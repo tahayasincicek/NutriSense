@@ -1,0 +1,7 @@
+{
+  "experiment_id": "20260902T061831Z-3a32310432",
+  "model_sha256": "987b384e8f90602770586ec8c08e06a91256974e37d7acc2537ad5dcc107cb65",
+  "next_required_command": "python -m nutrisense_ml.evaluate --run runs/20260902T061831Z-3a32310432 --data-root <DATA_ROOT> --split validation",
+  "status": "trained_not_evaluated",
+  "warning": "No test metric is valid until the separately sealed test evaluation is run."
+}
