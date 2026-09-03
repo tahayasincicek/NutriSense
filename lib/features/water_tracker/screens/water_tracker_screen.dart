@@ -465,8 +465,10 @@ class ActivityTrackerScreen extends ConsumerWidget {
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 8),
               child: Text(
-                'Henüz kilo ölçümü eklemediniz. Sağ üstteki artı ile '
-                'ilk ölçümünüzü kaydedin.',
+                // Düğme konumu tarif edilmez; göremeyen kullanıcı için
+                // sallayıp söylemek her zaman geçerli yoldur.
+                'Henüz kilo ölçümü eklemediniz. Telefonu sallayıp '
+                '"kilo ekle" diyerek ilk ölçümünüzü kaydedebilirsiniz.',
                 style: theme.textTheme.bodyMedium?.copyWith(
                   color: theme.colorScheme.onSurfaceVariant,
                 ),

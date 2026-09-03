@@ -15,9 +15,11 @@ class AppStrings {
   // KARŞILAMA VE GENEL
   // ═══════════════════════════════════════════════════════════════════════════
 
+  // Karşılama, göremeyen kullanıcıya düğme konumu tarif etmez; her zaman
+  // yapılabilecek olanı söyler: telefonu sallamak ve komut vermek.
   static const welcome = 'NutriSense\'e hoş geldiniz. '
-      'Besin taramak için ortadaki büyük butona basın veya '
-      '"Tara" komutunu söyleyin.';
+      'Telefonu sallayıp "Tara" deyin; besin taraması başlar. '
+      'Ne diyebileceğinizi öğrenmek için "Yardım" deyin.';
 
   static const welcomeBack = 'Tekrar hoş geldiniz. '
       'Bugün toplam kalori hedefinize ulaşmak için hazır mısınız?';

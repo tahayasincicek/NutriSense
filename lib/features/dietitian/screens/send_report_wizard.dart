@@ -306,7 +306,7 @@ class _SendReportWizardState extends ConsumerState<SendReportWizard> {
               ? null
               : (value) => setState(() => _explicitConsent = value ?? false),
           title: const Text(
-            'Yukarıdaki dönem, kayıt sayısı, alıcı ve kanallarla paylaşımı '
+            'Okunan dönem, kayıt sayısı, alıcı ve kanallarla paylaşımı '
             'bu gönderim için açıkça onaylıyorum.',
           ),
           controlAffinity: ListTileControlAffinity.leading,
