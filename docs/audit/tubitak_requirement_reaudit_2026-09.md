@@ -26,7 +26,7 @@ dayanır.
 
 ## Yönetici özeti
 
-Temmuzda 62 gereksinimden yalnız 1'i "Tam" idi. Bu denetimde 4 gereksinim
+Temmuzda 62 gereksinimden yalnız 1'i "Tam" idi. Bu denetimde 6 gereksinim
 "Tam"a, 6 gereksinim daha zayıf bir durumdan "Kısmi"ye taşındı. Temmuzdaki 6
 "Çelişkili" bulgunun 4'ü çözüldü; mobil istemci ile backend arasındaki
 sözleşme uyuşmazlığı giderildi ve sözleşme artık CI'da sapma kontrolüyle
@@ -34,11 +34,14 @@ korunuyor. Kalan iki çelişki (`IZ-07` sonuç raporu, `BT-02` bütçe kalemi)
 kod dışıdır. Ayrıca iOS kaynağı ilk kez gerçekten derlendi; `YN-09`'daki
 platform çelişkisi bu sayede kapandı.
 
-Buna karşılık **projenin bilimsel çekirdeği hâlâ boştur**. Eğitilmiş model
-yoktur (`OZ-06`, `YN-11`); besin tanıma tamamen dış sağlayıcıya (Google
-Vision / Gemini) dayanır. Saha çalışması, etik kurul kararı ve ham veri
-bulunmadığından `YN-01`–`YN-07`, `IZ-05`–`IZ-09` ve tüm `YE-*` satırları
-temmuzdaki durumlarını korur. Bu satırlar kodla kapatılamaz.
+**2 Eylül günü içinde eklenen:** projenin kendi görüntü tanıma modeli eğitildi
+ve mühürlü testle değerlendirildi (`OZ-06`, `YN-11`). Besin tanıma artık yalnız
+dış sağlayıcıya bağlı değildir; cihaz üstünde çalışan 29 sınıflık bir model
+uygulamaya paketlenmiştir.
+
+Buna karşılık saha çalışması, etik kurul kararı ve ham veri bulunmadığından
+`YN-01`–`YN-07`, `IZ-05`–`IZ-09` ve tüm `YE-*` satırları temmuzdaki durumlarını
+korur. Bu satırlar kodla kapatılamaz.
 
 ## Durum dağılımı
 
@@ -48,9 +51,9 @@ Kalan 61 gereksinim:
 
 | Durum | 17 Temmuz | 1 Eylül |
 |---|---|---|
-| Tam | 1 | 5 |
+| Tam | 1 | 7 |
 | Kısmi | 19 | 22 |
-| Kanıtsız | 30 | 27 |
+| Kanıtsız | 30 | 25 |
 | Eksik | 5 | 5 |
 | Çelişkili | 6 | 2 |
 
@@ -58,7 +61,7 @@ Kalan 61 gereksinim:
 
 | ID | Gereksinim | Temmuz | Eylül | Neyin değiştiği ve kanıtı |
 |---|---|---|---|---|
-| OZ-02 | Kamera görüntüsü YZ ile besin olarak tanınmalı. | Çelişkili | Kısmi | Sözleşme uyuşmazlığı giderildi: istemci `lib/core/constants/app_constants.dart` üzerinden kanonik `/api/v1/analyze-food` yolunu çağırıyor. `contracts/openapi.json` CI'daki sapma kontrolüyle korunuyor. **Kısmi kalma sebebi:** tanıma dış sağlayıcıya ait; depoda model yok. |
+| OZ-02 | Kamera görüntüsü YZ ile besin olarak tanınmalı. | Çelişkili | Kısmi | Sözleşme uyuşmazlığı giderildi: istemci `lib/core/constants/app_constants.dart` üzerinden kanonik `/api/v1/analyze-food` yolunu çağırıyor. `contracts/openapi.json` CI'daki sapma kontrolüyle korunuyor. Ayrıca cihaz üstünde çalışan kendi modelimiz uygulamaya paketlendi; kullanıcı sunucuya hiç gitmeden tarama yapabiliyor. **Kısmi kalma sebebi:** gerçek kullanıcıyla saha kanıtı yok. |
 | OZ-04 | Besin adı, miktar, tarih-saat ve kalori kaydedilmeli. | Kısmi | Tam | `_MockFoodLog` tamamen kaldırıldı (kod tabanında 0 eşleşme). Kayıt backend testleriyle, görüntüleme `integration_test/p0_fixture_journey_test.dart` ile doğrulanıyor; bu test CI'da gerçek Android emülatöründe koşuyor. |
 | OZ-05 | Kayıt/rapor e-posta veya SMS ile diyetisyene iletilmeli. | Kanıtsız | Kısmi | Her iki kanal da sağlayıcı mesaj kimliği üretiyor. E-posta Mailpit ile, SMS `local_outbox` sağlayıcısıyla kanıtlandı (`backend/tests/test_sms_local_outbox.py`, 7 test). **Kısmi kalma sebebi:** hiçbir mesaj gerçek operatöre çıkmadı; Twilio kimlikleri yok. |
 | OD-01 | Besin tanıma, kalori ve sesli geri bildirim tek akışta birleşmeli. | Çelişkili | Kısmi | URL/şema ayrışması giderildi; zincir P0 yolculuk testinde uçtan uca koşuyor. **Kısmi kalma sebebi:** test sentetik taşıma katmanı kullanır, canlı backend'e karşı gerçek cihaz kanıtı yoktur. |
@@ -71,6 +74,8 @@ Kalan 61 gereksinim:
 | YN-06 | t-testi, varsayımlar sağlanıyorsa yapılmalı. | Çelişkili | Kanıtsız | Çelişki giderildi: sapma artık ön-kayıtlı. `analysis/PRE_ANALYSIS_PLAN.md` ana testin Wilcoxon signed-rank olduğunu, paired t-testin ancak protokol değişikliğiyle kabul edilebileceğini yazıyor. **Kanıtsız kalma sebebi:** gerçek veri yok. |
 | YN-10 | Backend/veri katmanında MySQL kullanılmalı. | Kanıtsız | Tam | `backend/docker-compose.yml` MySQL 8.4 kullanıyor; Alembic göçleri CI'da boş veritabanında up/down/up olarak doğrulanıyor. SQLite yolu kaldırıldı. |
 | YN-09 | Android ve iOS desteklenmeli. | Kısmi/Çelişkili | Kısmi | Çelişki giderildi. Temmuzda iOS kaynağı hazırdı ama hiç derlenmemişti; `scripts/qa/ios_release_checks.py` kendi belgesinde Xcode derlemesi iddia etmediğini yazıyordu. CI'ya macOS runner üzerinde imzasız derleme yapan `iOS Derleme` işi eklendi ve ilk koşuda geçti (koşu `33510763349`). Android tarafı emülatörde P0 yolculuk testiyle zaten kanıtlı. **Kısmi kalma sebebi:** imzalı arşiv, TestFlight dağıtımı ve gerçek iPhone/VoiceOver kanıtı yok; imzalama sertifikası gerekiyor. |
+| OZ-06 | Etiketli veri seti ve makine öğrenmesi kullanılmalı. | Kanıtsız | Tam | 29 sınıflık model eğitildi ve mühürlü testle değerlendirildi (deney `20260902T090009Z-7871b6adb5`). Test accuracy 0,8375; macro F1 0,8268; top-3 0,9497. Veri kaynakları TurkishFoods-25 (Apache-2.0) ve Food-101; 17.051 görsel. Metrikler, karar dosyası ve provenance `ml/runs/` altında depodadır. |
+| YN-11 | Python/TensorFlow ile YZ geliştirilmelidir. | Kanıtsız | Tam | TensorFlow 2.18 ile eğitim çalıştırıldı; `provenance.json` sürümü, platformu ve kilit dosyası özetini kaydeder. Model TFLite float16 olarak uygulamaya paketlendi. |
 | KVKK-01 | *(yeni satır)* Sağlık verisi ve yurtdışı aktarım açık rızaya bağlanmalı. | — | Kısmi | KVKK m.6 ve m.9 gereği rıza artık uygulanabilir bir kapıdır: `image_cross_border_transfer` rızası yoksa `/analyze-food` 403 döner. Rıza kayıtları `/consents` uçlarıyla saklanır ve geri alınabilir. **Kısmi kalma sebebi:** aydınlatma metni yayımlanmadı (`privacy_notice_version=taslak-yayinlanmadi`). |
 
 ## Değişmeyen kritik satırlar
@@ -80,8 +85,6 @@ kapatılamaz; her biri sende olmayan bir kaynağa veya senin bir kararına bağl
 
 | ID | Gereksinim | Durum | Neden kapanmadı |
 |---|---|---|---|
-| OZ-06 | Etiketli veri seti ve makine öğrenmesi kullanılmalı. | Kanıtsız | `ml/MODEL_CARD.md`: "NOT RUN — model artefaktı yok". `ml/artifacts/` yalnız örnek indeks içerir. Etiketli veri kümesi gerekiyor. |
-| YN-11 | Python/TensorFlow ile YZ geliştirilmelidir. | Kanıtsız | `ml/requirements.lock` içinde TensorFlow yalnız yorum satırlarında geçiyor; eğitim çalıştırılmadı. |
 | OD-03 | Hipotez: sesli geri bildirim öğrenmeyi hızlandırır. | Kanıtsız | Ham veri, ön-kayıtlı analiz çıktısı yok. `analysis/results_manifest.json` çalıştırma kimliğini `NO-REAL-DATA-...` olarak veriyor. |
 | YN-01, YN-02, YN-13, YN-14 | Anket, kullanılabilirlik testi, etik onam. | Kanıtsız / Eksik | Etik kurul kararı yok; katılımcı çalışması başlatılamaz. |
 | IZ-05 – IZ-09 | Saha testi, sonuç raporu, konferans, paylaşım. | Kanıtsız / Çelişkili | Saha çalışması yapılmadı. |
