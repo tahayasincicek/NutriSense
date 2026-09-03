@@ -18,6 +18,7 @@ import 'dart:collection';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter/semantics.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -229,12 +230,18 @@ class AccessibilityService with WidgetsBindingObserver {
     if (text.isEmpty || !_isInitialized) return;
     if (!_isAppInForeground && priority != TtsPriority.critical) return;
     if (_speechInputActive || _ttsFailure.value != null) return;
-    // Ekran okuyucu açıkken çift konuşmayı önlemek için susarız; ancak
-    // kritik duyurular (hatalar) her hâlükârda duyulmalıdır, aksi hâlde
-    // kullanıcı bir işlemin başarısız olduğunu hiç öğrenemez.
+    // Ekran okuyucu açıkken kendi sesimizle konuşmayız; TalkBack veya
+    // VoiceOver ile üst üste binmek anlaşılmaz bir çıktı üretir.
+    //
+    // Ama susmak da doğru değildi: mesaj hiç iletilmiyordu, yani TalkBack
+    // kullanan biri tarama sonucunu ya da onay isteğini hiç duymayabiliyordu.
+    // Bunun yerine mesaj ekran okuyucunun kendi duyuru kanalına verilir;
+    // kullanıcının seçtiği ses, hız ve dil ayarlarıyla okunur, braille
+    // ekranına da düşer.
     if (_screenReaderActive &&
         !allowWhileScreenReaderActive &&
         priority != TtsPriority.critical) {
+      await announceToScreenReader(text);
       return;
     }
 
@@ -285,6 +292,20 @@ class AccessibilityService with WidgetsBindingObserver {
     _isSpeaking = false;
     _isPaused = false;
     _isProcessingQueue = false;
+  }
+
+  /// Mesajı işletim sisteminin ekran okuyucusuna duyurur.
+  ///
+  /// TalkBack ve VoiceOver bu kanalı kendi ses, hız ve dil ayarlarıyla okur;
+  /// braille ekranı bağlıysa oraya da düşer. Uygulamanın kendi TTS'i devreye
+  /// girmediği için üst üste konuşma olmaz.
+  Future<void> announceToScreenReader(String text) async {
+    if (text.isEmpty) return;
+    try {
+      await SemanticsService.announce(text, TextDirection.ltr);
+    } catch (_) {
+      // Duyuru kanalı yoksa sessiz kalınır; uygulamanın akışı bozulmamalı.
+    }
   }
 
   /// Ekran okuyucu etkinse otomatik TTS'i susturur ve çift konuşmayı önler.
