@@ -517,6 +517,12 @@ jobs:
           flutter test test/accessibility/ --reporter expanded
           echo "✅ Erişilebilirlik denetimi tamamlandı"
 
+      # Ekran okuyucu, dokunulan ögenin etiketini okur. Etiketsiz bir düğme
+      # yalnız "düğme" diye okunur ve göremeyen kullanıcı neye dokunduğunu
+      # anlayamaz. Bu kapı etiketsiz öge eklenmesini engeller.
+      - name: Dokunulabilir öge etiket denetimi
+        run: python scripts/qa/tappable_label_audit.py
+
   # ═══════════════════════════════════════════════════════════════════════════
   # iOS DERLEME (yalnız elle tetiklenir; macOS runner 10x dakika harcar)
   # ═══════════════════════════════════════════════════════════════════════════

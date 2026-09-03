@@ -1,5 +1,4 @@
 import 'package:flutter/services.dart';
-import 'package:flutter/semantics.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:nutrisense/shared/services/accessibility_service.dart';
 
