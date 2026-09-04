@@ -32,7 +32,8 @@ enum TtsPriority {
   /// Acil — hatalar, uyarılar. Mevcut sesi KESER ve anında çalar.
   critical(4),
 
-  /// Yüksek — sonuçlar, durum değişiklikleri. Kuyrukta öne geçer.
+  /// Yüksek — kullanıcı eyleminin sonucu. Çalan sesi KESER ve kuyruğu
+  /// boşaltır: kullanıcı yeni bir şey yaptıysa eski duyuru anlamsızdır.
   high(3),
 
   /// Normal — bildirimler, yönergeler. Sırayla çalar.
@@ -218,8 +219,8 @@ class AccessibilityService with WidgetsBindingObserver {
 
   /// Metni öncelik seviyesine göre seslendirir.
   ///
-  /// - [TtsPriority.critical]: Mevcut sesi KESER, anında çalar.
-  /// - [TtsPriority.high]: Kuyruğun ÖNÜNE eklenir.
+  /// - [TtsPriority.critical]: Mevcut sesi KESER, anında çalar, titreşir.
+  /// - [TtsPriority.high]: Mevcut sesi KESER ve kuyruğu boşaltır.
   /// - [TtsPriority.normal]: Kuyruğa sırayla eklenir.
   /// - [TtsPriority.low]: Sadece kuyruk boş ve ses yokken çalar.
   Future<void> speak(
@@ -245,14 +246,19 @@ class AccessibilityService with WidgetsBindingObserver {
       return;
     }
 
-    if (priority == TtsPriority.critical) {
-      // Kritik: hemen kes ve çal
+    // Kullanıcı bir eyleme geçtiğinde eski duyuru anlamını yitirir: başka
+    // ekrana geçmiş, başka düğmeye basmıştır. Eskisini sonuna kadar dinletmek
+    // görme engelli kullanıcıyı yanıltır, çünkü duyduğu cümle artık yaptığı
+    // işi anlatmaz. Bu yüzden yüksek ve kritik öncelik kuyruğu boşaltıp
+    // hemen konuşur; sıralı bilgi mesajları (normal) kuyrukta kalır.
+    if (priority == TtsPriority.critical || priority == TtsPriority.high) {
       await stop();
-      _messageQueue.clear();
       _isSpeaking = true;
       await _tts.speak(text);
       _isSpeaking = false;
-      if (_vibrationEnabled) await heavyHaptic();
+      if (priority == TtsPriority.critical && _vibrationEnabled) {
+        await heavyHaptic();
+      }
       return;
     }
 
