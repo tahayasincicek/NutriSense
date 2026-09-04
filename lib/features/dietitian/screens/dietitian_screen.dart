@@ -239,6 +239,20 @@ class _DietitianScreenState extends ConsumerState<DietitianScreen> {
     final theme = Theme.of(context);
     final assignment = _assignment!;
     final isApproved = assignment.isApproved;
+    // Bağ iki taraflı onayla kurulur. Hasta rızasını verdikten sonra durum
+    // hâlâ "pending" kalır; ekran bunu ayırt etmezse kullanıcı aynı düğmeyi
+    // tekrar görüp onayın işlemediğini sanıyordu.
+    final awaitingDietitian = assignment.awaitingDietitian;
+    final statusLabel = isApproved
+        ? 'Bağlantı Aktif'
+        : awaitingDietitian
+            ? 'Diyetisyen Onayı Bekleniyor'
+            : 'Onayınız Bekleniyor';
+    final statusSpoken = isApproved
+        ? 'Bağlantı aktif.'
+        : awaitingDietitian
+            ? 'Onayınız alındı, diyetisyenin kabulü bekleniyor.'
+            : 'Onayınız bekleniyor.';
 
     return Container(
       padding: const EdgeInsets.all(24),
@@ -259,8 +273,7 @@ class _DietitianScreenState extends ConsumerState<DietitianScreen> {
           Semantics(
             container: true,
             excludeSemantics: true,
-            label: 'Diyetisyeniniz ${assignment.dietitianName}. '
-                '${isApproved ? "Bağlantı aktif." : "Onay bekleniyor."}',
+            label: 'Diyetisyeniniz ${assignment.dietitianName}. $statusSpoken',
             child: Column(
               children: [
                 CircleAvatar(
@@ -287,7 +300,7 @@ class _DietitianScreenState extends ConsumerState<DietitianScreen> {
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: Text(
-                    isApproved ? 'Bağlantı Aktif' : 'Onay Bekleniyor',
+                    statusLabel,
                     style: TextStyle(
                         color: isApproved
                             ? theme.colorScheme.primary
@@ -300,7 +313,29 @@ class _DietitianScreenState extends ConsumerState<DietitianScreen> {
             ),
           ),
           const SizedBox(height: 24),
-          if (!isApproved)
+          if (!isApproved && awaitingDietitian)
+            // Hastanın yapacağı bir şey kalmadı; düğme yerine ne beklendiğini
+            // söyleyen bir açıklama gösterilir.
+            Semantics(
+              container: true,
+              label: 'Onayınız alındı. ${assignment.dietitianName} isteği '
+                  'kabul ettiğinde bağlantı kurulacak.',
+              child: Row(
+                children: [
+                  Icon(Icons.hourglass_top_rounded,
+                      size: 20, color: Colors.amber[800]),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      'Onayınız alındı. ${assignment.dietitianName} isteği '
+                      'kabul ettiğinde bağlantı kurulacak.',
+                      style: theme.textTheme.bodyMedium,
+                    ),
+                  ),
+                ],
+              ),
+            )
+          else if (!isApproved)
             AccessibleButton(
               key: const Key('dietitian_approve'),
               label: 'Bağlantıyı Onayla',
@@ -494,10 +529,16 @@ class _DietitianScreenState extends ConsumerState<DietitianScreen> {
       _busy = false;
       if (result.isSuccess) _assignment = result.data;
     });
+    // Rıza verildi diye bağ kurulmuş olmaz; rapor gönderimi diyetisyen de
+    // kabul edince açılır. Yanlış müjde vermek kullanıcıyı boş yere
+    // rapor göndermeye çalıştırıyordu.
+    final settled = result.data?.isApproved ?? false;
     _report(
       success: result.isSuccess,
       message: result.isSuccess
-          ? 'Bağlantı onaylandı. Artık rapor gönderebilirsiniz.'
+          ? settled
+              ? 'Bağlantı kuruldu. Artık rapor gönderebilirsiniz.'
+              : 'Onayınız alındı. Diyetisyenin kabulü bekleniyor.'
           : result.errorMessage ?? 'Onaylama başarısız oldu.',
     );
   }
