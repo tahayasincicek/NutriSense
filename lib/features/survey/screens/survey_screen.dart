@@ -82,13 +82,12 @@ class _SurveyScreenState extends ConsumerState<SurveyScreen> {
         title: const Text('Anket'),
         actions: [
           // Soruyu oku butonu
-          Semantics(
-            label: 'Soruyu tekrar oku',
-            button: true,
-            child: IconButton(
-              icon: const Icon(Icons.volume_up),
-              onPressed: _readCurrentQuestion,
-            ),
+          // tooltip düğmenin kendi adıdır; yalnız dıştaki Semantics'e
+          // yazılırsa ekran okuyucu düğmeye odaklandığında adsız kalır.
+          IconButton(
+            icon: const Icon(Icons.volume_up),
+            tooltip: 'Soruyu tekrar oku',
+            onPressed: _readCurrentQuestion,
           ),
         ],
       ),
@@ -228,6 +227,11 @@ class _SurveyScreenState extends ConsumerState<SurveyScreen> {
           label: '$value: $label${isSelected ? ", seçili" : ""}. '
               'Seçmek için çift dokunun.',
           selected: isSelected,
+          button: true,
+          // Dokunma eylemi adlandirilmis dugume tasinir; ic
+          // GestureDetector adsiz bir dugum birakmasin.
+          excludeSemantics: true,
+          onTap: () => _setAnswer(question.id, value, label),
           child: GestureDetector(
             onTap: () => _setAnswer(question.id, value, label),
             child: AnimatedContainer(
@@ -310,6 +314,11 @@ class _SurveyScreenState extends ConsumerState<SurveyScreen> {
         return Semantics(
           label: '$opt${isSelected ? ", seçili" : ""}',
           selected: isSelected,
+          button: true,
+          // Dokunma eylemi adlandirilmis dugume tasinir; ic
+          // GestureDetector adsiz bir dugum birakmasin.
+          excludeSemantics: true,
+          onTap: () => _setAnswer(question.id, opt, opt),
           child: GestureDetector(
             onTap: () => _setAnswer(question.id, opt, opt),
             child: AnimatedContainer(
@@ -385,6 +394,11 @@ class _SurveyScreenState extends ConsumerState<SurveyScreen> {
           child: Semantics(
             label: '$opt${isSelected ? ", seçili" : ""}',
             selected: isSelected,
+            button: true,
+            // Dokunma eylemi adlandirilmis dugume tasinir; ic
+            // GestureDetector adsiz bir dugum birakmasin.
+            excludeSemantics: true,
+            onTap: () => _setAnswer(question.id, opt, opt),
             child: GestureDetector(
               onTap: () => _setAnswer(question.id, opt, opt),
               child: AnimatedContainer(
@@ -504,6 +518,12 @@ class _SurveyScreenState extends ConsumerState<SurveyScreen> {
               label:
                   '$value yıldız: $label${value == current ? ", seçili" : ""}',
               selected: value == current,
+              button: true,
+              // Dokunma eylemi adlandirilmis dugume tasinir; ic
+              // GestureDetector adsiz bir dugum birakmasin.
+              excludeSemantics: true,
+              onTap: () =>
+                  _setAnswer(question.id, value, '$value yıldız, $label'),
               child: GestureDetector(
                 onTap: () =>
                     _setAnswer(question.id, value, '$value yıldız, $label'),

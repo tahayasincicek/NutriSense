@@ -298,8 +298,13 @@ class _FoodScanScreenState extends ConsumerState<FoodScanScreen> {
               ],
             ),
           ),
-          Checkbox(
-              value: false, onChanged: (v) {}, shape: const CircleBorder()),
+          // Süslemelik işaret: bir şey yapmıyor, bu yüzden dokunulabilir
+          // olmamalı. Aksi hâlde ekran okuyucu adsız bir onay kutusu okur ve
+          // kullanıcı işe yarayan bir denetim sanır.
+          const ExcludeSemantics(
+            child:
+                Checkbox(value: false, onChanged: null, shape: CircleBorder()),
+          ),
         ],
       ),
     );

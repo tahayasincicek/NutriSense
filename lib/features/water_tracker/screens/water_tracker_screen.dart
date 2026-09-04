@@ -456,6 +456,7 @@ class ActivityTrackerScreen extends ConsumerWidget {
             children: [
               Text('Kilo Takibi', style: theme.textTheme.titleMedium),
               IconButton(
+                  tooltip: 'Kilo ölçümü ekle',
                   onPressed: () => _showWeightInputDialog(context, ref),
                   icon: const Icon(Icons.add_circle_outline_rounded,
                       color: AppTheme.primaryColor)),

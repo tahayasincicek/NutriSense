@@ -52,6 +52,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                 children: [
                   const SizedBox(height: 20),
                   IconButton(
+                    tooltip: 'Geri dön',
                     onPressed: () => Navigator.pop(context),
                     icon: const Icon(Icons.arrow_back_ios_new_rounded),
                     style: IconButton.styleFrom(

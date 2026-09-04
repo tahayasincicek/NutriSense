@@ -5,6 +5,16 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:nutrisense/core/theme/app_theme.dart';
 import 'package:nutrisense/features/auth/screens/login_screen.dart';
+import 'package:nutrisense/features/auth/screens/password_reset_screen.dart';
+import 'package:nutrisense/features/auth/screens/privacy_consent_screen.dart';
+import 'package:nutrisense/features/auth/screens/register_screen.dart';
+import 'package:nutrisense/features/dietitian/screens/dietitian_access_screen.dart';
+import 'package:nutrisense/features/discover/screens/discover_screen.dart';
+import 'package:nutrisense/features/food_scan/screens/food_scan_screen.dart';
+import 'package:nutrisense/features/food_scan/screens/manual_food_entry_screen.dart';
+import 'package:nutrisense/features/settings/screens/accessibility_settings_screen.dart';
+import 'package:nutrisense/features/survey/screens/survey_screen.dart';
+import 'package:nutrisense/features/water_tracker/screens/water_tracker_screen.dart';
 import 'package:nutrisense/features/dietitian/screens/dietitian_screen.dart';
 import 'package:nutrisense/features/history/screens/nutrition_stats_screen.dart';
 import 'package:nutrisense/features/settings/screens/settings_screen.dart';
@@ -41,7 +51,7 @@ void main() {
   List<String> unnamedTappables(SemanticsNode root) {
     final offenders = <String>[];
 
-    void visit(SemanticsNode node) {
+    void visit(SemanticsNode node, String path) {
       final data = node.getSemanticsData();
       final tappable = data.hasAction(SemanticsAction.tap) ||
           data.hasFlag(SemanticsFlag.isButton);
@@ -52,15 +62,18 @@ void main() {
           (isField && data.value.trim().isNotEmpty);
 
       if (tappable && !named) {
-        offenders.add('id=${node.id} rect=${node.rect.size}');
+        // Yol, en yakın adlandırılmış atayı gösterir; hangi denetimin adsız
+        // kaldığını aramadan bulmayı sağlar.
+        offenders.add('${node.rect.size} (yakın: $path)');
       }
       node.visitChildren((child) {
-        visit(child);
+        final childLabel = child.getSemanticsData().label.trim();
+        visit(child, childLabel.isEmpty ? path : childLabel);
         return true;
       });
     }
 
-    visit(root);
+    visit(root, 'kök');
     return offenders;
   }
 
@@ -80,6 +93,12 @@ void main() {
           '${offenders.join(", ")}',
     );
     handle.dispose();
+
+    // Bazı ekranlar açılışta gecikmeli seslendirme kurar. Zaman ilerletilip
+    // ekran kapatılmazsa test bitiminde açık zamanlayıcı kalır.
+    await tester.pump(const Duration(seconds: 3));
+    await tester.pumpWidget(const SizedBox.shrink());
+    await tester.pumpAndSettle();
   }
 
   testWidgets('giriş ekranındaki her dokunulabilir ögenin adı var',
@@ -100,5 +119,55 @@ void main() {
   testWidgets('istatistik ekranındaki her dokunulabilir ögenin adı var',
       (tester) async {
     await expectAllTappablesNamed(tester, const NutritionStatsScreen());
+  });
+
+  testWidgets('kayıt ekranındaki her dokunulabilir ögenin adı var',
+      (tester) async {
+    await expectAllTappablesNamed(tester, const RegisterScreen());
+  });
+
+  testWidgets('parola sıfırlama ekranındaki her dokunulabilir ögenin adı var',
+      (tester) async {
+    await expectAllTappablesNamed(tester, const PasswordResetScreen());
+  });
+
+  testWidgets('rıza ekranındaki her dokunulabilir ögenin adı var',
+      (tester) async {
+    await expectAllTappablesNamed(tester, const PrivacyConsentScreen());
+  });
+
+  testWidgets('diyetisyen erişim ekranındaki her dokunulabilir ögenin adı var',
+      (tester) async {
+    await expectAllTappablesNamed(tester, const DietitianAccessScreen());
+  });
+
+  testWidgets('keşfet ekranındaki her dokunulabilir ögenin adı var',
+      (tester) async {
+    await expectAllTappablesNamed(tester, const DiscoverScreen());
+  });
+
+  testWidgets('tarama ekranındaki her dokunulabilir ögenin adı var',
+      (tester) async {
+    await expectAllTappablesNamed(tester, const FoodScanScreen());
+  });
+
+  testWidgets('manuel giriş ekranındaki her dokunulabilir ögenin adı var',
+      (tester) async {
+    await expectAllTappablesNamed(tester, const ManualFoodEntryScreen());
+  });
+
+  testWidgets('aktivite ekranındaki her dokunulabilir ögenin adı var',
+      (tester) async {
+    await expectAllTappablesNamed(tester, const ActivityTrackerScreen());
+  });
+
+  testWidgets('erişilebilirlik ayarlarındaki her dokunulabilir ögenin adı var',
+      (tester) async {
+    await expectAllTappablesNamed(tester, const AccessibilitySettingsScreen());
+  });
+
+  testWidgets('anket ekranındaki her dokunulabilir ögenin adı var',
+      (tester) async {
+    await expectAllTappablesNamed(tester, const SurveyScreen());
   });
 }

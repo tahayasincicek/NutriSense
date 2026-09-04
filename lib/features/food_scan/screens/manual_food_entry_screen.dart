@@ -242,12 +242,19 @@ class _ManualFoodEntryScreenState extends ConsumerState<ManualFoodEntryScreen> {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       // Mikrofon butonu
+                      // tooltip düğmenin kendi adıdır; ad yalnız dıştaki
+                      // Semantics'te kalırsa ekran okuyucu düğmeye
+                      // odaklandığında yalnız "düğme" der.
                       Semantics(
                         label: _isListening
                             ? 'Dinleniyor... Durdurmak için basın'
                             : 'Sesli arama. Besin adını söyleyin',
                         button: true,
+                        excludeSemantics: true,
                         child: IconButton(
+                          tooltip: _isListening
+                              ? 'Dinleniyor. Durdurmak için basın'
+                              : 'Sesli arama. Besin adını söyleyin',
                           icon: Icon(
                             _isListening ? Icons.mic : Icons.mic_none_rounded,
                             color: _isListening

@@ -218,6 +218,9 @@ class _AccessibilitySettingsScreenState
                 'Değiştirmek için çift dokunun.',
             toggled: _vibrationEnabled,
             onTapHint: 'Değiştirmek için çift dokunun',
+            // İç anahtarın semantiği kapatılır; aksi hâlde ekran
+            // okuyucu adsız ikinci bir düğüme odaklanır.
+            excludeSemantics: true,
             onTap: () async {
               final newValue = !_vibrationEnabled;
               setState(() => _vibrationEnabled = newValue);
@@ -299,6 +302,9 @@ class _AccessibilitySettingsScreenState
                 'Değiştirmek için çift dokunun.',
             toggled: _highContrast,
             onTapHint: 'Değiştirmek için çift dokunun',
+            // İç anahtarın semantiği kapatılır; aksi hâlde ekran
+            // okuyucu adsız ikinci bir düğüme odaklanır.
+            excludeSemantics: true,
             onTap: () async {
               final newValue = !_highContrast;
               setState(() => _highContrast = newValue);
