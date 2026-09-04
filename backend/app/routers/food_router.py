@@ -53,7 +53,7 @@ from ..models.schemas import (
     DietitianReceivedReport, DietitianReceivedReportList,
     DietitianReportDetail, DietitianReportRecord, DietitianReportDay,
     DietitianReplyRequest, DietitianProfileUpdate,
-    DietitianNoteRequest, DietitianNoteResponse,
+    DietitianNoteRequest, DietitianNoteItem, DietitianNoteList,
     HealthMetricUpdate, HealthMetricResponse,
     ProductConsentUpdate, ProductConsentItem, ProductConsentState,
     WeightMeasurementCreate, WeightMeasurementItem, WeightHistoryResponse,
@@ -2404,71 +2404,94 @@ def _assigned_patient_or_404(db: Session, dietitian_id: str, user_id: str) -> Us
     return patient
 
 
+def _note_list_response(
+    db: Session, dietitian_id: str, user_id: str
+) -> DietitianNoteList:
+    notes = db.query(DietitianNote).filter(
+        DietitianNote.dietitian_id == dietitian_id,
+        DietitianNote.user_id == user_id,
+    ).order_by(DietitianNote.created_at.desc()).all()
+    return DietitianNoteList(
+        user_id=user_id,
+        items=[
+            DietitianNoteItem(
+                id=note.id, body=note.body, created_at=note.created_at
+            )
+            for note in notes
+        ],
+    )
+
+
 @router.get(
-    "/dietitian/patients/{user_id}/note",
-    response_model=DietitianNoteResponse,
-    summary="Danışan notunu okur",
+    "/dietitian/patients/{user_id}/notes",
+    response_model=DietitianNoteList,
+    summary="Danışan notlarını listeler",
 )
-async def get_dietitian_note(
+async def list_dietitian_notes(
     user_id: str,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    """Diyetisyenin bu danışan için tuttuğu kalıcı notu döner.
-
-    Not yoksa boş gövde döner; istemci ayrı bir "yok" durumu tutmaz.
-    """
+    """Diyetisyenin bu danışan için yazdığı notları yeniden eskiye döner."""
     profile = _dietitian_profile_for_user(db, current_user)
     _assigned_patient_or_404(db, profile.id, user_id)
-    note = db.query(DietitianNote).filter(
-        DietitianNote.dietitian_id == profile.id,
-        DietitianNote.user_id == user_id,
-    ).first()
-    return DietitianNoteResponse(
-        user_id=user_id,
-        body=note.body if note else "",
-        updated_at=note.updated_at if note else None,
-    )
+    return _note_list_response(db, profile.id, user_id)
 
 
-@router.put(
-    "/dietitian/patients/{user_id}/note",
-    response_model=DietitianNoteResponse,
-    summary="Danışan notunu yazar",
+@router.post(
+    "/dietitian/patients/{user_id}/notes",
+    response_model=DietitianNoteList,
+    status_code=status.HTTP_201_CREATED,
+    summary="Danışan için yeni not ekler",
 )
-async def upsert_dietitian_note(
+async def create_dietitian_note(
     user_id: str,
     request: DietitianNoteRequest,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    """Notu oluşturur ya da günceller.
+    """Yeni bir not ekler; önceki notlar korunur.
 
-    Danışan-diyetisyen çifti başına tek not tutulur; geçmiş sürüm saklanmaz.
-    Not sağlık verisi içerdiği için yalnız eşleşme onaylıyken yazılabilir.
+    Takip notları birikerek anlam kazanır, bu yüzden kayıt üzerine yazmak
+    yerine listeye eklenir. Not sağlık verisi içerdiği için yalnız eşleşme
+    onaylıyken yazılabilir.
     """
     profile = _dietitian_profile_for_user(db, current_user)
     _assigned_patient_or_404(db, profile.id, user_id)
+    body = request.body.strip()
+    if not body:
+        raise HTTPException(status_code=422, detail="Not boş olamaz.")
+    db.add(
+        DietitianNote(user_id=user_id, dietitian_id=profile.id, body=body)
+    )
+    db.commit()
+    return _note_list_response(db, profile.id, user_id)
+
+
+@router.delete(
+    "/dietitian/patients/{user_id}/notes/{note_id}",
+    response_model=DietitianNoteList,
+    summary="Danışan notunu siler",
+)
+async def delete_dietitian_note(
+    user_id: str,
+    note_id: str,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """Yanlış yazılan notu kaldırır; diğer notlar etkilenmez."""
+    profile = _dietitian_profile_for_user(db, current_user)
+    _assigned_patient_or_404(db, profile.id, user_id)
     note = db.query(DietitianNote).filter(
+        DietitianNote.id == note_id,
         DietitianNote.dietitian_id == profile.id,
         DietitianNote.user_id == user_id,
     ).first()
     if note is None:
-        note = DietitianNote(
-            user_id=user_id,
-            dietitian_id=profile.id,
-            body=request.body.strip(),
-        )
-        db.add(note)
-    else:
-        note.body = request.body.strip()
+        raise HTTPException(status_code=404, detail="Not bulunamadı.")
+    db.delete(note)
     db.commit()
-    db.refresh(note)
-    return DietitianNoteResponse(
-        user_id=user_id,
-        body=note.body,
-        updated_at=note.updated_at,
-    )
+    return _note_list_response(db, profile.id, user_id)
 
 
 @router.patch(

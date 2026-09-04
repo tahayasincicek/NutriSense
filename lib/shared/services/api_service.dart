@@ -593,34 +593,49 @@ class ApiService {
         return DietitianReportDetail.fromJson(response.data ?? const {});
       });
 
-  /// Diyetisyenin kendi profilini günceller; güncel panel verisini döner.
-  /// Diyetisyenin bir danışan için tuttuğu kalıcı notu okur.
-  Future<ApiResult<String>> getDietitianNote({
+  /// Diyetisyenin bir danışan için yazdığı notları yeniden eskiye okur.
+  Future<ApiResult<List<DietitianNote>>> getDietitianNotes({
     required String userId,
     CancelToken? cancelToken,
   }) =>
       _safeCall(() async {
         final response = await _dio.get<Map<String, dynamic>>(
-          '/dietitian/patients/$userId/note',
+          '/dietitian/patients/$userId/notes',
           cancelToken: cancelToken,
         );
-        return response.data?['body'] as String? ?? '';
+        return DietitianNote.listFromJson(response.data);
       });
 
-  /// Notu oluşturur ya da günceller.
-  Future<ApiResult<String>> saveDietitianNote({
+  /// Yeni bir not ekler; önceki notlar korunur. Güncel listeyi döner.
+  Future<ApiResult<List<DietitianNote>>> addDietitianNote({
     required String userId,
     required String body,
     CancelToken? cancelToken,
   }) =>
       _safeCall(() async {
-        final response = await _dio.put<Map<String, dynamic>>(
-          '/dietitian/patients/$userId/note',
+        final response = await _dio.post<Map<String, dynamic>>(
+          '/dietitian/patients/$userId/notes',
           data: {'body': body},
           cancelToken: cancelToken,
         );
-        return response.data?['body'] as String? ?? '';
+        return DietitianNote.listFromJson(response.data);
       });
+
+  /// Yanlış yazılan notu siler. Güncel listeyi döner.
+  Future<ApiResult<List<DietitianNote>>> deleteDietitianNote({
+    required String userId,
+    required String noteId,
+    CancelToken? cancelToken,
+  }) =>
+      _safeCall(() async {
+        final response = await _dio.delete<Map<String, dynamic>>(
+          '/dietitian/patients/$userId/notes/$noteId',
+          cancelToken: cancelToken,
+        );
+        return DietitianNote.listFromJson(response.data);
+      });
+
+  /// Diyetisyenin kendi profilini günceller; güncel panel verisini döner.
 
   Future<ApiResult<DietitianDashboardData>> updateDietitianProfile({
     String? fullName,

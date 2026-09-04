@@ -446,8 +446,56 @@
         "title": "DietitianDashboardResponse",
         "type": "object"
       },
+      "DietitianNoteItem": {
+        "description": "Kayıtlı tek not.",
+        "properties": {
+          "body": {
+            "title": "Body",
+            "type": "string"
+          },
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "body",
+          "created_at"
+        ],
+        "title": "DietitianNoteItem",
+        "type": "object"
+      },
+      "DietitianNoteList": {
+        "description": "Danışanın notları, yeniden eskiye.",
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/DietitianNoteItem"
+            },
+            "title": "Items",
+            "type": "array"
+          },
+          "user_id": {
+            "format": "uuid",
+            "title": "User Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "user_id"
+        ],
+        "title": "DietitianNoteList",
+        "type": "object"
+      },
       "DietitianNoteRequest": {
-        "description": "Diyetisyenin danışan için yazdığı kalıcı not.",
+        "description": "Diyetisyenin danışan için yazdığı not.",
         "properties": {
           "body": {
             "maxLength": 4000,
@@ -460,38 +508,6 @@
           "body"
         ],
         "title": "DietitianNoteRequest",
-        "type": "object"
-      },
-      "DietitianNoteResponse": {
-        "description": "Kayıtlı not; yoksa body boş döner.",
-        "properties": {
-          "body": {
-            "title": "Body",
-            "type": "string"
-          },
-          "updated_at": {
-            "anyOf": [
-              {
-                "format": "date-time",
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Updated At"
-          },
-          "user_id": {
-            "format": "uuid",
-            "title": "User Id",
-            "type": "string"
-          }
-        },
-        "required": [
-          "user_id",
-          "body"
-        ],
-        "title": "DietitianNoteResponse",
         "type": "object"
       },
       "DietitianPatientHistoryResponse": {
@@ -4505,10 +4521,10 @@
         ]
       }
     },
-    "/api/v1/dietitian/patients/{user_id}/note": {
+    "/api/v1/dietitian/patients/{user_id}/notes": {
       "get": {
-        "description": "Diyetisyenin bu danışan için tuttuğu kalıcı notu döner.\n\nNot yoksa boş gövde döner; istemci ayrı bir \"yok\" durumu tutmaz.",
-        "operationId": "get_dietitian_note_api_v1_dietitian_patients__user_id__note_get",
+        "description": "Diyetisyenin bu danışan için yazdığı notları yeniden eskiye döner.",
+        "operationId": "list_dietitian_notes_api_v1_dietitian_patients__user_id__notes_get",
         "parameters": [
           {
             "in": "path",
@@ -4525,7 +4541,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/DietitianNoteResponse"
+                  "$ref": "#/components/schemas/DietitianNoteList"
                 }
               }
             },
@@ -4547,14 +4563,14 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Danışan notunu okur",
+        "summary": "Danışan notlarını listeler",
         "tags": [
           "NutriSense API"
         ]
       },
-      "put": {
-        "description": "Notu oluşturur ya da günceller.\n\nDanışan-diyetisyen çifti başına tek not tutulur; geçmiş sürüm saklanmaz.\nNot sağlık verisi içerdiği için yalnız eşleşme onaylıyken yazılabilir.",
-        "operationId": "upsert_dietitian_note_api_v1_dietitian_patients__user_id__note_put",
+      "post": {
+        "description": "Yeni bir not ekler; önceki notlar korunur.\n\nTakip notları birikerek anlam kazanır, bu yüzden kayıt üzerine yazmak\nyerine listeye eklenir. Not sağlık verisi içerdiği için yalnız eşleşme\nonaylıyken yazılabilir.",
+        "operationId": "create_dietitian_note_api_v1_dietitian_patients__user_id__notes_post",
         "parameters": [
           {
             "in": "path",
@@ -4577,11 +4593,11 @@
           "required": true
         },
         "responses": {
-          "200": {
+          "201": {
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/DietitianNoteResponse"
+                  "$ref": "#/components/schemas/DietitianNoteList"
                 }
               }
             },
@@ -4603,7 +4619,64 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Danışan notunu yazar",
+        "summary": "Danışan için yeni not ekler",
+        "tags": [
+          "NutriSense API"
+        ]
+      }
+    },
+    "/api/v1/dietitian/patients/{user_id}/notes/{note_id}": {
+      "delete": {
+        "description": "Yanlış yazılan notu kaldırır; diğer notlar etkilenmez.",
+        "operationId": "delete_dietitian_note_api_v1_dietitian_patients__user_id__notes__note_id__delete",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "user_id",
+            "required": true,
+            "schema": {
+              "title": "User Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "note_id",
+            "required": true,
+            "schema": {
+              "title": "Note Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DietitianNoteList"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Danışan notunu siler",
         "tags": [
           "NutriSense API"
         ]

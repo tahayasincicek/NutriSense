@@ -473,3 +473,33 @@ class DietitianReportDetail {
     );
   }
 }
+
+/// Diyetisyenin bir danışan için yazdığı tek not.
+///
+/// Notlar birikir: yeni kayıt eskisinin üzerine yazmaz, listeye eklenir.
+class DietitianNote {
+  const DietitianNote({
+    required this.id,
+    required this.body,
+    required this.createdAt,
+  });
+
+  final String id;
+  final String body;
+  final DateTime createdAt;
+
+  factory DietitianNote.fromJson(Map<String, dynamic> json) => DietitianNote(
+        id: json['id'] as String? ?? '',
+        body: (json['body'] as String? ?? '').trim(),
+        createdAt:
+            DateTime.tryParse(json['created_at'] as String? ?? '')?.toLocal() ??
+                DateTime.now(),
+      );
+
+  /// Uçların döndürdüğü `{user_id, items}` gövdesinden liste çıkarır.
+  static List<DietitianNote> listFromJson(Map<String, dynamic>? json) =>
+      (json?['items'] as List<dynamic>? ?? const [])
+          .whereType<Map<String, dynamic>>()
+          .map(DietitianNote.fromJson)
+          .toList(growable: false);
+}

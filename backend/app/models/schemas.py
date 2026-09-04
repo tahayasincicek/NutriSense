@@ -612,17 +612,24 @@ class DietitianReplyRequest(BaseModel):
 
 
 class DietitianNoteRequest(BaseModel):
-    """Diyetisyenin danışan için yazdığı kalıcı not."""
+    """Diyetisyenin danışan için yazdığı not."""
 
     body: str = Field(min_length=1, max_length=4000)
 
 
-class DietitianNoteResponse(BaseModel):
-    """Kayıtlı not; yoksa body boş döner."""
+class DietitianNoteItem(BaseModel):
+    """Kayıtlı tek not."""
+
+    id: UUID
+    body: str
+    created_at: datetime
+
+
+class DietitianNoteList(BaseModel):
+    """Danışanın notları, yeniden eskiye."""
 
     user_id: UUID
-    body: str
-    updated_at: Optional[datetime] = None
+    items: list[DietitianNoteItem] = Field(default_factory=list)
 
 
 class DietitianProfileUpdate(BaseModel):

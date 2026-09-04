@@ -304,11 +304,15 @@ class DietitianReport(Base):
 
 
 class DietitianNote(Base):
-    """Diyetisyenin bir danışan için tuttuğu kalıcı beslenme notu.
+    """Diyetisyenin bir danışan için tuttuğu beslenme notu.
 
     Rapor cevabından farklıdır: rapor cevabı tek bir gönderime bağlıdır ve
     o raporla birlikte anlam taşır. Bu not ise danışanın geneline aittir
     (örneğin "laktoz intoleransı var", "haftada üç gün spor").
+
+    Danışan-diyetisyen çifti başına birden çok not tutulur; her kayıt ayrı
+    bir satırdır ve eskisinin üzerine yazılmaz. Takip notları zaman içinde
+    birikir, bir öncekini silmek gözlem geçmişini yok ederdi.
 
     Sağlık verisi içerdiği için yalnız notu yazan diyetisyen ve notun sahibi
     danışan görebilir; eşleşme sonlandığında erişim de biter.
@@ -335,7 +339,9 @@ class DietitianNote(Base):
         UTCDateTime, default=utc_now, onupdate=utc_now, nullable=False
     )
     __table_args__ = (
-        UniqueConstraint("user_id", "dietitian_id", name="uq_note_user_dietitian"),
+        # Liste hep yeniden eskiye okunur; çiftin notları bu indeksle gelir.
+        Index("ix_dietitian_notes_pair_created", "user_id", "dietitian_id",
+              "created_at"),
     )
 
 
