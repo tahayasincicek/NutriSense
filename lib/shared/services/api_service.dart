@@ -594,6 +594,34 @@ class ApiService {
       });
 
   /// Diyetisyenin kendi profilini günceller; güncel panel verisini döner.
+  /// Diyetisyenin bir danışan için tuttuğu kalıcı notu okur.
+  Future<ApiResult<String>> getDietitianNote({
+    required String userId,
+    CancelToken? cancelToken,
+  }) =>
+      _safeCall(() async {
+        final response = await _dio.get<Map<String, dynamic>>(
+          '/dietitian/patients/$userId/note',
+          cancelToken: cancelToken,
+        );
+        return response.data?['body'] as String? ?? '';
+      });
+
+  /// Notu oluşturur ya da günceller.
+  Future<ApiResult<String>> saveDietitianNote({
+    required String userId,
+    required String body,
+    CancelToken? cancelToken,
+  }) =>
+      _safeCall(() async {
+        final response = await _dio.put<Map<String, dynamic>>(
+          '/dietitian/patients/$userId/note',
+          data: {'body': body},
+          cancelToken: cancelToken,
+        );
+        return response.data?['body'] as String? ?? '';
+      });
+
   Future<ApiResult<DietitianDashboardData>> updateDietitianProfile({
     String? fullName,
     String? specialization,

@@ -33,7 +33,8 @@ from sqlalchemy import func
 
 from ..models.database import (
     AuthAuditLog, ConsentRecord, Dietitian, DietitianAssignment,
-    DietitianReport, FoodLog, NotificationDelivery, NutritionSource,
+    DietitianNote, DietitianReport, FoodLog, NotificationDelivery,
+    NutritionSource,
     HealthMetric, PasswordResetToken, RecognitionAttempt, RefreshToken,
     User, WeightMeasurement, get_db, istanbul_date, utc_now,
 )
@@ -52,6 +53,7 @@ from ..models.schemas import (
     DietitianReceivedReport, DietitianReceivedReportList,
     DietitianReportDetail, DietitianReportRecord, DietitianReportDay,
     DietitianReplyRequest, DietitianProfileUpdate,
+    DietitianNoteRequest, DietitianNoteResponse,
     HealthMetricUpdate, HealthMetricResponse,
     ProductConsentUpdate, ProductConsentItem, ProductConsentState,
     WeightMeasurementCreate, WeightMeasurementItem, WeightHistoryResponse,
@@ -2385,6 +2387,88 @@ async def reply_to_dietitian_report(
     report.dietitian_replied_at = utc_now()
     db.commit()
     return _report_detail_response(db, report)
+
+
+def _assigned_patient_or_404(db: Session, dietitian_id: str, user_id: str) -> User:
+    """Diyetisyen yalnız kendisine onaylı biçimde bağlı danışanı görebilir."""
+    assignment = db.query(DietitianAssignment).filter(
+        DietitianAssignment.dietitian_id == dietitian_id,
+        DietitianAssignment.user_id == user_id,
+        DietitianAssignment.status == "approved",
+    ).first()
+    if assignment is None:
+        raise HTTPException(status_code=404, detail="Danışan bulunamadı.")
+    patient = db.query(User).filter(User.id == user_id).first()
+    if patient is None:
+        raise HTTPException(status_code=404, detail="Danışan bulunamadı.")
+    return patient
+
+
+@router.get(
+    "/dietitian/patients/{user_id}/note",
+    response_model=DietitianNoteResponse,
+    summary="Danışan notunu okur",
+)
+async def get_dietitian_note(
+    user_id: str,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """Diyetisyenin bu danışan için tuttuğu kalıcı notu döner.
+
+    Not yoksa boş gövde döner; istemci ayrı bir "yok" durumu tutmaz.
+    """
+    profile = _dietitian_profile_for_user(db, current_user)
+    _assigned_patient_or_404(db, profile.id, user_id)
+    note = db.query(DietitianNote).filter(
+        DietitianNote.dietitian_id == profile.id,
+        DietitianNote.user_id == user_id,
+    ).first()
+    return DietitianNoteResponse(
+        user_id=user_id,
+        body=note.body if note else "",
+        updated_at=note.updated_at if note else None,
+    )
+
+
+@router.put(
+    "/dietitian/patients/{user_id}/note",
+    response_model=DietitianNoteResponse,
+    summary="Danışan notunu yazar",
+)
+async def upsert_dietitian_note(
+    user_id: str,
+    request: DietitianNoteRequest,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """Notu oluşturur ya da günceller.
+
+    Danışan-diyetisyen çifti başına tek not tutulur; geçmiş sürüm saklanmaz.
+    Not sağlık verisi içerdiği için yalnız eşleşme onaylıyken yazılabilir.
+    """
+    profile = _dietitian_profile_for_user(db, current_user)
+    _assigned_patient_or_404(db, profile.id, user_id)
+    note = db.query(DietitianNote).filter(
+        DietitianNote.dietitian_id == profile.id,
+        DietitianNote.user_id == user_id,
+    ).first()
+    if note is None:
+        note = DietitianNote(
+            user_id=user_id,
+            dietitian_id=profile.id,
+            body=request.body.strip(),
+        )
+        db.add(note)
+    else:
+        note.body = request.body.strip()
+    db.commit()
+    db.refresh(note)
+    return DietitianNoteResponse(
+        user_id=user_id,
+        body=note.body,
+        updated_at=note.updated_at,
+    )
 
 
 @router.patch(

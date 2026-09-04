@@ -303,6 +303,42 @@ class DietitianReport(Base):
     __table_args__ = (UniqueConstraint("user_id", "idempotency_key", name="uq_report_user_idempotency"),)
 
 
+class DietitianNote(Base):
+    """Diyetisyenin bir danışan için tuttuğu kalıcı beslenme notu.
+
+    Rapor cevabından farklıdır: rapor cevabı tek bir gönderime bağlıdır ve
+    o raporla birlikte anlam taşır. Bu not ise danışanın geneline aittir
+    (örneğin "laktoz intoleransı var", "haftada üç gün spor").
+
+    Sağlık verisi içerdiği için yalnız notu yazan diyetisyen ve notun sahibi
+    danışan görebilir; eşleşme sonlandığında erişim de biter.
+    """
+
+    __tablename__ = "dietitian_notes"
+
+    id = Column(UUIDString, primary_key=True, default=lambda: str(uuid.uuid4()))
+    user_id = Column(
+        UUIDString,
+        ForeignKey("users.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+    dietitian_id = Column(
+        UUIDString,
+        ForeignKey("dietitians.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+    body = Column(Text, nullable=False)
+    created_at = Column(UTCDateTime, default=utc_now, nullable=False)
+    updated_at = Column(
+        UTCDateTime, default=utc_now, onupdate=utc_now, nullable=False
+    )
+    __table_args__ = (
+        UniqueConstraint("user_id", "dietitian_id", name="uq_note_user_dietitian"),
+    )
+
+
 class NotificationDelivery(Base):
     __tablename__ = "notification_deliveries"
 

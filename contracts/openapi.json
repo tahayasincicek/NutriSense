@@ -446,6 +446,54 @@
         "title": "DietitianDashboardResponse",
         "type": "object"
       },
+      "DietitianNoteRequest": {
+        "description": "Diyetisyenin danışan için yazdığı kalıcı not.",
+        "properties": {
+          "body": {
+            "maxLength": 4000,
+            "minLength": 1,
+            "title": "Body",
+            "type": "string"
+          }
+        },
+        "required": [
+          "body"
+        ],
+        "title": "DietitianNoteRequest",
+        "type": "object"
+      },
+      "DietitianNoteResponse": {
+        "description": "Kayıtlı not; yoksa body boş döner.",
+        "properties": {
+          "body": {
+            "title": "Body",
+            "type": "string"
+          },
+          "updated_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Updated At"
+          },
+          "user_id": {
+            "format": "uuid",
+            "title": "User Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "user_id",
+          "body"
+        ],
+        "title": "DietitianNoteResponse",
+        "type": "object"
+      },
       "DietitianPatientHistoryResponse": {
         "properties": {
           "date_from": {
@@ -4452,6 +4500,110 @@
           }
         ],
         "summary": "Dietitian Patient History",
+        "tags": [
+          "NutriSense API"
+        ]
+      }
+    },
+    "/api/v1/dietitian/patients/{user_id}/note": {
+      "get": {
+        "description": "Diyetisyenin bu danışan için tuttuğu kalıcı notu döner.\n\nNot yoksa boş gövde döner; istemci ayrı bir \"yok\" durumu tutmaz.",
+        "operationId": "get_dietitian_note_api_v1_dietitian_patients__user_id__note_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "user_id",
+            "required": true,
+            "schema": {
+              "title": "User Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DietitianNoteResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Danışan notunu okur",
+        "tags": [
+          "NutriSense API"
+        ]
+      },
+      "put": {
+        "description": "Notu oluşturur ya da günceller.\n\nDanışan-diyetisyen çifti başına tek not tutulur; geçmiş sürüm saklanmaz.\nNot sağlık verisi içerdiği için yalnız eşleşme onaylıyken yazılabilir.",
+        "operationId": "upsert_dietitian_note_api_v1_dietitian_patients__user_id__note_put",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "user_id",
+            "required": true,
+            "schema": {
+              "title": "User Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DietitianNoteRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DietitianNoteResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Danışan notunu yazar",
         "tags": [
           "NutriSense API"
         ]

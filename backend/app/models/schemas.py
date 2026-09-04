@@ -611,6 +611,20 @@ class DietitianReplyRequest(BaseModel):
     reply: str = Field(..., min_length=2, max_length=2000)
 
 
+class DietitianNoteRequest(BaseModel):
+    """Diyetisyenin danışan için yazdığı kalıcı not."""
+
+    body: str = Field(min_length=1, max_length=4000)
+
+
+class DietitianNoteResponse(BaseModel):
+    """Kayıtlı not; yoksa body boş döner."""
+
+    user_id: UUID
+    body: str
+    updated_at: Optional[datetime] = None
+
+
 class DietitianProfileUpdate(BaseModel):
     """Diyetisyenin kendi profilinde değiştirebildiği alanlar."""
     full_name: Optional[str] = Field(default=None, min_length=2, max_length=255)

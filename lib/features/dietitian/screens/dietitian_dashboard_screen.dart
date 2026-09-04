@@ -29,6 +29,12 @@ class _DietitianDashboardScreenState
   /// Danışan listesinde arama; liste büyüdükçe gezinmeyi mümkün kılar.
   String _query = '';
 
+  /// Rapor listesi filtresi: danışan adı.
+  String _reportQuery = '';
+
+  /// Rapor listesi filtresi: kaç günlük geçmiş gösterilsin. null ise hepsi.
+  int? _reportDays;
+
   @override
   void initState() {
     super.initState();
@@ -155,56 +161,31 @@ class _DietitianDashboardScreenState
   /// Diyetisyenin kendi profilini düzenlemesi.
   ///
   /// E-posta kimlik doğrulamasına bağlı olduğu için değiştirilemez.
+  /// Üst çubuktaki selamlama için ad. Panel yüklenmeden önce de çağrılır,
+  /// bu yüzden veri yokken nötr bir söz döner.
+  String _firstName() {
+    final full = _dashboard?.fullName.trim() ?? '';
+    if (full.isEmpty) return 'Diyetisyen';
+    return full.split(RegExp(r'\s+')).first;
+  }
+
   Future<void> _editProfile() async {
     final dashboard = _dashboard;
     if (dashboard == null) return;
-    final nameController = TextEditingController(text: dashboard.fullName);
-    final fieldController =
-        TextEditingController(text: dashboard.specialization);
 
-    final saved = await showDialog<bool>(
+    // Denetleyiciler diyaloğun kendisine aittir. `showDialog` döner dönmez
+    // dispose edilmeleri, kapanma animasyonu sürerken metin alanlarının
+    // silinmiş denetleyiciye bakmasına ve çerçevenin düşmesine yol açıyordu.
+    final entry = await showDialog<DietitianProfileEntry>(
       context: context,
-      builder: (dialogContext) => AlertDialog(
-        title: const Text('Profili düzenle'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Semantics(
-              textField: true,
-              label: 'Ad soyad',
-              child: TextField(
-                controller: nameController,
-                decoration: const InputDecoration(labelText: 'Ad Soyad'),
-              ),
-            ),
-            const SizedBox(height: 12),
-            Semantics(
-              textField: true,
-              label: 'Uzmanlık alanı',
-              child: TextField(
-                controller: fieldController,
-                decoration: const InputDecoration(labelText: 'Uzmanlık alanı'),
-              ),
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(dialogContext).pop(false),
-            child: const Text('Vazgeç'),
-          ),
-          TextButton(
-            onPressed: () => Navigator.of(dialogContext).pop(true),
-            child: const Text('Kaydet'),
-          ),
-        ],
+      builder: (_) => DietitianProfileDialog(
+        initialName: dashboard.fullName,
+        initialSpecialization: dashboard.specialization,
       ),
     );
-    final name = nameController.text.trim();
-    final field = fieldController.text.trim();
-    nameController.dispose();
-    fieldController.dispose();
-    if (saved != true || !mounted) return;
+    if (entry == null || !mounted) return;
+    final name = entry.fullName;
+    final field = entry.specialization;
     if (name.length < 2 || field.length < 2) {
       _announce('Ad ve uzmanlık alanı en az iki karakter olmalıdır.');
       return;
@@ -235,25 +216,56 @@ class _DietitianDashboardScreenState
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.transparent,
-        title: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              width: 34,
-              height: 34,
-              decoration: BoxDecoration(
-                color: AppTheme.primaryColor.withValues(alpha: 0.12),
-                shape: BoxShape.circle,
+        // Hasta ekranlarındaki karşılama başlığının aynısı: yeşil çerçeveli
+        // avatar, ad ve altında kısa bir alt yazı. Panelin uygulamanın
+        // parçası gibi durması için aynı düzen kullanılır.
+        title: Semantics(
+          header: true,
+          label: 'Merhaba ${_firstName()}. NutriSense Pro paneli.',
+          excludeSemantics: true,
+          child: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(2),
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  border: Border.all(
+                      color: Theme.of(context).colorScheme.primary, width: 2),
+                ),
+                child: CircleAvatar(
+                  radius: 16,
+                  backgroundColor:
+                      Theme.of(context).colorScheme.primaryContainer,
+                  child: Icon(
+                    Icons.medical_information_rounded,
+                    size: 20,
+                    color: Theme.of(context).colorScheme.onPrimaryContainer,
+                  ),
+                ),
               ),
-              child: const Icon(
-                Icons.medical_information_outlined,
-                size: 19,
-                color: AppTheme.primaryDark,
+              const SizedBox(width: 12),
+              Flexible(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text('Merhaba, ${_firstName()}',
+                        overflow: TextOverflow.ellipsis,
+                        style: Theme.of(context)
+                            .textTheme
+                            .titleMedium
+                            ?.copyWith(fontWeight: FontWeight.bold)),
+                    Text('NutriSense Pro',
+                        overflow: TextOverflow.ellipsis,
+                        style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                            color: Theme.of(context)
+                                .colorScheme
+                                .onSurfaceVariant)),
+                  ],
+                ),
               ),
-            ),
-            const SizedBox(width: 9),
-            const Text('NutriSense Pro'),
-          ],
+            ],
+          ),
         ),
         actions: [
           // Bekleyen istek varsa panel elle yenilenmeden fark edilsin.
@@ -284,27 +296,29 @@ class _DietitianDashboardScreenState
                 ),
               ),
             ),
-          IconButton(
-            tooltip: 'Paneli yenile',
-            onPressed: _loading ? null : _load,
-            icon: const Icon(Icons.refresh_rounded),
-          ),
+          // Yenileme ekranı aşağı çekerek yapılır, çıkış ise Ayarlar >
+          // Hesap Yönetimi altında durur; üst çubuk kalabalık olmasın.
           IconButton(
             tooltip: 'Ayarlar',
             onPressed: () => Navigator.of(context).push(
               MaterialPageRoute(builder: (_) => const SettingsScreen()),
             ),
-            icon: const Icon(Icons.settings_outlined),
-          ),
-          IconButton(
-            tooltip: 'Çıkış yap',
-            onPressed: () => ref.read(authControllerProvider.notifier).logout(),
-            icon: const Icon(Icons.logout_rounded),
+            icon: const Icon(Icons.settings_rounded),
           ),
           const SizedBox(width: 4),
         ],
       ),
       body: _SoftBackground(child: _buildBody(context)),
+    );
+  }
+
+  /// Rapor listesi için tarih aralığı seçeneği.
+  Widget _buildReportRangeChip(String label, int? days) {
+    final selected = _reportDays == days;
+    return ChoiceChip(
+      label: Text(label),
+      selected: selected,
+      onSelected: (_) => setState(() => _reportDays = days),
     );
   }
 
@@ -318,8 +332,17 @@ class _DietitianDashboardScreenState
     }
 
     final dashboard = _dashboard!;
-    final firstName = dashboard.fullName.trim().split(RegExp(r'\s+')).first;
     final needle = _query.trim().toLowerCase();
+    final reportNeedle = _reportQuery.trim().toLowerCase();
+    final cutoff = _reportDays == null
+        ? null
+        : DateTime.now().subtract(Duration(days: _reportDays!));
+    final visibleReports = dashboard.recentReports
+        .where((report) =>
+            (reportNeedle.isEmpty ||
+                report.patientName.toLowerCase().contains(reportNeedle)) &&
+            (cutoff == null || !report.toDate.isBefore(cutoff)))
+        .toList(growable: false);
     // Takip gerektirenler önce gelir; diyetisyen önceliğini listede görür.
     final visiblePatients = dashboard.patients
         .where((patient) =>
@@ -339,18 +362,7 @@ class _DietitianDashboardScreenState
         physics: const AlwaysScrollableScrollPhysics(),
         padding: const EdgeInsets.fromLTRB(20, 10, 20, 40),
         children: [
-          Semantics(
-            header: true,
-            child: Text(
-              'Merhaba, $firstName',
-              style: theme.textTheme.displaySmall?.copyWith(
-                color: AppTheme.primaryDark,
-                fontWeight: FontWeight.w900,
-                letterSpacing: -0.8,
-              ),
-            ),
-          ),
-          const SizedBox(height: 7),
+          // Selamlama artık üst çubukta; burada yalnız günün sorusu kalır.
           Text(
             'Danışanlarının beslenme yolculuğu bugün nasıl gidiyor?',
             style: theme.textTheme.bodyLarge?.copyWith(
@@ -382,7 +394,7 @@ class _DietitianDashboardScreenState
                 child: _MetricCard(
                   label: 'Bekleyen eşleşme',
                   value: '${dashboard.pendingAssignments}',
-                  icon: Icons.pending_actions_outlined,
+                  icon: Icons.pending_actions_rounded,
                   color: AppTheme.warningColor,
                 ),
               ),
@@ -393,7 +405,7 @@ class _DietitianDashboardScreenState
             label: 'Alınan beslenme raporu',
             value: '${dashboard.reportsReceived}',
             helper: 'Danışanlardan gelen toplam rapor',
-            icon: Icons.summarize_outlined,
+            icon: Icons.summarize_rounded,
             color: AppTheme.secondaryColor,
           ),
           if (dashboard.pendingRequests.isNotEmpty) ...[
@@ -417,17 +429,58 @@ class _DietitianDashboardScreenState
             ),
           ],
           const SizedBox(height: 32),
+          if (dashboard.patients.isNotEmpty) ...[
+            const SizedBox(height: 32),
+            _SectionHeading(
+              title: 'Bugün kime odaklanmalı?',
+              subtitle: 'Hedeften sapma ve sessizlik sırasına göre',
+            ),
+            const SizedBox(height: 12),
+            _FocusList(patients: dashboard.patients),
+          ],
+          const SizedBox(height: 32),
           _SectionHeading(
             title: 'Gelen beslenme raporları',
             subtitle: dashboard.recentReports.isEmpty
                 ? 'Danışan onayıyla gelen raporlar burada listelenir'
-                : 'Son ${dashboard.recentReports.length} rapor',
+                : '${visibleReports.length} / ${dashboard.recentReports.length} rapor',
           ),
           const SizedBox(height: 12),
+          // Danışan sayısı arttıkça tek liste aranamaz hâle geliyordu.
+          if (dashboard.recentReports.length > 3) ...[
+            TextField(
+              decoration: const InputDecoration(
+                prefixIcon: Icon(Icons.search_rounded),
+                hintText: 'Raporlarda danışan ara',
+                border: OutlineInputBorder(),
+              ),
+              onChanged: (value) => setState(() => _reportQuery = value),
+            ),
+            const SizedBox(height: 10),
+            Wrap(
+              spacing: 8,
+              children: [
+                _buildReportRangeChip('Tümü', null),
+                _buildReportRangeChip('Son 7 gün', 7),
+                _buildReportRangeChip('Son 30 gün', 30),
+              ],
+            ),
+            const SizedBox(height: 12),
+          ],
           if (dashboard.recentReports.isEmpty)
             const _EmptyReportsCard()
+          else if (visibleReports.isEmpty)
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 12),
+              child: Text(
+                'Seçtiğiniz ölçütlerle eşleşen rapor yok.',
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
+              ),
+            )
           else
-            ...dashboard.recentReports.map(
+            ...visibleReports.map(
               (report) => Padding(
                 padding: const EdgeInsets.only(bottom: 12),
                 child: _ReceivedReportCard(
@@ -483,6 +536,9 @@ class _DietitianDashboardScreenState
                     MaterialPageRoute(
                       builder: (_) => DietitianPatientDetailScreen(
                         patient: patient,
+                        reports: dashboard.recentReports
+                            .where((r) => r.patientId == patient.userId)
+                            .toList(growable: false),
                       ),
                     ),
                   ),
@@ -554,7 +610,7 @@ class _ProfileHeader extends StatelessWidget {
                 borderRadius: BorderRadius.circular(18),
               ),
               child: const Icon(
-                Icons.medical_services_outlined,
+                Icons.medical_services_rounded,
                 color: AppTheme.primaryColor,
                 size: 30,
               ),
@@ -627,7 +683,7 @@ class _ProfileHeader extends StatelessWidget {
             IconButton(
               tooltip: 'Profili düzenle',
               onPressed: onEdit,
-              icon: const Icon(Icons.edit_outlined),
+              icon: const Icon(Icons.edit_rounded),
             ),
           ],
         ),
@@ -699,20 +755,14 @@ class _MetricCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Container(
-              width: 42,
-              height: 42,
-              decoration: BoxDecoration(
-                color: color.withValues(alpha: 0.11),
-                borderRadius: BorderRadius.circular(13),
-              ),
-              child: Icon(icon, color: color, size: 23),
-            ),
-            const SizedBox(height: 14),
+            // Hasta ekranlarındaki kart ölçüsü: ikon doğrudan ve daha büyük
+            // durur, soluk bir kutunun içinde küçülmez; değer daha kalındır.
+            Icon(icon, color: color, size: 28),
+            const SizedBox(height: 16),
             Text(
               value,
-              style: theme.textTheme.headlineMedium?.copyWith(
-                fontWeight: FontWeight.bold,
+              style: theme.textTheme.headlineSmall?.copyWith(
+                fontWeight: FontWeight.w900,
                 color: color,
               ),
             ),
@@ -1006,7 +1056,7 @@ class _ReceivedReportCard extends StatelessWidget {
                             borderRadius: BorderRadius.circular(12),
                           ),
                           child: const Icon(
-                            Icons.description_outlined,
+                            Icons.description_rounded,
                             color: AppTheme.secondaryColor,
                           ),
                         ),
@@ -1042,19 +1092,19 @@ class _ReceivedReportCard extends StatelessWidget {
                       runSpacing: 8,
                       children: [
                         _ReportChip(
-                          icon: Icons.restaurant_outlined,
+                          icon: Icons.restaurant_rounded,
                           label: '${report.recordCount} besin kaydı',
                         ),
                         _ReportChip(
-                          icon: Icons.schedule_outlined,
+                          icon: Icons.schedule_rounded,
                           label: '${report.totalMeals} öğün',
                         ),
                         _ReportChip(
-                          icon: Icons.local_fire_department_outlined,
+                          icon: Icons.local_fire_department_rounded,
                           label: '$calories kcal',
                         ),
                         _ReportChip(
-                          icon: Icons.send_outlined,
+                          icon: Icons.send_rounded,
                           label: report.channelLabel,
                         ),
                       ],
@@ -1114,7 +1164,7 @@ class _EmptyReportsCard extends StatelessWidget {
       child: Column(
         children: [
           Icon(
-            Icons.mark_email_unread_outlined,
+            Icons.mark_email_unread_rounded,
             size: 38,
             color: theme.hintColor,
           ),
@@ -1208,7 +1258,7 @@ class _PatientCard extends StatelessWidget {
                           runSpacing: 7,
                           children: [
                             _PatientStatChip(
-                              icon: Icons.local_fire_department_outlined,
+                              icon: Icons.local_fire_department_rounded,
                               label:
                                   '${patient.todayCalories.toStringAsFixed(0)} kcal',
                               color: AppTheme.warningColor,
@@ -1221,7 +1271,7 @@ class _PatientCard extends StatelessWidget {
                             // Takip uyarısı: üç gün ve üzeri sessizlik.
                             if (patient.needsFollowUp)
                               _PatientStatChip(
-                                icon: Icons.notifications_active_outlined,
+                                icon: Icons.notifications_active_rounded,
                                 label: patient.followUpLabel,
                                 color: AppTheme.errorColor,
                               ),
@@ -1347,7 +1397,7 @@ class _EmptyPatientsCard extends StatelessWidget {
               shape: BoxShape.circle,
             ),
             child: const Icon(
-              Icons.person_search_outlined,
+              Icons.person_search_rounded,
               size: 34,
               color: AppTheme.primaryDark,
             ),
@@ -1403,7 +1453,7 @@ class _ErrorState extends StatelessWidget {
                     shape: BoxShape.circle,
                   ),
                   child: const Icon(
-                    Icons.cloud_off_outlined,
+                    Icons.cloud_off_rounded,
                     size: 34,
                     color: AppTheme.errorColor,
                   ),
@@ -1430,9 +1480,16 @@ class _ErrorState extends StatelessWidget {
 }
 
 class DietitianPatientDetailScreen extends ConsumerStatefulWidget {
-  const DietitianPatientDetailScreen({required this.patient, super.key});
+  const DietitianPatientDetailScreen({
+    required this.patient,
+    this.reports = const [],
+    super.key,
+  });
 
   final DietitianPatientSummary patient;
+
+  /// Bu danışandan gelen raporlar; detay sayfasında ayrı bölümde listelenir.
+  final List<DietitianReceivedReport> reports;
 
   @override
   ConsumerState<DietitianPatientDetailScreen> createState() =>
@@ -1590,7 +1647,7 @@ class _DietitianPatientDetailScreenState
                   label: 'Toplam kalori',
                   value: history.totalCalories.toStringAsFixed(0),
                   unit: 'kcal',
-                  icon: Icons.local_fire_department_outlined,
+                  icon: Icons.local_fire_department_rounded,
                   color: AppTheme.warningColor,
                 ),
               ),
@@ -1607,6 +1664,37 @@ class _DietitianPatientDetailScreenState
             ],
           ),
           const SizedBox(height: 32),
+          _CalorieTrendCard(
+            logs: history.logs,
+            dailyTarget: widget.patient.dailyCalorieTarget,
+          ),
+          const SizedBox(height: 24),
+          _PatientNoteCard(userId: widget.patient.userId),
+          const SizedBox(height: 24),
+          if (widget.reports.isNotEmpty) ...[
+            _SectionHeading(
+              title: 'Bu danışandan gelen raporlar',
+              subtitle: '${widget.reports.length} rapor',
+            ),
+            const SizedBox(height: 12),
+            ...widget.reports.map(
+              (report) => Padding(
+                padding: const EdgeInsets.only(bottom: 12),
+                child: _ReceivedReportCard(
+                  report: report,
+                  onTap: () => Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (_) => DietitianReportDetailScreen(
+                        reportId: report.reportId,
+                        patientName: report.patientName,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height: 24),
+          ],
           _SectionHeading(
             title: 'Son öğünler',
             subtitle: '${history.logs.length} kayıt',
@@ -1723,7 +1811,7 @@ class _MealCard extends StatelessWidget {
               borderRadius: BorderRadius.circular(15),
             ),
             child: const Icon(
-              Icons.restaurant_outlined,
+              Icons.restaurant_rounded,
               color: AppTheme.primaryDark,
             ),
           ),
@@ -1804,3 +1892,460 @@ String _mealLabel(String value) => switch (value) {
 
 String _dateLabel(DateTime value) => '${value.day.toString().padLeft(2, '0')}.'
     '${value.month.toString().padLeft(2, '0')}.${value.year}';
+
+/// Diyetisyen profil düzenleme sonucu.
+class DietitianProfileEntry {
+  const DietitianProfileEntry(this.fullName, this.specialization, this.phone);
+
+  final String fullName;
+  final String specialization;
+
+  /// Rapor SMS'i bu numaraya gider; boş bırakılabilir.
+  final String phone;
+}
+
+/// Uzman profilini düzenleme diyaloğu.
+///
+/// Metin denetleyicilerini kendi yaşam döngüsünde tutar.
+class DietitianProfileDialog extends StatefulWidget {
+  const DietitianProfileDialog({
+    super.key,
+    required this.initialName,
+    required this.initialSpecialization,
+    this.initialPhone = '',
+  });
+
+  final String initialName;
+  final String initialSpecialization;
+  final String initialPhone;
+
+  @override
+  State<DietitianProfileDialog> createState() => _DietitianProfileDialogState();
+}
+
+class _DietitianProfileDialogState extends State<DietitianProfileDialog> {
+  late final TextEditingController _name =
+      TextEditingController(text: widget.initialName);
+  late final TextEditingController _specialization =
+      TextEditingController(text: widget.initialSpecialization);
+  late final TextEditingController _phone =
+      TextEditingController(text: widget.initialPhone);
+
+  @override
+  void dispose() {
+    _name.dispose();
+    _specialization.dispose();
+    _phone.dispose();
+    super.dispose();
+  }
+
+  void _submit() => Navigator.of(context).pop(
+        DietitianProfileEntry(
+          _name.text.trim(),
+          _specialization.text.trim(),
+          _phone.text.trim(),
+        ),
+      );
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: const Text('Profili düzenle'),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Semantics(
+            textField: true,
+            label: 'Ad soyad',
+            child: TextField(
+              controller: _name,
+              autofocus: true,
+              textInputAction: TextInputAction.next,
+              decoration: const InputDecoration(labelText: 'Ad Soyad'),
+            ),
+          ),
+          const SizedBox(height: 12),
+          Semantics(
+            textField: true,
+            label: 'Uzmanlık alanı',
+            child: TextField(
+              controller: _specialization,
+              textInputAction: TextInputAction.next,
+              decoration: const InputDecoration(labelText: 'Uzmanlık alanı'),
+            ),
+          ),
+          const SizedBox(height: 12),
+          // Rapor SMS'i bu numaraya gider; alan arayüzde hiç yoktu.
+          Semantics(
+            textField: true,
+            label: 'Telefon numarası. Rapor SMS bildirimleri buraya gelir.',
+            child: TextField(
+              controller: _phone,
+              keyboardType: TextInputType.phone,
+              textInputAction: TextInputAction.done,
+              onSubmitted: (_) => _submit(),
+              decoration: const InputDecoration(
+                labelText: 'Telefon',
+                hintText: '+905xxxxxxxxx',
+              ),
+            ),
+          ),
+        ],
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: const Text('Vazgeç'),
+        ),
+        TextButton(onPressed: _submit, child: const Text('Kaydet')),
+      ],
+    );
+  }
+}
+
+/// Diyetisyenin önce kime bakması gerektiğini gösteren liste.
+///
+/// Panel sayı gösteriyordu ama karar aldırmıyordu: hangi danışanın sessiz
+/// kaldığı ya da hedefinden ne kadar saptığı tek tek kartlara bakmadan
+/// görülemiyordu.
+class _FocusList extends StatelessWidget {
+  const _FocusList({required this.patients});
+
+  final List<DietitianPatientSummary> patients;
+
+  /// Hedefe göre sapma oranı; hedefi olmayan danışan sıralamaya girmez.
+  double _deviation(DietitianPatientSummary p) {
+    if (p.dailyCalorieTarget <= 0) return 0;
+    return (p.todayCalories - p.dailyCalorieTarget).abs() /
+        p.dailyCalorieTarget;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final ranked = [...patients]..sort((a, b) {
+        // Önce sessiz kalanlar, sonra hedeften en çok sapanlar.
+        if (a.needsFollowUp != b.needsFollowUp) {
+          return a.needsFollowUp ? -1 : 1;
+        }
+        return _deviation(b).compareTo(_deviation(a));
+      });
+    final top = ranked.take(3).toList(growable: false);
+
+    return Column(
+      children: top.map((patient) {
+        final deviation = _deviation(patient);
+        final overTarget = patient.todayCalories > patient.dailyCalorieTarget;
+        final reason = patient.needsFollowUp
+            ? patient.followUpLabel
+            : patient.dailyCalorieTarget <= 0
+                ? 'Hedef belirlenmemiş'
+                : '${overTarget ? "Hedefin üzerinde" : "Hedefin altında"}, '
+                    'yüzde ${(deviation * 100).round()}';
+        final accent = patient.needsFollowUp
+            ? AppTheme.warningColor
+            : AppTheme.primaryColor;
+
+        return Semantics(
+          container: true,
+          excludeSemantics: true,
+          label: '${patient.fullName}. $reason. '
+              'Bugün ${patient.todayCalories.round()} kalori.',
+          child: Container(
+            margin: const EdgeInsets.only(bottom: 10),
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: theme.colorScheme.surface,
+              borderRadius: BorderRadius.circular(AppTheme.cardRadius),
+              border: Border.all(color: accent.withValues(alpha: 0.3)),
+            ),
+            child: Row(
+              children: [
+                Icon(
+                  patient.needsFollowUp
+                      ? Icons.notifications_active_rounded
+                      : Icons.trending_up_rounded,
+                  color: accent,
+                  size: 26,
+                ),
+                const SizedBox(width: 14),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(patient.fullName,
+                          overflow: TextOverflow.ellipsis,
+                          style: theme.textTheme.titleSmall
+                              ?.copyWith(fontWeight: FontWeight.bold)),
+                      const SizedBox(height: 2),
+                      Text(reason,
+                          style: theme.textTheme.bodySmall?.copyWith(
+                              color: theme.colorScheme.onSurfaceVariant)),
+                    ],
+                  ),
+                ),
+                Text('${patient.todayCalories.round()}',
+                    style: theme.textTheme.titleMedium
+                        ?.copyWith(fontWeight: FontWeight.w900, color: accent)),
+              ],
+            ),
+          ),
+        );
+      }).toList(growable: false),
+    );
+  }
+}
+
+/// Danışanın günlük kalori seyri.
+///
+/// Kayıtlar tek tek listeleniyordu; diyetisyen eğilimi görmek için hepsini
+/// zihninde toplamak zorundaydı.
+class _CalorieTrendCard extends StatelessWidget {
+  const _CalorieTrendCard({required this.logs, required this.dailyTarget});
+
+  final List<DietitianPatientLog> logs;
+  final double dailyTarget;
+
+  /// Günlük toplamlar, tarihe göre artan sırada.
+  List<MapEntry<DateTime, double>> _dailyTotals() {
+    final totals = <DateTime, double>{};
+    for (final log in logs) {
+      final day =
+          DateTime(log.loggedAt.year, log.loggedAt.month, log.loggedAt.day);
+      totals[day] = (totals[day] ?? 0) + log.totalCalories;
+    }
+    final entries = totals.entries.toList()
+      ..sort((a, b) => a.key.compareTo(b.key));
+    return entries;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final daily = _dailyTotals();
+    if (daily.isEmpty) return const SizedBox.shrink();
+
+    final values = daily.map((e) => e.value).toList(growable: false);
+    final average = values.reduce((a, b) => a + b) / values.length;
+    final peak = values.reduce((a, b) => a > b ? a : b);
+    final overTargetDays =
+        dailyTarget > 0 ? values.where((v) => v > dailyTarget).length : 0;
+
+    final summary = dailyTarget > 0
+        ? 'Günlük ortalama ${average.round()} kalori, hedef '
+            '${dailyTarget.round()}. ${daily.length} günün '
+            '$overTargetDays gününde hedef aşıldı.'
+        : 'Günlük ortalama ${average.round()} kalori. Hedef belirlenmemiş.';
+
+    return Semantics(
+      container: true,
+      excludeSemantics: true,
+      label: 'Kalori seyri. $summary',
+      child: Container(
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          color: theme.colorScheme.surface,
+          borderRadius: BorderRadius.circular(AppTheme.cardRadius),
+          border: Border.all(
+              color: theme.colorScheme.outline.withValues(alpha: 0.2)),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                const Icon(Icons.trending_up_rounded,
+                    color: AppTheme.primaryColor, size: 26),
+                const SizedBox(width: 10),
+                Text('Kalori seyri',
+                    style: theme.textTheme.titleSmall
+                        ?.copyWith(fontWeight: FontWeight.bold)),
+              ],
+            ),
+            const SizedBox(height: 14),
+            // Günlük toplamların basit sütun gösterimi; en yüksek gün
+            // ölçek kabul edilir.
+            SizedBox(
+              height: 64,
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: daily.map((entry) {
+                  final ratio = peak <= 0 ? 0.0 : entry.value / peak;
+                  final over = dailyTarget > 0 && entry.value > dailyTarget;
+                  return Expanded(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 2),
+                      child: Align(
+                        alignment: Alignment.bottomCenter,
+                        child: Container(
+                          height: (ratio * 60).clamp(4.0, 60.0),
+                          decoration: BoxDecoration(
+                            color: over
+                                ? AppTheme.warningColor
+                                : AppTheme.primaryColor,
+                            borderRadius: BorderRadius.circular(3),
+                          ),
+                        ),
+                      ),
+                    ),
+                  );
+                }).toList(growable: false),
+              ),
+            ),
+            const SizedBox(height: 12),
+            Text(summary,
+                style: theme.textTheme.bodySmall
+                    ?.copyWith(color: theme.colorScheme.onSurfaceVariant)),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Diyetisyenin danışan için tuttuğu kalıcı not.
+///
+/// Rapor cevabından farklıdır: rapor cevabı tek bir gönderime bağlıdır,
+/// bu not danışanın geneline aittir ("laktoz intoleransı var" gibi).
+class _PatientNoteCard extends ConsumerStatefulWidget {
+  const _PatientNoteCard({required this.userId});
+
+  final String userId;
+
+  @override
+  ConsumerState<_PatientNoteCard> createState() => _PatientNoteCardState();
+}
+
+class _PatientNoteCardState extends ConsumerState<_PatientNoteCard> {
+  final _controller = TextEditingController();
+  bool _loading = true;
+  bool _saving = false;
+  String _saved = '';
+  String? _message;
+
+  @override
+  void initState() {
+    super.initState();
+    _load();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  Future<void> _load() async {
+    final result = await ref
+        .read(apiServiceProvider)
+        .getDietitianNote(userId: widget.userId);
+    if (!mounted) return;
+    setState(() {
+      _loading = false;
+      _saved = result.data ?? '';
+      _controller.text = _saved;
+      _message = result.isSuccess ? null : result.errorMessage;
+    });
+  }
+
+  Future<void> _save() async {
+    final body = _controller.text.trim();
+    if (body.isEmpty) {
+      setState(() => _message = 'Not boş olamaz.');
+      return;
+    }
+    setState(() {
+      _saving = true;
+      _message = null;
+    });
+    final result = await ref.read(apiServiceProvider).saveDietitianNote(
+          userId: widget.userId,
+          body: body,
+        );
+    if (!mounted) return;
+    setState(() {
+      _saving = false;
+      if (result.isSuccess) _saved = result.data ?? body;
+      _message = result.isSuccess
+          ? 'Not kaydedildi.'
+          : result.errorMessage ?? 'Not kaydedilemedi.';
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final changed = _controller.text.trim() != _saved.trim();
+
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surface,
+        borderRadius: BorderRadius.circular(AppTheme.cardRadius),
+        border:
+            Border.all(color: theme.colorScheme.outline.withValues(alpha: 0.2)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Icon(Icons.sticky_note_2_rounded,
+                  color: AppTheme.primaryColor, size: 26),
+              const SizedBox(width: 10),
+              Text('Beslenme notu',
+                  style: theme.textTheme.titleSmall
+                      ?.copyWith(fontWeight: FontWeight.bold)),
+            ],
+          ),
+          const SizedBox(height: 6),
+          Text(
+            'Bu not danışanın geneline aittir ve yalnız siz görürsünüz.',
+            style: theme.textTheme.bodySmall
+                ?.copyWith(color: theme.colorScheme.onSurfaceVariant),
+          ),
+          const SizedBox(height: 14),
+          if (_loading)
+            const Center(child: CircularProgressIndicator())
+          else
+            Semantics(
+              textField: true,
+              label: 'Danışan için beslenme notu',
+              child: TextField(
+                controller: _controller,
+                maxLines: 4,
+                maxLength: 4000,
+                onChanged: (_) => setState(() {}),
+                decoration: const InputDecoration(
+                  border: OutlineInputBorder(),
+                  hintText:
+                      'Örnek: Laktoz intoleransı var, akşam sporu yapıyor.',
+                ),
+              ),
+            ),
+          if (_message != null) ...[
+            const SizedBox(height: 8),
+            Semantics(
+              liveRegion: true,
+              child: Text(
+                _message!,
+                style: theme.textTheme.bodySmall
+                    ?.copyWith(color: theme.colorScheme.primary),
+              ),
+            ),
+          ],
+          const SizedBox(height: 8),
+          Align(
+            alignment: Alignment.centerRight,
+            child: AccessibleButton(
+              label: _saving ? 'Kaydediliyor' : 'Notu Kaydet',
+              semanticLabel: 'Danışan için yazdığınız notu kaydeder',
+              isLoading: _saving,
+              onPressed: (!changed || _saving || _loading) ? null : _save,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
