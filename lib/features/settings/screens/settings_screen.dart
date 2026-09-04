@@ -10,6 +10,8 @@ import '../../auth/state/auth_controller.dart';
 import '../../history/state/daily_goal_provider.dart';
 import '../../onboarding/screens/onboarding_screen.dart';
 import '../../auth/screens/privacy_consent_screen.dart';
+import '../../../shared/services/api_service.dart';
+import '../../dietitian/screens/dietitian_dashboard_screen.dart';
 import '../../food_scan/state/on_device_model_preference.dart';
 import '../../survey/screens/survey_screen.dart';
 import '../../survey/screens/usability_test_screen.dart';
@@ -101,9 +103,92 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     );
   }
 
+  /// Hesabın doğrulama durumunu gösterir.
+  ///
+  /// Rapor teslimatı doğrulanmış e-postaya bağlıdır; kullanıcı bunu
+  /// göremediği için rapor gelmediğinde sebebini anlayamıyordu.
+  Future<void> _showDietitianStatus() async {
+    final dashboard =
+        await ref.read(apiServiceProvider).getDietitianDashboard();
+    if (!mounted) return;
+    final data = dashboard.data;
+    final message = data == null
+        ? 'Hesap bilgisi alınamadı. Bağlantınızı kontrol edin.'
+        : 'E-posta doğrulaması: '
+            '${data.emailVerified ? "tamamlandı" : "bekliyor"}. '
+            'Aktif danışan: ${data.activePatients}. '
+            'Bekleyen eşleşme: ${data.pendingAssignments}.';
+    _accessibility.speak(message, priority: TtsPriority.high);
+    if (!mounted) return;
+    await showDialog<void>(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: const Text('Hesap Durumu'),
+        content: Text(message),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Tamam'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Diyetisyenin uzman profilini düzenler.
+  ///
+  /// Aynı diyalog panelde de kullanılır; ayarlardan da erişilebilmesi,
+  /// kullanıcının profilini bulmak için panele dönmesini gereksiz kılar.
+  Future<void> _openDietitianProfile() async {
+    final api = ref.read(apiServiceProvider);
+    final dashboard = await api.getDietitianDashboard();
+    if (!mounted) return;
+    final data = dashboard.data;
+    if (data == null) {
+      _accessibility.speak(
+        'Profil bilgisi alınamadı. Bağlantınızı kontrol edin.',
+        priority: TtsPriority.high,
+      );
+      return;
+    }
+
+    final entry = await showDialog<DietitianProfileEntry>(
+      context: context,
+      builder: (_) => DietitianProfileDialog(
+        initialName: data.fullName,
+        initialSpecialization: data.specialization,
+      ),
+    );
+    if (entry == null || !mounted) return;
+    if (entry.fullName.length < 2 || entry.specialization.length < 2) {
+      _accessibility.speak(
+        'Ad ve uzmanlık alanı en az iki karakter olmalıdır.',
+        priority: TtsPriority.high,
+      );
+      return;
+    }
+    final result = await api.updateDietitianProfile(
+      fullName: entry.fullName,
+      specialization: entry.specialization,
+      // Boş bırakıldıysa mevcut numara korunur; gönderilmez.
+      phone: entry.phone.isEmpty ? null : entry.phone,
+    );
+    if (!mounted) return;
+    _accessibility.speak(
+      result.isSuccess
+          ? 'Uzman profiliniz güncellendi.'
+          : result.errorMessage ?? 'Profil güncellenemedi.',
+      priority: TtsPriority.high,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    // Diyetisyen portalı hiç seslendirme yapmaz ve diyetisyen bir araştırma
+    // katılımcısı değildir; hasta ayarlarını ona göstermek kafa karıştırır.
+    final isDietitian =
+        ref.watch(authControllerProvider).user?.accountType == 'dietitian';
 
     return Scaffold(
       // Bu ekran Navigator.push ile açılır; arkasında AppShell
@@ -147,7 +232,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           _buildProfileHeader(),
           const SizedBox(height: 32),
 
-          _buildSectionTitle('Erişilebilirlik'),
+          _buildSectionTitle(isDietitian ? 'Görünüm' : 'Erişilebilirlik'),
           _buildSettingCard([
             _buildSwitchTile(
               title: 'Karanlık Mod',
@@ -164,92 +249,122 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 );
               },
             ),
-            _buildSliderTile(
-              title: 'Konuşma Hızı',
-              icon: Icons.record_voice_over_rounded,
-              value: _ttsSpeed,
-              onChanged: (v) {
-                setState(() => _ttsSpeed = v);
-                _accessibility.setSpeechRate(v);
-              },
-            ),
+            if (!isDietitian)
+              _buildSliderTile(
+                title: 'Konuşma Hızı',
+                icon: Icons.record_voice_over_rounded,
+                value: _ttsSpeed,
+                onChanged: (v) {
+                  setState(() => _ttsSpeed = v);
+                  _accessibility.setSpeechRate(v);
+                },
+              ),
           ]),
 
-          const SizedBox(height: 24),
-          _buildSectionTitle('Besin Tanıma'),
-          _buildSettingCard([
-            _buildSwitchTile(
-              key: const Key('settings_on_device_model'),
-              title: 'Cihaz Üstü Model',
-              subtitle: 'İnternetsiz tanır; kaloriyi siz onaylarsınız',
-              icon: Icons.memory_rounded,
-              value: ref.watch(onDeviceModelProvider),
-              onChanged: (v) {
-                ref.read(onDeviceModelProvider.notifier).setEnabled(v);
-                _accessibility.speak(
-                  v
-                      ? 'Cihaz üstü model açıldı. Tarama internete gitmez, '
-                          'yalnız yemek adı önerilir.'
-                      : 'Cihaz üstü model kapatıldı. Tarama sunucuda yapılır.',
-                  priority: TtsPriority.high,
-                );
-              },
-            ),
-          ]),
+          if (isDietitian) ...[
+            const SizedBox(height: 24),
+            _buildSectionTitle('Diyetisyen'),
+            _buildSettingCard([
+              _buildActionTile(
+                key: const Key('settings_dietitian_profile'),
+                title: 'Uzman Profilim',
+                icon: Icons.badge_rounded,
+                color: AppTheme.primaryColor,
+                onTap: _openDietitianProfile,
+              ),
+              // Rapor teslimatı doğrulanmış e-postaya bağlıdır; durumu
+              // görmeden neden rapor gelmediği anlaşılamıyordu.
+              _buildActionTile(
+                key: const Key('settings_dietitian_status'),
+                title: 'Hesap Durumu',
+                icon: Icons.verified_rounded,
+                color: AppTheme.primaryColor,
+                onTap: _showDietitianStatus,
+              ),
+            ]),
+          ],
 
-          const SizedBox(height: 24),
-          _buildSectionTitle('Beslenme Hedefleri'),
-          _buildSettingCard([
-            _buildGoalSlider(),
-          ]),
+          // Aşağıdaki bölümler yalnız hasta hesabı içindir: besin tanıma,
+          // kalori hedefi, tanıtım ve araştırma araçları diyetisyeni
+          // ilgilendirmez.
+          if (!isDietitian) ...[
+            const SizedBox(height: 24),
+            _buildSectionTitle('Besin Tanıma'),
+            _buildSettingCard([
+              _buildSwitchTile(
+                key: const Key('settings_on_device_model'),
+                title: 'Cihaz Üstü Model',
+                subtitle: 'İnternetsiz tanır; kaloriyi siz onaylarsınız',
+                icon: Icons.memory_rounded,
+                value: ref.watch(onDeviceModelProvider),
+                onChanged: (v) {
+                  ref.read(onDeviceModelProvider.notifier).setEnabled(v);
+                  _accessibility.speak(
+                    v
+                        ? 'Cihaz üstü model açıldı. Tarama internete gitmez, '
+                            'yalnız yemek adı önerilir.'
+                        : 'Cihaz üstü model kapatıldı. Tarama sunucuda yapılır.',
+                    priority: TtsPriority.high,
+                  );
+                },
+              ),
+            ]),
 
-          const SizedBox(height: 24),
-          _buildSectionTitle('Yardım'),
-          _buildSettingCard([
-            _buildActionTile(
-              key: const Key('settings_replay_onboarding'),
-              title: 'Tanıtımı Tekrar Dinle',
-              icon: Icons.replay_rounded,
-              color: AppTheme.primaryColor,
-              onTap: _replayOnboarding,
-            ),
-          ]),
+            const SizedBox(height: 24),
+            _buildSectionTitle('Beslenme Hedefleri'),
+            _buildSettingCard([
+              _buildGoalSlider(),
+            ]),
 
-          const SizedBox(height: 24),
-          // Araştırma araçları: TÜBİTAK metodolojisinde vaat edilen anket ve
-          // kullanılabilirlik testi verilerini toplamak için kullanılır.
-          _buildSectionTitle('Araştırma'),
-          _buildSettingCard([
-            _buildActionTile(
-              key: const Key('settings_open_privacy'),
-              title: 'Kişisel Verilerim ve İzinler',
-              icon: Icons.shield_outlined,
-              color: AppTheme.primaryColor,
-              onTap: () => Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (_) => const PrivacyConsentScreen(),
+            const SizedBox(height: 24),
+            _buildSectionTitle('Yardım'),
+            _buildSettingCard([
+              _buildActionTile(
+                key: const Key('settings_replay_onboarding'),
+                title: 'Tanıtımı Tekrar Dinle',
+                icon: Icons.replay_rounded,
+                color: AppTheme.primaryColor,
+                onTap: _replayOnboarding,
+              ),
+            ]),
+
+            const SizedBox(height: 24),
+            // Araştırma araçları: TÜBİTAK metodolojisinde vaat edilen anket ve
+            // kullanılabilirlik testi verilerini toplamak için kullanılır.
+            _buildSectionTitle('Araştırma'),
+            _buildSettingCard([
+              _buildActionTile(
+                key: const Key('settings_open_privacy'),
+                title: 'Kişisel Verilerim ve İzinler',
+                icon: Icons.shield_outlined,
+                color: AppTheme.primaryColor,
+                onTap: () => Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (_) => const PrivacyConsentScreen(),
+                  ),
                 ),
               ),
-            ),
-            _buildActionTile(
-              key: const Key('settings_open_survey'),
-              title: 'Anket',
-              icon: Icons.assignment_outlined,
-              color: AppTheme.primaryColor,
-              onTap: () => Navigator.of(context).push(
-                MaterialPageRoute(builder: (_) => const SurveyScreen()),
+              _buildActionTile(
+                key: const Key('settings_open_survey'),
+                title: 'Anket',
+                icon: Icons.assignment_outlined,
+                color: AppTheme.primaryColor,
+                onTap: () => Navigator.of(context).push(
+                  MaterialPageRoute(builder: (_) => const SurveyScreen()),
+                ),
               ),
-            ),
-            _buildActionTile(
-              key: const Key('settings_open_usability'),
-              title: 'Kullanılabilirlik Testi',
-              icon: Icons.science_outlined,
-              color: AppTheme.primaryColor,
-              onTap: () => Navigator.of(context).push(
-                MaterialPageRoute(builder: (_) => const UsabilityTestScreen()),
+              _buildActionTile(
+                key: const Key('settings_open_usability'),
+                title: 'Kullanılabilirlik Testi',
+                icon: Icons.science_outlined,
+                color: AppTheme.primaryColor,
+                onTap: () => Navigator.of(context).push(
+                  MaterialPageRoute(
+                      builder: (_) => const UsabilityTestScreen()),
+                ),
               ),
-            ),
-          ]),
+            ]),
+          ],
 
           const SizedBox(height: 24),
           _buildSectionTitle('Hesap Yönetimi'),

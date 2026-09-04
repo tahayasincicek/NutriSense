@@ -7,8 +7,6 @@ import '../../../shared/services/accessibility_service.dart';
 import '../../../shared/services/api_service.dart';
 import '../../../shared/widgets/accessible_button.dart';
 import 'send_report_wizard.dart';
-import 'dietitian_access_screen.dart';
-import '../../settings/screens/settings_screen.dart';
 import '../models/shared_report_history.dart';
 
 class DietitianScreen extends ConsumerStatefulWidget {
@@ -89,24 +87,6 @@ class _DietitianScreenState extends ConsumerState<DietitianScreen> {
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         title: const Text('Diyetisyen Paneli'),
-        actions: [
-          IconButton(
-            tooltip: 'Ayarlar',
-            onPressed: () => Navigator.of(context).push(
-              MaterialPageRoute(builder: (_) => const SettingsScreen()),
-            ),
-            icon: const Icon(Icons.settings_outlined),
-          ),
-          IconButton(
-            tooltip: 'Diyetisyen portalına giriş',
-            onPressed: () => Navigator.of(context).push(
-              MaterialPageRoute(
-                builder: (_) => const DietitianAccessScreen(),
-              ),
-            ),
-            icon: const Icon(Icons.admin_panel_settings_outlined),
-          ),
-        ],
       ),
       body: _loading
           ? const Center(child: CircularProgressIndicator())

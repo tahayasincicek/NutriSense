@@ -118,7 +118,7 @@ class _DietitianAccessScreenState extends ConsumerState<DietitianAccessScreen> {
                                     shape: BoxShape.circle,
                                   ),
                                   child: const Icon(
-                                    Icons.medical_information_outlined,
+                                    Icons.medical_information_rounded,
                                     size: 44,
                                     color: AppTheme.primaryColor,
                                   ),
