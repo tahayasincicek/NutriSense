@@ -637,10 +637,10 @@ class _ProfileHeader extends StatelessWidget {
         decoration: _surfaceDecoration(theme, accent: AppTheme.primaryColor),
         child: Row(
           children: [
-            const _IconTile(
-              icon: Icons.medical_services_rounded,
+            const Icon(
+              Icons.medical_services_rounded,
               color: AppTheme.primaryColor,
-              size: 60,
+              size: 34,
             ),
             const SizedBox(width: 16),
             Expanded(
@@ -860,7 +860,7 @@ class _MetricCard extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(width: 8),
-                _IconTile(icon: icon, color: color, size: 38),
+                Icon(icon, color: color, size: 26),
               ],
             ),
             const SizedBox(height: 14),
@@ -907,7 +907,7 @@ class _WideMetricCard extends StatelessWidget {
         decoration: _surfaceDecoration(theme),
         child: Row(
           children: [
-            _IconTile(icon: icon, color: color, size: 48),
+            Icon(icon, color: color, size: 28),
             const SizedBox(width: 14),
             Expanded(
               child: Column(
@@ -1975,47 +1975,6 @@ BoxDecoration _surfaceDecoration(ThemeData theme, {Color? accent}) =>
       ],
     );
 
-/// Panelin her yerinde kullanılan ikon karosu.
-///
-/// İkonlar önceden üç ayrı biçimde çiziliyordu: kimi çıplak duruyor, kimi
-/// düz renkli bir kutunun içindeydi, boyutları da tutmuyordu. Bu dağınıklık
-/// paneli amatör gösteriyordu. Tek bir karo tanımı hepsini aynı dile getirir:
-/// iki tonlu yumuşak dolgu, ince kenarlık, sabit oran.
-class _IconTile extends StatelessWidget {
-  const _IconTile({
-    required this.icon,
-    required this.color,
-    this.size = 44,
-  });
-
-  final IconData icon;
-  final Color color;
-  final double size;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: size,
-      height: size,
-      decoration: BoxDecoration(
-        // Düz tek renk yerine hafif bir eğim: karoya derinlik verir ama
-        // ikonun okunurluğunu bozacak kadar koyulaşmaz.
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            color.withValues(alpha: 0.16),
-            color.withValues(alpha: 0.07),
-          ],
-        ),
-        borderRadius: BorderRadius.circular(size * 0.32),
-        border: Border.all(color: color.withValues(alpha: 0.18)),
-      ),
-      child: Icon(icon, color: color, size: size * 0.5),
-    );
-  }
-}
-
 String _mealLabel(String value) => switch (value) {
       'kahvalti' => 'Kahvaltı',
       'ogle' => 'Öğle',
@@ -2194,12 +2153,12 @@ class _FocusList extends StatelessWidget {
             ),
             child: Row(
               children: [
-                _IconTile(
-                  icon: patient.needsFollowUp
+                Icon(
+                  patient.needsFollowUp
                       ? Icons.notifications_active_rounded
                       : Icons.trending_up_rounded,
                   color: accent,
-                  size: 42,
+                  size: 26,
                 ),
                 const SizedBox(width: 14),
                 Expanded(
