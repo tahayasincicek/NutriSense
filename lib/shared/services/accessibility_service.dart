@@ -292,12 +292,21 @@ class AccessibilityService with WidgetsBindingObserver {
   }
 
   /// Tüm konuşmayı durdurur ve kuyruğu temizler.
+  ///
+  /// Bayraklar motoru beklemeden, hemen sıfırlanır. Aksi hâlde ekran
+  /// değişiminde şu yarış oluşuyordu: durdurma `_tts.stop()` beklerken yeni
+  /// ekran duyurusunu kuyruğa ekliyor, fakat `_isProcessingQueue` hâlâ true
+  /// göründüğü için kuyruk işletilmiyor; durdurma bitince bayrağı düşürüyor
+  /// ama kimse kuyruğu yeniden tetiklemiyordu. Sonuç: eski ses devam ediyor,
+  /// yeni ekranın cümlesi hiç okunmuyordu.
   Future<void> stop() async {
     _messageQueue.clear();
-    await _tts.stop();
     _isSpeaking = false;
     _isPaused = false;
     _isProcessingQueue = false;
+    await _tts.stop();
+    // Durdurma sürerken yeni bir duyuru eklendiyse kuyrukta unutulmasın.
+    if (_messageQueue.isNotEmpty) unawaited(_processQueue());
   }
 
   /// Mesajı işletim sisteminin ekran okuyucusuna duyurur.
