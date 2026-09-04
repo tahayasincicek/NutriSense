@@ -763,43 +763,22 @@ class _SectionHeading extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Row(
-          children: [
-            // Başlığın solundaki kısa çubuk bölümlerin nerede başladığını
-            // gösterir; uzun listede bölümler birbirine karışmaz.
-            Container(
-              width: 3,
-              height: 16,
-              decoration: BoxDecoration(
-                color: AppTheme.primaryColor,
-                borderRadius: BorderRadius.circular(2),
-              ),
+        Semantics(
+          header: true,
+          child: Text(
+            // Hasta ekranlarındaki bölüm başlığı ölçüsü.
+            title,
+            style: theme.textTheme.titleMedium?.copyWith(
+              fontWeight: FontWeight.bold,
             ),
-            const SizedBox(width: 9),
-            Expanded(
-              child: Semantics(
-                header: true,
-                child: Text(
-                  // Hasta ekranlarındaki bölüm başlığı ölçüsü.
-                  title,
-                  style: theme.textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
-            ),
-          ],
+          ),
         ),
         const SizedBox(height: 2),
-        Padding(
-          // Çubuk kadar içeri alınır ki alt yazı başlıkla aynı hizada dursun.
-          padding: const EdgeInsets.only(left: 12),
-          child: Text(
-            subtitle,
-            style: theme.textTheme.bodySmall?.copyWith(
-              color: theme.colorScheme.onSurfaceVariant,
-              fontWeight: FontWeight.w600,
-            ),
+        Text(
+          subtitle,
+          style: theme.textTheme.bodySmall?.copyWith(
+            color: theme.colorScheme.onSurfaceVariant,
+            fontWeight: FontWeight.w600,
           ),
         ),
       ],
