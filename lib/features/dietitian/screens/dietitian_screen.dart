@@ -235,6 +235,60 @@ class _DietitianScreenState extends ConsumerState<DietitianScreen> {
     );
   }
 
+  /// Amber'ın zemine göre okunabilir tonu.
+  ///
+  /// Amber 500 beyaz üzerinde sönük kalıyor, koyu temada ise koyu ton
+  /// kayboluyor; ton zemine göre seçilir.
+  Color _warningInk(ThemeData theme) => theme.brightness == Brightness.dark
+      ? AppTheme.warningColor
+      : AppTheme.warningTextColor;
+
+  /// Durum rozeti: nokta göstergesi, ince kenarlık ve okunabilir metin.
+  ///
+  /// Eskiden düz sarı dolgulu bir kutuydu; kenarlıksız ve düşük kontrastlı
+  /// olduğu için karta yapıştırılmış gibi duruyordu. Nokta, rengi tek başına
+  /// ayırt edemeyen kullanıcı için de durumu görünür kılar.
+  Widget _buildStatusPill({
+    required String label,
+    required Color accent,
+    required bool isPositive,
+  }) {
+    final theme = Theme.of(context);
+    final ink = isPositive
+        ? (theme.brightness == Brightness.dark
+            ? AppTheme.primaryColor
+            : AppTheme.primaryDark)
+        : _warningInk(theme);
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      decoration: BoxDecoration(
+        color: accent.withOpacity(0.08),
+        borderRadius: BorderRadius.circular(999),
+        border: Border.all(color: accent.withOpacity(0.25)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            width: 6,
+            height: 6,
+            decoration: BoxDecoration(color: ink, shape: BoxShape.circle),
+          ),
+          const SizedBox(width: 8),
+          Text(
+            label,
+            style: theme.textTheme.labelMedium?.copyWith(
+              color: ink,
+              fontWeight: FontWeight.w600,
+              letterSpacing: 0.1,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildAssignmentCard() {
     final theme = Theme.of(context);
     final assignment = _assignment!;
@@ -290,24 +344,12 @@ class _DietitianScreenState extends ConsumerState<DietitianScreen> {
                     textAlign: TextAlign.center,
                     style: theme.textTheme.titleLarge),
                 const SizedBox(height: 4),
-                Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-                  decoration: BoxDecoration(
-                    color: isApproved
-                        ? theme.colorScheme.primary.withOpacity(0.1)
-                        : Colors.amber.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: Text(
-                    statusLabel,
-                    style: TextStyle(
-                        color: isApproved
-                            ? theme.colorScheme.primary
-                            : Colors.amber[800],
-                        fontWeight: FontWeight.bold,
-                        fontSize: 12),
-                  ),
+                _buildStatusPill(
+                  label: statusLabel,
+                  accent: isApproved
+                      ? AppTheme.primaryColor
+                      : AppTheme.warningColor,
+                  isPositive: isApproved,
                 ),
               ],
             ),
@@ -320,19 +362,32 @@ class _DietitianScreenState extends ConsumerState<DietitianScreen> {
               container: true,
               label: 'Onayınız alındı. ${assignment.dietitianName} isteği '
                   'kabul ettiğinde bağlantı kurulacak.',
-              child: Row(
-                children: [
-                  Icon(Icons.hourglass_top_rounded,
-                      size: 20, color: Colors.amber[800]),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      'Onayınız alındı. ${assignment.dietitianName} isteği '
-                      'kabul ettiğinde bağlantı kurulacak.',
-                      style: theme.textTheme.bodyMedium,
+              child: Container(
+                padding: const EdgeInsets.all(14),
+                decoration: BoxDecoration(
+                  color: AppTheme.warningColor.withOpacity(0.08),
+                  borderRadius: BorderRadius.circular(AppTheme.buttonRadius),
+                  border: Border.all(
+                      color: AppTheme.warningColor.withOpacity(0.22)),
+                ),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Icon(Icons.hourglass_top_rounded,
+                        size: 18, color: _warningInk(theme)),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Text(
+                        'Onayınız alındı. ${assignment.dietitianName} isteği '
+                        'kabul ettiğinde bağlantı kurulacak.',
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: theme.colorScheme.onSurface,
+                          height: 1.4,
+                        ),
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             )
           else if (!isApproved)
@@ -444,25 +499,12 @@ class _DietitianScreenState extends ConsumerState<DietitianScreen> {
                         ?.copyWith(fontWeight: FontWeight.bold),
                   ),
                 ),
-                Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                  decoration: BoxDecoration(
-                    color: item.status == 'completed'
-                        ? AppTheme.primaryColor.withOpacity(0.1)
-                        : AppTheme.warningColor.withOpacity(0.15),
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: Text(
-                    item.statusLabel,
-                    style: TextStyle(
-                      fontSize: 11,
-                      fontWeight: FontWeight.bold,
-                      color: item.status == 'completed'
-                          ? AppTheme.primaryColor
-                          : AppTheme.warningColor,
-                    ),
-                  ),
+                _buildStatusPill(
+                  label: item.statusLabel,
+                  accent: item.isDelivered
+                      ? AppTheme.primaryColor
+                      : AppTheme.warningColor,
+                  isPositive: item.isDelivered,
                 ),
               ],
             ),

@@ -25,6 +25,12 @@ class AppTheme {
   static const Color errorColor = Color(0xFFEF4444); // Red 500
   static const Color infoColor = Color(0xFF3B82F6); // Blue 500
 
+  /// Açık zeminde yazı olarak kullanılacak amber tonu.
+  ///
+  /// Amber 500 beyaz üzerinde 2:1 civarında kalıyor ve okunmuyor; durum
+  /// rozetlerinde metin bu koyu tonla, dolgu ise [warningColor] ile çizilir.
+  static const Color warningTextColor = Color(0xFFB45309); // Amber 700
+
   // Light Mode Colors
   static const Color lightBg = Color(0xFFF8FAFC); // Slate 50
   static const Color lightSurface = Color(0xFFFFFFFF);

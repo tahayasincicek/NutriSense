@@ -38,19 +38,26 @@ class SharedReportHistoryItem {
   String get spokenSummary {
     final period = '${_spokenDate(fromDate)} ile ${_spokenDate(toDate)} arası';
     final reply = hasReply ? 'Diyetisyeniniz cevap yazdı.' : 'Henüz cevap yok.';
-    return '$period, $recordCount kayıt, durum $statusLabel. $reply';
+    return '$period, $recordCount kayıt, durum '
+        '${statusLabel.toLowerCase()}. $reply';
   }
+
+  /// Rapor karşı tarafa ulaştı mı.
+  bool get isDelivered => status == 'completed' || status == 'sent';
 
   String get statusLabel {
     switch (status) {
+      // Backend tamamlanan gönderim için 'sent' de yazıyor; bu durum
+      // karşılanmadığı için kartlarda ham "sent" metni görünüyordu.
       case 'completed':
-        return 'gönderildi';
+      case 'sent':
+        return 'Gönderildi';
       case 'partial':
-        return 'kısmen gönderildi';
+        return 'Kısmen gönderildi';
       case 'failed':
-        return 'gönderilemedi';
+        return 'Gönderilemedi';
       case 'pending':
-        return 'gönderiliyor';
+        return 'Gönderiliyor';
       default:
         return status;
     }
