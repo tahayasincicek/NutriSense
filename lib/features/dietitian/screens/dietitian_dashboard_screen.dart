@@ -1,3 +1,5 @@
+import 'dart:ui' show FontFeature;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -254,12 +256,46 @@ class _DietitianDashboardScreenState
                             .textTheme
                             .titleMedium
                             ?.copyWith(fontWeight: FontWeight.bold)),
-                    Text('NutriSense Pro',
-                        overflow: TextOverflow.ellipsis,
-                        style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                            color: Theme.of(context)
-                                .colorScheme
-                                .onSurfaceVariant)),
+                    // "Pro" ayrı bir rozet olarak durur: düz gri alt yazı
+                    // olarak yazıldığında portalın ayrı bir ürün olduğu
+                    // hiç belli olmuyordu.
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text('NutriSense',
+                            overflow: TextOverflow.ellipsis,
+                            style: Theme.of(context)
+                                .textTheme
+                                .labelSmall
+                                ?.copyWith(
+                                    letterSpacing: 0.4,
+                                    fontWeight: FontWeight.w700,
+                                    color: Theme.of(context)
+                                        .colorScheme
+                                        .onSurfaceVariant)),
+                        const SizedBox(width: 5),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 5, vertical: 1),
+                          decoration: BoxDecoration(
+                            color:
+                                AppTheme.primaryColor.withValues(alpha: 0.12),
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                          child: Text('PRO',
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .labelSmall
+                                  ?.copyWith(
+                                    fontSize: 9,
+                                    letterSpacing: 0.8,
+                                    fontWeight: FontWeight.w800,
+                                    color:
+                                        Theme.of(context).colorScheme.primary,
+                                  )),
+                        ),
+                      ],
+                    ),
                   ],
                 ),
               ),
@@ -601,18 +637,10 @@ class _ProfileHeader extends StatelessWidget {
         decoration: _surfaceDecoration(theme, accent: AppTheme.primaryColor),
         child: Row(
           children: [
-            Container(
-              width: 62,
-              height: 62,
-              decoration: BoxDecoration(
-                color: AppTheme.primaryColor.withValues(alpha: 0.11),
-                borderRadius: BorderRadius.circular(18),
-              ),
-              child: const Icon(
-                Icons.medical_services_rounded,
-                color: AppTheme.primaryColor,
-                size: 30,
-              ),
+            const _IconTile(
+              icon: Icons.medical_services_rounded,
+              color: AppTheme.primaryColor,
+              size: 60,
             ),
             const SizedBox(width: 16),
             Expanded(
@@ -639,13 +667,22 @@ class _ProfileHeader extends StatelessWidget {
                   const SizedBox(height: 10),
                   Container(
                     padding:
-                        const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                        const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                     decoration: BoxDecoration(
                       color: (data.emailVerified
                               ? AppTheme.successColor
                               : AppTheme.warningColor)
-                          .withValues(alpha: 0.11),
+                          .withValues(alpha: 0.10),
                       borderRadius: BorderRadius.circular(999),
+                      // Rozet dolgusu zeminden yalnız yüzde on ayrışıyordu ve
+                      // kartın üstünde yüzer gibi duruyordu; ince kenarlık
+                      // onu kartın parçası hâline getirir.
+                      border: Border.all(
+                        color: (data.emailVerified
+                                ? AppTheme.successColor
+                                : AppTheme.warningColor)
+                            .withValues(alpha: 0.28),
+                      ),
                     ),
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
@@ -679,10 +716,29 @@ class _ProfileHeader extends StatelessWidget {
                 ],
               ),
             ),
-            IconButton(
-              tooltip: 'Profili düzenle',
-              onPressed: onEdit,
-              icon: const Icon(Icons.edit_rounded),
+            // Çıplak ikon düğmesi kartın köşesinde başıboş duruyordu; çerçeve
+            // onu bir eylem olarak okutur ve dokunma alanını belli eder.
+            Semantics(
+              button: true,
+              label: 'Profili düzenle',
+              child: Material(
+                color: Colors.transparent,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  side: BorderSide(
+                    color: theme.colorScheme.outline.withValues(alpha: 0.35),
+                  ),
+                ),
+                clipBehavior: Clip.antiAlias,
+                child: InkWell(
+                  onTap: onEdit,
+                  child: const SizedBox(
+                    width: 44,
+                    height: 44,
+                    child: Icon(Icons.edit_rounded, size: 19),
+                  ),
+                ),
+              ),
             ),
           ],
         ),
@@ -707,22 +763,43 @@ class _SectionHeading extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Semantics(
-          header: true,
-          child: Text(
-            // Hasta ekranlarındaki bölüm başlığı ölçüsü.
-            title,
-            style: theme.textTheme.titleMedium?.copyWith(
-              fontWeight: FontWeight.bold,
+        Row(
+          children: [
+            // Başlığın solundaki kısa çubuk bölümlerin nerede başladığını
+            // gösterir; uzun listede bölümler birbirine karışmaz.
+            Container(
+              width: 3,
+              height: 16,
+              decoration: BoxDecoration(
+                color: AppTheme.primaryColor,
+                borderRadius: BorderRadius.circular(2),
+              ),
             ),
-          ),
+            const SizedBox(width: 9),
+            Expanded(
+              child: Semantics(
+                header: true,
+                child: Text(
+                  // Hasta ekranlarındaki bölüm başlığı ölçüsü.
+                  title,
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ),
+          ],
         ),
         const SizedBox(height: 2),
-        Text(
-          subtitle,
-          style: theme.textTheme.bodySmall?.copyWith(
-            color: theme.colorScheme.onSurfaceVariant,
-            fontWeight: FontWeight.w600,
+        Padding(
+          // Çubuk kadar içeri alınır ki alt yazı başlıkla aynı hizada dursun.
+          padding: const EdgeInsets.only(left: 12),
+          child: Text(
+            subtitle,
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: theme.colorScheme.onSurfaceVariant,
+              fontWeight: FontWeight.w600,
+            ),
           ),
         ),
       ],
@@ -754,24 +831,48 @@ class _MetricCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Hasta ekranlarındaki kart ölçüsü: ikon doğrudan ve daha büyük
-            // durur, soluk bir kutunun içinde küçülmez; değer daha kalındır.
-            Icon(icon, color: color, size: 28),
-            const SizedBox(height: 16),
+            // Etiket üstte, sayı altında: gözün okuma sırası "neyin sayısı,
+            // kaç tane" biçiminde ilerler. İkon sağ üstte durur ve sayıyla
+            // yer değiştirmez; iki kart yan yanayken rakamlar aynı hizada
+            // kalır, panel derli toplu görünür.
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(
+                  // Etiket alanı iki satırlık yer kaplar. "Bekleyen eşleşme"
+                  // alta taşınca kart uzuyor ve yan yana duran iki kartın
+                  // rakamları farklı hizaya düşüyordu.
+                  child: SizedBox(
+                    height: 40,
+                    child: Padding(
+                      padding: const EdgeInsets.only(top: 3),
+                      child: Text(
+                        label,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: theme.colorScheme.onSurfaceVariant,
+                          fontWeight: FontWeight.w600,
+                          height: 1.3,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                _IconTile(icon: icon, color: color, size: 38),
+              ],
+            ),
+            const SizedBox(height: 14),
             Text(
               value,
-              style: theme.textTheme.headlineSmall?.copyWith(
-                fontWeight: FontWeight.w900,
+              style: theme.textTheme.displaySmall?.copyWith(
+                fontWeight: FontWeight.w800,
                 color: color,
-              ),
-            ),
-            const SizedBox(height: 4),
-            Text(
-              label,
-              style: theme.textTheme.bodySmall?.copyWith(
-                color: theme.colorScheme.onSurfaceVariant,
-                fontWeight: FontWeight.w600,
-                height: 1.35,
+                height: 1,
+                // Rakamlar eşit genişlikte çizilir; sayı değişince kart
+                // içindeki hizalama oynamaz.
+                fontFeatures: const [FontFeature.tabularFigures()],
               ),
             ),
           ],
@@ -806,15 +907,7 @@ class _WideMetricCard extends StatelessWidget {
         decoration: _surfaceDecoration(theme),
         child: Row(
           children: [
-            Container(
-              width: 48,
-              height: 48,
-              decoration: BoxDecoration(
-                color: color.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(15),
-              ),
-              child: Icon(icon, color: color, size: 25),
-            ),
+            _IconTile(icon: icon, color: color, size: 48),
             const SizedBox(width: 14),
             Expanded(
               child: Column(
@@ -1882,6 +1975,47 @@ BoxDecoration _surfaceDecoration(ThemeData theme, {Color? accent}) =>
       ],
     );
 
+/// Panelin her yerinde kullanılan ikon karosu.
+///
+/// İkonlar önceden üç ayrı biçimde çiziliyordu: kimi çıplak duruyor, kimi
+/// düz renkli bir kutunun içindeydi, boyutları da tutmuyordu. Bu dağınıklık
+/// paneli amatör gösteriyordu. Tek bir karo tanımı hepsini aynı dile getirir:
+/// iki tonlu yumuşak dolgu, ince kenarlık, sabit oran.
+class _IconTile extends StatelessWidget {
+  const _IconTile({
+    required this.icon,
+    required this.color,
+    this.size = 44,
+  });
+
+  final IconData icon;
+  final Color color;
+  final double size;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: size,
+      height: size,
+      decoration: BoxDecoration(
+        // Düz tek renk yerine hafif bir eğim: karoya derinlik verir ama
+        // ikonun okunurluğunu bozacak kadar koyulaşmaz.
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            color.withValues(alpha: 0.16),
+            color.withValues(alpha: 0.07),
+          ],
+        ),
+        borderRadius: BorderRadius.circular(size * 0.32),
+        border: Border.all(color: color.withValues(alpha: 0.18)),
+      ),
+      child: Icon(icon, color: color, size: size * 0.5),
+    );
+  }
+}
+
 String _mealLabel(String value) => switch (value) {
       'kahvalti' => 'Kahvaltı',
       'ogle' => 'Öğle',
@@ -2060,12 +2194,12 @@ class _FocusList extends StatelessWidget {
             ),
             child: Row(
               children: [
-                Icon(
-                  patient.needsFollowUp
+                _IconTile(
+                  icon: patient.needsFollowUp
                       ? Icons.notifications_active_rounded
                       : Icons.trending_up_rounded,
                   color: accent,
-                  size: 26,
+                  size: 42,
                 ),
                 const SizedBox(width: 14),
                 Expanded(
