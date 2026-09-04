@@ -1932,21 +1932,30 @@ class _MealCard extends StatelessWidget {
               ],
             ),
           ),
-          const SizedBox(width: 10),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 7),
-            decoration: BoxDecoration(
-              color: AppTheme.warningColor.withValues(alpha: 0.09),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Text(
-              '${log.totalCalories.toStringAsFixed(0)}\nkcal',
-              textAlign: TextAlign.center,
-              style: theme.textTheme.bodySmall?.copyWith(
-                color: AppTheme.warningColor,
-                fontWeight: FontWeight.w900,
-                height: 1.25,
-              ),
+          const SizedBox(width: 12),
+          // Kalori kutusuz yazılır. Her satırda bir dolgu bloğu olması
+          // listeyi benekli gösteriyordu; sayıyı öne çıkaran şey kutu değil,
+          // birimden ayrılan ağırlık ve boyut farkı.
+          Text.rich(
+            TextSpan(
+              children: [
+                TextSpan(
+                  text: log.totalCalories.toStringAsFixed(0),
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w800,
+                    height: 1.1,
+                    // Rakamlar eşit genişlikte; satırlar alt alta hizalı kalır.
+                    fontFeatures: const [FontFeature.tabularFigures()],
+                  ),
+                ),
+                TextSpan(
+                  text: ' kcal',
+                  style: theme.textTheme.labelSmall?.copyWith(
+                    color: theme.colorScheme.onSurfaceVariant,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
             ),
           ),
         ],
