@@ -353,12 +353,27 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       required IconData icon,
       required bool value,
       required ValueChanged<bool> onChanged}) {
-    return ListTile(
+    // SwitchListTile kullanılır: başlık ile anahtarı tek bir semantik düğümde
+    // birleştirir. Ayrı bir `trailing: Switch` bırakılsaydı anahtar adsız
+    // kalır ve ekran okuyucu yalnız "düğme" derdi.
+    // Sarmalayıcı adı, açıklamayı ve açık/kapalı durumunu taşır; dokunma
+    // eylemini de kendisi sunar. İç anahtarın semantiği kapatılır, aksi
+    // hâlde ekran okuyucu adsız ikinci bir düğüme odaklanıp yalnız "düğme"
+    // der ve kullanıcı neyi açtığını bilmez.
+    return Semantics(
       key: key,
-      leading: Icon(icon, color: AppTheme.primaryColor),
-      title: Text(title),
-      subtitle: Text(subtitle, style: const TextStyle(fontSize: 12)),
-      trailing: Switch.adaptive(value: value, onChanged: onChanged),
+      label: title,
+      hint: subtitle,
+      toggled: value,
+      onTap: () => onChanged(!value),
+      excludeSemantics: true,
+      child: SwitchListTile(
+        secondary: Icon(icon, color: AppTheme.primaryColor),
+        title: Text(title),
+        subtitle: Text(subtitle, style: const TextStyle(fontSize: 12)),
+        value: value,
+        onChanged: onChanged,
+      ),
     );
   }
 
@@ -372,10 +387,22 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     return ListTile(
       leading: Icon(icon, color: AppTheme.primaryColor),
       title: Text(title),
+      // Sarmalayıcı adı ve değeri taşır, eylemleri de kendisi sunar; iç
+      // kaydırıcının semantiği kapatılır. Aksi hâlde ekran okuyucu adsız
+      // ikinci bir düğüme odaklanıp yalnız "kaydırıcı" der.
       subtitle: Semantics(
         slider: true,
         label: title,
         value: 'yüzde $percent',
+        // Artır/azalt eylemleri, ulaşılacak değerlerle birlikte bildirilmek
+        // zorundadır; ekran okuyucu kullanıcıya sonucu önceden söyler.
+        increasedValue:
+            'yüzde ${((value + 0.1).clamp(0.1, 1.0) * 100).round()}',
+        decreasedValue:
+            'yüzde ${((value - 0.1).clamp(0.1, 1.0) * 100).round()}',
+        excludeSemantics: true,
+        onIncrease: () => onChanged((value + 0.1).clamp(0.1, 1.0)),
+        onDecrease: () => onChanged((value - 0.1).clamp(0.1, 1.0)),
         child: Slider(
           key: const Key('tts_speed_slider'),
           value: value,
