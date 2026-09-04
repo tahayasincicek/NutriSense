@@ -110,74 +110,32 @@ class _DietitianAccessScreenState extends ConsumerState<DietitianAccessScreen> {
                             children: [
                               Align(
                                 child: Container(
-                                  width: 100,
-                                  height: 100,
-                                  padding: const EdgeInsets.all(4),
+                                  width: 88,
+                                  height: 88,
                                   decoration: BoxDecoration(
+                                    color: AppTheme.primaryColor
+                                        .withValues(alpha: 0.11),
                                     shape: BoxShape.circle,
-                                    border: Border.all(
-                                      color: AppTheme.primaryColor.withValues(alpha: 0.2),
-                                      width: 2,
-                                    ),
                                   ),
-                                  child: Container(
-                                    decoration: BoxDecoration(
-                                      shape: BoxShape.circle,
-                                      gradient: const LinearGradient(
-                                        colors: [AppTheme.primaryColor, AppTheme.primaryDark],
-                                        begin: Alignment.topLeft,
-                                        end: Alignment.bottomRight,
-                                      ),
-                                      boxShadow: [
-                                        BoxShadow(
-                                          color: AppTheme.primaryColor.withValues(alpha: 0.3),
-                                          blurRadius: 20,
-                                          offset: const Offset(0, 10),
-                                        ),
-                                      ],
-                                    ),
-                                    child: const Icon(
-                                      Icons.medical_information_rounded,
-                                      size: 50,
-                                      color: Colors.white,
-                                    ),
+                                  child: const Icon(
+                                    Icons.medical_information_rounded,
+                                    size: 44,
+                                    color: AppTheme.primaryColor,
                                   ),
                                 ),
                               ),
-                              const SizedBox(height: 24),
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Container(
-                                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-                                    decoration: BoxDecoration(
-                                      color: AppTheme.primaryColor.withValues(alpha: 0.1),
-                                      borderRadius: BorderRadius.circular(20),
-                                      border: Border.all(color: AppTheme.primaryColor.withValues(alpha: 0.2)),
-                                    ),
-                                    child: Text(
-                                      'PROFESYONEL PORTAL',
-                                      style: theme.textTheme.labelSmall?.copyWith(
-                                        color: AppTheme.primaryDark,
-                                        fontWeight: FontWeight.w900,
-                                        letterSpacing: 1.2,
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: 12),
+                              const SizedBox(height: 22),
                               Semantics(
                                 header: true,
                                 child: Text(
                                   _registering
-                                      ? 'Uzman Hesabı Oluştur'
-                                      : 'Diyetisyen Girişi',
+                                      ? 'Uzman hesabını oluştur'
+                                      : 'Diyetisyen Portalı',
                                   textAlign: TextAlign.center,
-                                  style: theme.textTheme.headlineLarge?.copyWith(
+                                  style: theme.textTheme.displaySmall?.copyWith(
                                     color: AppTheme.primaryDark,
                                     fontWeight: FontWeight.w900,
-                                    letterSpacing: -1.0,
+                                    letterSpacing: -0.8,
                                   ),
                                 ),
                               ),

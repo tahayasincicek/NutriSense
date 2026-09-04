@@ -38,6 +38,29 @@ void main() {
     expect(find.text('Ayarlar sayfası'), findsNothing);
   });
 
+  testWidgets('çıkış arada loading durumundan geçse de yığın köke iner',
+      (tester) async {
+    final auth = _FakeAuthController();
+    await tester.pumpWidget(_app(auth));
+    await tester.pumpAndSettle();
+
+    final navigator = tester.state<NavigatorState>(find.byType(Navigator));
+    navigator.push(
+      MaterialPageRoute<void>(
+        builder: (_) => const Scaffold(body: Text('Ayarlar sayfası')),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    // Gerçek logout() önce loading'e geçiyor. Kapı "önceki durum
+    // authenticated miydi" diye baksaydı bu geçişi kaçırır ve Ayarlar
+    // ekranı giriş ekranının üstünde asılı kalırdı.
+    auth.signOutThroughLoading();
+    await tester.pumpAndSettle();
+
+    expect(find.text('Ayarlar sayfası'), findsNothing);
+  });
+
   testWidgets('oturum kilitlenince de yığın köke iner', (tester) async {
     final auth = _FakeAuthController();
     await tester.pumpWidget(_app(auth));
@@ -103,6 +126,12 @@ class _FakeAuthController extends AuthController {
   Future<void> bootstrap() async {}
 
   void signOut() => state = const AuthState(AuthStatus.unauthenticated);
+
+  /// Gerçek [AuthController.logout] gibi önce loading'e geçer.
+  void signOutThroughLoading() {
+    state = const AuthState(AuthStatus.loading);
+    state = const AuthState(AuthStatus.unauthenticated);
+  }
 
   void lock() => state = const AuthState(
         AuthStatus.locked,

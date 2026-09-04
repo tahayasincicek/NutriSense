@@ -156,76 +156,51 @@ class _DietitianScreenState extends ConsumerState<DietitianScreen> {
     final theme = Theme.of(context);
     return Container(
       padding: const EdgeInsets.all(24),
+      // Kart görünümü diğer sekmelerdeki kartlarla aynı: aynı yüzey rengi,
+      // aynı köşe yarıçapı, aynı ince kenarlık. Farklı bir kenarlık ve gölge
+      // kullanmak paneli uygulamanın dışında bir yer gibi gösteriyordu.
       decoration: BoxDecoration(
         color: theme.colorScheme.surface,
         borderRadius: BorderRadius.circular(AppTheme.cardRadius),
         border: Border.all(color: theme.colorScheme.outline.withOpacity(0.2)),
-        boxShadow: [
-          BoxShadow(
-            color: AppTheme.primaryColor.withOpacity(0.06),
-            blurRadius: 20,
-            offset: const Offset(0, 8),
-          ),
-        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
+          // Ana eylemin simgesi, uygulamanın diğer birincil kartlarındaki
+          // gibi yeşil gradyanlı yuvarlak bir alan içinde durur.
           Center(
             child: Container(
-              width: 76,
-              height: 76,
-              padding: const EdgeInsets.all(4),
+              width: 64,
+              height: 64,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                border: Border.all(
-                  color: AppTheme.primaryColor.withOpacity(0.2),
-                  width: 2,
+                gradient: const LinearGradient(
+                  colors: [AppTheme.primaryColor, AppTheme.primaryDark],
                 ),
-              ),
-              child: Container(
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  gradient: const LinearGradient(
-                    colors: [AppTheme.primaryColor, AppTheme.primaryDark],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
+                boxShadow: [
+                  BoxShadow(
+                    color: AppTheme.primaryColor.withOpacity(0.3),
+                    blurRadius: 16,
+                    offset: const Offset(0, 6),
                   ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: AppTheme.primaryColor.withOpacity(0.35),
-                      blurRadius: 16,
-                      offset: const Offset(0, 6),
-                    ),
-                  ],
-                ),
-                child: const Icon(Icons.person_search_rounded,
-                    size: 38, color: Colors.white),
+                ],
               ),
+              child: const Icon(Icons.person_search_rounded,
+                  size: 32, color: Colors.white),
             ),
           ),
-          const SizedBox(height: 20),
+          const SizedBox(height: 16),
           Text('Diyetisyen Atama',
               style: theme.textTheme.titleLarge
                   ?.copyWith(fontWeight: FontWeight.w800),
               textAlign: TextAlign.center),
-          const SizedBox(height: 8),
+          const SizedBox(height: 12),
           Text(
             'Diyetisyeninin e-posta adresini yazarak bağlantı isteği gönderebilirsin.',
             textAlign: TextAlign.center,
             style: theme.textTheme.bodyMedium
                 ?.copyWith(color: theme.colorScheme.onSurfaceVariant),
-          ),
-          const SizedBox(height: 20),
-          Wrap(
-            alignment: WrapAlignment.center,
-            spacing: 8,
-            runSpacing: 8,
-            children: [
-              _buildFeatureChip(Icons.share_rounded, 'Rapor Paylaşımı'),
-              _buildFeatureChip(Icons.analytics_rounded, 'Uzman Analizi'),
-              _buildFeatureChip(Icons.star_rounded, 'Birebir Takip'),
-            ],
           ),
           const SizedBox(height: 24),
           Semantics(
@@ -254,31 +229,6 @@ class _DietitianScreenState extends ConsumerState<DietitianScreen> {
                 'Diyetisyeninize bağlantı isteği göndermek için basın',
             isLoading: _busy,
             onPressed: _busy ? null : _requestAssignment,
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildFeatureChip(IconData icon, String label) {
-    final theme = Theme.of(context);
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-      decoration: BoxDecoration(
-        color: AppTheme.primaryColor.withOpacity(0.08),
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(icon, size: 14, color: AppTheme.primaryDark),
-          const SizedBox(width: 5),
-          Text(
-            label,
-            style: theme.textTheme.labelSmall?.copyWith(
-              color: AppTheme.primaryDark,
-              fontWeight: FontWeight.w700,
-            ),
           ),
         ],
       ),
@@ -369,13 +319,6 @@ class _DietitianScreenState extends ConsumerState<DietitianScreen> {
             color: isApproved
                 ? AppTheme.primaryColor.withOpacity(0.3)
                 : theme.colorScheme.outline.withOpacity(0.2)),
-        boxShadow: [
-          BoxShadow(
-            color: (isApproved ? AppTheme.primaryColor : AppTheme.warningColor).withOpacity(0.06),
-            blurRadius: 20,
-            offset: const Offset(0, 8),
-          ),
-        ],
       ),
       child: Column(
         children: [
@@ -387,52 +330,20 @@ class _DietitianScreenState extends ConsumerState<DietitianScreen> {
             label: 'Diyetisyeniniz ${assignment.dietitianName}. $statusSpoken',
             child: Column(
               children: [
-                Stack(
-                  alignment: Alignment.center,
-                  children: [
-                    Container(
-                      width: 86,
-                      height: 86,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        border: Border.all(
-                          color: (isApproved ? AppTheme.primaryColor : AppTheme.warningColor).withOpacity(0.2),
-                          width: 2,
-                        ),
-                      ),
-                    ),
-                    CircleAvatar(
-                      radius: 38,
-                      backgroundColor: (isApproved ? AppTheme.primaryColor : AppTheme.warningColor).withOpacity(0.12),
-                      child: Text(
-                        assignment.dietitianName[0],
-                        style: TextStyle(
-                          fontSize: 28,
-                          fontWeight: FontWeight.w900,
-                          color: isApproved ? AppTheme.primaryDark : AppTheme.warningTextColor,
-                        ),
-                      ),
-                    ),
-                    if (isApproved)
-                      Positioned(
-                        bottom: 0,
-                        right: 4,
-                        child: Container(
-                          padding: const EdgeInsets.all(4),
-                          decoration: const BoxDecoration(
-                            color: AppTheme.successColor,
-                            shape: BoxShape.circle,
-                          ),
-                          child: const Icon(Icons.check_rounded, size: 14, color: Colors.white),
-                        ),
-                      ),
-                  ],
+                CircleAvatar(
+                  radius: 35,
+                  backgroundColor: theme.colorScheme.primary.withOpacity(0.1),
+                  child: Text(assignment.dietitianName[0],
+                      style: TextStyle(
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                          color: theme.colorScheme.primary)),
                 ),
                 const SizedBox(height: 16),
                 Text(assignment.dietitianName,
                     textAlign: TextAlign.center,
-                    style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w800)),
-                const SizedBox(height: 8),
+                    style: theme.textTheme.titleLarge),
+                const SizedBox(height: 4),
                 _buildStatusPill(
                   label: statusLabel,
                   accent: isApproved
@@ -452,7 +363,7 @@ class _DietitianScreenState extends ConsumerState<DietitianScreen> {
               label: 'Onayınız alındı. ${assignment.dietitianName} isteği '
                   'kabul ettiğinde bağlantı kurulacak.',
               child: Container(
-                padding: const EdgeInsets.all(16),
+                padding: const EdgeInsets.all(14),
                 decoration: BoxDecoration(
                   color: AppTheme.warningColor.withOpacity(0.08),
                   borderRadius: BorderRadius.circular(AppTheme.buttonRadius),
@@ -463,13 +374,13 @@ class _DietitianScreenState extends ConsumerState<DietitianScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Icon(Icons.hourglass_top_rounded,
-                        size: 20, color: _warningInk(theme)),
-                    const SizedBox(width: 12),
+                        size: 18, color: _warningInk(theme)),
+                    const SizedBox(width: 10),
                     Expanded(
                       child: Text(
                         'Onayınız alındı. ${assignment.dietitianName} isteği '
                         'kabul ettiğinde bağlantı kurulacak.',
-                        style: theme.textTheme.bodyMedium?.copyWith(
+                        style: theme.textTheme.bodySmall?.copyWith(
                           color: theme.colorScheme.onSurface,
                           height: 1.4,
                         ),

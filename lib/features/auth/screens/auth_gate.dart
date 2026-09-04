@@ -19,15 +19,20 @@ class AuthGate extends ConsumerWidget {
     // altta giriş ekranı kurulsa da o sayfalar yığında kalır ve kullanıcı
     // hiçbir şey olmamış gibi görür. Oturumdan çıkılan her durumda yığını
     // köke indiriyoruz: elle çıkış, hesap silme ve oturum kilitlenmesi.
+    // Önceki duruma bakılmaz. Çıkış akışı authenticated'tan doğrudan
+    // unauthenticated'a geçmiyor, arada loading var; "önceki durum
+    // authenticated miydi" koşulu bu yüzden hiç tutmuyordu ve çıkıştan
+    // sonra Ayarlar ekranı yığında kalıp giriş ekranını gizliyordu.
+    // Oturum yokken kapının üstünde duran her ekran zaten kapatılmalı.
     ref.listen<AuthState>(authControllerProvider, (previous, next) {
-      final wasInSession = previous?.status == AuthStatus.authenticated;
       final leftSession = next.status == AuthStatus.unauthenticated ||
           next.status == AuthStatus.locked;
-      if (!wasInSession || !leftSession) return;
+      if (!leftSession) return;
 
       // Durum değişimi build sırasında geldiği için gezinme bir sonraki
       // kareye bırakılır; build içinde Navigator çağırmak hata verir.
       WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!context.mounted) return;
         final navigator = Navigator.of(context);
         if (navigator.canPop()) {
           navigator.popUntil((route) => route.isFirst);

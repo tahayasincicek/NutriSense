@@ -595,53 +595,23 @@ class _ProfileHeader extends StatelessWidget {
       label: '${data.fullName}, ${data.specialization}, '
           '${data.emailVerified ? 'doğrulanmış diyetisyen' : 'doğrulama bekleniyor'}',
       child: Container(
-        padding: const EdgeInsets.all(22),
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            colors: [
-              AppTheme.primaryColor.withValues(alpha: 0.12),
-              theme.colorScheme.surface,
-            ],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ),
-          borderRadius: BorderRadius.circular(AppTheme.cardRadius),
-          border: Border.all(
-            color: AppTheme.primaryColor.withValues(alpha: 0.25),
-            width: 1.2,
-          ),
-          boxShadow: [
-            BoxShadow(
-              color: AppTheme.primaryColor.withValues(alpha: 0.08),
-              blurRadius: 20,
-              offset: const Offset(0, 8),
-            ),
-          ],
-        ),
+        padding: const EdgeInsets.all(24),
+        // Hasta ekranlarındaki kartlarla aynı yüzey; dolu gradyan blok
+        // uygulamanın geri kalanında hiçbir yerde kullanılmıyor.
+        decoration: _surfaceDecoration(theme, accent: AppTheme.primaryColor),
         child: Row(
           children: [
             Container(
-              width: 66,
-              height: 66,
+              width: 62,
+              height: 62,
               decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                gradient: const LinearGradient(
-                  colors: [AppTheme.primaryColor, AppTheme.primaryDark],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                ),
-                boxShadow: [
-                  BoxShadow(
-                    color: AppTheme.primaryColor.withValues(alpha: 0.35),
-                    blurRadius: 12,
-                    offset: const Offset(0, 4),
-                  ),
-                ],
+                color: AppTheme.primaryColor.withValues(alpha: 0.11),
+                borderRadius: BorderRadius.circular(18),
               ),
               child: const Icon(
                 Icons.medical_services_rounded,
-                color: Colors.white,
-                size: 32,
+                color: AppTheme.primaryColor,
+                size: 30,
               ),
             ),
             const SizedBox(width: 16),
@@ -649,63 +619,33 @@ class _ProfileHeader extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Text(
-                          data.fullName,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: theme.textTheme.titleLarge?.copyWith(
-                            fontWeight: FontWeight.w800,
-                            letterSpacing: -0.3,
-                          ),
-                        ),
-                      ),
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 8, vertical: 3),
-                        decoration: BoxDecoration(
-                          color: AppTheme.primaryColor.withValues(alpha: 0.15),
-                          borderRadius: BorderRadius.circular(999),
-                        ),
-                        child: Text(
-                          'PRO',
-                          style: theme.textTheme.labelSmall?.copyWith(
-                            color: AppTheme.primaryDark,
-                            fontWeight: FontWeight.w900,
-                            letterSpacing: 0.5,
-                          ),
-                        ),
-                      ),
-                    ],
+                  Text(
+                    data.fullName,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: theme.textTheme.titleLarge?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                   const SizedBox(height: 4),
                   Text(
                     data.specialization,
-                    maxLines: 1,
+                    maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                     style: theme.textTheme.bodyMedium?.copyWith(
                       color: theme.colorScheme.onSurfaceVariant,
-                      fontWeight: FontWeight.w500,
                     ),
                   ),
                   const SizedBox(height: 10),
                   Container(
                     padding:
-                        const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                        const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                     decoration: BoxDecoration(
                       color: (data.emailVerified
                               ? AppTheme.successColor
                               : AppTheme.warningColor)
-                          .withValues(alpha: 0.12),
+                          .withValues(alpha: 0.11),
                       borderRadius: BorderRadius.circular(999),
-                      border: Border.all(
-                        color: (data.emailVerified
-                                ? AppTheme.successColor
-                                : AppTheme.warningColor)
-                            .withValues(alpha: 0.3),
-                      ),
                     ),
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
@@ -714,7 +654,7 @@ class _ProfileHeader extends StatelessWidget {
                           data.emailVerified
                               ? Icons.verified_rounded
                               : Icons.info_outline_rounded,
-                          size: 15,
+                          size: 16,
                           color: data.emailVerified
                               ? AppTheme.successColor
                               : AppTheme.warningColor,
@@ -739,20 +679,10 @@ class _ProfileHeader extends StatelessWidget {
                 ],
               ),
             ),
-            const SizedBox(width: 8),
-            Container(
-              decoration: BoxDecoration(
-                color: theme.colorScheme.surface,
-                shape: BoxShape.circle,
-                border: Border.all(
-                  color: theme.colorScheme.outline.withValues(alpha: 0.2),
-                ),
-              ),
-              child: IconButton(
-                tooltip: 'Profili düzenle',
-                onPressed: onEdit,
-                icon: const Icon(Icons.edit_rounded, size: 20),
-              ),
+            IconButton(
+              tooltip: 'Profili düzenle',
+              onPressed: onEdit,
+              icon: const Icon(Icons.edit_rounded),
             ),
           ],
         ),
@@ -824,30 +754,15 @@ class _MetricCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Container(
-              width: 48,
-              height: 48,
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [
-                    color.withValues(alpha: 0.22),
-                    color.withValues(alpha: 0.08)
-                  ],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                ),
-                shape: BoxShape.circle,
-                border: Border.all(color: color.withValues(alpha: 0.3)),
-              ),
-              child: Icon(icon, color: color, size: 24),
-            ),
+            // Hasta ekranlarındaki kart ölçüsü: ikon doğrudan ve daha büyük
+            // durur, soluk bir kutunun içinde küçülmez; değer daha kalındır.
+            Icon(icon, color: color, size: 28),
             const SizedBox(height: 16),
             Text(
               value,
               style: theme.textTheme.headlineSmall?.copyWith(
                 fontWeight: FontWeight.w900,
                 color: color,
-                letterSpacing: -0.5,
               ),
             ),
             const SizedBox(height: 4),
@@ -887,26 +802,18 @@ class _WideMetricCard extends StatelessWidget {
     return Semantics(
       label: '$label: $value. $helper',
       child: Container(
-        padding: const EdgeInsets.all(18),
-        decoration: _surfaceDecoration(theme, accent: color),
+        padding: const EdgeInsets.all(17),
+        decoration: _surfaceDecoration(theme),
         child: Row(
           children: [
             Container(
-              width: 52,
-              height: 52,
+              width: 48,
+              height: 48,
               decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [
-                    color.withValues(alpha: 0.22),
-                    color.withValues(alpha: 0.08)
-                  ],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                ),
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: color.withValues(alpha: 0.3)),
+                color: color.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(15),
               ),
-              child: Icon(icon, color: color, size: 26),
+              child: Icon(icon, color: color, size: 25),
             ),
             const SizedBox(width: 14),
             Expanded(
@@ -930,19 +837,11 @@ class _WideMetricCard extends StatelessWidget {
               ),
             ),
             const SizedBox(width: 12),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-              decoration: BoxDecoration(
-                color: color.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(14),
-                border: Border.all(color: color.withValues(alpha: 0.25)),
-              ),
-              child: Text(
-                value,
-                style: theme.textTheme.headlineMedium?.copyWith(
-                  color: color,
-                  fontWeight: FontWeight.w900,
-                ),
+            Text(
+              value,
+              style: theme.textTheme.headlineMedium?.copyWith(
+                color: color,
+                fontWeight: FontWeight.w900,
               ),
             ),
           ],
@@ -986,21 +885,14 @@ class _PendingRequestCard extends StatelessWidget {
         : 'Danışan onayı bekleniyor';
 
     return Container(
-      padding: const EdgeInsets.all(18),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: theme.cardColor,
-        borderRadius: BorderRadius.circular(AppTheme.cardRadius),
+        borderRadius: BorderRadius.circular(18),
         border: Border.all(
-          color: AppTheme.warningColor.withValues(alpha: 0.4),
+          color: AppTheme.warningColor.withValues(alpha: 0.35),
           width: 1.5,
         ),
-        boxShadow: [
-          BoxShadow(
-            color: AppTheme.warningColor.withValues(alpha: 0.08),
-            blurRadius: 16,
-            offset: const Offset(0, 6),
-          ),
-        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1013,29 +905,18 @@ class _PendingRequestCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Container(
-                    width: 48,
-                    height: 48,
+                    width: 44,
+                    height: 44,
                     decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        colors: [
-                          AppTheme.warningColor.withValues(alpha: 0.25),
-                          AppTheme.warningColor.withValues(alpha: 0.1),
-                        ],
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                      ),
+                      color: AppTheme.warningColor.withValues(alpha: 0.14),
                       shape: BoxShape.circle,
-                      border: Border.all(
-                        color: AppTheme.warningColor.withValues(alpha: 0.4),
-                      ),
                     ),
                     child: const Icon(
-                      Icons.person_add_alt_1_rounded,
+                      Icons.person_add_alt_1_outlined,
                       color: AppTheme.warningColor,
-                      size: 24,
                     ),
                   ),
-                  const SizedBox(width: 14),
+                  const SizedBox(width: 13),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -1043,34 +924,22 @@ class _PendingRequestCard extends StatelessWidget {
                         Text(
                           request.patientName,
                           style: theme.textTheme.titleMedium?.copyWith(
-                            fontWeight: FontWeight.w800,
+                            fontWeight: FontWeight.w700,
                           ),
                         ),
                         const SizedBox(height: 2),
                         Text(
                           request.patientEmailMasked,
-                          style: theme.textTheme.bodySmall?.copyWith(
-                            color: theme.colorScheme.onSurfaceVariant,
-                          ),
+                          style: theme.textTheme.bodySmall,
                         ),
                         const SizedBox(height: 6),
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                          decoration: BoxDecoration(
-                            color: (request.patientApproved
-                                    ? AppTheme.successColor
-                                    : AppTheme.warningColor)
-                                .withValues(alpha: 0.1),
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: Text(
-                            '$_relativeAge · $consentLabel',
-                            style: theme.textTheme.bodySmall?.copyWith(
-                              color: request.patientApproved
-                                  ? AppTheme.successColor
-                                  : AppTheme.warningColor,
-                              fontWeight: FontWeight.w700,
-                            ),
+                        Text(
+                          '$_relativeAge · $consentLabel',
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: request.patientApproved
+                                ? AppTheme.successColor
+                                : AppTheme.warningColor,
+                            fontWeight: FontWeight.w600,
                           ),
                         ),
                       ],
@@ -1080,7 +949,7 @@ class _PendingRequestCard extends StatelessWidget {
               ),
             ),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 14),
           Row(
             children: [
               Expanded(
@@ -1178,26 +1047,16 @@ class _ReceivedReportCard extends StatelessWidget {
                     Row(
                       children: [
                         Container(
-                          width: 44,
-                          height: 44,
+                          width: 42,
+                          height: 42,
                           decoration: BoxDecoration(
-                            gradient: LinearGradient(
-                              colors: [
-                                AppTheme.secondaryColor.withValues(alpha: 0.22),
-                                AppTheme.secondaryColor.withValues(alpha: 0.08),
-                              ],
-                              begin: Alignment.topLeft,
-                              end: Alignment.bottomRight,
-                            ),
-                            borderRadius: BorderRadius.circular(14),
-                            border: Border.all(
-                              color: AppTheme.secondaryColor.withValues(alpha: 0.3),
-                            ),
+                            color:
+                                AppTheme.secondaryColor.withValues(alpha: 0.14),
+                            borderRadius: BorderRadius.circular(12),
                           ),
                           child: const Icon(
                             Icons.description_rounded,
                             color: AppTheme.secondaryColor,
-                            size: 24,
                           ),
                         ),
                         const SizedBox(width: 12),
@@ -1208,35 +1067,25 @@ class _ReceivedReportCard extends StatelessWidget {
                               Text(
                                 report.patientName,
                                 style: theme.textTheme.titleMedium?.copyWith(
-                                  fontWeight: FontWeight.w800,
+                                  fontWeight: FontWeight.w700,
                                 ),
                               ),
-                              const SizedBox(height: 2),
                               Text(
                                 '${report.reportTypeLabel} · $_range',
-                                style: theme.textTheme.bodySmall?.copyWith(
-                                  color: theme.colorScheme.onSurfaceVariant,
-                                ),
+                                style: theme.textTheme.bodySmall,
                               ),
                             ],
                           ),
                         ),
                         if (report.isPartial)
-                          Container(
-                            padding: const EdgeInsets.all(6),
-                            decoration: BoxDecoration(
-                              color: AppTheme.warningColor.withValues(alpha: 0.12),
-                              shape: BoxShape.circle,
-                            ),
-                            child: const Icon(
-                              Icons.warning_amber_rounded,
-                              color: AppTheme.warningColor,
-                              size: 20,
-                            ),
+                          Icon(
+                            Icons.warning_amber_rounded,
+                            color: AppTheme.warningColor,
+                            semanticLabel: 'Kısmi teslimat',
                           ),
                       ],
                     ),
-                    const SizedBox(height: 14),
+                    const SizedBox(height: 12),
                     Wrap(
                       spacing: 8,
                       runSpacing: 8,
@@ -1372,22 +1221,11 @@ class _PatientCard extends StatelessWidget {
               child: Row(
                 children: [
                   Container(
-                    width: 56,
-                    height: 56,
+                    width: 54,
+                    height: 54,
                     decoration: BoxDecoration(
-                      gradient: const LinearGradient(
-                        colors: [AppTheme.primaryColor, AppTheme.primaryDark],
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                      ),
+                      color: AppTheme.primaryColor.withValues(alpha: 0.11),
                       shape: BoxShape.circle,
-                      boxShadow: [
-                        BoxShadow(
-                          color: AppTheme.primaryColor.withValues(alpha: 0.25),
-                          blurRadius: 10,
-                          offset: const Offset(0, 4),
-                        ),
-                      ],
                     ),
                     alignment: Alignment.center,
                     child: Text(
@@ -1395,7 +1233,7 @@ class _PatientCard extends StatelessWidget {
                           ? '?'
                           : patient.fullName.characters.first.toUpperCase(),
                       style: theme.textTheme.titleLarge?.copyWith(
-                        color: Colors.white,
+                        color: AppTheme.primaryDark,
                         fontWeight: FontWeight.w900,
                       ),
                     ),
@@ -2218,31 +2056,16 @@ class _FocusList extends StatelessWidget {
             decoration: BoxDecoration(
               color: theme.colorScheme.surface,
               borderRadius: BorderRadius.circular(AppTheme.cardRadius),
-              border: Border.all(color: accent.withValues(alpha: 0.35), width: 1.2),
-              boxShadow: [
-                BoxShadow(
-                  color: accent.withValues(alpha: 0.06),
-                  blurRadius: 14,
-                  offset: const Offset(0, 4),
-                ),
-              ],
+              border: Border.all(color: accent.withValues(alpha: 0.3)),
             ),
             child: Row(
               children: [
-                Container(
-                  width: 44,
-                  height: 44,
-                  decoration: BoxDecoration(
-                    color: accent.withValues(alpha: 0.12),
-                    shape: BoxShape.circle,
-                  ),
-                  child: Icon(
-                    patient.needsFollowUp
-                        ? Icons.notifications_active_rounded
-                        : Icons.trending_up_rounded,
-                    color: accent,
-                    size: 24,
-                  ),
+                Icon(
+                  patient.needsFollowUp
+                      ? Icons.notifications_active_rounded
+                      : Icons.trending_up_rounded,
+                  color: accent,
+                  size: 26,
                 ),
                 const SizedBox(width: 14),
                 Expanded(
@@ -2260,20 +2083,9 @@ class _FocusList extends StatelessWidget {
                     ],
                   ),
                 ),
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                  decoration: BoxDecoration(
-                    color: accent.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: Text(
-                    '${patient.todayCalories.round()} kcal',
-                    style: theme.textTheme.titleSmall?.copyWith(
-                      fontWeight: FontWeight.w900,
-                      color: accent,
-                    ),
-                  ),
-                ),
+                Text('${patient.todayCalories.round()}',
+                    style: theme.textTheme.titleMedium
+                        ?.copyWith(fontWeight: FontWeight.w900, color: accent)),
               ],
             ),
           ),
@@ -2335,61 +2147,42 @@ class _CalorieTrendCard extends StatelessWidget {
           borderRadius: BorderRadius.circular(AppTheme.cardRadius),
           border: Border.all(
               color: theme.colorScheme.outline.withValues(alpha: 0.2)),
-          boxShadow: [
-            BoxShadow(
-              color: AppTheme.primaryColor.withValues(alpha: 0.05),
-              blurRadius: 18,
-              offset: const Offset(0, 6),
-            ),
-          ],
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
               children: [
-                Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: AppTheme.primaryColor.withValues(alpha: 0.12),
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: const Icon(Icons.trending_up_rounded,
-                      color: AppTheme.primaryColor, size: 22),
-                ),
-                const SizedBox(width: 12),
+                const Icon(Icons.trending_up_rounded,
+                    color: AppTheme.primaryColor, size: 26),
+                const SizedBox(width: 10),
                 Text('Kalori seyri',
                     style: theme.textTheme.titleSmall
                         ?.copyWith(fontWeight: FontWeight.bold)),
               ],
             ),
-            const SizedBox(height: 16),
-            // Günlük toplamların sütun gösterimi
+            const SizedBox(height: 14),
+            // Günlük toplamların basit sütun gösterimi; en yüksek gün
+            // ölçek kabul edilir.
             SizedBox(
-              height: 72,
+              height: 64,
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: daily.map((entry) {
                   final ratio = peak <= 0 ? 0.0 : entry.value / peak;
                   final over = dailyTarget > 0 && entry.value > dailyTarget;
-                  final color = over ? AppTheme.warningColor : AppTheme.primaryColor;
                   return Expanded(
                     child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 2.5),
+                      padding: const EdgeInsets.symmetric(horizontal: 2),
                       child: Align(
                         alignment: Alignment.bottomCenter,
                         child: Container(
-                          height: (ratio * 68).clamp(6.0, 68.0),
+                          height: (ratio * 60).clamp(4.0, 60.0),
                           decoration: BoxDecoration(
-                            gradient: LinearGradient(
-                              colors: [
-                                color,
-                                color.withValues(alpha: 0.7),
-                              ],
-                              begin: Alignment.topCenter,
-                              end: Alignment.bottomCenter,
-                            ),
-                            borderRadius: BorderRadius.circular(6),
+                            color: over
+                                ? AppTheme.warningColor
+                                : AppTheme.primaryColor,
+                            borderRadius: BorderRadius.circular(3),
                           ),
                         ),
                       ),
@@ -2398,7 +2191,7 @@ class _CalorieTrendCard extends StatelessWidget {
                 }).toList(growable: false),
               ),
             ),
-            const SizedBox(height: 14),
+            const SizedBox(height: 12),
             Text(summary,
                 style: theme.textTheme.bodySmall
                     ?.copyWith(color: theme.colorScheme.onSurfaceVariant)),
@@ -2473,7 +2266,7 @@ class _PatientNoteCardState extends ConsumerState<_PatientNoteCard> {
       if (result.isSuccess) {
         _notes = result.data ?? _notes;
         // Alan boşalır ki bir sonraki not doğrudan yazılabilsin; eskisini
-        // silip yeniden yazma zorunluluğu kalkar.
+        // silip yeniden yazma zorunluuluğu kalkar.
         _controller.clear();
       }
       _message = result.isSuccess
