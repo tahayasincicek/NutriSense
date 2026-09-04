@@ -119,6 +119,10 @@ class _AppShellState extends ConsumerState<AppShell>
               if (text.contains('enerjik')) mood = 'Enerjik';
               ref.read(activityProvider.notifier).setMood(mood);
               _onTabChanged(1);
+              ref.read(accessibilityServiceProvider).speak(
+                    '$mood hissediyorsunuz. Kaydedildi.',
+                    priority: TtsPriority.high,
+                  );
             }
             // "kilomu kaydet yetmiş dört buçuk" gibi sözcükle söylenen
             // sayıları da anlar; rakam söylemek zorunlu değil.

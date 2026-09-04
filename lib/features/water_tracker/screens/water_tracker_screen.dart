@@ -292,9 +292,16 @@ class ActivityTrackerScreen extends ConsumerWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Bugün nasıl hissediyorsun?',
-              style: theme.textTheme.titleSmall
-                  ?.copyWith(fontWeight: FontWeight.bold)),
+          Semantics(
+            header: true,
+            label: 'Bugün nasıl hissediyorsun? Ruh hâlinizi söyleyerek de '
+                'seçebilirsiniz; örneğin "mutluyum" deyin.',
+            child: ExcludeSemantics(
+              child: Text('Bugün nasıl hissediyorsun?',
+                  style: theme.textTheme.titleSmall
+                      ?.copyWith(fontWeight: FontWeight.bold)),
+            ),
+          ),
           const SizedBox(height: 16),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -306,10 +313,15 @@ class ActivityTrackerScreen extends ConsumerWidget {
                 label: '${m['label']} hissediyorum',
                 child: GestureDetector(
                   onTap: () {
-                    ref
-                        .read(activityProvider.notifier)
-                        .setMood(m['label'] as String);
+                    final label = m['label'] as String;
+                    ref.read(activityProvider.notifier).setMood(label);
                     AccessibilityUtils.lightHaptic();
+                    // Seçim sesli onaylanır; aksi hâlde göremeyen kullanıcı
+                    // dokunuşun işe yarayıp yaramadığını bilemez.
+                    ref.read(accessibilityServiceProvider).speak(
+                          '$label hissediyorsunuz. Kaydedildi.',
+                          priority: TtsPriority.high,
+                        );
                   },
                   child: ExcludeSemantics(
                     child: AnimatedContainer(
@@ -576,57 +588,21 @@ class ActivityTrackerScreen extends ConsumerWidget {
   /// Takip edilecek yeni bir ilaç veya takviye ekler.
   Future<void> _showMedicationDialog(
       BuildContext context, WidgetRef ref) async {
-    final nameController = TextEditingController();
-    final scheduleController = TextEditingController();
-    final saved = await showDialog<bool>(
+    // Denetleyiciler diyaloğun kendisine aittir. Daha önce `showDialog`
+    // döner dönmez dispose ediliyordu; kapanma animasyonu sürerken metin
+    // alanları silinmiş denetleyiciye baktığı için çerçeve
+    // "_dependents.isEmpty" hatasıyla düşüyordu.
+    final result = await showDialog<_MedicationEntry>(
       context: context,
-      builder: (dialogContext) => AlertDialog(
-        title: const Text('Takviye ekle'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Semantics(
-              textField: true,
-              label: 'İlaç veya takviye adı',
-              child: TextField(
-                controller: nameController,
-                decoration: const InputDecoration(labelText: 'Ad'),
-              ),
-            ),
-            const SizedBox(height: 12),
-            Semantics(
-              textField: true,
-              label: 'Kullanım zamanı',
-              child: TextField(
-                controller: scheduleController,
-                decoration: const InputDecoration(
-                  labelText: 'Zaman',
-                  hintText: 'Örnek: Sabah - Tok',
-                ),
-              ),
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(dialogContext).pop(false),
-            child: const Text('Vazgeç'),
-          ),
-          TextButton(
-            onPressed: () => Navigator.of(dialogContext).pop(true),
-            child: const Text('Ekle'),
-          ),
-        ],
-      ),
+      builder: (_) => const _MedicationDialog(),
     );
-    final name = nameController.text.trim();
-    final schedule = scheduleController.text.trim();
-    nameController.dispose();
-    scheduleController.dispose();
-    if (saved != true || name.isEmpty || !context.mounted) return;
-    ref.read(activityProvider.notifier).addMedication(name, schedule);
+    if (result == null || !context.mounted) return;
+    ref.read(activityProvider.notifier).addMedication(
+          result.name,
+          result.schedule,
+        );
     ref.read(accessibilityServiceProvider).speak(
-          '$name takip listesine eklendi.',
+          '${result.name} takip listesine eklendi.',
           priority: TtsPriority.high,
         );
   }
@@ -676,5 +652,93 @@ class ActivityTrackerScreen extends ConsumerWidget {
           'Uyku süresi ${speakableNumber(value)} saat olarak kaydedildi.',
           priority: TtsPriority.high,
         );
+  }
+}
+
+/// Diyalogdan dönen takviye bilgisi.
+class _MedicationEntry {
+  const _MedicationEntry(this.name, this.schedule);
+
+  final String name;
+  final String schedule;
+}
+
+/// Takviye ekleme diyaloğu.
+///
+/// Metin denetleyicilerini kendi yaşam döngüsünde tutar; böylece diyalog
+/// kapanma animasyonu bitmeden dispose edilmezler.
+class _MedicationDialog extends StatefulWidget {
+  const _MedicationDialog();
+
+  @override
+  State<_MedicationDialog> createState() => _MedicationDialogState();
+}
+
+class _MedicationDialogState extends State<_MedicationDialog> {
+  final _nameController = TextEditingController();
+  final _scheduleController = TextEditingController();
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _scheduleController.dispose();
+    super.dispose();
+  }
+
+  void _submit() {
+    final name = _nameController.text.trim();
+    if (name.isEmpty) {
+      Navigator.of(context).pop();
+      return;
+    }
+    Navigator.of(context).pop(
+      _MedicationEntry(name, _scheduleController.text.trim()),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: const Text('Takviye ekle'),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Semantics(
+            textField: true,
+            label: 'İlaç veya takviye adı',
+            child: TextField(
+              controller: _nameController,
+              autofocus: true,
+              textInputAction: TextInputAction.next,
+              decoration: const InputDecoration(labelText: 'Ad'),
+            ),
+          ),
+          const SizedBox(height: 12),
+          Semantics(
+            textField: true,
+            label: 'Kullanım zamanı',
+            child: TextField(
+              controller: _scheduleController,
+              textInputAction: TextInputAction.done,
+              onSubmitted: (_) => _submit(),
+              decoration: const InputDecoration(
+                labelText: 'Zaman',
+                hintText: 'Örnek: Sabah - Tok',
+              ),
+            ),
+          ),
+        ],
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: const Text('Vazgeç'),
+        ),
+        TextButton(
+          onPressed: _submit,
+          child: const Text('Ekle'),
+        ),
+      ],
+    );
   }
 }
