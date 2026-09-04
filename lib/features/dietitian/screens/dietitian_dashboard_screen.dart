@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/theme/app_theme.dart';
+import '../../settings/screens/settings_screen.dart';
 import '../../../shared/services/api_service.dart';
 import '../../../shared/widgets/accessible_button.dart';
 import '../../auth/state/auth_controller.dart';
@@ -287,6 +288,13 @@ class _DietitianDashboardScreenState
             tooltip: 'Paneli yenile',
             onPressed: _loading ? null : _load,
             icon: const Icon(Icons.refresh_rounded),
+          ),
+          IconButton(
+            tooltip: 'Ayarlar',
+            onPressed: () => Navigator.of(context).push(
+              MaterialPageRoute(builder: (_) => const SettingsScreen()),
+            ),
+            icon: const Icon(Icons.settings_outlined),
           ),
           IconButton(
             tooltip: 'Çıkış yap',
@@ -637,22 +645,24 @@ class _SectionHeading extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.end,
+    // Başlık ve alt yazı alt alta durur. Aynı satırda dururken uzun alt yazı
+    // başlığa dar bir sütun bırakıyor ve "Gelen be / slenme" gibi kelime
+    // ortasından bölünmeler oluyordu. Alt alta dizilim, %200 yazı ölçeğinde
+    // de bozulmaz.
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Expanded(
-          child: Semantics(
-            header: true,
-            child: Text(
-              // Hasta ekranlarındaki bölüm başlığı ölçüsü.
-              title,
-              style: theme.textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
+        Semantics(
+          header: true,
+          child: Text(
+            // Hasta ekranlarındaki bölüm başlığı ölçüsü.
+            title,
+            style: theme.textTheme.titleMedium?.copyWith(
+              fontWeight: FontWeight.bold,
             ),
           ),
         ),
-        const SizedBox(width: 12),
+        const SizedBox(height: 2),
         Text(
           subtitle,
           style: theme.textTheme.bodySmall?.copyWith(

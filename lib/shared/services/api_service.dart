@@ -12,6 +12,7 @@ import '../../core/config/app_config.dart';
 import '../models/food_analysis_model.dart';
 import '../models/auth_model.dart';
 import '../../features/dietitian/models/dietitian_dashboard_models.dart';
+import '../../features/dietitian/models/shared_report_history.dart';
 
 enum ApiCallState { idle, loading, success, error }
 
@@ -752,6 +753,26 @@ class ApiService {
           options: Options(extra: const {_skipRefreshKey: true}),
         );
         await _clearSession();
+      });
+
+  /// Hastanın gönderdiği rapor geçmişi.
+  ///
+  /// Backend bu listeyi veriyordu fakat uygulama okumuyordu; kullanıcı neyi
+  /// ne zaman paylaştığını ve diyetisyeninin cevabını göremiyordu.
+  Future<ApiResult<List<SharedReportHistoryItem>>> getSharedReportHistory({
+    CancelToken? cancelToken,
+  }) =>
+      _safeCall(() async {
+        final response = await _dio.get<dynamic>(
+          '/dietitian-reports',
+          cancelToken: cancelToken,
+        );
+        final data = response.data as List<dynamic>? ?? const [];
+        return data
+            .map((item) => SharedReportHistoryItem.fromJson(
+                  Map<String, dynamic>.from(item as Map),
+                ))
+            .toList(growable: false);
       });
 
   Future<ApiResult<DietitianAssignmentInfo?>> getDietitianAssignment({

@@ -8,6 +8,8 @@ import '../../../shared/services/api_service.dart';
 import '../../../shared/widgets/accessible_button.dart';
 import 'send_report_wizard.dart';
 import 'dietitian_access_screen.dart';
+import '../../settings/screens/settings_screen.dart';
+import '../models/shared_report_history.dart';
 
 class DietitianScreen extends ConsumerStatefulWidget {
   const DietitianScreen({super.key});
@@ -20,6 +22,7 @@ class _DietitianScreenState extends ConsumerState<DietitianScreen> {
   final _email = TextEditingController();
   late final AccessibilityService _accessibility;
   DietitianAssignmentInfo? _assignment;
+  List<SharedReportHistoryItem> _history = const [];
   bool _loading = true;
   bool _busy = false;
   String? _error;
@@ -58,6 +61,7 @@ class _DietitianScreenState extends ConsumerState<DietitianScreen> {
       _assignment = result.data;
       _error = result.isSuccess ? null : result.errorMessage;
     });
+    if (result.data != null) await _loadHistory();
   }
 
   /// İşlem sonucunu hem ekranda hem sesli bildirir.
@@ -87,6 +91,13 @@ class _DietitianScreenState extends ConsumerState<DietitianScreen> {
         title: const Text('Diyetisyen Paneli'),
         actions: [
           IconButton(
+            tooltip: 'Ayarlar',
+            onPressed: () => Navigator.of(context).push(
+              MaterialPageRoute(builder: (_) => const SettingsScreen()),
+            ),
+            icon: const Icon(Icons.settings_outlined),
+          ),
+          IconButton(
             tooltip: 'Diyetisyen portalına giriş',
             onPressed: () => Navigator.of(context).push(
               MaterialPageRoute(
@@ -111,6 +122,10 @@ class _DietitianScreenState extends ConsumerState<DietitianScreen> {
                     _buildSetupCard()
                   else
                     _buildAssignmentCard(),
+                  if (_assignment != null) ...[
+                    const SizedBox(height: 32),
+                    _buildHistorySection(),
+                  ],
                 ],
               ),
             ),
@@ -128,7 +143,9 @@ class _DietitianScreenState extends ConsumerState<DietitianScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Uzman Desteği', style: theme.textTheme.displaySmall),
+          Text('Uzman Desteği',
+              style: theme.textTheme.titleLarge
+                  ?.copyWith(fontWeight: FontWeight.w800)),
           const SizedBox(height: 8),
           Text(
             'Beslenme programını bir uzmanla paylaşarak daha hızlı sonuç alabilirsin.',
@@ -159,25 +176,45 @@ class _DietitianScreenState extends ConsumerState<DietitianScreen> {
     final theme = Theme.of(context);
     return Container(
       padding: const EdgeInsets.all(24),
+      // Kart görünümü diğer sekmelerdeki kartlarla aynı: aynı yüzey rengi,
+      // aynı köşe yarıçapı, aynı ince kenarlık. Farklı bir kenarlık ve gölge
+      // kullanmak paneli uygulamanın dışında bir yer gibi gösteriyordu.
       decoration: BoxDecoration(
         color: theme.colorScheme.surface,
         borderRadius: BorderRadius.circular(AppTheme.cardRadius),
-        border: Border.all(color: theme.colorScheme.outline.withOpacity(0.5)),
-        boxShadow: [
-          BoxShadow(
-              color: Colors.black.withOpacity(0.05),
-              blurRadius: 20,
-              offset: const Offset(0, 8))
-        ],
+        border: Border.all(color: theme.colorScheme.outline.withOpacity(0.2)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          const Icon(Icons.person_search_rounded,
-              size: 48, color: AppTheme.primaryColor),
+          // Ana eylemin simgesi, uygulamanın diğer birincil kartlarındaki
+          // gibi yeşil gradyanlı yuvarlak bir alan içinde durur.
+          Center(
+            child: Container(
+              width: 64,
+              height: 64,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                gradient: const LinearGradient(
+                  colors: [AppTheme.primaryColor, AppTheme.primaryDark],
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: AppTheme.primaryColor.withOpacity(0.3),
+                    blurRadius: 16,
+                    offset: const Offset(0, 6),
+                  ),
+                ],
+              ),
+              child: const Icon(Icons.person_search_rounded,
+                  size: 32, color: Colors.white),
+            ),
+          ),
           const SizedBox(height: 16),
           Text('Diyetisyen Atama',
-              style: theme.textTheme.titleLarge, textAlign: TextAlign.center),
+              style: theme.textTheme.titleLarge
+                  ?.copyWith(fontWeight: FontWeight.w800),
+              textAlign: TextAlign.center),
           const SizedBox(height: 12),
           Text(
             'Diyetisyeninin e-posta adresini yazarak bağlantı isteği gönderebilirsin.',
@@ -228,10 +265,12 @@ class _DietitianScreenState extends ConsumerState<DietitianScreen> {
       decoration: BoxDecoration(
         color: theme.colorScheme.surface,
         borderRadius: BorderRadius.circular(AppTheme.cardRadius),
+        // Bağlantı aktifken yeşil vurgulu kenarlık, beklerken diğer
+        // kartlarla aynı nötr kenarlık kullanılır.
         border: Border.all(
             color: isApproved
-                ? theme.colorScheme.primary.withOpacity(0.3)
-                : theme.colorScheme.outline),
+                ? AppTheme.primaryColor.withOpacity(0.3)
+                : theme.colorScheme.outline.withOpacity(0.2)),
       ),
       child: Column(
         children: [
@@ -311,6 +350,136 @@ class _DietitianScreenState extends ConsumerState<DietitianScreen> {
             onPressed: _busy ? null : _cancelAssignment,
           ),
         ],
+      ),
+    );
+  }
+
+  Future<void> _loadHistory() async {
+    final result = await _api.getSharedReportHistory();
+    if (!mounted) return;
+    setState(() => _history = result.data ?? const []);
+  }
+
+  /// Gönderilen raporların geçmişi ve diyetisyenin cevabı.
+  ///
+  /// Kullanıcı daha önce neyi paylaştığını göremiyordu; bu, paylaşımın
+  /// denetlenebilir olması için gerekli.
+  Widget _buildHistorySection() {
+    final theme = Theme.of(context);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Semantics(
+          header: true,
+          child: Text('Gönderdiğim Raporlar',
+              style: theme.textTheme.titleLarge
+                  ?.copyWith(fontWeight: FontWeight.w800)),
+        ),
+        const SizedBox(height: 12),
+        if (_history.isEmpty)
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: theme.colorScheme.surface,
+              borderRadius: BorderRadius.circular(AppTheme.cardRadius),
+              border:
+                  Border.all(color: theme.colorScheme.outline.withOpacity(0.2)),
+            ),
+            child: Text(
+              'Henüz rapor göndermediniz. Hazır olduğunuzda haftalık '
+              'raporunuzu paylaşabilirsiniz.',
+              style: theme.textTheme.bodyMedium
+                  ?.copyWith(color: theme.colorScheme.onSurfaceVariant),
+            ),
+          )
+        else
+          ..._history.map(_buildHistoryCard),
+      ],
+    );
+  }
+
+  Widget _buildHistoryCard(SharedReportHistoryItem item) {
+    final theme = Theme.of(context);
+    final channels = item.channels
+        .map((c) => '${c.channelLabel}: ${c.statusLabel}')
+        .join(', ');
+
+    return Semantics(
+      container: true,
+      excludeSemantics: true,
+      label: item.spokenSummary,
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 12),
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          color: theme.colorScheme.surface,
+          borderRadius: BorderRadius.circular(AppTheme.cardRadius),
+          border: Border.all(color: theme.colorScheme.outline.withOpacity(0.2)),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    item.periodLabel,
+                    style: theme.textTheme.titleSmall
+                        ?.copyWith(fontWeight: FontWeight.bold),
+                  ),
+                ),
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: item.status == 'completed'
+                        ? AppTheme.primaryColor.withOpacity(0.1)
+                        : AppTheme.warningColor.withOpacity(0.15),
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Text(
+                    item.statusLabel,
+                    style: TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.bold,
+                      color: item.status == 'completed'
+                          ? AppTheme.primaryColor
+                          : AppTheme.warningColor,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 6),
+            Text(
+                '${item.recordCount} kayıt${channels.isEmpty ? '' : ' - $channels'}',
+                style: theme.textTheme.bodySmall
+                    ?.copyWith(color: theme.colorScheme.onSurfaceVariant)),
+            if (item.hasReply) ...[
+              const SizedBox(height: 12),
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: AppTheme.primaryColor.withOpacity(0.06),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('Diyetisyeninizin cevabı',
+                        style: theme.textTheme.labelMedium?.copyWith(
+                            fontWeight: FontWeight.bold,
+                            color: AppTheme.primaryColor)),
+                    const SizedBox(height: 4),
+                    Text(item.dietitianReply!,
+                        style: theme.textTheme.bodyMedium),
+                  ],
+                ),
+              ),
+            ],
+          ],
+        ),
       ),
     );
   }
