@@ -5,7 +5,6 @@ import '../../../core/theme/app_theme.dart';
 import '../../settings/screens/settings_screen.dart';
 import '../../../shared/services/api_service.dart';
 import '../../../shared/widgets/accessible_button.dart';
-import '../../auth/state/auth_controller.dart';
 import '../models/dietitian_dashboard_models.dart';
 import 'dietitian_report_detail_screen.dart';
 
