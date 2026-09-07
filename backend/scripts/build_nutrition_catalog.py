@@ -25,126 +25,304 @@ MILLILITRES = {
 # ekmek 40 gramdir. Bu yuzden ml birimi yalnizca burada icecek olarak
 # isaretlenen kayitlara verilir; heuristik ile turetilmez.
 REVIEWED = {
-    # ── İçecekler ────────────────────────────────────────────────────────
-    # Su bilerek yok: sıfır kalorili olduğu için `_nutrition_is_traceable`
-    # kapısından geçmez (bilinmeyen besini sıfır kalori göstermeme koruması)
-    # ve uygulamada zaten ayrı bir su takibi var.
+    # ── İçecekler ───────────────────────────────────────────────────
     2710488: (
-        "tea", "Tea, hot, leaf, black", "Çay (siyah, demleme)",
-        (("ml", "1 fl oz"),),
+        "tea", "Tea, hot, leaf, black",
+        "Çay (siyah, demleme)", (("ml", "1 fl oz"),),
+    ),
+    2710490: (
+        "green_tea", "Tea, hot, leaf, green",
+        "Yeşil çay", (("ml", "1 fl oz"),),
     ),
     2710377: (
-        "turkish_coffee", "Coffee, Turkish", "Türk kahvesi",
-        (("ml", "1 fl oz"),),
+        "turkish_coffee", "Coffee, Turkish",
+        "Türk kahvesi", (("ml", "1 fl oz"),),
     ),
-    2705385: ("milk", "Milk, whole", "Süt (tam yağlı)", (("ml", "1 fl oz"),)),
+    2710375: (
+        "brewed_coffee", "Coffee, brewed",
+        "Filtre kahve", (("ml", "1 fl oz"),),
+    ),
+    2705385: (
+        "milk", "Milk, whole",
+        "Süt (tam yağlı)", (("ml", "1 fl oz"),),
+    ),
+    2705386: (
+        "milk_reduced_fat", "Milk, reduced fat (2%)",
+        "Süt (yarım yağlı)", (("ml", "1 fl oz"),),
+    ),
     2709186: (
-        "orange_juice", "Orange juice, 100%, NFS", "Portakal suyu (%100)",
-        (("ml", "1 fl oz (no ice)"),),
+        "orange_juice", "Orange juice, 100%, NFS",
+        "Portakal suyu (%100)", (("ml", "1 fl oz (no ice)"),),
+    ),
+    2709320: (
+        "apple_juice", "Apple juice, 100%",
+        "Elma suyu (%100)", (("ml", "1 fl oz (no ice)"),),
+    ),
+    2710570: (
+        "lemonade", "Lemonade, fruit juice drink",
+        "Limonata", (("ml", "1 fl oz (no ice)"),),
     ),
     2710541: (
-        "cola", "Soft drink, cola", "Kola (gazlı içecek)",
-        (("ml", "1 fl oz (no ice)"),),
+        "cola", "Soft drink, cola",
+        "Kola (gazlı içecek)", (("ml", "1 fl oz (no ice)"),),
     ),
-    # ── Kahvaltı ve temel gıdalar ────────────────────────────────────────
-    2707598: (
-        "bread", "Bread, white", "Ekmek (beyaz)",
-        (("dilim", "1 medium or regular slice"),),
-    ),
-    2707154: (
-        "egg", "Egg, whole, boiled or poached", "Yumurta (haşlanmış)",
-        (("adet", "1 egg"),),
-    ),
+    # ── Süt ürünleri ────────────────────────────────────────────────
     2705418: (
-        "yogurt", "Yogurt, whole milk, plain", "Yoğurt (tam yağlı, sade)",
-        (("kase", "1 cup"),),
+        "yogurt", "Yogurt, whole milk, plain",
+        "Yoğurt (tam yağlı, sade)", (("kase", "1 cup"),),
     ),
     2705714: (
-        "feta_cheese", "Cheese, Feta", "Beyaz peynir (feta)",
-        (("dilim", "1 wedge (1.33 oz)"),),
+        "feta_cheese", "Cheese, Feta",
+        "Beyaz peynir (feta)", (("dilim", "1 wedge (1.33 oz)"),),
     ),
-    2710089: (
-        "green_olives", "Olives, green", "Yeşil zeytin", (("adet", "1 olive"),),
+    2705709: (
+        "cheddar_cheese", "Cheese, Cheddar",
+        "Kaşar benzeri peynir (cheddar)", (("dilim", "1 slice"),),
     ),
-    2707531: (
-        "walnuts", "Walnuts, excluding honey roasted", "Ceviz (bal kaplamasız)",
-        (("adet", "1 nut"),),
+    2705747: (
+        "cottage_cheese", "Cheese, cottage, NFS",
+        "Lor peyniri (cottage)", (("kase", "1 cup"),),
     ),
-    # ── Ana yemek ve garnitür ────────────────────────────────────────────
+    2710154: (
+        "butter", "Butter, NFS",
+        "Tereyağı", (),
+    ),
+    2705629: (
+        "ice_cream", "Ice cream, NFS",
+        "Dondurma", (("kase", "1 cup"),),
+    ),
+    # ── Ekmek ve unlu mamul ─────────────────────────────────────────
+    2707598: (
+        "bread", "Bread, white",
+        "Ekmek (beyaz)", (("dilim", "1 medium or regular slice"),),
+    ),
+    2707709: (
+        "whole_wheat_bread", "Bread, whole wheat",
+        "Tam buğday ekmeği", (("dilim", "1 medium or regular slice"),),
+    ),
+    2707684: (
+        "bagel", "Bagel",
+        "Halka ekmek (bagel)", (("adet", "1 regular"),),
+    ),
+    2708726: (
+        "cheese_pastry", "Pastry, cheese-filled",
+        "Peynirli börek benzeri hamur işi", (("adet", "1 pastry"),),
+    ),
+    2708044: (
+        "baklava", "Baklava",
+        "Baklava (genel tarif)", (("adet", "1 piece"),),
+    ),
+    # ── Tahıl ve bakliyat ───────────────────────────────────────────
     2708403: (
-        "rice", "Rice, white, cooked, NS as to fat", "Pilav (beyaz pirinç)",
-        (("kase", "1 cup, cooked"),),
+        "rice", "Rice, white, cooked, NS as to fat",
+        "Pilav (beyaz pirinç)", (("kase", "1 cup, cooked"),),
+    ),
+    2708409: (
+        "brown_rice", "Rice, brown, cooked, NS as to fat",
+        "Esmer pirinç pilavı", (("kase", "1 cup, cooked"),),
     ),
     2708357: (
-        "pasta", "Pasta, cooked", "Makarna (haşlanmış)",
-        (("kase", "1 cup, cooked"),),
+        "pasta", "Pasta, cooked",
+        "Makarna (haşlanmış)", (("kase", "1 cup, cooked"),),
+    ),
+    2708441: (
+        "couscous", "Couscous, plain, cooked",
+        "Kuskus (sade)", (("kase", "1 cup, cooked"),),
     ),
     2708438: (
-        "bulgur", "Bulgur, no added fat", "Bulgur (yağ eklenmemiş)",
-        (("kase", "1 cup, cooked"),),
-    ),
-    2709385: (
-        "boiled_potato", "Potato, boiled, NFS", "Haşlanmış patates",
-        (("adet", "1 medium"),),
-    ),
-    2705956: (
-        "chicken_breast",
-        "Chicken breast, baked, broiled, or roasted, skin not eaten, from raw",
-        "Tavuk göğsü (fırında, derisiz)", (("adet", "1 medium breast"),),
-    ),
-    2705905: (
-        "lamb", "Lamb, NS as to cut", "Kuzu eti (kesim belirtilmemiş)",
-        (("dilim", "1 piece/slice, any size"),),
-    ),
-    2707402: (
-        "hummus", "Hummus, plain", "Humus (sade)",
-        (("kase", "1 individual container"),),
+        "bulgur", "Bulgur, no added fat",
+        "Bulgur (yağ eklenmemiş)", (("kase", "1 cup, cooked"),),
     ),
     2707414: (
-        "chickpeas", "Chickpeas, NFS", "Nohut", (("kase", "1 cup"),),
+        "chickpeas", "Chickpeas, NFS",
+        "Nohut", (("kase", "1 cup"),),
     ),
-    # ── Çorba ────────────────────────────────────────────────────────────
+    2707353: (
+        "white_beans", "White beans, NFS",
+        "Beyaz fasulye (sade, haşlanmış)", (("kase", "1 cup"),),
+    ),
+    2707425: (
+        "lentils", "Lentils, from dried, no added fat",
+        "Mercimek (kuru, yağsız)", (("kase", "1 cup"),),
+    ),
+    2707402: (
+        "hummus", "Hummus, plain",
+        "Humus (sade)", (("kase", "1 individual container"),),
+    ),
+    # ── Et, tavuk, balık ────────────────────────────────────────────
+    2705956: (
+        "chicken_breast", "Chicken breast, baked, broiled, or roasted, skin not eaten, from raw",
+        "Tavuk göğsü (fırında, derisiz)", (("adet", "1 medium breast"),),
+    ),
+    2706037: (
+        "chicken_thigh", "Chicken thigh, stewed, skin eaten",
+        "Tavuk but (haşlama, derili)", (("adet", "1 medium thigh"),),
+    ),
+    2705854: (
+        "ground_beef", "Beef, ground",
+        "Dana kıyma", (),
+    ),
+    2706467: (
+        "meatballs", "Meatballs, NS as to type of meat, with sauce",
+        "Köfte (soslu, et türü belirtilmemiş)", (("adet", "1 meatball with sauce"),),
+    ),
+    2705905: (
+        "lamb", "Lamb, NS as to cut",
+        "Kuzu eti (kesim belirtilmemiş)", (("dilim", "1 piece/slice, any size"),),
+    ),
+    2707154: (
+        "egg", "Egg, whole, boiled or poached",
+        "Yumurta (haşlanmış)", (("adet", "1 egg"),),
+    ),
+    2707205: (
+        "omelette", "Egg omelet or scrambled egg, no added fat",
+        "Omlet (ilave yağsız)", (),
+    ),
+    2706224: (
+        "fish", "Fish, NFS",
+        "Balık (tür belirtilmemiş)", (),
+    ),
+    2706360: (
+        "shrimp", "Shrimp, NFS",
+        "Karides", (("adet", "1 small/medium shrimp"),),
+    ),
+    # ── Çorba ───────────────────────────────────────────────────────
     2707462: (
-        "lentil_soup", "Soup, lentil", "Mercimek çorbası", (("kase", "1 cup"),),
+        "lentil_soup", "Soup, lentil",
+        "Mercimek çorbası", (("kase", "1 cup"),),
     ),
     2710113: (
-        "vegetable_soup", "Soup, vegetable", "Sebze çorbası",
-        (("kase", "1 cup"),),
+        "vegetable_soup", "Soup, vegetable",
+        "Sebze çorbası", (("kase", "1 cup"),),
     ),
-    # ── Meyve ve sebze ───────────────────────────────────────────────────
-    2709215: ("apple", "Apple, raw", "Elma (çiğ)", (("adet", "1 medium"),)),
-    2709224: ("banana", "Banana, raw", "Muz (çiğ)", (("adet", "1 banana"),)),
-    2709171: ("orange", "Orange, raw", "Portakal (çiğ)", (("adet", "1 fruit"),)),
-    2709270: (
-        "watermelon", "Watermelon, raw", "Karpuz (çiğ)",
-        (("dilim", "1 medium wedge/slice"),),
+    2709149: (
+        "chicken_noodle_soup", "Soup, chicken noodle",
+        "Tavuklu şehriye çorbası", (("kase", "1 cup"),),
     ),
+    2709757: (
+        "tomato_soup", "Soup, tomato",
+        "Domates çorbası", (("kase", "1 cup"),),
+    ),
+    # ── Sebze ───────────────────────────────────────────────────────
     2709719: (
-        "tomato", "Tomatoes, raw", "Domates (çiğ)", (("adet", "1 whole"),),
+        "tomato", "Tomatoes, raw",
+        "Domates (çiğ)", (("adet", "1 whole"),),
     ),
     2709784: (
-        "cucumber", "Cucumber, raw", "Salatalık (çiğ)", (("adet", "1 regular"),),
+        "cucumber", "Cucumber, raw",
+        "Salatalık (çiğ)", (("adet", "1 regular"),),
     ),
-    # ── Hazır yemek ──────────────────────────────────────────────────────
-    2708044: ("baklava", "Baklava", "Baklava (genel tarif)", (("adet", "1 piece"),)),
+    2709785: (
+        "eggplant", "Eggplant, raw",
+        "Patlıcan (çiğ)", (("adet", "1 whole"),),
+    ),
+    2709800: (
+        "green_pepper", "Peppers, sweet, green, raw",
+        "Yeşil biber (çiğ)", (("adet", "1 regular"),),
+    ),
+    2709795: (
+        "onion", "Onions, raw",
+        "Soğan (çiğ)", (("adet", "1 whole"),),
+    ),
+    2709660: (
+        "carrot", "Carrots, raw",
+        "Havuç (çiğ)", (("adet", "1 regular carrot"),),
+    ),
+    2709789: (
+        "lettuce", "Lettuce, raw",
+        "Marul (çiğ)", (("kase", "1 cup"),),
+    ),
+    2709385: (
+        "boiled_potato", "Potato, boiled, NFS",
+        "Haşlanmış patates", (("adet", "1 medium"),),
+    ),
+    2709458: (
+        "french_fries", "Potato, french fries, from fresh, fried",
+        "Patates kızartması (taze patatesten)", (),
+    ),
+    2710089: (
+        "green_olives", "Olives, green",
+        "Yeşil zeytin", (("adet", "1 olive"),),
+    ),
+    # ── Meyve ───────────────────────────────────────────────────────
+    2709215: (
+        "apple", "Apple, raw",
+        "Elma (çiğ)", (("adet", "1 medium"),),
+    ),
+    2709224: (
+        "banana", "Banana, raw",
+        "Muz (çiğ)", (("adet", "1 banana"),),
+    ),
+    2709171: (
+        "orange", "Orange, raw",
+        "Portakal (çiğ)", (("adet", "1 fruit"),),
+    ),
+    2709270: (
+        "watermelon", "Watermelon, raw",
+        "Karpuz (çiğ)", (("dilim", "1 medium wedge/slice"),),
+    ),
+    2709237: (
+        "grapes", "Grapes, raw",
+        "Üzüm (çiğ)", (("kase", "1 cup"),),
+    ),
+    2709283: (
+        "strawberry", "Strawberries, raw",
+        "Çilek (çiğ)", (("kase", "1 cup"),),
+    ),
+    2709231: (
+        "cherry", "Cherries, raw",
+        "Kiraz (çiğ)", (("kase", "1 cup"),),
+    ),
+    2709235: (
+        "fig", "Fig, raw",
+        "İncir (çiğ)", (("adet", "1 fig"),),
+    ),
+    2709221: (
+        "apricot", "Apricot, raw",
+        "Kayısı (çiğ)", (("adet", "1 apricot"),),
+    ),
+    2709212: (
+        "raisins", "Raisins",
+        "Kuru üzüm", (("kase", "1 cup"),),
+    ),
+    # ── Kuruyemiş ───────────────────────────────────────────────────
+    2707531: (
+        "walnuts", "Walnuts, excluding honey roasted",
+        "Ceviz (bal kaplamasız)", (("adet", "1 nut"),),
+    ),
+    2707502: (
+        "hazelnuts", "Hazelnuts",
+        "Fındık", (("adet", "1 nut"),),
+    ),
+    2707485: (
+        "almonds", "Almonds, NFS",
+        "Badem", (("adet", "1 nut"),),
+    ),
+    2707527: (
+        "pistachios", "Pistachio nuts, NFS",
+        "Antep fıstığı", (("adet", "1 nut"),),
+    ),
+    # ── Katkı ve tatlı ──────────────────────────────────────────────
+    2710186: (
+        "olive_oil", "Olive oil",
+        "Zeytinyağı", (),
+    ),
+    2710281: (
+        "honey", "Honey",
+        "Bal", (),
+    ),
+    2710301: (
+        "jam", "Jam",
+        "Reçel", (),
+    ),
+    # ── Hazır yemek ─────────────────────────────────────────────────
     2706920: (
-        "hamburger", "Hamburger, NFS", "Hamburger (genel tarif)",
-        (("adet", "1 hamburger"),),
+        "hamburger", "Hamburger, NFS",
+        "Hamburger (genel tarif)", (("adet", "1 hamburger"),),
     ),
     2708614: (
         "pizza", "Pizza, cheese, from restaurant or fast food, NS as to type of crust",
         "Pizza (peynirli, restoran tipi)", (("dilim", "1 piece, large pizza"),),
-    ),
-    2707205: (
-        "omelette", "Egg omelet or scrambled egg, no added fat", "Omlet (ilave yağsız)",
-        # FNDDS yalnizca "1 egg" veriyor; bu bir omlet porsiyonu degil, icindeki
-        # yumurta basina agirlik. Adet olarak sunmak yaniltici olurdu.
-        (),
-    ),
-    2709458: (
-        "french_fries", "Potato, french fries, from fresh, fried", "Patates kızartması (taze patatesten)",
-        # Tek bir patates kizartmasi anlamli bir porsiyon birimi degil.
-        (),
     ),
 }
 NUTRIENTS = {

@@ -45,12 +45,15 @@ doğrulamadan geçer. Eski prototipteki veriler korunmuştur, ancak doğrulanmı
 kalori sonucu olarak kullanılmaz.
 
 USDA'nın resmî FNDDS 2021-2023 arşivi 7 Eylül 2026'da indirilip kimlik ve besin
-değerleri doğrudan karşılaştırıldı. Katalog 32 kayıt içerir: içecekler (süt, çay,
+değerleri doğrudan karşılaştırıldı. Katalog 72 kayıt içerir: içecekler (süt, çay,
 Türk kahvesi, portakal suyu, kola), temel gıdalar (ekmek, yumurta, yoğurt, beyaz
 peynir, zeytin, ceviz), ana yemek ve garnitürler (pilav, makarna, bulgur,
 haşlanmış patates, tavuk göğsü, kuzu eti, humus, nohut), çorbalar, meyve ve
-sebzeler ile hazır yemekler (baklava, hamburger, pizza, omlet, patates
-kızartması). Tarif ayrımları Türkçe sonuç adında görünür. Her kayıtta FDC
+sebzeler, kuruyemişler ile hazır yemekler (baklava, hamburger, pizza, omlet,
+patates kızartması). Kayıtlar USDA açıklamasına sadık adlandırılır: "Köfte
+(soslu, et türü belirtilmemiş)" ya da "Peynirli börek benzeri hamur işi" gibi.
+Böylece kullanıcı elindeki kaydın tam karşılık mı yoksa yakın bir referans mı
+olduğunu görür. Tarif ayrımları Türkçe sonuç adında görünür. Her kayıtta FDC
 kimliği, resmî URL, erişim zamanı, CC0 lisansı, atıf ve beş besin değeri bulunur.
 `VERIFIED`, kaynak verisinden doğrulanmış çıkarım demektir; uzman değerlendirmesi,
 kişinin tabağı için ölçüm veya klinik doğrulama anlamına gelmez.
