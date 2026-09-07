@@ -389,7 +389,7 @@ class _SendReportWizardState extends ConsumerState<SendReportWizard> {
               title: Text('${delivery.channelLabel}: ${delivery.status}'),
               subtitle: Text('${delivery.destinationMasked}; '
                   'deneme ${delivery.attemptCount}/${delivery.maxAttempts}'
-                  '${delivery.errorCode == null ? '' : '; ${delivery.errorCode}'}'),
+                  '${delivery.errorMessage == null ? '' : '; ${delivery.errorMessage}'}'),
             ),
         const Text(
           '“Gönderildi”, sağlayıcının mesajı kabul ettiğini gösterir; '

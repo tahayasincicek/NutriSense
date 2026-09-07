@@ -39,6 +39,7 @@ from ..models.database import (
     User, WeightMeasurement, get_db, istanbul_date, utc_now,
 )
 from ..models.schemas import (
+    AutomaticShareSettings,
     FoodAnalysisResponse, FoodCandidate, FoodAnalysisDecisionRequest,
     FoodAnalysisDecisionResponse, FoodPortionRequest, ManualFoodLogRequest,
     NutrientData,
@@ -70,6 +71,11 @@ from ..domain.nutrition import (
 from ..domain.report_delivery import (
     ReportDeliveryError, accessibility_summary, build_report_payload,
     consent_context_hash, mask_email, mask_phone, resolve_report_dates,
+    verified_recipients,
+)
+from ..domain.automatic_reports import (
+    PURPOSE, POLICY, active_consent, recipient_digest, local_delivery_only,
+    queue_automatic_report, guard_automatic_delivery,
 )
 from ..middleware.auth import (
     get_current_user, hash_password, verify_password,
@@ -792,6 +798,7 @@ async def decide_food_analysis(
     attempt.decided_at = utc_now()
     try:
         db.add_all([nutrition_source, log_entry])
+        automatic = _queue_food_share(db, current_user, log_entry)
         db.commit()
     except Exception:
         db.rollback()
@@ -800,6 +807,7 @@ async def decide_food_analysis(
             status_code=503,
             detail="Onaylı kayıt güvenli biçimde oluşturulamadı.",
         )
+    await _deliver_food_share(db, automatic)
     return FoodAnalysisDecisionResponse(
         analysis_id=attempt.id,
         log_id=log_entry.id,
@@ -926,11 +934,13 @@ async def create_manual_food_log(
     )
     try:
         db.add_all([attempt, nutrition_source, log_entry])
+        automatic = _queue_food_share(db, current_user, log_entry)
         db.commit()
     except Exception:
         db.rollback()
         logger.exception("Manuel yemek kaydı transaction'ı geri alındı.")
         raise HTTPException(status_code=503, detail="Manuel kayıt oluşturulamadı.")
+    await _deliver_food_share(db, automatic)
     return FoodAnalysisDecisionResponse(
         analysis_id=attempt.id,
         log_id=log_entry.id,
@@ -1653,11 +1663,81 @@ def _report_response(
     )
 
 
+def _queue_food_share(db, user, log):
+    user = db.get(User, user.id)
+    if user is None or not user.dietitian_id:
+        return None
+    try:
+        dietitian, assignment = _approved_report_relationship(db, user)
+        report = queue_automatic_report(
+            db, user, log, dietitian, assignment, getattr(notification_service, "settings", settings),
+        )
+        return (report, dietitian) if report else None
+    except (HTTPException, ReportDeliveryError):
+        # Missing/revoked relationship or contact must not block saving food.
+        return None
+
+
+async def _deliver_food_share(db, automatic):
+    if automatic is None:
+        return
+    try:
+        await _process_report_outbox(db, *automatic)
+    except Exception:
+        db.rollback()
+        logger.exception("Besin kaydedildi; otomatik yerel rapor teslimatı tamamlanamadı.")
+
+
+@router.get("/dietitian-auto-share", response_model=AutomaticShareSettings)
+def get_automatic_share(db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+    try:
+        dietitian, assignment = _approved_report_relationship(db, current_user)
+        verified_recipients(dietitian, ["email", "sms"])
+        enabled = local_delivery_only(getattr(notification_service, "settings", settings)) and bool(
+            active_consent(db, current_user, dietitian, assignment)
+        )
+    except (HTTPException, ReportDeliveryError):
+        enabled = False
+    return {"enabled": enabled}
+
+
+@router.put("/dietitian-auto-share", response_model=AutomaticShareSettings)
+def set_automatic_share(
+    request: AutomaticShareSettings, db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    # Serialize preference changes with other changes for this user.
+    db.query(User).filter(User.id == current_user.id).with_for_update().one()
+    if request.enabled:
+        if not local_delivery_only(getattr(notification_service, "settings", settings)):
+            raise HTTPException(409, "Otomatik paylaşım yalnız ücretsiz yerel test ortamında açılabilir.")
+        dietitian, assignment = _approved_report_relationship(db, current_user)
+        try:
+            recipients = verified_recipients(dietitian, ["email", "sms"])
+        except ReportDeliveryError as exc:
+            raise HTTPException(422, str(exc))
+    db.query(ConsentRecord).filter(
+        ConsentRecord.user_id == current_user.id,
+        ConsentRecord.consent_type == PURPOSE,
+        ConsentRecord.revoked_at.is_(None),
+    ).update({"revoked_at": utc_now()}, synchronize_session=False)
+    if request.enabled:
+        db.add(ConsentRecord(
+            user_id=current_user.id, assignment_id=assignment.id,
+            consent_type=PURPOSE, policy_version=POLICY, granted=True,
+            context_hash=recipient_digest(dietitian, assignment),
+            channels_json=["email", "sms"], recipient_masked=recipients,
+        ))
+    db.commit()
+    return {"enabled": request.enabled}
+
+
 async def _process_report_outbox(
     db: Session,
     report: DietitianReport,
     dietitian: Dietitian,
 ) -> None:
+    guard_automatic_delivery(db, report, dietitian, getattr(notification_service, "settings", settings))
     deliveries = db.query(NotificationDelivery).filter(
         NotificationDelivery.report_id == report.id,
         NotificationDelivery.status.in_(["queued", "failed"]),
@@ -1716,6 +1796,10 @@ async def _process_report_outbox(
                 )
             else:
                 delivery.next_attempt_at = None
+                # The API and mobile client use attempt_count/max_attempts as
+                # the durable retryability signal. Exhaust terminal failures so
+                # the UI cannot offer a retry that the server should reject.
+                delivery.attempt_count = delivery.max_attempts
         else:
             delivery.status = "sent"
             delivery.provider_message_id = result["provider_message_id"]

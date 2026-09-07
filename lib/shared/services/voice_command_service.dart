@@ -52,6 +52,12 @@ enum VoiceCommand {
   cancel('İptal', ['iptal', 'iptal et', 'vazgeç', 'durdur', 'bırak']),
   settings('Ayarlar', ['ayarlar', 'ayarları aç', 'tercihler', 'seçenekler']),
   help('Yardım', ['yardım', 'komutlar', 'ne yapabilirim', 'ne diyebilirim']),
+  readNutrition('Besin bilgilerini oku', [
+    'besin bilgilerini oku',
+    'besin değerlerini oku',
+    'detayları oku',
+    'tekrar oku',
+  ]),
   yes('Evet', ['evet', 'tamam', 'olur', 'kabul', 'kaydet', 'onayla']),
   no('Hayır', ['hayır', 'yok', 'istemiyorum', 'reddet']),
 

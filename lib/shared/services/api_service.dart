@@ -833,6 +833,21 @@ class ApiService {
         );
       });
 
+  Future<ApiResult<bool>> getAutomaticFoodShare() => _safeCall(() async {
+        final response =
+            await _dio.get<Map<String, dynamic>>('/dietitian-auto-share');
+        return response.data!['enabled'] == true;
+      });
+
+  Future<ApiResult<bool>> setAutomaticFoodShare(bool enabled) =>
+      _safeCall(() async {
+        final response = await _dio.put<Map<String, dynamic>>(
+          '/dietitian-auto-share',
+          data: {'enabled': enabled},
+        );
+        return response.data!['enabled'] == true;
+      });
+
   Future<ApiResult<DietitianAssignmentInfo>> requestDietitianAssignment({
     required String email,
     CancelToken? cancelToken,

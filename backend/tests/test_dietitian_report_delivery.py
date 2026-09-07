@@ -264,6 +264,36 @@ def test_preview_guards_no_relationship_unverified_empty_and_idor(client):
     ).status_code == 401
 
 
+def test_terminal_delivery_error_exhausts_retry_in_api(client, monkeypatch):
+    tokens = _register(client, "terminal-error@example.com")
+    _relationship(tokens["user_id"])
+    _food_log(tokens["user_id"])
+    preview = _preview(client, tokens, ["email"]).json()
+
+    class TerminalFailure:
+        async def send_channel(self, **kwargs):
+            raise ChannelDeliveryError("RECIPIENT_NOT_ALLOWLISTED", retryable=False)
+
+    monkeypatch.setattr(food_router, "notification_service", TerminalFailure())
+    response = client.post(
+        "/api/v1/send-to-dietitian",
+        headers={**_auth(tokens), "Idempotency-Key": "terminal-error-test-001"},
+        json={
+            "user_id": tokens["user_id"], "report_type": "daily",
+            "from_date": TODAY.isoformat(), "to_date": TODAY.isoformat(),
+            "channels": ["email"], "consent": True,
+            "consent_context_hash": preview["consent_context_hash"],
+        },
+    )
+    assert response.status_code == 200
+    delivery = response.json()["channels"][0]
+    assert delivery["attempt_count"] == delivery["max_attempts"] == 3
+    report_id = response.json()["report_id"]
+    assert client.post(
+        f"/api/v1/dietitian-reports/{report_id}/retry", headers=_auth(tokens),
+    ).status_code == 409
+
+
 @pytest.mark.asyncio
 async def test_mail_sandbox_and_sms_both_contain_approved_food_details():
     captured = {}
@@ -328,13 +358,50 @@ async def test_mail_sandbox_and_sms_both_contain_approved_food_details():
     assert "150 g" in plain and "78 kcal" in plain
     assert "2026-07-18T10:30:00+00:00" in plain
 
+    external_sandbox = NotificationService(settings_override=Settings(
+        app_environment="test", notification_mode="sandbox",
+        notification_sandbox_email_allowlist="sandbox-dietitian@nutrisense.invalid",
+        smtp_host="smtp.example.invalid", smtp_from_email="noreply@nutrisense.invalid",
+    ), email_transport=capture_email)
     with pytest.raises(ChannelDeliveryError) as error:
-        await service.send_channel(
+        await external_sandbox.send_channel(
             channel="email",
             destination="real-person@example.com",
             report_data=payload,
         )
     assert error.value.code == "RECIPIENT_NOT_ALLOWLISTED"
+
+
+@pytest.mark.asyncio
+async def test_local_mailpit_accepts_app_recipient_without_allowlist():
+    captured = {}
+
+    async def capture(message, destination):
+        captured["to"] = destination
+        return {"provider_message_id": "mailpit-local", "provider_status": "accepted"}
+
+    settings = Settings(
+        app_environment="dev", notification_mode="sandbox",
+        notification_sandbox_email_allowlist="", smtp_host="mailpit",
+        smtp_from_email="noreply@nutrisense.invalid", smtp_start_tls=False,
+    )
+    service = NotificationService(settings_override=settings, email_transport=capture)
+    result = await service.send_channel(
+        channel="email", destination="dietitian@gmail.com",
+        report_data={
+            "report_type": "daily", "from_date": TODAY.isoformat(),
+            "to_date": TODAY.isoformat(), "record_count": 1,
+            "total_calories": 78.0, "average_daily_calories": 78.0,
+            "estimated_portion_count": 0, "source_explanations": ["fixture"],
+            "message": None, "disclaimer": "Tıbbi tavsiye değildir.",
+            "records": [{"food_name_tr": "Elma", "portion_grams": 150,
+                         "portion_is_estimate": False, "total_calories": 78,
+                         "logged_at": "2026-09-07T12:00:00+03:00",
+                         "recognition_source": "fixture"}],
+        },
+    )
+    assert result["provider_status"] == "accepted"
+    assert captured["to"] == "dietitian@gmail.com"
 
 
 @pytest.mark.parametrize("channels", [["email", "sms"], ["sms"]])

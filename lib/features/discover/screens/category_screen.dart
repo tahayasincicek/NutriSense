@@ -9,6 +9,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../shared/services/accessibility_service.dart';
 import '../models/discover_content.dart';
 import '../widgets/article_card.dart';
+import '../widgets/discover_background.dart';
 
 class CategoryScreen extends ConsumerStatefulWidget {
   const CategoryScreen({super.key, required this.category});
@@ -39,8 +40,13 @@ class _CategoryScreenState extends ConsumerState<CategoryScreen> {
   Widget build(BuildContext context) {
     final articles = articlesForCategory(widget.category.id);
 
-    return Scaffold(
-      appBar: AppBar(title: Text(widget.category.title)),
+    return DiscoverBackground(
+        child: Scaffold(
+      backgroundColor: Colors.transparent,
+      appBar: AppBar(
+          title: Text(widget.category.title),
+          backgroundColor: Colors.transparent,
+          surfaceTintColor: Colors.transparent),
       body: articles.isEmpty
           ? Center(
               child: Padding(
@@ -62,6 +68,6 @@ class _CategoryScreenState extends ConsumerState<CategoryScreen> {
               itemBuilder: (context, index) =>
                   ArticleCard(article: articles[index]),
             ),
-    );
+    ));
   }
 }

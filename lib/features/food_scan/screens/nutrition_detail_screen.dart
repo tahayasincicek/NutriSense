@@ -13,9 +13,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/theme/app_theme.dart';
-import '../../../core/utils/accessibility_utils.dart';
 import '../../../shared/models/food_analysis_model.dart';
 import '../../../shared/services/accessibility_service.dart';
+import '../../../shared/services/contextual_voice_command.dart';
+import '../../../shared/services/voice_command_service.dart';
 import '../../../shared/widgets/accessible_button.dart';
 
 class NutritionDetailScreen extends ConsumerStatefulWidget {
@@ -43,14 +44,74 @@ class NutritionDetailScreen extends ConsumerStatefulWidget {
 
 class _NutritionDetailScreenState extends ConsumerState<NutritionDetailScreen> {
   late final AccessibilityService _accessibility;
+  late final VoiceCommandService _voice;
+  OnCommandRecognized? _previousCommandHandler;
+  late final OnCommandRecognized _detailCommandHandler;
+  bool _completed = false;
 
   @override
   void initState() {
     super.initState();
     _accessibility = ref.read(accessibilityServiceProvider);
+    _voice = ref.read(voiceCommandServiceProvider);
+    _previousCommandHandler = _voice.onCommandRecognized;
+    _detailCommandHandler = _handleVoiceCommand;
+    _voice.onCommandRecognized = _detailCommandHandler;
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      _announceDetails();
+      if (mounted) _announceDetails();
     });
+  }
+
+  void _handleVoiceCommand(CommandResult result) {
+    if (!mounted || _completed || ModalRoute.of(context)?.isCurrent != true) {
+      return;
+    }
+    // Re-parse the actual words in this confirmation context: a fuzzy global
+    // match must never authorize saving a food record.
+    final intent = const ContextualVoiceCommandParser().parse(
+      result.rawText,
+      context: VoiceInteractionContext.scanConfirmation,
+    );
+    if (intent.accepted && intent.isExact) {
+      switch (intent.action) {
+        case ContextualVoiceAction.listenEntry:
+          _announceDetails();
+          return;
+        case ContextualVoiceAction.save:
+        case ContextualVoiceAction.yes:
+          _finish('saved');
+          return;
+        case ContextualVoiceAction.retake:
+        case ContextualVoiceAction.no:
+        case ContextualVoiceAction.cancel:
+        case ContextualVoiceAction.back:
+          _finish('rescan');
+          return;
+        default:
+          break;
+      }
+    }
+    _accessibility.speak(
+      'Bilgileri dinlemek için besin bilgilerini oku, '
+      'kaydetmek için kaydet, yeniden taramak için tekrar çek deyin.',
+      priority: TtsPriority.high,
+    );
+  }
+
+  void _finish(String action) {
+    if (_completed || ModalRoute.of(context)?.isCurrent != true) return;
+    _completed = true;
+    // The camera screen performs the server confirmation and announces its
+    // outcome. Do not announce success before that request has completed.
+    Navigator.of(context).pop(action);
+  }
+
+  @override
+  void dispose() {
+    if (identical(_voice.onCommandRecognized, _detailCommandHandler)) {
+      _voice.onCommandRecognized = _previousCommandHandler;
+    }
+    super.dispose();
   }
 
   void _announceDetails() {
@@ -70,7 +131,8 @@ class _NutritionDetailScreenState extends ConsumerState<NutritionDetailScreen> {
 
     buffer.write(
         'Güven yüzdesi: ${(widget.confidence * 100).toStringAsFixed(0)}. ');
-    buffer.write('Kaydetmek için kaydet deyin.');
+    buffer.write('Kaydetmek için kaydet, bilgileri yeniden dinlemek için '
+        'besin bilgilerini oku deyin.');
 
     _accessibility.speak(buffer.toString(), priority: TtsPriority.high);
   }
@@ -259,14 +321,7 @@ class _NutritionDetailScreenState extends ConsumerState<NutritionDetailScreen> {
               semanticLabel:
                   '${widget.foodNameTr} besinini ${widget.calories.toStringAsFixed(0)} kalori olarak kaydet',
               icon: Icons.save_rounded,
-              onPressed: () {
-                _accessibility.speak(
-                  '${widget.foodNameTr} kaydedildi.',
-                  priority: TtsPriority.high,
-                );
-                AccessibilityUtils.successHaptic();
-                Navigator.of(context).pop('saved');
-              },
+              onPressed: () => _finish('saved'),
             ),
             const SizedBox(height: 12),
             AccessibleButton(
@@ -274,9 +329,7 @@ class _NutritionDetailScreenState extends ConsumerState<NutritionDetailScreen> {
               semanticLabel: 'Farklı bir besin taramak için kameraya dön',
               icon: Icons.camera_alt_rounded,
               type: AccessibleButtonType.outlined,
-              onPressed: () {
-                Navigator.of(context).pop('rescan');
-              },
+              onPressed: () => _finish('rescan'),
             ),
           ],
         ),

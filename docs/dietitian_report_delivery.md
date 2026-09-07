@@ -145,6 +145,32 @@ SMTP/Twilio gibi dış sistemlerde atomik “tam olarak bir kez” garantisi yok
 
 Rapor payload snapshot'ı yeniden denemelerde aynı içeriğin korunmasını sağlar. Production'a geçmeden önce rapor, teslimat ve audit kayıtlarının saklama/silme süreleri kurumun KVKK politikasıyla belirlenmeli; hesap silme, yedek silme ve sağlayıcı retention süreçleri birlikte test edilmelidir.
 
+## Onay sonrası otomatik yerel paylaşım
+
+Diyetisyen panelindeki **Onay sonrası otomatik paylaşım** anahtarı başlangıçta
+kapalıdır. Kullanıcının açıklamayı onaylaması `PUT /api/v1/dietitian-auto-share`
+üzerinden ayrı bir `automatic_food_share_local` izin kaydı oluşturur. GET aynı
+uçtan etkin durumu döndürür. İki alıcı kanalının da doğrulanmış olması gerekir.
+
+Yeni tarama onayı, düzelterek onaylama ve onaylı manuel giriş, yalnız yeni besin
+kaydını içeren e-posta ve SMS raporunu aynı veritabanı işlemi içinde kuyruğa
+alır. Besin kaydı kimliği gönderimin tekrarını engeller. Önceki kayıtlar,
+reddedilen analizler ve sonradan geçmiş düzenlemeleri otomatik gönderilmez.
+Teslimat hatası kaydedilmiş besini geri almaz; durum rapor geçmişinde görünür.
+
+Bu izin **yalnız yerel test içindir**: dev/test ortamı, sandbox bildirim modu,
+yerel SMTP ve `local_outbox` birlikte gereklidir. Compose SMS sağlayıcısını
+`local_outbox` olarak sabitler. Mailpit e-postaları localhost:8025'te, SMS
+mesajları backend içindeki `/tmp/sms_outbox.jsonl` dosyasında görülür. Gerçek
+adrese veya telefona gönderim yapılmaz. Ortam harici sağlayıcıya çevrilirse
+otomatik gönderim ve bu raporların yeniden denenmesi engellenir; bu izin
+gerçek gönderim iznine dönüşmez. İzin kapatılması, diyetisyen ilişkisinin
+kaldırılması veya alıcı değişmesi eski izinle yeni teslimatı engeller.
+
+Zamanlayıcı yoktur; tetikleyici yeni besin onayıdır. Doğrulama:
+`backend/tests/test_automatic_food_share.py` ve
+`test/widget/automatic_food_share_test.dart`.
+
 ## Secret ve sandbox yapılandırması
 
 SMTP/Twilio değerleri yalnız backend environment veya secret store'dan okunur. Mobil binary'de bulunmaz. `.env.example` yalnız değişken adları/açıklamaları ve sentetik RFC-reserved örnek alıcıları içerir.
@@ -159,6 +185,15 @@ Temel anahtarlar:
 - `TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN`, `TWILIO_PHONE_NUMBER`
 
 Sandbox modu allowlist dışındaki alıcıyı sağlayıcı çağrısından önce reddeder. Yerel Mailpit için SMTP user/password boş, TLS ve STARTTLS kapalı olmalıdır. Production `.env` değeri sandbox testine devralınmamalıdır. Secret değerleri terminale, teste, audit kaydına veya rapora yazdırılmaz. Bir secret daha önce Git'e girdiyse yalnız dosyadan silmek yeterli değildir; sağlayıcı panelinden rotasyon yapılmalıdır.
+
+Yerel/dev/test ortamında `SMTP_HOST=mailpit|localhost|127.0.0.1` olduğunda
+Mailpit dış dünyaya teslimat yapamayacağı için uygulamadaki doğrulanmış alıcı
+adresleri ayrıca sandbox allowlist'e eklenmek zorunda değildir; alıcı başlığı
+yakalanan mesajda inceleme amacıyla korunur. Aynı kural yalnız
+`SMS_PROVIDER_MODE=local_outbox` için geçerlidir. Harici SMTP/Twilio sandbox
+sağlayıcılarında allowlist zorunluluğu devam eder. Yeniden denenemez bir hata
+kanalın deneme hakkını tüketir ve mobil arayüz yanıltıcı yeniden deneme düğmesi
+göstermez.
 
 ## Tekrar üretilebilir Mailpit kanıtı
 

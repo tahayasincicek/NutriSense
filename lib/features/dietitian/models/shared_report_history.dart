@@ -53,11 +53,15 @@ class SharedReportHistoryItem {
       case 'sent':
         return 'Gönderildi';
       case 'partial':
+      case 'partial_failed':
         return 'Kısmen gönderildi';
       case 'failed':
         return 'Gönderilemedi';
       case 'pending':
+      case 'sending':
         return 'Gönderiliyor';
+      case 'queued':
+        return 'Sırada';
       default:
         return status;
     }
@@ -110,6 +114,12 @@ class SharedReportChannel {
         return 'iletildi';
       case 'failed':
         return 'iletilemedi';
+      case 'queued':
+        return 'sırada';
+      case 'sending':
+        return 'gönderiliyor';
+      case 'skipped':
+        return 'atlanmış';
       default:
         return status;
     }

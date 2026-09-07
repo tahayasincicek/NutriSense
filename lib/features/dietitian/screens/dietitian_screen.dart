@@ -8,6 +8,7 @@ import '../../../shared/services/api_service.dart';
 import '../../../shared/widgets/accessible_button.dart';
 import 'send_report_wizard.dart';
 import '../models/shared_report_history.dart';
+import '../widgets/report_history_section.dart';
 
 class DietitianScreen extends ConsumerStatefulWidget {
   const DietitianScreen({super.key});
@@ -23,6 +24,8 @@ class _DietitianScreenState extends ConsumerState<DietitianScreen> {
   List<SharedReportHistoryItem> _history = const [];
   bool _loading = true;
   bool _busy = false;
+  bool _automaticShare = false;
+  bool _automaticLoaded = false;
   String? _error;
 
   ApiService get _api => ref.read(apiServiceProvider);
@@ -59,7 +62,16 @@ class _DietitianScreenState extends ConsumerState<DietitianScreen> {
       _assignment = result.data;
       _error = result.isSuccess ? null : result.errorMessage;
     });
-    if (result.data != null) await _loadHistory();
+    if (result.data != null) {
+      await _loadHistory();
+      final automatic = await _api.getAutomaticFoodShare();
+      if (!mounted) return;
+      setState(() {
+        _automaticShare = automatic.data ?? false;
+        _automaticLoaded = automatic.isSuccess;
+        if (!automatic.isSuccess) _error = automatic.errorMessage;
+      });
+    }
   }
 
   /// İşlem sonucunu hem ekranda hem sesli bildirir.
@@ -82,6 +94,9 @@ class _DietitianScreenState extends ConsumerState<DietitianScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // AppShell extends its body behind the navigation bar. Preserve that
+    // inherited bottom inset even though this list supplies explicit padding.
+    final bottomInset = MediaQuery.paddingOf(context).bottom;
     return Scaffold(
       backgroundColor: Colors.transparent,
       appBar: AppBar(
@@ -93,7 +108,7 @@ class _DietitianScreenState extends ConsumerState<DietitianScreen> {
           : RefreshIndicator(
               onRefresh: _load,
               child: ListView(
-                padding: const EdgeInsets.all(20),
+                padding: EdgeInsets.fromLTRB(20, 20, 20, 20 + bottomInset),
                 children: [
                   if (_error != null) _buildErrorCard(_error!),
                   _buildHeader(),
@@ -364,6 +379,17 @@ class _DietitianScreenState extends ConsumerState<DietitianScreen> {
             foregroundColor: AppTheme.errorColor,
             onPressed: _busy ? null : _cancelAssignment,
           ),
+          if (isApproved)
+            SwitchListTile(
+              key: const Key('automatic_food_share'),
+              title: const Text('Onay sonrası otomatik paylaşım'),
+              subtitle: const Text(
+                  'Yerel test: onayladığınız her besinin adı, miktarı, '
+                  'tarih-saati ve kalorisi e-posta ve SMS test kutularına aktarılır. '
+                  'Gerçek adrese veya telefona ulaşmaz; gönderim ücreti oluşmaz.'),
+              value: _automaticShare,
+              onChanged: _busy || !_automaticLoaded ? null : _setAutomaticShare,
+            ),
         ],
       ),
     );
@@ -375,129 +401,51 @@ class _DietitianScreenState extends ConsumerState<DietitianScreen> {
     setState(() => _history = result.data ?? const []);
   }
 
+  Future<void> _setAutomaticShare(bool enabled) async {
+    if (enabled) {
+      final approved = await showDialog<bool>(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text('Otomatik paylaşımı aç?'),
+          content: Text(
+              '${_assignment!.dietitianName} için bundan sonra onayladığınız '
+              'her yeni besinin adı, miktarı, tarih-saati ve kalorisi hem e-posta '
+              'hem SMS yerel test kutusuna otomatik aktarılacak. Önceki kayıtlar '
+              'gönderilmez. Bu ayarı istediğiniz zaman kapatabilirsiniz. '
+              'Gerçek gönderim yapılmaz ve gönderim ücreti oluşmaz.'),
+          actions: [
+            TextButton(
+                onPressed: () => Navigator.pop(context, false),
+                child: const Text('Vazgeç')),
+            TextButton(
+                onPressed: () => Navigator.pop(context, true),
+                child: const Text('Onayla ve Aç')),
+          ],
+        ),
+      );
+      if (approved != true || !mounted) return;
+    }
+    setState(() => _busy = true);
+    final result = await _api.setAutomaticFoodShare(enabled);
+    if (!mounted) return;
+    setState(() {
+      _busy = false;
+      if (result.isSuccess) _automaticShare = result.data!;
+    });
+    _report(
+        success: result.isSuccess,
+        message: result.isSuccess
+            ? (enabled
+                ? 'Otomatik yerel paylaşım açıldı.'
+                : 'Otomatik paylaşım kapatıldı.')
+            : result.errorMessage ?? 'Paylaşım ayarı değiştirilemedi.');
+  }
+
   /// Gönderilen raporların geçmişi ve diyetisyenin cevabı.
   ///
   /// Kullanıcı daha önce neyi paylaştığını göremiyordu; bu, paylaşımın
   /// denetlenebilir olması için gerekli.
-  Widget _buildHistorySection() {
-    final theme = Theme.of(context);
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Semantics(
-          header: true,
-          child: Text('Gönderdiğim Raporlar',
-              style: theme.textTheme.titleLarge
-                  ?.copyWith(fontWeight: FontWeight.w800)),
-        ),
-        const SizedBox(height: 12),
-        if (_history.isEmpty)
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.all(20),
-            decoration: BoxDecoration(
-              color: theme.colorScheme.surface,
-              borderRadius: BorderRadius.circular(AppTheme.cardRadius),
-              border:
-                  Border.all(color: theme.colorScheme.outline.withOpacity(0.2)),
-            ),
-            child: Text(
-              'Henüz rapor göndermediniz. Hazır olduğunuzda haftalık '
-              'raporunuzu paylaşabilirsiniz.',
-              style: theme.textTheme.bodyMedium
-                  ?.copyWith(color: theme.colorScheme.onSurfaceVariant),
-            ),
-          )
-        else
-          ..._history.map(_buildHistoryCard),
-      ],
-    );
-  }
-
-  Widget _buildHistoryCard(SharedReportHistoryItem item) {
-    final theme = Theme.of(context);
-    final channels = item.channels
-        .map((c) => '${c.channelLabel}: ${c.statusLabel}')
-        .join(', ');
-
-    return Semantics(
-      container: true,
-      excludeSemantics: true,
-      label: item.spokenSummary,
-      child: Container(
-        margin: const EdgeInsets.only(bottom: 12),
-        padding: const EdgeInsets.all(20),
-        decoration: BoxDecoration(
-          color: theme.colorScheme.surface,
-          borderRadius: BorderRadius.circular(AppTheme.cardRadius),
-          border: Border.all(color: theme.colorScheme.outline.withOpacity(0.2)),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    item.periodLabel,
-                    style: theme.textTheme.titleSmall
-                        ?.copyWith(fontWeight: FontWeight.bold),
-                  ),
-                ),
-                Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                  decoration: BoxDecoration(
-                    color: item.status == 'completed'
-                        ? AppTheme.primaryColor.withOpacity(0.1)
-                        : AppTheme.warningColor.withOpacity(0.15),
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: Text(
-                    item.statusLabel,
-                    style: TextStyle(
-                      fontSize: 11,
-                      fontWeight: FontWeight.bold,
-                      color: item.status == 'completed'
-                          ? AppTheme.primaryColor
-                          : AppTheme.warningColor,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 6),
-            Text(
-                '${item.recordCount} kayıt${channels.isEmpty ? '' : ' - $channels'}',
-                style: theme.textTheme.bodySmall
-                    ?.copyWith(color: theme.colorScheme.onSurfaceVariant)),
-            if (item.hasReply) ...[
-              const SizedBox(height: 12),
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: AppTheme.primaryColor.withOpacity(0.06),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text('Diyetisyeninizin cevabı',
-                        style: theme.textTheme.labelMedium?.copyWith(
-                            fontWeight: FontWeight.bold,
-                            color: AppTheme.primaryColor)),
-                    const SizedBox(height: 4),
-                    Text(item.dietitianReply!,
-                        style: theme.textTheme.bodyMedium),
-                  ],
-                ),
-              ),
-            ],
-          ],
-        ),
-      ),
-    );
-  }
+  Widget _buildHistorySection() => ReportHistorySection(items: _history);
 
   Future<void> _requestAssignment() async {
     final email = _email.text.trim();

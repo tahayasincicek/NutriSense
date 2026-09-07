@@ -177,6 +177,22 @@ class NotificationService:
         if mode not in {"sandbox", "production"}:
             raise ChannelDeliveryError("CHANNEL_DISABLED", retryable=False)
         if mode == "sandbox":
+            environment = self.settings.app_environment.lower()
+            local_email_sink = (
+                channel == "email"
+                and environment in {"local", "dev", "test"}
+                and self.settings.smtp_host.lower() in {"mailpit", "localhost", "127.0.0.1"}
+            )
+            local_sms_sink = (
+                channel == "sms"
+                and environment in {"local", "dev", "test"}
+                and self.settings.sms_provider_mode == "local_outbox"
+            )
+            # Local sinks cannot contact the displayed recipient. The address is
+            # retained in the captured message so the end-to-end report can be
+            # inspected without weakening allowlists for an external provider.
+            if local_email_sink or local_sms_sink:
+                return
             allowed = (
                 self.settings.sandbox_email_allowlist
                 if channel == "email"

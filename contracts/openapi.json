@@ -20,6 +20,19 @@
         "title": "AccountDeletionRequest",
         "type": "object"
       },
+      "AutomaticShareSettings": {
+        "properties": {
+          "enabled": {
+            "title": "Enabled",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "enabled"
+        ],
+        "title": "AutomaticShareSettings",
+        "type": "object"
+      },
       "Body_analyze_food_api_v1_analyze_food_post": {
         "properties": {
           "capture_id": {
@@ -4192,6 +4205,76 @@
           }
         ],
         "summary": "Bir amaç için rıza ver veya geri çek",
+        "tags": [
+          "NutriSense API"
+        ]
+      }
+    },
+    "/api/v1/dietitian-auto-share": {
+      "get": {
+        "operationId": "get_automatic_share_api_v1_dietitian_auto_share_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AutomaticShareSettings"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Get Automatic Share",
+        "tags": [
+          "NutriSense API"
+        ]
+      },
+      "put": {
+        "operationId": "set_automatic_share_api_v1_dietitian_auto_share_put",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AutomaticShareSettings"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AutomaticShareSettings"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Set Automatic Share",
         "tags": [
           "NutriSense API"
         ]

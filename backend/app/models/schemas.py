@@ -19,6 +19,10 @@ from pydantic import (
 # BESİN ANALİZİ
 # ═══════════════════════════════════════════════════════════════════════════════
 
+class AutomaticShareSettings(BaseModel):
+    enabled: bool
+
+
 class NutrientData(BaseModel):
     """Besin değerleri."""
     protein: float = Field(0.0, ge=0, description="Protein (g)")

@@ -184,6 +184,15 @@ class ContextualVoiceCommandParser {
         _allowed(ContextualVoiceAction.today, context)) {
       return _exact(raw, ContextualVoiceAction.today);
     }
+    if (_isExact(value, const [
+          'besin bilgilerini oku',
+          'besin degerlerini oku',
+          'detaylari oku',
+          'tekrar oku',
+        ]) &&
+        context == VoiceInteractionContext.scanConfirmation) {
+      return _exact(raw, ContextualVoiceAction.listenEntry);
+    }
     if (_isExact(value, const ['kaydi dinle', 'bu kaydi dinle']) &&
         context == VoiceInteractionContext.history) {
       return _exact(raw, ContextualVoiceAction.listenEntry);

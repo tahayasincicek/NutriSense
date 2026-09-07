@@ -716,6 +716,19 @@ class ChannelDeliveryResult {
   bool get isSent => status == 'sent';
   bool get canRetry => status == 'failed' && attemptCount < maxAttempts;
   String get channelLabel => channel == 'email' ? 'E-posta' : 'SMS';
+  String? get errorMessage => switch (errorCode) {
+        'RECIPIENT_NOT_ALLOWLISTED' =>
+          'Bu alıcı test gönderim listesinde değil. Sunucu yapılandırmasını kontrol edin.',
+        'CHANNEL_DISABLED' => 'Bu gönderim kanalı sunucuda kapalı.',
+        'EMAIL_NOT_CONFIGURED' => 'E-posta servisi yapılandırılmamış.',
+        'SMS_NOT_CONFIGURED' => 'SMS servisi yapılandırılmamış.',
+        'SMS_DELIVERY_UNCERTAIN' =>
+          'SMS sağlayıcıya ulaşmış olabilir. Çift gönderimi önlemek için otomatik yeniden deneme kapatıldı.',
+        'RECIPIENT_CHANGED' =>
+          'Diyetisyen iletişim bilgisi değişti. Yeni bir rapor önizlemesi oluşturun.',
+        null => null,
+        _ => 'Gönderim sağlayıcı tarafından kabul edilmedi ($errorCode).',
+      };
 
   factory ChannelDeliveryResult.fromJson(Map<String, dynamic> json) =>
       ChannelDeliveryResult(

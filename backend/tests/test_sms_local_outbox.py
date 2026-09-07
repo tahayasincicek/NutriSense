@@ -88,7 +88,12 @@ async def test_sms_body_contains_the_approved_food_details(tmp_path):
 
 @pytest.mark.asyncio
 async def test_recipient_outside_the_allowlist_is_rejected(tmp_path):
-    settings = _settings(tmp_path)
+    settings = _settings(
+        tmp_path, sms_provider_mode="twilio",
+        twilio_account_sid="AC" + "1" * 32,
+        twilio_auth_token="secret-test-token",
+        twilio_phone_number="+15005550001",
+    )
     service = NotificationService(settings_override=settings)
 
     with pytest.raises(ChannelDeliveryError) as excinfo:
@@ -99,6 +104,18 @@ async def test_recipient_outside_the_allowlist_is_rejected(tmp_path):
         )
     assert excinfo.value.args[0] == "RECIPIENT_NOT_ALLOWLISTED"
     assert not (tmp_path / "sms_outbox.jsonl").exists()
+
+
+@pytest.mark.asyncio
+async def test_local_sms_sink_accepts_verified_app_recipient_without_allowlist(tmp_path):
+    settings = _settings(
+        tmp_path, notification_sandbox_phone_allowlist="",
+    )
+    service = NotificationService(settings_override=settings)
+    result = await service.send_channel(
+        channel="sms", destination="+905551112233", report_data=_report(),
+    )
+    assert result["provider_status"] == "queued_local_outbox"
 
 
 @pytest.mark.asyncio
