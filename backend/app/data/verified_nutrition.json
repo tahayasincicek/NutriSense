@@ -22,6 +22,34 @@
         "license": "CC0 1.0",
         "attribution": "USDA FoodData Central, FNDDS 2021-2023. Milk, reduced fat (2%). https://fdc.nal.usda.gov/fdc-app.html#/food-details/2705386/nutrients"
       },
+      "usda-fdc:2705393": {
+        "source_url": "https://fdc.nal.usda.gov/fdc-app.html#/food-details/2705393/nutrients",
+        "source_item_name": "Buttermilk",
+        "retrieved_at": "2026-09-07T05:37:48Z",
+        "license": "CC0 1.0",
+        "attribution": "USDA FoodData Central, FNDDS 2021-2023. Buttermilk. https://fdc.nal.usda.gov/fdc-app.html#/food-details/2705393/nutrients"
+      },
+      "usda-fdc:2705394": {
+        "source_url": "https://fdc.nal.usda.gov/fdc-app.html#/food-details/2705394/nutrients",
+        "source_item_name": "Kefir",
+        "retrieved_at": "2026-09-07T05:37:48Z",
+        "license": "CC0 1.0",
+        "attribution": "USDA FoodData Central, FNDDS 2021-2023. Kefir. https://fdc.nal.usda.gov/fdc-app.html#/food-details/2705394/nutrients"
+      },
+      "usda-fdc:2705395": {
+        "source_url": "https://fdc.nal.usda.gov/fdc-app.html#/food-details/2705395/nutrients",
+        "source_item_name": "Goat milk",
+        "retrieved_at": "2026-09-07T05:37:48Z",
+        "license": "CC0 1.0",
+        "attribution": "USDA FoodData Central, FNDDS 2021-2023. Goat milk. https://fdc.nal.usda.gov/fdc-app.html#/food-details/2705395/nutrients"
+      },
+      "usda-fdc:2705412": {
+        "source_url": "https://fdc.nal.usda.gov/fdc-app.html#/food-details/2705412/nutrients",
+        "source_item_name": "Oat milk",
+        "retrieved_at": "2026-09-07T05:37:48Z",
+        "license": "CC0 1.0",
+        "attribution": "USDA FoodData Central, FNDDS 2021-2023. Oat milk. https://fdc.nal.usda.gov/fdc-app.html#/food-details/2705412/nutrients"
+      },
       "usda-fdc:2705418": {
         "source_url": "https://fdc.nal.usda.gov/fdc-app.html#/food-details/2705418/nutrients",
         "source_item_name": "Yogurt, whole milk, plain",
@@ -29,12 +57,33 @@
         "license": "CC0 1.0",
         "attribution": "USDA FoodData Central, FNDDS 2021-2023. Yogurt, whole milk, plain. https://fdc.nal.usda.gov/fdc-app.html#/food-details/2705418/nutrients"
       },
+      "usda-fdc:2705422": {
+        "source_url": "https://fdc.nal.usda.gov/fdc-app.html#/food-details/2705422/nutrients",
+        "source_item_name": "Yogurt, Greek, whole milk, plain",
+        "retrieved_at": "2026-09-07T05:37:48Z",
+        "license": "CC0 1.0",
+        "attribution": "USDA FoodData Central, FNDDS 2021-2023. Yogurt, Greek, whole milk, plain. https://fdc.nal.usda.gov/fdc-app.html#/food-details/2705422/nutrients"
+      },
+      "usda-fdc:2705597": {
+        "source_url": "https://fdc.nal.usda.gov/fdc-app.html#/food-details/2705597/nutrients",
+        "source_item_name": "Cream, heavy",
+        "retrieved_at": "2026-09-07T05:37:48Z",
+        "license": "CC0 1.0",
+        "attribution": "USDA FoodData Central, FNDDS 2021-2023. Cream, heavy. https://fdc.nal.usda.gov/fdc-app.html#/food-details/2705597/nutrients"
+      },
       "usda-fdc:2705629": {
         "source_url": "https://fdc.nal.usda.gov/fdc-app.html#/food-details/2705629/nutrients",
         "source_item_name": "Ice cream, NFS",
         "retrieved_at": "2026-09-07T05:37:48Z",
         "license": "CC0 1.0",
         "attribution": "USDA FoodData Central, FNDDS 2021-2023. Ice cream, NFS. https://fdc.nal.usda.gov/fdc-app.html#/food-details/2705629/nutrients"
+      },
+      "usda-fdc:2705685": {
+        "source_url": "https://fdc.nal.usda.gov/fdc-app.html#/food-details/2705685/nutrients",
+        "source_item_name": "Pudding, rice",
+        "retrieved_at": "2026-09-07T05:37:48Z",
+        "license": "CC0 1.0",
+        "attribution": "USDA FoodData Central, FNDDS 2021-2023. Pudding, rice. https://fdc.nal.usda.gov/fdc-app.html#/food-details/2705685/nutrients"
       },
       "usda-fdc:2705709": {
         "source_url": "https://fdc.nal.usda.gov/fdc-app.html#/food-details/2705709/nutrients",
@@ -50,12 +99,33 @@
         "license": "CC0 1.0",
         "attribution": "USDA FoodData Central, FNDDS 2021-2023. Cheese, Feta. https://fdc.nal.usda.gov/fdc-app.html#/food-details/2705714/nutrients"
       },
+      "usda-fdc:2705722": {
+        "source_url": "https://fdc.nal.usda.gov/fdc-app.html#/food-details/2705722/nutrients",
+        "source_item_name": "Cheese, Mozzarella, NFS",
+        "retrieved_at": "2026-09-07T05:37:48Z",
+        "license": "CC0 1.0",
+        "attribution": "USDA FoodData Central, FNDDS 2021-2023. Cheese, Mozzarella, NFS. https://fdc.nal.usda.gov/fdc-app.html#/food-details/2705722/nutrients"
+      },
+      "usda-fdc:2705730": {
+        "source_url": "https://fdc.nal.usda.gov/fdc-app.html#/food-details/2705730/nutrients",
+        "source_item_name": "Cheese, Parmesan, hard",
+        "retrieved_at": "2026-09-07T05:37:48Z",
+        "license": "CC0 1.0",
+        "attribution": "USDA FoodData Central, FNDDS 2021-2023. Cheese, Parmesan, hard. https://fdc.nal.usda.gov/fdc-app.html#/food-details/2705730/nutrients"
+      },
       "usda-fdc:2705747": {
         "source_url": "https://fdc.nal.usda.gov/fdc-app.html#/food-details/2705747/nutrients",
         "source_item_name": "Cheese, cottage, NFS",
         "retrieved_at": "2026-09-07T05:37:48Z",
         "license": "CC0 1.0",
         "attribution": "USDA FoodData Central, FNDDS 2021-2023. Cheese, cottage, NFS. https://fdc.nal.usda.gov/fdc-app.html#/food-details/2705747/nutrients"
+      },
+      "usda-fdc:2705822": {
+        "source_url": "https://fdc.nal.usda.gov/fdc-app.html#/food-details/2705822/nutrients",
+        "source_item_name": "Beef, NFS",
+        "retrieved_at": "2026-09-07T05:37:48Z",
+        "license": "CC0 1.0",
+        "attribution": "USDA FoodData Central, FNDDS 2021-2023. Beef, NFS. https://fdc.nal.usda.gov/fdc-app.html#/food-details/2705822/nutrients"
       },
       "usda-fdc:2705849": {
         "source_url": "https://fdc.nal.usda.gov/fdc-app.html#/food-details/2705849/nutrients",
@@ -78,6 +148,20 @@
         "license": "CC0 1.0",
         "attribution": "USDA FoodData Central, FNDDS 2021-2023. Lamb, NS as to cut. https://fdc.nal.usda.gov/fdc-app.html#/food-details/2705905/nutrients"
       },
+      "usda-fdc:2705908": {
+        "source_url": "https://fdc.nal.usda.gov/fdc-app.html#/food-details/2705908/nutrients",
+        "source_item_name": "Goat",
+        "retrieved_at": "2026-09-07T05:37:48Z",
+        "license": "CC0 1.0",
+        "attribution": "USDA FoodData Central, FNDDS 2021-2023. Goat. https://fdc.nal.usda.gov/fdc-app.html#/food-details/2705908/nutrients"
+      },
+      "usda-fdc:2705909": {
+        "source_url": "https://fdc.nal.usda.gov/fdc-app.html#/food-details/2705909/nutrients",
+        "source_item_name": "Veal, chop",
+        "retrieved_at": "2026-09-07T05:37:48Z",
+        "license": "CC0 1.0",
+        "attribution": "USDA FoodData Central, FNDDS 2021-2023. Veal, chop. https://fdc.nal.usda.gov/fdc-app.html#/food-details/2705909/nutrients"
+      },
       "usda-fdc:2705956": {
         "source_url": "https://fdc.nal.usda.gov/fdc-app.html#/food-details/2705956/nutrients",
         "source_item_name": "Chicken breast, baked, broiled, or roasted, skin not eaten, from raw",
@@ -92,6 +176,48 @@
         "license": "CC0 1.0",
         "attribution": "USDA FoodData Central, FNDDS 2021-2023. Chicken thigh, stewed, skin eaten. https://fdc.nal.usda.gov/fdc-app.html#/food-details/2706037/nutrients"
       },
+      "usda-fdc:2706061": {
+        "source_url": "https://fdc.nal.usda.gov/fdc-app.html#/food-details/2706061/nutrients",
+        "source_item_name": "Chicken wing, stewed",
+        "retrieved_at": "2026-09-07T05:37:48Z",
+        "license": "CC0 1.0",
+        "attribution": "USDA FoodData Central, FNDDS 2021-2023. Chicken wing, stewed. https://fdc.nal.usda.gov/fdc-app.html#/food-details/2706061/nutrients"
+      },
+      "usda-fdc:2706104": {
+        "source_url": "https://fdc.nal.usda.gov/fdc-app.html#/food-details/2706104/nutrients",
+        "source_item_name": "Turkey, NFS",
+        "retrieved_at": "2026-09-07T05:37:48Z",
+        "license": "CC0 1.0",
+        "attribution": "USDA FoodData Central, FNDDS 2021-2023. Turkey, NFS. https://fdc.nal.usda.gov/fdc-app.html#/food-details/2706104/nutrients"
+      },
+      "usda-fdc:2706153": {
+        "source_url": "https://fdc.nal.usda.gov/fdc-app.html#/food-details/2706153/nutrients",
+        "source_item_name": "Liver, beef",
+        "retrieved_at": "2026-09-07T05:37:48Z",
+        "license": "CC0 1.0",
+        "attribution": "USDA FoodData Central, FNDDS 2021-2023. Liver, beef. https://fdc.nal.usda.gov/fdc-app.html#/food-details/2706153/nutrients"
+      },
+      "usda-fdc:2706171": {
+        "source_url": "https://fdc.nal.usda.gov/fdc-app.html#/food-details/2706171/nutrients",
+        "source_item_name": "Beef sausage",
+        "retrieved_at": "2026-09-07T05:37:48Z",
+        "license": "CC0 1.0",
+        "attribution": "USDA FoodData Central, FNDDS 2021-2023. Beef sausage. https://fdc.nal.usda.gov/fdc-app.html#/food-details/2706171/nutrients"
+      },
+      "usda-fdc:2706183": {
+        "source_url": "https://fdc.nal.usda.gov/fdc-app.html#/food-details/2706183/nutrients",
+        "source_item_name": "Pastrami, NFS",
+        "retrieved_at": "2026-09-07T05:37:48Z",
+        "license": "CC0 1.0",
+        "attribution": "USDA FoodData Central, FNDDS 2021-2023. Pastrami, NFS. https://fdc.nal.usda.gov/fdc-app.html#/food-details/2706183/nutrients"
+      },
+      "usda-fdc:2706195": {
+        "source_url": "https://fdc.nal.usda.gov/fdc-app.html#/food-details/2706195/nutrients",
+        "source_item_name": "Salami, NFS",
+        "retrieved_at": "2026-09-07T05:37:48Z",
+        "license": "CC0 1.0",
+        "attribution": "USDA FoodData Central, FNDDS 2021-2023. Salami, NFS. https://fdc.nal.usda.gov/fdc-app.html#/food-details/2706195/nutrients"
+      },
       "usda-fdc:2706224": {
         "source_url": "https://fdc.nal.usda.gov/fdc-app.html#/food-details/2706224/nutrients",
         "source_item_name": "Fish, NFS",
@@ -105,6 +231,48 @@
         "retrieved_at": "2026-09-07T05:37:48Z",
         "license": "CC0 1.0",
         "attribution": "USDA FoodData Central, FNDDS 2021-2023. Fish, anchovy. https://fdc.nal.usda.gov/fdc-app.html#/food-details/2706232/nutrients"
+      },
+      "usda-fdc:2706285": {
+        "source_url": "https://fdc.nal.usda.gov/fdc-app.html#/food-details/2706285/nutrients",
+        "source_item_name": "Fish, salmon, NFS",
+        "retrieved_at": "2026-09-07T05:37:48Z",
+        "license": "CC0 1.0",
+        "attribution": "USDA FoodData Central, FNDDS 2021-2023. Fish, salmon, NFS. https://fdc.nal.usda.gov/fdc-app.html#/food-details/2706285/nutrients"
+      },
+      "usda-fdc:2706293": {
+        "source_url": "https://fdc.nal.usda.gov/fdc-app.html#/food-details/2706293/nutrients",
+        "source_item_name": "Fish, sardines, canned",
+        "retrieved_at": "2026-09-07T05:37:48Z",
+        "license": "CC0 1.0",
+        "attribution": "USDA FoodData Central, FNDDS 2021-2023. Fish, sardines, canned. https://fdc.nal.usda.gov/fdc-app.html#/food-details/2706293/nutrients"
+      },
+      "usda-fdc:2706309": {
+        "source_url": "https://fdc.nal.usda.gov/fdc-app.html#/food-details/2706309/nutrients",
+        "source_item_name": "Fish, tuna, NFS",
+        "retrieved_at": "2026-09-07T05:37:48Z",
+        "license": "CC0 1.0",
+        "attribution": "USDA FoodData Central, FNDDS 2021-2023. Fish, tuna, NFS. https://fdc.nal.usda.gov/fdc-app.html#/food-details/2706309/nutrients"
+      },
+      "usda-fdc:2706331": {
+        "source_url": "https://fdc.nal.usda.gov/fdc-app.html#/food-details/2706331/nutrients",
+        "source_item_name": "Octopus",
+        "retrieved_at": "2026-09-07T05:37:48Z",
+        "license": "CC0 1.0",
+        "attribution": "USDA FoodData Central, FNDDS 2021-2023. Octopus. https://fdc.nal.usda.gov/fdc-app.html#/food-details/2706331/nutrients"
+      },
+      "usda-fdc:2706344": {
+        "source_url": "https://fdc.nal.usda.gov/fdc-app.html#/food-details/2706344/nutrients",
+        "source_item_name": "Crab",
+        "retrieved_at": "2026-09-07T05:37:48Z",
+        "license": "CC0 1.0",
+        "attribution": "USDA FoodData Central, FNDDS 2021-2023. Crab. https://fdc.nal.usda.gov/fdc-app.html#/food-details/2706344/nutrients"
+      },
+      "usda-fdc:2706350": {
+        "source_url": "https://fdc.nal.usda.gov/fdc-app.html#/food-details/2706350/nutrients",
+        "source_item_name": "Mussels",
+        "retrieved_at": "2026-09-07T05:37:48Z",
+        "license": "CC0 1.0",
+        "attribution": "USDA FoodData Central, FNDDS 2021-2023. Mussels. https://fdc.nal.usda.gov/fdc-app.html#/food-details/2706350/nutrients"
       },
       "usda-fdc:2706360": {
         "source_url": "https://fdc.nal.usda.gov/fdc-app.html#/food-details/2706360/nutrients",
@@ -141,6 +309,13 @@
         "license": "CC0 1.0",
         "attribution": "USDA FoodData Central, FNDDS 2021-2023. Egg, whole, boiled or poached. https://fdc.nal.usda.gov/fdc-app.html#/food-details/2707154/nutrients"
       },
+      "usda-fdc:2707156": {
+        "source_url": "https://fdc.nal.usda.gov/fdc-app.html#/food-details/2707156/nutrients",
+        "source_item_name": "Egg, whole, fried no added fat",
+        "retrieved_at": "2026-09-07T05:37:48Z",
+        "license": "CC0 1.0",
+        "attribution": "USDA FoodData Central, FNDDS 2021-2023. Egg, whole, fried no added fat. https://fdc.nal.usda.gov/fdc-app.html#/food-details/2707156/nutrients"
+      },
       "usda-fdc:2707205": {
         "source_url": "https://fdc.nal.usda.gov/fdc-app.html#/food-details/2707205/nutrients",
         "source_item_name": "Egg omelet or scrambled egg, no added fat",
@@ -169,6 +344,20 @@
         "license": "CC0 1.0",
         "attribution": "USDA FoodData Central, FNDDS 2021-2023. Chickpeas, NFS. https://fdc.nal.usda.gov/fdc-app.html#/food-details/2707414/nutrients"
       },
+      "usda-fdc:2707420": {
+        "source_url": "https://fdc.nal.usda.gov/fdc-app.html#/food-details/2707420/nutrients",
+        "source_item_name": "Split peas, from dried, no added fat",
+        "retrieved_at": "2026-09-07T05:37:48Z",
+        "license": "CC0 1.0",
+        "attribution": "USDA FoodData Central, FNDDS 2021-2023. Split peas, from dried, no added fat. https://fdc.nal.usda.gov/fdc-app.html#/food-details/2707420/nutrients"
+      },
+      "usda-fdc:2707423": {
+        "source_url": "https://fdc.nal.usda.gov/fdc-app.html#/food-details/2707423/nutrients",
+        "source_item_name": "Lentils, NFS",
+        "retrieved_at": "2026-09-07T05:37:48Z",
+        "license": "CC0 1.0",
+        "attribution": "USDA FoodData Central, FNDDS 2021-2023. Lentils, NFS. https://fdc.nal.usda.gov/fdc-app.html#/food-details/2707423/nutrients"
+      },
       "usda-fdc:2707425": {
         "source_url": "https://fdc.nal.usda.gov/fdc-app.html#/food-details/2707425/nutrients",
         "source_item_name": "Lentils, from dried, no added fat",
@@ -190,12 +379,40 @@
         "license": "CC0 1.0",
         "attribution": "USDA FoodData Central, FNDDS 2021-2023. Almonds, NFS. https://fdc.nal.usda.gov/fdc-app.html#/food-details/2707485/nutrients"
       },
+      "usda-fdc:2707493": {
+        "source_url": "https://fdc.nal.usda.gov/fdc-app.html#/food-details/2707493/nutrients",
+        "source_item_name": "Cashews, NFS",
+        "retrieved_at": "2026-09-07T05:37:48Z",
+        "license": "CC0 1.0",
+        "attribution": "USDA FoodData Central, FNDDS 2021-2023. Cashews, NFS. https://fdc.nal.usda.gov/fdc-app.html#/food-details/2707493/nutrients"
+      },
+      "usda-fdc:2707499": {
+        "source_url": "https://fdc.nal.usda.gov/fdc-app.html#/food-details/2707499/nutrients",
+        "source_item_name": "Chestnuts",
+        "retrieved_at": "2026-09-07T05:37:48Z",
+        "license": "CC0 1.0",
+        "attribution": "USDA FoodData Central, FNDDS 2021-2023. Chestnuts. https://fdc.nal.usda.gov/fdc-app.html#/food-details/2707499/nutrients"
+      },
       "usda-fdc:2707502": {
         "source_url": "https://fdc.nal.usda.gov/fdc-app.html#/food-details/2707502/nutrients",
         "source_item_name": "Hazelnuts",
         "retrieved_at": "2026-09-07T05:37:48Z",
         "license": "CC0 1.0",
         "attribution": "USDA FoodData Central, FNDDS 2021-2023. Hazelnuts. https://fdc.nal.usda.gov/fdc-app.html#/food-details/2707502/nutrients"
+      },
+      "usda-fdc:2707512": {
+        "source_url": "https://fdc.nal.usda.gov/fdc-app.html#/food-details/2707512/nutrients",
+        "source_item_name": "Peanuts, NFS",
+        "retrieved_at": "2026-09-07T05:37:48Z",
+        "license": "CC0 1.0",
+        "attribution": "USDA FoodData Central, FNDDS 2021-2023. Peanuts, NFS. https://fdc.nal.usda.gov/fdc-app.html#/food-details/2707512/nutrients"
+      },
+      "usda-fdc:2707526": {
+        "source_url": "https://fdc.nal.usda.gov/fdc-app.html#/food-details/2707526/nutrients",
+        "source_item_name": "Pine nuts",
+        "retrieved_at": "2026-09-07T05:37:48Z",
+        "license": "CC0 1.0",
+        "attribution": "USDA FoodData Central, FNDDS 2021-2023. Pine nuts. https://fdc.nal.usda.gov/fdc-app.html#/food-details/2707526/nutrients"
       },
       "usda-fdc:2707527": {
         "source_url": "https://fdc.nal.usda.gov/fdc-app.html#/food-details/2707527/nutrients",
@@ -211,12 +428,54 @@
         "license": "CC0 1.0",
         "attribution": "USDA FoodData Central, FNDDS 2021-2023. Walnuts, excluding honey roasted. https://fdc.nal.usda.gov/fdc-app.html#/food-details/2707531/nutrients"
       },
+      "usda-fdc:2707579": {
+        "source_url": "https://fdc.nal.usda.gov/fdc-app.html#/food-details/2707579/nutrients",
+        "source_item_name": "Pumpkin seeds, NFS",
+        "retrieved_at": "2026-09-07T05:37:48Z",
+        "license": "CC0 1.0",
+        "attribution": "USDA FoodData Central, FNDDS 2021-2023. Pumpkin seeds, NFS. https://fdc.nal.usda.gov/fdc-app.html#/food-details/2707579/nutrients"
+      },
+      "usda-fdc:2707585": {
+        "source_url": "https://fdc.nal.usda.gov/fdc-app.html#/food-details/2707585/nutrients",
+        "source_item_name": "Sunflower seeds, NFS",
+        "retrieved_at": "2026-09-07T05:37:48Z",
+        "license": "CC0 1.0",
+        "attribution": "USDA FoodData Central, FNDDS 2021-2023. Sunflower seeds, NFS. https://fdc.nal.usda.gov/fdc-app.html#/food-details/2707585/nutrients"
+      },
+      "usda-fdc:2707587": {
+        "source_url": "https://fdc.nal.usda.gov/fdc-app.html#/food-details/2707587/nutrients",
+        "source_item_name": "Tahini",
+        "retrieved_at": "2026-09-07T05:37:48Z",
+        "license": "CC0 1.0",
+        "attribution": "USDA FoodData Central, FNDDS 2021-2023. Tahini. https://fdc.nal.usda.gov/fdc-app.html#/food-details/2707587/nutrients"
+      },
+      "usda-fdc:2707588": {
+        "source_url": "https://fdc.nal.usda.gov/fdc-app.html#/food-details/2707588/nutrients",
+        "source_item_name": "Flax seeds",
+        "retrieved_at": "2026-09-07T05:37:48Z",
+        "license": "CC0 1.0",
+        "attribution": "USDA FoodData Central, FNDDS 2021-2023. Flax seeds. https://fdc.nal.usda.gov/fdc-app.html#/food-details/2707588/nutrients"
+      },
+      "usda-fdc:2707590": {
+        "source_url": "https://fdc.nal.usda.gov/fdc-app.html#/food-details/2707590/nutrients",
+        "source_item_name": "Chia seeds",
+        "retrieved_at": "2026-09-07T05:37:48Z",
+        "license": "CC0 1.0",
+        "attribution": "USDA FoodData Central, FNDDS 2021-2023. Chia seeds. https://fdc.nal.usda.gov/fdc-app.html#/food-details/2707590/nutrients"
+      },
       "usda-fdc:2707598": {
         "source_url": "https://fdc.nal.usda.gov/fdc-app.html#/food-details/2707598/nutrients",
         "source_item_name": "Bread, white",
         "retrieved_at": "2026-09-07T05:37:48Z",
         "license": "CC0 1.0",
         "attribution": "USDA FoodData Central, FNDDS 2021-2023. Bread, white. https://fdc.nal.usda.gov/fdc-app.html#/food-details/2707598/nutrients"
+      },
+      "usda-fdc:2707678": {
+        "source_url": "https://fdc.nal.usda.gov/fdc-app.html#/food-details/2707678/nutrients",
+        "source_item_name": "Croissant",
+        "retrieved_at": "2026-09-07T05:37:48Z",
+        "license": "CC0 1.0",
+        "attribution": "USDA FoodData Central, FNDDS 2021-2023. Croissant. https://fdc.nal.usda.gov/fdc-app.html#/food-details/2707678/nutrients"
       },
       "usda-fdc:2707684": {
         "source_url": "https://fdc.nal.usda.gov/fdc-app.html#/food-details/2707684/nutrients",
@@ -232,6 +491,34 @@
         "license": "CC0 1.0",
         "attribution": "USDA FoodData Central, FNDDS 2021-2023. Bread, whole wheat. https://fdc.nal.usda.gov/fdc-app.html#/food-details/2707709/nutrients"
       },
+      "usda-fdc:2707755": {
+        "source_url": "https://fdc.nal.usda.gov/fdc-app.html#/food-details/2707755/nutrients",
+        "source_item_name": "Bread, rye",
+        "retrieved_at": "2026-09-07T05:37:48Z",
+        "license": "CC0 1.0",
+        "attribution": "USDA FoodData Central, FNDDS 2021-2023. Bread, rye. https://fdc.nal.usda.gov/fdc-app.html#/food-details/2707755/nutrients"
+      },
+      "usda-fdc:2707810": {
+        "source_url": "https://fdc.nal.usda.gov/fdc-app.html#/food-details/2707810/nutrients",
+        "source_item_name": "Cornbread, prepared from mix",
+        "retrieved_at": "2026-09-07T05:37:48Z",
+        "license": "CC0 1.0",
+        "attribution": "USDA FoodData Central, FNDDS 2021-2023. Cornbread, prepared from mix. https://fdc.nal.usda.gov/fdc-app.html#/food-details/2707810/nutrients"
+      },
+      "usda-fdc:2707882": {
+        "source_url": "https://fdc.nal.usda.gov/fdc-app.html#/food-details/2707882/nutrients",
+        "source_item_name": "Cake, pound",
+        "retrieved_at": "2026-09-07T05:37:48Z",
+        "license": "CC0 1.0",
+        "attribution": "USDA FoodData Central, FNDDS 2021-2023. Cake, pound. https://fdc.nal.usda.gov/fdc-app.html#/food-details/2707882/nutrients"
+      },
+      "usda-fdc:2707899": {
+        "source_url": "https://fdc.nal.usda.gov/fdc-app.html#/food-details/2707899/nutrients",
+        "source_item_name": "Cookie, NFS",
+        "retrieved_at": "2026-09-07T05:37:48Z",
+        "license": "CC0 1.0",
+        "attribution": "USDA FoodData Central, FNDDS 2021-2023. Cookie, NFS. https://fdc.nal.usda.gov/fdc-app.html#/food-details/2707899/nutrients"
+      },
       "usda-fdc:2708024": {
         "source_url": "https://fdc.nal.usda.gov/fdc-app.html#/food-details/2708024/nutrients",
         "source_item_name": "Fritter, plain",
@@ -246,12 +533,89 @@
         "license": "CC0 1.0",
         "attribution": "USDA FoodData Central, FNDDS 2021-2023. Baklava. https://fdc.nal.usda.gov/fdc-app.html#/food-details/2708044/nutrients"
       },
+      "usda-fdc:2708062": {
+        "source_url": "https://fdc.nal.usda.gov/fdc-app.html#/food-details/2708062/nutrients",
+        "source_item_name": "Doughnut, NFS",
+        "retrieved_at": "2026-09-07T05:37:48Z",
+        "license": "CC0 1.0",
+        "attribution": "USDA FoodData Central, FNDDS 2021-2023. Doughnut, NFS. https://fdc.nal.usda.gov/fdc-app.html#/food-details/2708062/nutrients"
+      },
+      "usda-fdc:2708132": {
+        "source_url": "https://fdc.nal.usda.gov/fdc-app.html#/food-details/2708132/nutrients",
+        "source_item_name": "Crackers, NFS",
+        "retrieved_at": "2026-09-07T05:37:48Z",
+        "license": "CC0 1.0",
+        "attribution": "USDA FoodData Central, FNDDS 2021-2023. Crackers, NFS. https://fdc.nal.usda.gov/fdc-app.html#/food-details/2708132/nutrients"
+      },
+      "usda-fdc:2708162": {
+        "source_url": "https://fdc.nal.usda.gov/fdc-app.html#/food-details/2708162/nutrients",
+        "source_item_name": "Rice cake",
+        "retrieved_at": "2026-09-07T05:37:48Z",
+        "license": "CC0 1.0",
+        "attribution": "USDA FoodData Central, FNDDS 2021-2023. Rice cake. https://fdc.nal.usda.gov/fdc-app.html#/food-details/2708162/nutrients"
+      },
+      "usda-fdc:2708215": {
+        "source_url": "https://fdc.nal.usda.gov/fdc-app.html#/food-details/2708215/nutrients",
+        "source_item_name": "Pita chips",
+        "retrieved_at": "2026-09-07T05:37:48Z",
+        "license": "CC0 1.0",
+        "attribution": "USDA FoodData Central, FNDDS 2021-2023. Pita chips. https://fdc.nal.usda.gov/fdc-app.html#/food-details/2708215/nutrients"
+      },
+      "usda-fdc:2708216": {
+        "source_url": "https://fdc.nal.usda.gov/fdc-app.html#/food-details/2708216/nutrients",
+        "source_item_name": "Popcorn, NFS",
+        "retrieved_at": "2026-09-07T05:37:48Z",
+        "license": "CC0 1.0",
+        "attribution": "USDA FoodData Central, FNDDS 2021-2023. Popcorn, NFS. https://fdc.nal.usda.gov/fdc-app.html#/food-details/2708216/nutrients"
+      },
+      "usda-fdc:2708294": {
+        "source_url": "https://fdc.nal.usda.gov/fdc-app.html#/food-details/2708294/nutrients",
+        "source_item_name": "Pancakes, NFS",
+        "retrieved_at": "2026-09-07T05:37:48Z",
+        "license": "CC0 1.0",
+        "attribution": "USDA FoodData Central, FNDDS 2021-2023. Pancakes, NFS. https://fdc.nal.usda.gov/fdc-app.html#/food-details/2708294/nutrients"
+      },
+      "usda-fdc:2708312": {
+        "source_url": "https://fdc.nal.usda.gov/fdc-app.html#/food-details/2708312/nutrients",
+        "source_item_name": "Waffle, NFS",
+        "retrieved_at": "2026-09-07T05:37:48Z",
+        "license": "CC0 1.0",
+        "attribution": "USDA FoodData Central, FNDDS 2021-2023. Waffle, NFS. https://fdc.nal.usda.gov/fdc-app.html#/food-details/2708312/nutrients"
+      },
+      "usda-fdc:2708352": {
+        "source_url": "https://fdc.nal.usda.gov/fdc-app.html#/food-details/2708352/nutrients",
+        "source_item_name": "Noodles, cooked",
+        "retrieved_at": "2026-09-07T05:37:48Z",
+        "license": "CC0 1.0",
+        "attribution": "USDA FoodData Central, FNDDS 2021-2023. Noodles, cooked. https://fdc.nal.usda.gov/fdc-app.html#/food-details/2708352/nutrients"
+      },
       "usda-fdc:2708357": {
         "source_url": "https://fdc.nal.usda.gov/fdc-app.html#/food-details/2708357/nutrients",
         "source_item_name": "Pasta, cooked",
         "retrieved_at": "2026-09-07T05:37:48Z",
         "license": "CC0 1.0",
         "attribution": "USDA FoodData Central, FNDDS 2021-2023. Pasta, cooked. https://fdc.nal.usda.gov/fdc-app.html#/food-details/2708357/nutrients"
+      },
+      "usda-fdc:2708361": {
+        "source_url": "https://fdc.nal.usda.gov/fdc-app.html#/food-details/2708361/nutrients",
+        "source_item_name": "Barley",
+        "retrieved_at": "2026-09-07T05:37:48Z",
+        "license": "CC0 1.0",
+        "attribution": "USDA FoodData Central, FNDDS 2021-2023. Barley. https://fdc.nal.usda.gov/fdc-app.html#/food-details/2708361/nutrients"
+      },
+      "usda-fdc:2708377": {
+        "source_url": "https://fdc.nal.usda.gov/fdc-app.html#/food-details/2708377/nutrients",
+        "source_item_name": "Millet",
+        "retrieved_at": "2026-09-07T05:37:48Z",
+        "license": "CC0 1.0",
+        "attribution": "USDA FoodData Central, FNDDS 2021-2023. Millet. https://fdc.nal.usda.gov/fdc-app.html#/food-details/2708377/nutrients"
+      },
+      "usda-fdc:2708380": {
+        "source_url": "https://fdc.nal.usda.gov/fdc-app.html#/food-details/2708380/nutrients",
+        "source_item_name": "Oatmeal, NFS",
+        "retrieved_at": "2026-09-07T05:37:48Z",
+        "license": "CC0 1.0",
+        "attribution": "USDA FoodData Central, FNDDS 2021-2023. Oatmeal, NFS. https://fdc.nal.usda.gov/fdc-app.html#/food-details/2708380/nutrients"
       },
       "usda-fdc:2708403": {
         "source_url": "https://fdc.nal.usda.gov/fdc-app.html#/food-details/2708403/nutrients",
@@ -281,6 +645,13 @@
         "license": "CC0 1.0",
         "attribution": "USDA FoodData Central, FNDDS 2021-2023. Bulgur, no added fat. https://fdc.nal.usda.gov/fdc-app.html#/food-details/2708438/nutrients"
       },
+      "usda-fdc:2708439": {
+        "source_url": "https://fdc.nal.usda.gov/fdc-app.html#/food-details/2708439/nutrients",
+        "source_item_name": "Bulgur, fat added",
+        "retrieved_at": "2026-09-07T05:37:48Z",
+        "license": "CC0 1.0",
+        "attribution": "USDA FoodData Central, FNDDS 2021-2023. Bulgur, fat added. https://fdc.nal.usda.gov/fdc-app.html#/food-details/2708439/nutrients"
+      },
       "usda-fdc:2708441": {
         "source_url": "https://fdc.nal.usda.gov/fdc-app.html#/food-details/2708441/nutrients",
         "source_item_name": "Couscous, plain, cooked",
@@ -288,12 +659,26 @@
         "license": "CC0 1.0",
         "attribution": "USDA FoodData Central, FNDDS 2021-2023. Couscous, plain, cooked. https://fdc.nal.usda.gov/fdc-app.html#/food-details/2708441/nutrients"
       },
+      "usda-fdc:2708453": {
+        "source_url": "https://fdc.nal.usda.gov/fdc-app.html#/food-details/2708453/nutrients",
+        "source_item_name": "Cereal, corn flakes, plain",
+        "retrieved_at": "2026-09-07T05:37:48Z",
+        "license": "CC0 1.0",
+        "attribution": "USDA FoodData Central, FNDDS 2021-2023. Cereal, corn flakes, plain. https://fdc.nal.usda.gov/fdc-app.html#/food-details/2708453/nutrients"
+      },
       "usda-fdc:2708614": {
         "source_url": "https://fdc.nal.usda.gov/fdc-app.html#/food-details/2708614/nutrients",
         "source_item_name": "Pizza, cheese, from restaurant or fast food, NS as to type of crust",
         "retrieved_at": "2026-09-07T05:37:48Z",
         "license": "CC0 1.0",
         "attribution": "USDA FoodData Central, FNDDS 2021-2023. Pizza, cheese, from restaurant or fast food, NS as to type of crust. https://fdc.nal.usda.gov/fdc-app.html#/food-details/2708614/nutrients"
+      },
+      "usda-fdc:2708700": {
+        "source_url": "https://fdc.nal.usda.gov/fdc-app.html#/food-details/2708700/nutrients",
+        "source_item_name": "Egg roll, meatless",
+        "retrieved_at": "2026-09-07T05:37:48Z",
+        "license": "CC0 1.0",
+        "attribution": "USDA FoodData Central, FNDDS 2021-2023. Egg roll, meatless. https://fdc.nal.usda.gov/fdc-app.html#/food-details/2708700/nutrients"
       },
       "usda-fdc:2708708": {
         "source_url": "https://fdc.nal.usda.gov/fdc-app.html#/food-details/2708708/nutrients",
@@ -337,6 +722,20 @@
         "license": "CC0 1.0",
         "attribution": "USDA FoodData Central, FNDDS 2021-2023. Soup, chicken noodle. https://fdc.nal.usda.gov/fdc-app.html#/food-details/2709149/nutrients"
       },
+      "usda-fdc:2709165": {
+        "source_url": "https://fdc.nal.usda.gov/fdc-app.html#/food-details/2709165/nutrients",
+        "source_item_name": "Grapefruit, raw",
+        "retrieved_at": "2026-09-07T05:37:48Z",
+        "license": "CC0 1.0",
+        "attribution": "USDA FoodData Central, FNDDS 2021-2023. Grapefruit, raw. https://fdc.nal.usda.gov/fdc-app.html#/food-details/2709165/nutrients"
+      },
+      "usda-fdc:2709168": {
+        "source_url": "https://fdc.nal.usda.gov/fdc-app.html#/food-details/2709168/nutrients",
+        "source_item_name": "Lemon, raw",
+        "retrieved_at": "2026-09-07T05:37:48Z",
+        "license": "CC0 1.0",
+        "attribution": "USDA FoodData Central, FNDDS 2021-2023. Lemon, raw. https://fdc.nal.usda.gov/fdc-app.html#/food-details/2709168/nutrients"
+      },
       "usda-fdc:2709171": {
         "source_url": "https://fdc.nal.usda.gov/fdc-app.html#/food-details/2709171/nutrients",
         "source_item_name": "Orange, raw",
@@ -344,12 +743,47 @@
         "license": "CC0 1.0",
         "attribution": "USDA FoodData Central, FNDDS 2021-2023. Orange, raw. https://fdc.nal.usda.gov/fdc-app.html#/food-details/2709171/nutrients"
       },
+      "usda-fdc:2709175": {
+        "source_url": "https://fdc.nal.usda.gov/fdc-app.html#/food-details/2709175/nutrients",
+        "source_item_name": "Tangerine, raw",
+        "retrieved_at": "2026-09-07T05:37:48Z",
+        "license": "CC0 1.0",
+        "attribution": "USDA FoodData Central, FNDDS 2021-2023. Tangerine, raw. https://fdc.nal.usda.gov/fdc-app.html#/food-details/2709175/nutrients"
+      },
+      "usda-fdc:2709180": {
+        "source_url": "https://fdc.nal.usda.gov/fdc-app.html#/food-details/2709180/nutrients",
+        "source_item_name": "Lemon juice, 100%, NS as to form",
+        "retrieved_at": "2026-09-07T05:37:48Z",
+        "license": "CC0 1.0",
+        "attribution": "USDA FoodData Central, FNDDS 2021-2023. Lemon juice, 100%, NS as to form. https://fdc.nal.usda.gov/fdc-app.html#/food-details/2709180/nutrients"
+      },
       "usda-fdc:2709186": {
         "source_url": "https://fdc.nal.usda.gov/fdc-app.html#/food-details/2709186/nutrients",
         "source_item_name": "Orange juice, 100%, NFS",
         "retrieved_at": "2026-09-07T05:37:48Z",
         "license": "CC0 1.0",
         "attribution": "USDA FoodData Central, FNDDS 2021-2023. Orange juice, 100%, NFS. https://fdc.nal.usda.gov/fdc-app.html#/food-details/2709186/nutrients"
+      },
+      "usda-fdc:2709197": {
+        "source_url": "https://fdc.nal.usda.gov/fdc-app.html#/food-details/2709197/nutrients",
+        "source_item_name": "Apricot, dried",
+        "retrieved_at": "2026-09-07T05:37:48Z",
+        "license": "CC0 1.0",
+        "attribution": "USDA FoodData Central, FNDDS 2021-2023. Apricot, dried. https://fdc.nal.usda.gov/fdc-app.html#/food-details/2709197/nutrients"
+      },
+      "usda-fdc:2709203": {
+        "source_url": "https://fdc.nal.usda.gov/fdc-app.html#/food-details/2709203/nutrients",
+        "source_item_name": "Date",
+        "retrieved_at": "2026-09-07T05:37:48Z",
+        "license": "CC0 1.0",
+        "attribution": "USDA FoodData Central, FNDDS 2021-2023. Date. https://fdc.nal.usda.gov/fdc-app.html#/food-details/2709203/nutrients"
+      },
+      "usda-fdc:2709204": {
+        "source_url": "https://fdc.nal.usda.gov/fdc-app.html#/food-details/2709204/nutrients",
+        "source_item_name": "Fig, dried",
+        "retrieved_at": "2026-09-07T05:37:48Z",
+        "license": "CC0 1.0",
+        "attribution": "USDA FoodData Central, FNDDS 2021-2023. Fig, dried. https://fdc.nal.usda.gov/fdc-app.html#/food-details/2709204/nutrients"
       },
       "usda-fdc:2709212": {
         "source_url": "https://fdc.nal.usda.gov/fdc-app.html#/food-details/2709212/nutrients",
@@ -372,12 +806,26 @@
         "license": "CC0 1.0",
         "attribution": "USDA FoodData Central, FNDDS 2021-2023. Apricot, raw. https://fdc.nal.usda.gov/fdc-app.html#/food-details/2709221/nutrients"
       },
+      "usda-fdc:2709223": {
+        "source_url": "https://fdc.nal.usda.gov/fdc-app.html#/food-details/2709223/nutrients",
+        "source_item_name": "Avocado, raw",
+        "retrieved_at": "2026-09-07T05:37:48Z",
+        "license": "CC0 1.0",
+        "attribution": "USDA FoodData Central, FNDDS 2021-2023. Avocado, raw. https://fdc.nal.usda.gov/fdc-app.html#/food-details/2709223/nutrients"
+      },
       "usda-fdc:2709224": {
         "source_url": "https://fdc.nal.usda.gov/fdc-app.html#/food-details/2709224/nutrients",
         "source_item_name": "Banana, raw",
         "retrieved_at": "2026-09-07T05:37:48Z",
         "license": "CC0 1.0",
         "attribution": "USDA FoodData Central, FNDDS 2021-2023. Banana, raw. https://fdc.nal.usda.gov/fdc-app.html#/food-details/2709224/nutrients"
+      },
+      "usda-fdc:2709226": {
+        "source_url": "https://fdc.nal.usda.gov/fdc-app.html#/food-details/2709226/nutrients",
+        "source_item_name": "Cantaloupe, raw",
+        "retrieved_at": "2026-09-07T05:37:48Z",
+        "license": "CC0 1.0",
+        "attribution": "USDA FoodData Central, FNDDS 2021-2023. Cantaloupe, raw. https://fdc.nal.usda.gov/fdc-app.html#/food-details/2709226/nutrients"
       },
       "usda-fdc:2709231": {
         "source_url": "https://fdc.nal.usda.gov/fdc-app.html#/food-details/2709231/nutrients",
@@ -400,12 +848,68 @@
         "license": "CC0 1.0",
         "attribution": "USDA FoodData Central, FNDDS 2021-2023. Grapes, raw. https://fdc.nal.usda.gov/fdc-app.html#/food-details/2709237/nutrients"
       },
+      "usda-fdc:2709239": {
+        "source_url": "https://fdc.nal.usda.gov/fdc-app.html#/food-details/2709239/nutrients",
+        "source_item_name": "Kiwi fruit, raw",
+        "retrieved_at": "2026-09-07T05:37:48Z",
+        "license": "CC0 1.0",
+        "attribution": "USDA FoodData Central, FNDDS 2021-2023. Kiwi fruit, raw. https://fdc.nal.usda.gov/fdc-app.html#/food-details/2709239/nutrients"
+      },
+      "usda-fdc:2709249": {
+        "source_url": "https://fdc.nal.usda.gov/fdc-app.html#/food-details/2709249/nutrients",
+        "source_item_name": "Peach, raw",
+        "retrieved_at": "2026-09-07T05:37:48Z",
+        "license": "CC0 1.0",
+        "attribution": "USDA FoodData Central, FNDDS 2021-2023. Peach, raw. https://fdc.nal.usda.gov/fdc-app.html#/food-details/2709249/nutrients"
+      },
+      "usda-fdc:2709254": {
+        "source_url": "https://fdc.nal.usda.gov/fdc-app.html#/food-details/2709254/nutrients",
+        "source_item_name": "Pear, raw",
+        "retrieved_at": "2026-09-07T05:37:48Z",
+        "license": "CC0 1.0",
+        "attribution": "USDA FoodData Central, FNDDS 2021-2023. Pear, raw. https://fdc.nal.usda.gov/fdc-app.html#/food-details/2709254/nutrients"
+      },
+      "usda-fdc:2709260": {
+        "source_url": "https://fdc.nal.usda.gov/fdc-app.html#/food-details/2709260/nutrients",
+        "source_item_name": "Pineapple, raw",
+        "retrieved_at": "2026-09-07T05:37:48Z",
+        "license": "CC0 1.0",
+        "attribution": "USDA FoodData Central, FNDDS 2021-2023. Pineapple, raw. https://fdc.nal.usda.gov/fdc-app.html#/food-details/2709260/nutrients"
+      },
+      "usda-fdc:2709265": {
+        "source_url": "https://fdc.nal.usda.gov/fdc-app.html#/food-details/2709265/nutrients",
+        "source_item_name": "Plum, raw",
+        "retrieved_at": "2026-09-07T05:37:48Z",
+        "license": "CC0 1.0",
+        "attribution": "USDA FoodData Central, FNDDS 2021-2023. Plum, raw. https://fdc.nal.usda.gov/fdc-app.html#/food-details/2709265/nutrients"
+      },
+      "usda-fdc:2709267": {
+        "source_url": "https://fdc.nal.usda.gov/fdc-app.html#/food-details/2709267/nutrients",
+        "source_item_name": "Pomegranate, raw",
+        "retrieved_at": "2026-09-07T05:37:48Z",
+        "license": "CC0 1.0",
+        "attribution": "USDA FoodData Central, FNDDS 2021-2023. Pomegranate, raw. https://fdc.nal.usda.gov/fdc-app.html#/food-details/2709267/nutrients"
+      },
       "usda-fdc:2709270": {
         "source_url": "https://fdc.nal.usda.gov/fdc-app.html#/food-details/2709270/nutrients",
         "source_item_name": "Watermelon, raw",
         "retrieved_at": "2026-09-07T05:37:48Z",
         "license": "CC0 1.0",
         "attribution": "USDA FoodData Central, FNDDS 2021-2023. Watermelon, raw. https://fdc.nal.usda.gov/fdc-app.html#/food-details/2709270/nutrients"
+      },
+      "usda-fdc:2709275": {
+        "source_url": "https://fdc.nal.usda.gov/fdc-app.html#/food-details/2709275/nutrients",
+        "source_item_name": "Blueberries, raw",
+        "retrieved_at": "2026-09-07T05:37:48Z",
+        "license": "CC0 1.0",
+        "attribution": "USDA FoodData Central, FNDDS 2021-2023. Blueberries, raw. https://fdc.nal.usda.gov/fdc-app.html#/food-details/2709275/nutrients"
+      },
+      "usda-fdc:2709281": {
+        "source_url": "https://fdc.nal.usda.gov/fdc-app.html#/food-details/2709281/nutrients",
+        "source_item_name": "Raspberries, raw",
+        "retrieved_at": "2026-09-07T05:37:48Z",
+        "license": "CC0 1.0",
+        "attribution": "USDA FoodData Central, FNDDS 2021-2023. Raspberries, raw. https://fdc.nal.usda.gov/fdc-app.html#/food-details/2709281/nutrients"
       },
       "usda-fdc:2709283": {
         "source_url": "https://fdc.nal.usda.gov/fdc-app.html#/food-details/2709283/nutrients",
@@ -428,12 +932,54 @@
         "license": "CC0 1.0",
         "attribution": "USDA FoodData Central, FNDDS 2021-2023. Potato, boiled, NFS. https://fdc.nal.usda.gov/fdc-app.html#/food-details/2709385/nutrients"
       },
+      "usda-fdc:2709421": {
+        "source_url": "https://fdc.nal.usda.gov/fdc-app.html#/food-details/2709421/nutrients",
+        "source_item_name": "Potato chips, NFS",
+        "retrieved_at": "2026-09-07T05:37:48Z",
+        "license": "CC0 1.0",
+        "attribution": "USDA FoodData Central, FNDDS 2021-2023. Potato chips, NFS. https://fdc.nal.usda.gov/fdc-app.html#/food-details/2709421/nutrients"
+      },
       "usda-fdc:2709458": {
         "source_url": "https://fdc.nal.usda.gov/fdc-app.html#/food-details/2709458/nutrients",
         "source_item_name": "Potato, french fries, from fresh, fried",
         "retrieved_at": "2026-09-07T05:37:48Z",
         "license": "CC0 1.0",
         "attribution": "USDA FoodData Central, FNDDS 2021-2023. Potato, french fries, from fresh, fried. https://fdc.nal.usda.gov/fdc-app.html#/food-details/2709458/nutrients"
+      },
+      "usda-fdc:2709574": {
+        "source_url": "https://fdc.nal.usda.gov/fdc-app.html#/food-details/2709574/nutrients",
+        "source_item_name": "Chard, raw",
+        "retrieved_at": "2026-09-07T05:37:48Z",
+        "license": "CC0 1.0",
+        "attribution": "USDA FoodData Central, FNDDS 2021-2023. Chard, raw. https://fdc.nal.usda.gov/fdc-app.html#/food-details/2709574/nutrients"
+      },
+      "usda-fdc:2709590": {
+        "source_url": "https://fdc.nal.usda.gov/fdc-app.html#/food-details/2709590/nutrients",
+        "source_item_name": "Romaine lettuce, raw",
+        "retrieved_at": "2026-09-07T05:37:48Z",
+        "license": "CC0 1.0",
+        "attribution": "USDA FoodData Central, FNDDS 2021-2023. Romaine lettuce, raw. https://fdc.nal.usda.gov/fdc-app.html#/food-details/2709590/nutrients"
+      },
+      "usda-fdc:2709599": {
+        "source_url": "https://fdc.nal.usda.gov/fdc-app.html#/food-details/2709599/nutrients",
+        "source_item_name": "Kale, raw",
+        "retrieved_at": "2026-09-07T05:37:48Z",
+        "license": "CC0 1.0",
+        "attribution": "USDA FoodData Central, FNDDS 2021-2023. Kale, raw. https://fdc.nal.usda.gov/fdc-app.html#/food-details/2709599/nutrients"
+      },
+      "usda-fdc:2709614": {
+        "source_url": "https://fdc.nal.usda.gov/fdc-app.html#/food-details/2709614/nutrients",
+        "source_item_name": "Spinach, raw",
+        "retrieved_at": "2026-09-07T05:37:48Z",
+        "license": "CC0 1.0",
+        "attribution": "USDA FoodData Central, FNDDS 2021-2023. Spinach, raw. https://fdc.nal.usda.gov/fdc-app.html#/food-details/2709614/nutrients"
+      },
+      "usda-fdc:2709643": {
+        "source_url": "https://fdc.nal.usda.gov/fdc-app.html#/food-details/2709643/nutrients",
+        "source_item_name": "Broccoli, raw",
+        "retrieved_at": "2026-09-07T05:37:48Z",
+        "license": "CC0 1.0",
+        "attribution": "USDA FoodData Central, FNDDS 2021-2023. Broccoli, raw. https://fdc.nal.usda.gov/fdc-app.html#/food-details/2709643/nutrients"
       },
       "usda-fdc:2709660": {
         "source_url": "https://fdc.nal.usda.gov/fdc-app.html#/food-details/2709660/nutrients",
@@ -442,12 +988,40 @@
         "license": "CC0 1.0",
         "attribution": "USDA FoodData Central, FNDDS 2021-2023. Carrots, raw. https://fdc.nal.usda.gov/fdc-app.html#/food-details/2709660/nutrients"
       },
+      "usda-fdc:2709687": {
+        "source_url": "https://fdc.nal.usda.gov/fdc-app.html#/food-details/2709687/nutrients",
+        "source_item_name": "Peas and carrots, cooked, NS as to form",
+        "retrieved_at": "2026-09-07T05:37:48Z",
+        "license": "CC0 1.0",
+        "attribution": "USDA FoodData Central, FNDDS 2021-2023. Peas and carrots, cooked, NS as to form. https://fdc.nal.usda.gov/fdc-app.html#/food-details/2709687/nutrients"
+      },
+      "usda-fdc:2709692": {
+        "source_url": "https://fdc.nal.usda.gov/fdc-app.html#/food-details/2709692/nutrients",
+        "source_item_name": "Pumpkin, cooked",
+        "retrieved_at": "2026-09-07T05:37:48Z",
+        "license": "CC0 1.0",
+        "attribution": "USDA FoodData Central, FNDDS 2021-2023. Pumpkin, cooked. https://fdc.nal.usda.gov/fdc-app.html#/food-details/2709692/nutrients"
+      },
+      "usda-fdc:2709697": {
+        "source_url": "https://fdc.nal.usda.gov/fdc-app.html#/food-details/2709697/nutrients",
+        "source_item_name": "Sweet potato, NFS",
+        "retrieved_at": "2026-09-07T05:37:48Z",
+        "license": "CC0 1.0",
+        "attribution": "USDA FoodData Central, FNDDS 2021-2023. Sweet potato, NFS. https://fdc.nal.usda.gov/fdc-app.html#/food-details/2709697/nutrients"
+      },
       "usda-fdc:2709719": {
         "source_url": "https://fdc.nal.usda.gov/fdc-app.html#/food-details/2709719/nutrients",
         "source_item_name": "Tomatoes, raw",
         "retrieved_at": "2026-09-07T05:37:48Z",
         "license": "CC0 1.0",
         "attribution": "USDA FoodData Central, FNDDS 2021-2023. Tomatoes, raw. https://fdc.nal.usda.gov/fdc-app.html#/food-details/2709719/nutrients"
+      },
+      "usda-fdc:2709733": {
+        "source_url": "https://fdc.nal.usda.gov/fdc-app.html#/food-details/2709733/nutrients",
+        "source_item_name": "Ketchup",
+        "retrieved_at": "2026-09-07T05:37:48Z",
+        "license": "CC0 1.0",
+        "attribution": "USDA FoodData Central, FNDDS 2021-2023. Ketchup. https://fdc.nal.usda.gov/fdc-app.html#/food-details/2709733/nutrients"
       },
       "usda-fdc:2709757": {
         "source_url": "https://fdc.nal.usda.gov/fdc-app.html#/food-details/2709757/nutrients",
@@ -463,6 +1037,48 @@
         "license": "CC0 1.0",
         "attribution": "USDA FoodData Central, FNDDS 2021-2023. Artichoke. https://fdc.nal.usda.gov/fdc-app.html#/food-details/2709766/nutrients"
       },
+      "usda-fdc:2709770": {
+        "source_url": "https://fdc.nal.usda.gov/fdc-app.html#/food-details/2709770/nutrients",
+        "source_item_name": "Beets, raw",
+        "retrieved_at": "2026-09-07T05:37:48Z",
+        "license": "CC0 1.0",
+        "attribution": "USDA FoodData Central, FNDDS 2021-2023. Beets, raw. https://fdc.nal.usda.gov/fdc-app.html#/food-details/2709770/nutrients"
+      },
+      "usda-fdc:2709773": {
+        "source_url": "https://fdc.nal.usda.gov/fdc-app.html#/food-details/2709773/nutrients",
+        "source_item_name": "Cabbage, green, raw",
+        "retrieved_at": "2026-09-07T05:37:48Z",
+        "license": "CC0 1.0",
+        "attribution": "USDA FoodData Central, FNDDS 2021-2023. Cabbage, green, raw. https://fdc.nal.usda.gov/fdc-app.html#/food-details/2709773/nutrients"
+      },
+      "usda-fdc:2709775": {
+        "source_url": "https://fdc.nal.usda.gov/fdc-app.html#/food-details/2709775/nutrients",
+        "source_item_name": "Cabbage, red, raw",
+        "retrieved_at": "2026-09-07T05:37:48Z",
+        "license": "CC0 1.0",
+        "attribution": "USDA FoodData Central, FNDDS 2021-2023. Cabbage, red, raw. https://fdc.nal.usda.gov/fdc-app.html#/food-details/2709775/nutrients"
+      },
+      "usda-fdc:2709777": {
+        "source_url": "https://fdc.nal.usda.gov/fdc-app.html#/food-details/2709777/nutrients",
+        "source_item_name": "Cauliflower, raw",
+        "retrieved_at": "2026-09-07T05:37:48Z",
+        "license": "CC0 1.0",
+        "attribution": "USDA FoodData Central, FNDDS 2021-2023. Cauliflower, raw. https://fdc.nal.usda.gov/fdc-app.html#/food-details/2709777/nutrients"
+      },
+      "usda-fdc:2709778": {
+        "source_url": "https://fdc.nal.usda.gov/fdc-app.html#/food-details/2709778/nutrients",
+        "source_item_name": "Celery, raw",
+        "retrieved_at": "2026-09-07T05:37:48Z",
+        "license": "CC0 1.0",
+        "attribution": "USDA FoodData Central, FNDDS 2021-2023. Celery, raw. https://fdc.nal.usda.gov/fdc-app.html#/food-details/2709778/nutrients"
+      },
+      "usda-fdc:2709783": {
+        "source_url": "https://fdc.nal.usda.gov/fdc-app.html#/food-details/2709783/nutrients",
+        "source_item_name": "Corn, raw",
+        "retrieved_at": "2026-09-07T05:37:48Z",
+        "license": "CC0 1.0",
+        "attribution": "USDA FoodData Central, FNDDS 2021-2023. Corn, raw. https://fdc.nal.usda.gov/fdc-app.html#/food-details/2709783/nutrients"
+      },
       "usda-fdc:2709784": {
         "source_url": "https://fdc.nal.usda.gov/fdc-app.html#/food-details/2709784/nutrients",
         "source_item_name": "Cucumber, raw",
@@ -477,12 +1093,26 @@
         "license": "CC0 1.0",
         "attribution": "USDA FoodData Central, FNDDS 2021-2023. Eggplant, raw. https://fdc.nal.usda.gov/fdc-app.html#/food-details/2709785/nutrients"
       },
+      "usda-fdc:2709786": {
+        "source_url": "https://fdc.nal.usda.gov/fdc-app.html#/food-details/2709786/nutrients",
+        "source_item_name": "Garlic, raw",
+        "retrieved_at": "2026-09-07T05:37:48Z",
+        "license": "CC0 1.0",
+        "attribution": "USDA FoodData Central, FNDDS 2021-2023. Garlic, raw. https://fdc.nal.usda.gov/fdc-app.html#/food-details/2709786/nutrients"
+      },
       "usda-fdc:2709789": {
         "source_url": "https://fdc.nal.usda.gov/fdc-app.html#/food-details/2709789/nutrients",
         "source_item_name": "Lettuce, raw",
         "retrieved_at": "2026-09-07T05:37:48Z",
         "license": "CC0 1.0",
         "attribution": "USDA FoodData Central, FNDDS 2021-2023. Lettuce, raw. https://fdc.nal.usda.gov/fdc-app.html#/food-details/2709789/nutrients"
+      },
+      "usda-fdc:2709793": {
+        "source_url": "https://fdc.nal.usda.gov/fdc-app.html#/food-details/2709793/nutrients",
+        "source_item_name": "Mushrooms, raw",
+        "retrieved_at": "2026-09-07T05:37:48Z",
+        "license": "CC0 1.0",
+        "attribution": "USDA FoodData Central, FNDDS 2021-2023. Mushrooms, raw. https://fdc.nal.usda.gov/fdc-app.html#/food-details/2709793/nutrients"
       },
       "usda-fdc:2709795": {
         "source_url": "https://fdc.nal.usda.gov/fdc-app.html#/food-details/2709795/nutrients",
@@ -491,6 +1121,13 @@
         "license": "CC0 1.0",
         "attribution": "USDA FoodData Central, FNDDS 2021-2023. Onions, raw. https://fdc.nal.usda.gov/fdc-app.html#/food-details/2709795/nutrients"
       },
+      "usda-fdc:2709796": {
+        "source_url": "https://fdc.nal.usda.gov/fdc-app.html#/food-details/2709796/nutrients",
+        "source_item_name": "Parsley, raw",
+        "retrieved_at": "2026-09-07T05:37:48Z",
+        "license": "CC0 1.0",
+        "attribution": "USDA FoodData Central, FNDDS 2021-2023. Parsley, raw. https://fdc.nal.usda.gov/fdc-app.html#/food-details/2709796/nutrients"
+      },
       "usda-fdc:2709800": {
         "source_url": "https://fdc.nal.usda.gov/fdc-app.html#/food-details/2709800/nutrients",
         "source_item_name": "Peppers, sweet, green, raw",
@@ -498,12 +1135,47 @@
         "license": "CC0 1.0",
         "attribution": "USDA FoodData Central, FNDDS 2021-2023. Peppers, sweet, green, raw. https://fdc.nal.usda.gov/fdc-app.html#/food-details/2709800/nutrients"
       },
+      "usda-fdc:2709801": {
+        "source_url": "https://fdc.nal.usda.gov/fdc-app.html#/food-details/2709801/nutrients",
+        "source_item_name": "Peppers, sweet, red, raw",
+        "retrieved_at": "2026-09-07T05:37:48Z",
+        "license": "CC0 1.0",
+        "attribution": "USDA FoodData Central, FNDDS 2021-2023. Peppers, sweet, red, raw. https://fdc.nal.usda.gov/fdc-app.html#/food-details/2709801/nutrients"
+      },
+      "usda-fdc:2709803": {
+        "source_url": "https://fdc.nal.usda.gov/fdc-app.html#/food-details/2709803/nutrients",
+        "source_item_name": "Radish",
+        "retrieved_at": "2026-09-07T05:37:48Z",
+        "license": "CC0 1.0",
+        "attribution": "USDA FoodData Central, FNDDS 2021-2023. Radish. https://fdc.nal.usda.gov/fdc-app.html#/food-details/2709803/nutrients"
+      },
+      "usda-fdc:2710085": {
+        "source_url": "https://fdc.nal.usda.gov/fdc-app.html#/food-details/2710085/nutrients",
+        "source_item_name": "Mustard",
+        "retrieved_at": "2026-09-07T05:37:48Z",
+        "license": "CC0 1.0",
+        "attribution": "USDA FoodData Central, FNDDS 2021-2023. Mustard. https://fdc.nal.usda.gov/fdc-app.html#/food-details/2710085/nutrients"
+      },
       "usda-fdc:2710089": {
         "source_url": "https://fdc.nal.usda.gov/fdc-app.html#/food-details/2710089/nutrients",
         "source_item_name": "Olives, green",
         "retrieved_at": "2026-09-07T05:37:48Z",
         "license": "CC0 1.0",
         "attribution": "USDA FoodData Central, FNDDS 2021-2023. Olives, green. https://fdc.nal.usda.gov/fdc-app.html#/food-details/2710089/nutrients"
+      },
+      "usda-fdc:2710090": {
+        "source_url": "https://fdc.nal.usda.gov/fdc-app.html#/food-details/2710090/nutrients",
+        "source_item_name": "Olives, black",
+        "retrieved_at": "2026-09-07T05:37:48Z",
+        "license": "CC0 1.0",
+        "attribution": "USDA FoodData Central, FNDDS 2021-2023. Olives, black. https://fdc.nal.usda.gov/fdc-app.html#/food-details/2710090/nutrients"
+      },
+      "usda-fdc:2710097": {
+        "source_url": "https://fdc.nal.usda.gov/fdc-app.html#/food-details/2710097/nutrients",
+        "source_item_name": "Pickles, NFS",
+        "retrieved_at": "2026-09-07T05:37:48Z",
+        "license": "CC0 1.0",
+        "attribution": "USDA FoodData Central, FNDDS 2021-2023. Pickles, NFS. https://fdc.nal.usda.gov/fdc-app.html#/food-details/2710097/nutrients"
       },
       "usda-fdc:2710113": {
         "source_url": "https://fdc.nal.usda.gov/fdc-app.html#/food-details/2710113/nutrients",
@@ -526,12 +1198,40 @@
         "license": "CC0 1.0",
         "attribution": "USDA FoodData Central, FNDDS 2021-2023. Butter, NFS. https://fdc.nal.usda.gov/fdc-app.html#/food-details/2710154/nutrients"
       },
+      "usda-fdc:2710183": {
+        "source_url": "https://fdc.nal.usda.gov/fdc-app.html#/food-details/2710183/nutrients",
+        "source_item_name": "Corn oil",
+        "retrieved_at": "2026-09-07T05:37:48Z",
+        "license": "CC0 1.0",
+        "attribution": "USDA FoodData Central, FNDDS 2021-2023. Corn oil. https://fdc.nal.usda.gov/fdc-app.html#/food-details/2710183/nutrients"
+      },
       "usda-fdc:2710186": {
         "source_url": "https://fdc.nal.usda.gov/fdc-app.html#/food-details/2710186/nutrients",
         "source_item_name": "Olive oil",
         "retrieved_at": "2026-09-07T05:37:48Z",
         "license": "CC0 1.0",
         "attribution": "USDA FoodData Central, FNDDS 2021-2023. Olive oil. https://fdc.nal.usda.gov/fdc-app.html#/food-details/2710186/nutrients"
+      },
+      "usda-fdc:2710192": {
+        "source_url": "https://fdc.nal.usda.gov/fdc-app.html#/food-details/2710192/nutrients",
+        "source_item_name": "Sunflower oil",
+        "retrieved_at": "2026-09-07T05:37:48Z",
+        "license": "CC0 1.0",
+        "attribution": "USDA FoodData Central, FNDDS 2021-2023. Sunflower oil. https://fdc.nal.usda.gov/fdc-app.html#/food-details/2710192/nutrients"
+      },
+      "usda-fdc:2710204": {
+        "source_url": "https://fdc.nal.usda.gov/fdc-app.html#/food-details/2710204/nutrients",
+        "source_item_name": "Mayonnaise, regular",
+        "retrieved_at": "2026-09-07T05:37:48Z",
+        "license": "CC0 1.0",
+        "attribution": "USDA FoodData Central, FNDDS 2021-2023. Mayonnaise, regular. https://fdc.nal.usda.gov/fdc-app.html#/food-details/2710204/nutrients"
+      },
+      "usda-fdc:2710247": {
+        "source_url": "https://fdc.nal.usda.gov/fdc-app.html#/food-details/2710247/nutrients",
+        "source_item_name": "Tomato sauce, for use with vegetables",
+        "retrieved_at": "2026-09-07T05:37:48Z",
+        "license": "CC0 1.0",
+        "attribution": "USDA FoodData Central, FNDDS 2021-2023. Tomato sauce, for use with vegetables. https://fdc.nal.usda.gov/fdc-app.html#/food-details/2710247/nutrients"
       },
       "usda-fdc:2710281": {
         "source_url": "https://fdc.nal.usda.gov/fdc-app.html#/food-details/2710281/nutrients",
@@ -540,12 +1240,26 @@
         "license": "CC0 1.0",
         "attribution": "USDA FoodData Central, FNDDS 2021-2023. Honey. https://fdc.nal.usda.gov/fdc-app.html#/food-details/2710281/nutrients"
       },
+      "usda-fdc:2710300": {
+        "source_url": "https://fdc.nal.usda.gov/fdc-app.html#/food-details/2710300/nutrients",
+        "source_item_name": "Jelly",
+        "retrieved_at": "2026-09-07T05:37:48Z",
+        "license": "CC0 1.0",
+        "attribution": "USDA FoodData Central, FNDDS 2021-2023. Jelly. https://fdc.nal.usda.gov/fdc-app.html#/food-details/2710300/nutrients"
+      },
       "usda-fdc:2710301": {
         "source_url": "https://fdc.nal.usda.gov/fdc-app.html#/food-details/2710301/nutrients",
         "source_item_name": "Jam",
         "retrieved_at": "2026-09-07T05:37:48Z",
         "license": "CC0 1.0",
         "attribution": "USDA FoodData Central, FNDDS 2021-2023. Jam. https://fdc.nal.usda.gov/fdc-app.html#/food-details/2710301/nutrients"
+      },
+      "usda-fdc:2710328": {
+        "source_url": "https://fdc.nal.usda.gov/fdc-app.html#/food-details/2710328/nutrients",
+        "source_item_name": "Chocolate candy",
+        "retrieved_at": "2026-09-07T05:37:48Z",
+        "license": "CC0 1.0",
+        "attribution": "USDA FoodData Central, FNDDS 2021-2023. Chocolate candy. https://fdc.nal.usda.gov/fdc-app.html#/food-details/2710328/nutrients"
       },
       "usda-fdc:2710359": {
         "source_url": "https://fdc.nal.usda.gov/fdc-app.html#/food-details/2710359/nutrients",
@@ -740,6 +1454,94 @@
     "calories_per_100g": 50.0,
     "fiber_per_100g": 0.0
   },
+  "buttermilk": {
+    "evidence_status": "VERIFIED",
+    "source_item_id": "usda-fdc:2705393",
+    "locale": "en-US",
+    "display_name_tr": "Yayık ayranı (buttermilk)",
+    "default_portion_g": 100,
+    "serving_unit": "gram",
+    "serving_quantity": 100,
+    "portion_units": [
+      {
+        "unit": "ml",
+        "grams_per_unit": 1.0313,
+        "source_item_id": "usda-fdc:2705393",
+        "source_measure": "FNDDS food portion: 1 fl oz = 30.5 g"
+      }
+    ],
+    "protein_per_100g": 3.46,
+    "fat_per_100g": 1.08,
+    "carbs_per_100g": 4.81,
+    "calories_per_100g": 43.0,
+    "fiber_per_100g": 0.0
+  },
+  "kefir": {
+    "evidence_status": "VERIFIED",
+    "source_item_id": "usda-fdc:2705394",
+    "locale": "en-US",
+    "display_name_tr": "Kefir",
+    "default_portion_g": 100,
+    "serving_unit": "gram",
+    "serving_quantity": 100,
+    "portion_units": [
+      {
+        "unit": "ml",
+        "grams_per_unit": 1.0313,
+        "source_item_id": "usda-fdc:2705394",
+        "source_measure": "FNDDS food portion: 1 fl oz = 30.5 g"
+      }
+    ],
+    "protein_per_100g": 3.59,
+    "fat_per_100g": 0.96,
+    "carbs_per_100g": 7.48,
+    "calories_per_100g": 52.0,
+    "fiber_per_100g": 0.0
+  },
+  "goat_milk": {
+    "evidence_status": "VERIFIED",
+    "source_item_id": "usda-fdc:2705395",
+    "locale": "en-US",
+    "display_name_tr": "Keçi sütü",
+    "default_portion_g": 100,
+    "serving_unit": "gram",
+    "serving_quantity": 100,
+    "portion_units": [
+      {
+        "unit": "ml",
+        "grams_per_unit": 1.0313,
+        "source_item_id": "usda-fdc:2705395",
+        "source_measure": "FNDDS food portion: 1 fl oz = 30.5 g"
+      }
+    ],
+    "protein_per_100g": 3.56,
+    "fat_per_100g": 4.14,
+    "carbs_per_100g": 4.45,
+    "calories_per_100g": 69.0,
+    "fiber_per_100g": 0.0
+  },
+  "oat_milk": {
+    "evidence_status": "VERIFIED",
+    "source_item_id": "usda-fdc:2705412",
+    "locale": "en-US",
+    "display_name_tr": "Yulaf sütü",
+    "default_portion_g": 100,
+    "serving_unit": "gram",
+    "serving_quantity": 100,
+    "portion_units": [
+      {
+        "unit": "ml",
+        "grams_per_unit": 1.0313,
+        "source_item_id": "usda-fdc:2705412",
+        "source_measure": "FNDDS food portion: 1 fl oz = 30.5 g"
+      }
+    ],
+    "protein_per_100g": 0.66,
+    "fat_per_100g": 2.33,
+    "carbs_per_100g": 5.37,
+    "calories_per_100g": 45.0,
+    "fiber_per_100g": 0.5
+  },
   "yogurt": {
     "evidence_status": "VERIFIED",
     "source_item_id": "usda-fdc:2705418",
@@ -760,6 +1562,43 @@
     "fat_per_100g": 4.48,
     "carbs_per_100g": 5.57,
     "calories_per_100g": 78.0,
+    "fiber_per_100g": 0.0
+  },
+  "greek_yogurt": {
+    "evidence_status": "VERIFIED",
+    "source_item_id": "usda-fdc:2705422",
+    "locale": "en-US",
+    "display_name_tr": "Süzme yoğurt (tam yağlı)",
+    "default_portion_g": 100,
+    "serving_unit": "gram",
+    "serving_quantity": 100,
+    "portion_units": [
+      {
+        "unit": "kase",
+        "grams_per_unit": 245.0,
+        "source_item_id": "usda-fdc:2705422",
+        "source_measure": "FNDDS food portion: 1 cup = 245 g"
+      }
+    ],
+    "protein_per_100g": 8.78,
+    "fat_per_100g": 4.39,
+    "carbs_per_100g": 4.75,
+    "calories_per_100g": 94.0,
+    "fiber_per_100g": 0.0
+  },
+  "cream": {
+    "evidence_status": "VERIFIED",
+    "source_item_id": "usda-fdc:2705597",
+    "locale": "en-US",
+    "display_name_tr": "Krema (kaymak)",
+    "default_portion_g": 100,
+    "serving_unit": "gram",
+    "serving_quantity": 100,
+    "portion_units": [],
+    "protein_per_100g": 2.02,
+    "fat_per_100g": 35.6,
+    "carbs_per_100g": 3.8,
+    "calories_per_100g": 343,
     "fiber_per_100g": 0.0
   },
   "ice_cream": {
@@ -783,6 +1622,28 @@
     "carbs_per_100g": 26.4,
     "calories_per_100g": 221,
     "fiber_per_100g": 0.8
+  },
+  "rice_pudding": {
+    "evidence_status": "VERIFIED",
+    "source_item_id": "usda-fdc:2705685",
+    "locale": "en-US",
+    "display_name_tr": "Sütlaç benzeri pirinç muhallebisi",
+    "default_portion_g": 100,
+    "serving_unit": "gram",
+    "serving_quantity": 100,
+    "portion_units": [
+      {
+        "unit": "kase",
+        "grams_per_unit": 260.0,
+        "source_item_id": "usda-fdc:2705685",
+        "source_measure": "FNDDS food portion: 1 cup = 260 g"
+      }
+    ],
+    "protein_per_100g": 3.23,
+    "fat_per_100g": 2.15,
+    "carbs_per_100g": 18.4,
+    "calories_per_100g": 108,
+    "fiber_per_100g": 0.3
   },
   "cheddar_cheese": {
     "evidence_status": "VERIFIED",
@@ -828,6 +1689,43 @@
     "calories_per_100g": 273,
     "fiber_per_100g": 0.0
   },
+  "mozzarella": {
+    "evidence_status": "VERIFIED",
+    "source_item_id": "usda-fdc:2705722",
+    "locale": "en-US",
+    "display_name_tr": "Mozzarella peyniri",
+    "default_portion_g": 100,
+    "serving_unit": "gram",
+    "serving_quantity": 100,
+    "portion_units": [
+      {
+        "unit": "dilim",
+        "grams_per_unit": 21.0,
+        "source_item_id": "usda-fdc:2705722",
+        "source_measure": "FNDDS food portion: 1 slice = 21 g"
+      }
+    ],
+    "protein_per_100g": 23.7,
+    "fat_per_100g": 20.4,
+    "carbs_per_100g": 4.44,
+    "calories_per_100g": 296,
+    "fiber_per_100g": 0.0
+  },
+  "parmesan": {
+    "evidence_status": "VERIFIED",
+    "source_item_id": "usda-fdc:2705730",
+    "locale": "en-US",
+    "display_name_tr": "Parmesan peyniri (sert)",
+    "default_portion_g": 100,
+    "serving_unit": "gram",
+    "serving_quantity": 100,
+    "portion_units": [],
+    "protein_per_100g": 29.9,
+    "fat_per_100g": 28.8,
+    "carbs_per_100g": 8.36,
+    "calories_per_100g": 412,
+    "fiber_per_100g": 0.0
+  },
   "cottage_cheese": {
     "evidence_status": "VERIFIED",
     "source_item_id": "usda-fdc:2705747",
@@ -848,6 +1746,21 @@
     "fat_per_100g": 2.3,
     "carbs_per_100g": 4.31,
     "calories_per_100g": 82.0,
+    "fiber_per_100g": 0.0
+  },
+  "beef": {
+    "evidence_status": "VERIFIED",
+    "source_item_id": "usda-fdc:2705822",
+    "locale": "en-US",
+    "display_name_tr": "Dana eti (kesim belirtilmemiş)",
+    "default_portion_g": 100,
+    "serving_unit": "gram",
+    "serving_quantity": 100,
+    "portion_units": [],
+    "protein_per_100g": 27.1,
+    "fat_per_100g": 13.0,
+    "carbs_per_100g": 0.0,
+    "calories_per_100g": 231,
     "fiber_per_100g": 0.0
   },
   "beef_stew_meat": {
@@ -902,6 +1815,36 @@
     "calories_per_100g": 292,
     "fiber_per_100g": 0.0
   },
+  "goat": {
+    "evidence_status": "VERIFIED",
+    "source_item_id": "usda-fdc:2705908",
+    "locale": "en-US",
+    "display_name_tr": "Keçi eti",
+    "default_portion_g": 100,
+    "serving_unit": "gram",
+    "serving_quantity": 100,
+    "portion_units": [],
+    "protein_per_100g": 26.9,
+    "fat_per_100g": 3.01,
+    "carbs_per_100g": 0.0,
+    "calories_per_100g": 142,
+    "fiber_per_100g": 0.0
+  },
+  "veal": {
+    "evidence_status": "VERIFIED",
+    "source_item_id": "usda-fdc:2705909",
+    "locale": "en-US",
+    "display_name_tr": "Dana pirzola",
+    "default_portion_g": 100,
+    "serving_unit": "gram",
+    "serving_quantity": 100,
+    "portion_units": [],
+    "protein_per_100g": 29.5,
+    "fat_per_100g": 4.4,
+    "carbs_per_100g": 0.07,
+    "calories_per_100g": 158,
+    "fiber_per_100g": 0.0
+  },
   "chicken_breast": {
     "evidence_status": "VERIFIED",
     "source_item_id": "usda-fdc:2705956",
@@ -946,6 +1889,117 @@
     "calories_per_100g": 227,
     "fiber_per_100g": 0.0
   },
+  "chicken_wing": {
+    "evidence_status": "VERIFIED",
+    "source_item_id": "usda-fdc:2706061",
+    "locale": "en-US",
+    "display_name_tr": "Tavuk kanat (haşlama)",
+    "default_portion_g": 100,
+    "serving_unit": "gram",
+    "serving_quantity": 100,
+    "portion_units": [],
+    "protein_per_100g": 22.6,
+    "fat_per_100g": 16.7,
+    "carbs_per_100g": 0.0,
+    "calories_per_100g": 247,
+    "fiber_per_100g": 0.0
+  },
+  "turkey": {
+    "evidence_status": "VERIFIED",
+    "source_item_id": "usda-fdc:2706104",
+    "locale": "en-US",
+    "display_name_tr": "Hindi eti",
+    "default_portion_g": 100,
+    "serving_unit": "gram",
+    "serving_quantity": 100,
+    "portion_units": [],
+    "protein_per_100g": 28.8,
+    "fat_per_100g": 2.06,
+    "carbs_per_100g": 0.0,
+    "calories_per_100g": 139,
+    "fiber_per_100g": 0.0
+  },
+  "liver": {
+    "evidence_status": "VERIFIED",
+    "source_item_id": "usda-fdc:2706153",
+    "locale": "en-US",
+    "display_name_tr": "Dana ciğeri",
+    "default_portion_g": 100,
+    "serving_unit": "gram",
+    "serving_quantity": 100,
+    "portion_units": [],
+    "protein_per_100g": 26.3,
+    "fat_per_100g": 4.64,
+    "carbs_per_100g": 5.12,
+    "calories_per_100g": 174,
+    "fiber_per_100g": 0.0
+  },
+  "beef_sausage": {
+    "evidence_status": "VERIFIED",
+    "source_item_id": "usda-fdc:2706171",
+    "locale": "en-US",
+    "display_name_tr": "Dana sucuk benzeri sosis",
+    "default_portion_g": 100,
+    "serving_unit": "gram",
+    "serving_quantity": 100,
+    "portion_units": [
+      {
+        "unit": "dilim",
+        "grams_per_unit": 15.0,
+        "source_item_id": "usda-fdc:2706171",
+        "source_measure": "FNDDS food portion: 1 slice = 15 g"
+      }
+    ],
+    "protein_per_100g": 13.3,
+    "fat_per_100g": 28.7,
+    "carbs_per_100g": 3.37,
+    "calories_per_100g": 341,
+    "fiber_per_100g": 0.0
+  },
+  "pastrami": {
+    "evidence_status": "VERIFIED",
+    "source_item_id": "usda-fdc:2706183",
+    "locale": "en-US",
+    "display_name_tr": "Pastırma benzeri (pastrami)",
+    "default_portion_g": 100,
+    "serving_unit": "gram",
+    "serving_quantity": 100,
+    "portion_units": [
+      {
+        "unit": "dilim",
+        "grams_per_unit": 28.0,
+        "source_item_id": "usda-fdc:2706183",
+        "source_measure": "FNDDS food portion: 1 slice, NFS = 28 g"
+      }
+    ],
+    "protein_per_100g": 21.8,
+    "fat_per_100g": 5.82,
+    "carbs_per_100g": 0.36,
+    "calories_per_100g": 147,
+    "fiber_per_100g": 0.0
+  },
+  "salami": {
+    "evidence_status": "VERIFIED",
+    "source_item_id": "usda-fdc:2706195",
+    "locale": "en-US",
+    "display_name_tr": "Salam",
+    "default_portion_g": 100,
+    "serving_unit": "gram",
+    "serving_quantity": 100,
+    "portion_units": [
+      {
+        "unit": "dilim",
+        "grams_per_unit": 28.0,
+        "source_item_id": "usda-fdc:2706195",
+        "source_measure": "FNDDS food portion: 1 slice, NFS = 28 g"
+      }
+    ],
+    "protein_per_100g": 21.1,
+    "fat_per_100g": 31.6,
+    "carbs_per_100g": 0.72,
+    "calories_per_100g": 378,
+    "fiber_per_100g": 0.0
+  },
   "fish": {
     "evidence_status": "VERIFIED",
     "source_item_id": "usda-fdc:2706224",
@@ -974,6 +2028,103 @@
     "fat_per_100g": 9.71,
     "carbs_per_100g": 0.0,
     "calories_per_100g": 210,
+    "fiber_per_100g": 0.0
+  },
+  "salmon": {
+    "evidence_status": "VERIFIED",
+    "source_item_id": "usda-fdc:2706285",
+    "locale": "en-US",
+    "display_name_tr": "Somon",
+    "default_portion_g": 100,
+    "serving_unit": "gram",
+    "serving_quantity": 100,
+    "portion_units": [],
+    "protein_per_100g": 25.4,
+    "fat_per_100g": 18.4,
+    "carbs_per_100g": 0.01,
+    "calories_per_100g": 274,
+    "fiber_per_100g": 0.0
+  },
+  "sardines": {
+    "evidence_status": "VERIFIED",
+    "source_item_id": "usda-fdc:2706293",
+    "locale": "en-US",
+    "display_name_tr": "Sardalya (konserve)",
+    "default_portion_g": 100,
+    "serving_unit": "gram",
+    "serving_quantity": 100,
+    "portion_units": [],
+    "protein_per_100g": 24.6,
+    "fat_per_100g": 11.4,
+    "carbs_per_100g": 0.0,
+    "calories_per_100g": 208,
+    "fiber_per_100g": 0.0
+  },
+  "tuna": {
+    "evidence_status": "VERIFIED",
+    "source_item_id": "usda-fdc:2706309",
+    "locale": "en-US",
+    "display_name_tr": "Ton balığı",
+    "default_portion_g": 100,
+    "serving_unit": "gram",
+    "serving_quantity": 100,
+    "portion_units": [],
+    "protein_per_100g": 19.0,
+    "fat_per_100g": 0.94,
+    "carbs_per_100g": 0.08,
+    "calories_per_100g": 85.0,
+    "fiber_per_100g": 0.0
+  },
+  "squid": {
+    "evidence_status": "VERIFIED",
+    "source_item_id": "usda-fdc:2706331",
+    "locale": "en-US",
+    "display_name_tr": "Ahtapot",
+    "default_portion_g": 100,
+    "serving_unit": "gram",
+    "serving_quantity": 100,
+    "portion_units": [],
+    "protein_per_100g": 13.2,
+    "fat_per_100g": 13.0,
+    "carbs_per_100g": 13.4,
+    "calories_per_100g": 226,
+    "fiber_per_100g": 0.5
+  },
+  "crab": {
+    "evidence_status": "VERIFIED",
+    "source_item_id": "usda-fdc:2706344",
+    "locale": "en-US",
+    "display_name_tr": "Yengeç",
+    "default_portion_g": 100,
+    "serving_unit": "gram",
+    "serving_quantity": 100,
+    "portion_units": [],
+    "protein_per_100g": 17.9,
+    "fat_per_100g": 0.74,
+    "carbs_per_100g": 0.0,
+    "calories_per_100g": 83.0,
+    "fiber_per_100g": 0.0
+  },
+  "mussels": {
+    "evidence_status": "VERIFIED",
+    "source_item_id": "usda-fdc:2706350",
+    "locale": "en-US",
+    "display_name_tr": "Midye",
+    "default_portion_g": 100,
+    "serving_unit": "gram",
+    "serving_quantity": 100,
+    "portion_units": [
+      {
+        "unit": "adet",
+        "grams_per_unit": 15.0,
+        "source_item_id": "usda-fdc:2706350",
+        "source_measure": "FNDDS food portion: 1 mussel = 15 g"
+      }
+    ],
+    "protein_per_100g": 15.1,
+    "fat_per_100g": 2.84,
+    "carbs_per_100g": 4.67,
+    "calories_per_100g": 109,
     "fiber_per_100g": 0.0
   },
   "shrimp": {
@@ -1086,6 +2237,28 @@
     "calories_per_100g": 143,
     "fiber_per_100g": 0.0
   },
+  "fried_egg": {
+    "evidence_status": "VERIFIED",
+    "source_item_id": "usda-fdc:2707156",
+    "locale": "en-US",
+    "display_name_tr": "Yumurta (yağsız kızartma)",
+    "default_portion_g": 100,
+    "serving_unit": "gram",
+    "serving_quantity": 100,
+    "portion_units": [
+      {
+        "unit": "adet",
+        "grams_per_unit": 50.0,
+        "source_item_id": "usda-fdc:2707156",
+        "source_measure": "FNDDS food portion: 1 egg = 50 g"
+      }
+    ],
+    "protein_per_100g": 12.4,
+    "fat_per_100g": 9.93,
+    "carbs_per_100g": 0.96,
+    "calories_per_100g": 143,
+    "fiber_per_100g": 0.0
+  },
   "omelette": {
     "evidence_status": "VERIFIED",
     "source_item_id": "usda-fdc:2707205",
@@ -1167,6 +2340,50 @@
     "calories_per_100g": 211,
     "fiber_per_100g": 7.1
   },
+  "split_peas": {
+    "evidence_status": "VERIFIED",
+    "source_item_id": "usda-fdc:2707420",
+    "locale": "en-US",
+    "display_name_tr": "Kuru bezelye",
+    "default_portion_g": 100,
+    "serving_unit": "gram",
+    "serving_quantity": 100,
+    "portion_units": [
+      {
+        "unit": "kase",
+        "grams_per_unit": 180.0,
+        "source_item_id": "usda-fdc:2707420",
+        "source_measure": "FNDDS food portion: 1 cup = 180 g"
+      }
+    ],
+    "protein_per_100g": 8.29,
+    "fat_per_100g": 0.39,
+    "carbs_per_100g": 21.0,
+    "calories_per_100g": 117,
+    "fiber_per_100g": 8.2
+  },
+  "lentils_nfs": {
+    "evidence_status": "VERIFIED",
+    "source_item_id": "usda-fdc:2707423",
+    "locale": "en-US",
+    "display_name_tr": "Yeşil mercimek",
+    "default_portion_g": 100,
+    "serving_unit": "gram",
+    "serving_quantity": 100,
+    "portion_units": [
+      {
+        "unit": "kase",
+        "grams_per_unit": 185.0,
+        "source_item_id": "usda-fdc:2707423",
+        "source_measure": "FNDDS food portion: 1 cup = 185 g"
+      }
+    ],
+    "protein_per_100g": 8.38,
+    "fat_per_100g": 6.86,
+    "carbs_per_100g": 18.7,
+    "calories_per_100g": 166,
+    "fiber_per_100g": 7.3
+  },
   "lentils": {
     "evidence_status": "VERIFIED",
     "source_item_id": "usda-fdc:2707425",
@@ -1233,6 +2450,43 @@
     "calories_per_100g": 598,
     "fiber_per_100g": 10.9
   },
+  "cashews": {
+    "evidence_status": "VERIFIED",
+    "source_item_id": "usda-fdc:2707493",
+    "locale": "en-US",
+    "display_name_tr": "Kaju",
+    "default_portion_g": 100,
+    "serving_unit": "gram",
+    "serving_quantity": 100,
+    "portion_units": [],
+    "protein_per_100g": 15.3,
+    "fat_per_100g": 46.4,
+    "carbs_per_100g": 32.7,
+    "calories_per_100g": 574,
+    "fiber_per_100g": 3.0
+  },
+  "chestnuts": {
+    "evidence_status": "VERIFIED",
+    "source_item_id": "usda-fdc:2707499",
+    "locale": "en-US",
+    "display_name_tr": "Kestane",
+    "default_portion_g": 100,
+    "serving_unit": "gram",
+    "serving_quantity": 100,
+    "portion_units": [
+      {
+        "unit": "adet",
+        "grams_per_unit": 8.0,
+        "source_item_id": "usda-fdc:2707499",
+        "source_measure": "FNDDS food portion: 1 nut = 8 g"
+      }
+    ],
+    "protein_per_100g": 3.17,
+    "fat_per_100g": 2.2,
+    "carbs_per_100g": 53.0,
+    "calories_per_100g": 245,
+    "fiber_per_100g": 5.1
+  },
   "hazelnuts": {
     "evidence_status": "VERIFIED",
     "source_item_id": "usda-fdc:2707502",
@@ -1254,6 +2508,36 @@
     "carbs_per_100g": 16.7,
     "calories_per_100g": 628,
     "fiber_per_100g": 9.7
+  },
+  "peanuts": {
+    "evidence_status": "VERIFIED",
+    "source_item_id": "usda-fdc:2707512",
+    "locale": "en-US",
+    "display_name_tr": "Yer fıstığı",
+    "default_portion_g": 100,
+    "serving_unit": "gram",
+    "serving_quantity": 100,
+    "portion_units": [],
+    "protein_per_100g": 24.4,
+    "fat_per_100g": 49.7,
+    "carbs_per_100g": 21.3,
+    "calories_per_100g": 587,
+    "fiber_per_100g": 8.4
+  },
+  "pine_nuts": {
+    "evidence_status": "VERIFIED",
+    "source_item_id": "usda-fdc:2707526",
+    "locale": "en-US",
+    "display_name_tr": "Çam fıstığı",
+    "default_portion_g": 100,
+    "serving_unit": "gram",
+    "serving_quantity": 100,
+    "portion_units": [],
+    "protein_per_100g": 13.7,
+    "fat_per_100g": 68.4,
+    "carbs_per_100g": 13.1,
+    "calories_per_100g": 673,
+    "fiber_per_100g": 3.7
   },
   "pistachios": {
     "evidence_status": "VERIFIED",
@@ -1299,6 +2583,81 @@
     "calories_per_100g": 730,
     "fiber_per_100g": 5.2
   },
+  "pumpkin_seeds": {
+    "evidence_status": "VERIFIED",
+    "source_item_id": "usda-fdc:2707579",
+    "locale": "en-US",
+    "display_name_tr": "Kabak çekirdeği",
+    "default_portion_g": 100,
+    "serving_unit": "gram",
+    "serving_quantity": 100,
+    "portion_units": [],
+    "protein_per_100g": 29.8,
+    "fat_per_100g": 49.0,
+    "carbs_per_100g": 14.7,
+    "calories_per_100g": 574,
+    "fiber_per_100g": 6.5
+  },
+  "sunflower_seeds": {
+    "evidence_status": "VERIFIED",
+    "source_item_id": "usda-fdc:2707585",
+    "locale": "en-US",
+    "display_name_tr": "Ay çekirdeği",
+    "default_portion_g": 100,
+    "serving_unit": "gram",
+    "serving_quantity": 100,
+    "portion_units": [],
+    "protein_per_100g": 19.3,
+    "fat_per_100g": 49.8,
+    "carbs_per_100g": 24.1,
+    "calories_per_100g": 582,
+    "fiber_per_100g": 11.1
+  },
+  "tahini": {
+    "evidence_status": "VERIFIED",
+    "source_item_id": "usda-fdc:2707587",
+    "locale": "en-US",
+    "display_name_tr": "Tahin",
+    "default_portion_g": 100,
+    "serving_unit": "gram",
+    "serving_quantity": 100,
+    "portion_units": [],
+    "protein_per_100g": 19.7,
+    "fat_per_100g": 62.4,
+    "carbs_per_100g": 14.2,
+    "calories_per_100g": 697,
+    "fiber_per_100g": 8.4
+  },
+  "flax_seeds": {
+    "evidence_status": "VERIFIED",
+    "source_item_id": "usda-fdc:2707588",
+    "locale": "en-US",
+    "display_name_tr": "Keten tohumu",
+    "default_portion_g": 100,
+    "serving_unit": "gram",
+    "serving_quantity": 100,
+    "portion_units": [],
+    "protein_per_100g": 18.0,
+    "fat_per_100g": 37.3,
+    "carbs_per_100g": 34.4,
+    "calories_per_100g": 545,
+    "fiber_per_100g": 23.1
+  },
+  "chia_seeds": {
+    "evidence_status": "VERIFIED",
+    "source_item_id": "usda-fdc:2707590",
+    "locale": "en-US",
+    "display_name_tr": "Chia tohumu",
+    "default_portion_g": 100,
+    "serving_unit": "gram",
+    "serving_quantity": 100,
+    "portion_units": [],
+    "protein_per_100g": 16.5,
+    "fat_per_100g": 30.7,
+    "carbs_per_100g": 42.1,
+    "calories_per_100g": 486,
+    "fiber_per_100g": 34.4
+  },
   "bread": {
     "evidence_status": "VERIFIED",
     "source_item_id": "usda-fdc:2707598",
@@ -1320,6 +2679,28 @@
     "carbs_per_100g": 49.2,
     "calories_per_100g": 267,
     "fiber_per_100g": 2.3
+  },
+  "croissant": {
+    "evidence_status": "VERIFIED",
+    "source_item_id": "usda-fdc:2707678",
+    "locale": "en-US",
+    "display_name_tr": "Kruvasan",
+    "default_portion_g": 100,
+    "serving_unit": "gram",
+    "serving_quantity": 100,
+    "portion_units": [
+      {
+        "unit": "adet",
+        "grams_per_unit": 57.0,
+        "source_item_id": "usda-fdc:2707678",
+        "source_measure": "FNDDS food portion: 1 medium croissant = 57 g"
+      }
+    ],
+    "protein_per_100g": 8.2,
+    "fat_per_100g": 21.0,
+    "carbs_per_100g": 45.8,
+    "calories_per_100g": 406,
+    "fiber_per_100g": 2.6
   },
   "bagel": {
     "evidence_status": "VERIFIED",
@@ -1365,6 +2746,94 @@
     "calories_per_100g": 254,
     "fiber_per_100g": 6.0
   },
+  "rye_bread": {
+    "evidence_status": "VERIFIED",
+    "source_item_id": "usda-fdc:2707755",
+    "locale": "en-US",
+    "display_name_tr": "Çavdar ekmeği",
+    "default_portion_g": 100,
+    "serving_unit": "gram",
+    "serving_quantity": 100,
+    "portion_units": [
+      {
+        "unit": "dilim",
+        "grams_per_unit": 32.0,
+        "source_item_id": "usda-fdc:2707755",
+        "source_measure": "FNDDS food portion: 1 medium or regular slice = 32 g"
+      }
+    ],
+    "protein_per_100g": 8.5,
+    "fat_per_100g": 3.3,
+    "carbs_per_100g": 48.3,
+    "calories_per_100g": 259,
+    "fiber_per_100g": 5.8
+  },
+  "cornbread": {
+    "evidence_status": "VERIFIED",
+    "source_item_id": "usda-fdc:2707810",
+    "locale": "en-US",
+    "display_name_tr": "Mısır ekmeği (hazır karışım)",
+    "default_portion_g": 100,
+    "serving_unit": "gram",
+    "serving_quantity": 100,
+    "portion_units": [
+      {
+        "unit": "dilim",
+        "grams_per_unit": 60.0,
+        "source_item_id": "usda-fdc:2707810",
+        "source_measure": "FNDDS food portion: 1 piece = 60 g"
+      }
+    ],
+    "protein_per_100g": 6.59,
+    "fat_per_100g": 9.58,
+    "carbs_per_100g": 54.5,
+    "calories_per_100g": 330,
+    "fiber_per_100g": 2.3
+  },
+  "cake_plain": {
+    "evidence_status": "VERIFIED",
+    "source_item_id": "usda-fdc:2707882",
+    "locale": "en-US",
+    "display_name_tr": "Kek (yağlı hamur)",
+    "default_portion_g": 100,
+    "serving_unit": "gram",
+    "serving_quantity": 100,
+    "portion_units": [
+      {
+        "unit": "dilim",
+        "grams_per_unit": 115.0,
+        "source_item_id": "usda-fdc:2707882",
+        "source_measure": "FNDDS food portion: 1 piece/slice, any size = 115 g"
+      }
+    ],
+    "protein_per_100g": 5.0,
+    "fat_per_100g": 14.0,
+    "carbs_per_100g": 53.6,
+    "calories_per_100g": 353,
+    "fiber_per_100g": 0.6
+  },
+  "cookie": {
+    "evidence_status": "VERIFIED",
+    "source_item_id": "usda-fdc:2707899",
+    "locale": "en-US",
+    "display_name_tr": "Bisküvi",
+    "default_portion_g": 100,
+    "serving_unit": "gram",
+    "serving_quantity": 100,
+    "portion_units": [
+      {
+        "unit": "adet",
+        "grams_per_unit": 30.0,
+        "source_item_id": "usda-fdc:2707899",
+        "source_measure": "FNDDS food portion: 1 medium = 30 g"
+      }
+    ],
+    "protein_per_100g": 5.1,
+    "fat_per_100g": 24.7,
+    "carbs_per_100g": 65.4,
+    "calories_per_100g": 492,
+    "fiber_per_100g": 2.0
+  },
   "fritter": {
     "evidence_status": "VERIFIED",
     "source_item_id": "usda-fdc:2708024",
@@ -1409,6 +2878,154 @@
     "calories_per_100g": 440,
     "fiber_per_100g": 2.5
   },
+  "doughnut": {
+    "evidence_status": "VERIFIED",
+    "source_item_id": "usda-fdc:2708062",
+    "locale": "en-US",
+    "display_name_tr": "Donut",
+    "default_portion_g": 100,
+    "serving_unit": "gram",
+    "serving_quantity": 100,
+    "portion_units": [
+      {
+        "unit": "adet",
+        "grams_per_unit": 75.0,
+        "source_item_id": "usda-fdc:2708062",
+        "source_measure": "FNDDS food portion: 1 doughnut = 75 g"
+      }
+    ],
+    "protein_per_100g": 5.52,
+    "fat_per_100g": 22.9,
+    "carbs_per_100g": 49.5,
+    "calories_per_100g": 426,
+    "fiber_per_100g": 1.8
+  },
+  "crackers": {
+    "evidence_status": "VERIFIED",
+    "source_item_id": "usda-fdc:2708132",
+    "locale": "en-US",
+    "display_name_tr": "Kraker",
+    "default_portion_g": 100,
+    "serving_unit": "gram",
+    "serving_quantity": 100,
+    "portion_units": [],
+    "protein_per_100g": 6.64,
+    "fat_per_100g": 26.4,
+    "carbs_per_100g": 61.3,
+    "calories_per_100g": 510,
+    "fiber_per_100g": 2.3
+  },
+  "rice_cake": {
+    "evidence_status": "VERIFIED",
+    "source_item_id": "usda-fdc:2708162",
+    "locale": "en-US",
+    "display_name_tr": "Pirinç patlağı",
+    "default_portion_g": 100,
+    "serving_unit": "gram",
+    "serving_quantity": 100,
+    "portion_units": [
+      {
+        "unit": "adet",
+        "grams_per_unit": 3.0,
+        "source_item_id": "usda-fdc:2708162",
+        "source_measure": "FNDDS food portion: 1 cake = 3 g"
+      }
+    ],
+    "protein_per_100g": 7.1,
+    "fat_per_100g": 4.3,
+    "carbs_per_100g": 81.1,
+    "calories_per_100g": 392,
+    "fiber_per_100g": 4.2
+  },
+  "pita_chips": {
+    "evidence_status": "VERIFIED",
+    "source_item_id": "usda-fdc:2708215",
+    "locale": "en-US",
+    "display_name_tr": "Pide cipsi",
+    "default_portion_g": 100,
+    "serving_unit": "gram",
+    "serving_quantity": 100,
+    "portion_units": [],
+    "protein_per_100g": 11.8,
+    "fat_per_100g": 15.2,
+    "carbs_per_100g": 68.3,
+    "calories_per_100g": 457,
+    "fiber_per_100g": 3.8
+  },
+  "popcorn": {
+    "evidence_status": "VERIFIED",
+    "source_item_id": "usda-fdc:2708216",
+    "locale": "en-US",
+    "display_name_tr": "Patlamış mısır",
+    "default_portion_g": 100,
+    "serving_unit": "gram",
+    "serving_quantity": 100,
+    "portion_units": [],
+    "protein_per_100g": 9.13,
+    "fat_per_100g": 30.6,
+    "carbs_per_100g": 55.0,
+    "calories_per_100g": 518,
+    "fiber_per_100g": 10.2
+  },
+  "pancake": {
+    "evidence_status": "VERIFIED",
+    "source_item_id": "usda-fdc:2708294",
+    "locale": "en-US",
+    "display_name_tr": "Krep/pankek",
+    "default_portion_g": 100,
+    "serving_unit": "gram",
+    "serving_quantity": 100,
+    "portion_units": [],
+    "protein_per_100g": 7.41,
+    "fat_per_100g": 12.1,
+    "carbs_per_100g": 35.3,
+    "calories_per_100g": 282,
+    "fiber_per_100g": 2.1
+  },
+  "waffle": {
+    "evidence_status": "VERIFIED",
+    "source_item_id": "usda-fdc:2708312",
+    "locale": "en-US",
+    "display_name_tr": "Waffle",
+    "default_portion_g": 100,
+    "serving_unit": "gram",
+    "serving_quantity": 100,
+    "portion_units": [
+      {
+        "unit": "adet",
+        "grams_per_unit": 75.0,
+        "source_item_id": "usda-fdc:2708312",
+        "source_measure": "FNDDS food portion: 1 medium waffle = 75 g"
+      }
+    ],
+    "protein_per_100g": 7.42,
+    "fat_per_100g": 9.49,
+    "carbs_per_100g": 48.4,
+    "calories_per_100g": 309,
+    "fiber_per_100g": 2.6
+  },
+  "noodles": {
+    "evidence_status": "VERIFIED",
+    "source_item_id": "usda-fdc:2708352",
+    "locale": "en-US",
+    "display_name_tr": "Erişte (haşlanmış)",
+    "default_portion_g": 100,
+    "serving_unit": "gram",
+    "serving_quantity": 100,
+    "portion_units": [
+      {
+        "unit": "kase",
+        "grams_per_unit": 160.0,
+        "source_item_id": "usda-fdc:2708352",
+        "source_measure": "FNDDS food portion: 1 cup, cooked = 160 g"
+      }
+    ],
+    "protein_per_100g": 4.51,
+    "fat_per_100g": 2.06,
+    "carbs_per_100g": 25.0,
+    "calories_per_100g": 137,
+    "fiber_per_100g": 1.2
+  },
   "pasta": {
     "evidence_status": "VERIFIED",
     "source_item_id": "usda-fdc:2708357",
@@ -1430,6 +3047,72 @@
     "carbs_per_100g": 30.7,
     "calories_per_100g": 157,
     "fiber_per_100g": 1.8
+  },
+  "barley": {
+    "evidence_status": "VERIFIED",
+    "source_item_id": "usda-fdc:2708361",
+    "locale": "en-US",
+    "display_name_tr": "Arpa (pişmiş)",
+    "default_portion_g": 100,
+    "serving_unit": "gram",
+    "serving_quantity": 100,
+    "portion_units": [
+      {
+        "unit": "kase",
+        "grams_per_unit": 170.0,
+        "source_item_id": "usda-fdc:2708361",
+        "source_measure": "FNDDS food portion: 1 cup, cooked = 170 g"
+      }
+    ],
+    "protein_per_100g": 2.2,
+    "fat_per_100g": 2.74,
+    "carbs_per_100g": 27.2,
+    "calories_per_100g": 139,
+    "fiber_per_100g": 3.7
+  },
+  "millet": {
+    "evidence_status": "VERIFIED",
+    "source_item_id": "usda-fdc:2708377",
+    "locale": "en-US",
+    "display_name_tr": "Darı (pişmiş)",
+    "default_portion_g": 100,
+    "serving_unit": "gram",
+    "serving_quantity": 100,
+    "portion_units": [
+      {
+        "unit": "kase",
+        "grams_per_unit": 170.0,
+        "source_item_id": "usda-fdc:2708377",
+        "source_measure": "FNDDS food portion: 1 cup, cooked = 170 g"
+      }
+    ],
+    "protein_per_100g": 3.5,
+    "fat_per_100g": 1.0,
+    "carbs_per_100g": 23.6,
+    "calories_per_100g": 118,
+    "fiber_per_100g": 1.3
+  },
+  "oatmeal": {
+    "evidence_status": "VERIFIED",
+    "source_item_id": "usda-fdc:2708380",
+    "locale": "en-US",
+    "display_name_tr": "Yulaf ezmesi (pişmiş)",
+    "default_portion_g": 100,
+    "serving_unit": "gram",
+    "serving_quantity": 100,
+    "portion_units": [
+      {
+        "unit": "kase",
+        "grams_per_unit": 240.0,
+        "source_item_id": "usda-fdc:2708380",
+        "source_measure": "FNDDS food portion: 1 cup, cooked = 240 g"
+      }
+    ],
+    "protein_per_100g": 2.18,
+    "fat_per_100g": 2.63,
+    "carbs_per_100g": 11.2,
+    "calories_per_100g": 76.0,
+    "fiber_per_100g": 1.7
   },
   "rice": {
     "evidence_status": "VERIFIED",
@@ -1519,6 +3202,28 @@
     "calories_per_100g": 83.0,
     "fiber_per_100g": 4.5
   },
+  "bulgur_with_fat": {
+    "evidence_status": "VERIFIED",
+    "source_item_id": "usda-fdc:2708439",
+    "locale": "en-US",
+    "display_name_tr": "Bulgur pilavı (yağlı)",
+    "default_portion_g": 100,
+    "serving_unit": "gram",
+    "serving_quantity": 100,
+    "portion_units": [
+      {
+        "unit": "kase",
+        "grams_per_unit": 140.0,
+        "source_item_id": "usda-fdc:2708439",
+        "source_measure": "FNDDS food portion: 1 cup, cooked = 140 g"
+      }
+    ],
+    "protein_per_100g": 2.9,
+    "fat_per_100g": 5.07,
+    "carbs_per_100g": 17.3,
+    "calories_per_100g": 121,
+    "fiber_per_100g": 4.2
+  },
   "couscous": {
     "evidence_status": "VERIFIED",
     "source_item_id": "usda-fdc:2708441",
@@ -1541,6 +3246,28 @@
     "calories_per_100g": 111,
     "fiber_per_100g": 1.4
   },
+  "corn_flakes": {
+    "evidence_status": "VERIFIED",
+    "source_item_id": "usda-fdc:2708453",
+    "locale": "en-US",
+    "display_name_tr": "Mısır gevreği",
+    "default_portion_g": 100,
+    "serving_unit": "gram",
+    "serving_quantity": 100,
+    "portion_units": [
+      {
+        "unit": "kase",
+        "grams_per_unit": 30.0,
+        "source_item_id": "usda-fdc:2708453",
+        "source_measure": "FNDDS food portion: 1 cup = 30 g"
+      }
+    ],
+    "protein_per_100g": 6.4,
+    "fat_per_100g": 1.6,
+    "carbs_per_100g": 79.5,
+    "calories_per_100g": 365,
+    "fiber_per_100g": 3.5
+  },
   "pizza": {
     "evidence_status": "VERIFIED",
     "source_item_id": "usda-fdc:2708614",
@@ -1561,6 +3288,28 @@
     "fat_per_100g": 9.69,
     "carbs_per_100g": 33.3,
     "calories_per_100g": 266,
+    "fiber_per_100g": 2.3
+  },
+  "egg_roll": {
+    "evidence_status": "VERIFIED",
+    "source_item_id": "usda-fdc:2708700",
+    "locale": "en-US",
+    "display_name_tr": "Sigara böreği benzeri rulo (etsiz)",
+    "default_portion_g": 100,
+    "serving_unit": "gram",
+    "serving_quantity": 100,
+    "portion_units": [
+      {
+        "unit": "adet",
+        "grams_per_unit": 64.0,
+        "source_item_id": "usda-fdc:2708700",
+        "source_measure": "FNDDS food portion: 1 egg roll = 64 g"
+      }
+    ],
+    "protein_per_100g": 5.62,
+    "fat_per_100g": 14.1,
+    "carbs_per_100g": 30.0,
+    "calories_per_100g": 270,
     "fiber_per_100g": 2.3
   },
   "steamed_dumpling": {
@@ -1695,6 +3444,50 @@
     "calories_per_100g": 53.0,
     "fiber_per_100g": 0.7
   },
+  "grapefruit": {
+    "evidence_status": "VERIFIED",
+    "source_item_id": "usda-fdc:2709165",
+    "locale": "en-US",
+    "display_name_tr": "Greyfurt (çiğ)",
+    "default_portion_g": 100,
+    "serving_unit": "gram",
+    "serving_quantity": 100,
+    "portion_units": [
+      {
+        "unit": "adet",
+        "grams_per_unit": 308.0,
+        "source_item_id": "usda-fdc:2709165",
+        "source_measure": "FNDDS food portion: 1 fruit = 308 g"
+      }
+    ],
+    "protein_per_100g": 0.77,
+    "fat_per_100g": 0.14,
+    "carbs_per_100g": 10.7,
+    "calories_per_100g": 42.0,
+    "fiber_per_100g": 1.6
+  },
+  "lemon": {
+    "evidence_status": "VERIFIED",
+    "source_item_id": "usda-fdc:2709168",
+    "locale": "en-US",
+    "display_name_tr": "Limon (çiğ)",
+    "default_portion_g": 100,
+    "serving_unit": "gram",
+    "serving_quantity": 100,
+    "portion_units": [
+      {
+        "unit": "adet",
+        "grams_per_unit": 65.0,
+        "source_item_id": "usda-fdc:2709168",
+        "source_measure": "FNDDS food portion: 1 fruit = 65 g"
+      }
+    ],
+    "protein_per_100g": 1.1,
+    "fat_per_100g": 0.3,
+    "carbs_per_100g": 9.32,
+    "calories_per_100g": 29.0,
+    "fiber_per_100g": 2.8
+  },
   "orange": {
     "evidence_status": "VERIFIED",
     "source_item_id": "usda-fdc:2709171",
@@ -1717,6 +3510,50 @@
     "calories_per_100g": 50.0,
     "fiber_per_100g": 2.2
   },
+  "tangerine": {
+    "evidence_status": "VERIFIED",
+    "source_item_id": "usda-fdc:2709175",
+    "locale": "en-US",
+    "display_name_tr": "Mandalina (çiğ)",
+    "default_portion_g": 100,
+    "serving_unit": "gram",
+    "serving_quantity": 100,
+    "portion_units": [
+      {
+        "unit": "adet",
+        "grams_per_unit": 109.0,
+        "source_item_id": "usda-fdc:2709175",
+        "source_measure": "FNDDS food portion: 1 fruit = 109 g"
+      }
+    ],
+    "protein_per_100g": 0.81,
+    "fat_per_100g": 0.31,
+    "carbs_per_100g": 13.3,
+    "calories_per_100g": 53.0,
+    "fiber_per_100g": 1.8
+  },
+  "lemon_juice": {
+    "evidence_status": "VERIFIED",
+    "source_item_id": "usda-fdc:2709180",
+    "locale": "en-US",
+    "display_name_tr": "Limon suyu",
+    "default_portion_g": 100,
+    "serving_unit": "gram",
+    "serving_quantity": 100,
+    "portion_units": [
+      {
+        "unit": "ml",
+        "grams_per_unit": 1.0482,
+        "source_item_id": "usda-fdc:2709180",
+        "source_measure": "FNDDS food portion: 1 fl oz (no ice) = 31 g"
+      }
+    ],
+    "protein_per_100g": 0.35,
+    "fat_per_100g": 0.24,
+    "carbs_per_100g": 6.9,
+    "calories_per_100g": 22.0,
+    "fiber_per_100g": 0.3
+  },
   "orange_juice": {
     "evidence_status": "VERIFIED",
     "source_item_id": "usda-fdc:2709186",
@@ -1738,6 +3575,65 @@
     "carbs_per_100g": 10.2,
     "calories_per_100g": 47.0,
     "fiber_per_100g": 0.3
+  },
+  "dried_apricot": {
+    "evidence_status": "VERIFIED",
+    "source_item_id": "usda-fdc:2709197",
+    "locale": "en-US",
+    "display_name_tr": "Kuru kayısı",
+    "default_portion_g": 100,
+    "serving_unit": "gram",
+    "serving_quantity": 100,
+    "portion_units": [],
+    "protein_per_100g": 3.39,
+    "fat_per_100g": 0.51,
+    "carbs_per_100g": 62.6,
+    "calories_per_100g": 241,
+    "fiber_per_100g": 7.3
+  },
+  "date_fruit": {
+    "evidence_status": "VERIFIED",
+    "source_item_id": "usda-fdc:2709203",
+    "locale": "en-US",
+    "display_name_tr": "Hurma",
+    "default_portion_g": 100,
+    "serving_unit": "gram",
+    "serving_quantity": 100,
+    "portion_units": [
+      {
+        "unit": "adet",
+        "grams_per_unit": 8.0,
+        "source_item_id": "usda-fdc:2709203",
+        "source_measure": "FNDDS food portion: 1 date = 8 g"
+      }
+    ],
+    "protein_per_100g": 2.45,
+    "fat_per_100g": 0.39,
+    "carbs_per_100g": 75.0,
+    "calories_per_100g": 282,
+    "fiber_per_100g": 8.0
+  },
+  "dried_fig": {
+    "evidence_status": "VERIFIED",
+    "source_item_id": "usda-fdc:2709204",
+    "locale": "en-US",
+    "display_name_tr": "Kuru incir",
+    "default_portion_g": 100,
+    "serving_unit": "gram",
+    "serving_quantity": 100,
+    "portion_units": [
+      {
+        "unit": "adet",
+        "grams_per_unit": 8.0,
+        "source_item_id": "usda-fdc:2709204",
+        "source_measure": "FNDDS food portion: 1 fig = 8 g"
+      }
+    ],
+    "protein_per_100g": 3.3,
+    "fat_per_100g": 0.92,
+    "carbs_per_100g": 63.9,
+    "calories_per_100g": 277,
+    "fiber_per_100g": 9.8
   },
   "raisins": {
     "evidence_status": "VERIFIED",
@@ -1805,6 +3701,28 @@
     "calories_per_100g": 48.0,
     "fiber_per_100g": 2.0
   },
+  "avocado": {
+    "evidence_status": "VERIFIED",
+    "source_item_id": "usda-fdc:2709223",
+    "locale": "en-US",
+    "display_name_tr": "Avokado (çiğ)",
+    "default_portion_g": 100,
+    "serving_unit": "gram",
+    "serving_quantity": 100,
+    "portion_units": [
+      {
+        "unit": "adet",
+        "grams_per_unit": 150.0,
+        "source_item_id": "usda-fdc:2709223",
+        "source_measure": "FNDDS food portion: 1 fruit = 150 g"
+      }
+    ],
+    "protein_per_100g": 2.0,
+    "fat_per_100g": 14.7,
+    "carbs_per_100g": 8.53,
+    "calories_per_100g": 160,
+    "fiber_per_100g": 6.7
+  },
   "banana": {
     "evidence_status": "VERIFIED",
     "source_item_id": "usda-fdc:2709224",
@@ -1826,6 +3744,28 @@
     "carbs_per_100g": 22.7,
     "calories_per_100g": 97.0,
     "fiber_per_100g": 1.7
+  },
+  "cantaloupe": {
+    "evidence_status": "VERIFIED",
+    "source_item_id": "usda-fdc:2709226",
+    "locale": "en-US",
+    "display_name_tr": "Kavun (çiğ)",
+    "default_portion_g": 100,
+    "serving_unit": "gram",
+    "serving_quantity": 100,
+    "portion_units": [
+      {
+        "unit": "kase",
+        "grams_per_unit": 155.0,
+        "source_item_id": "usda-fdc:2709226",
+        "source_measure": "FNDDS food portion: 1 cup = 155 g"
+      }
+    ],
+    "protein_per_100g": 0.82,
+    "fat_per_100g": 0.18,
+    "carbs_per_100g": 8.16,
+    "calories_per_100g": 38.0,
+    "fiber_per_100g": 0.8
   },
   "cherry": {
     "evidence_status": "VERIFIED",
@@ -1893,6 +3833,138 @@
     "calories_per_100g": 83.0,
     "fiber_per_100g": 0.9
   },
+  "kiwi": {
+    "evidence_status": "VERIFIED",
+    "source_item_id": "usda-fdc:2709239",
+    "locale": "en-US",
+    "display_name_tr": "Kivi (çiğ)",
+    "default_portion_g": 100,
+    "serving_unit": "gram",
+    "serving_quantity": 100,
+    "portion_units": [
+      {
+        "unit": "adet",
+        "grams_per_unit": 75.0,
+        "source_item_id": "usda-fdc:2709239",
+        "source_measure": "FNDDS food portion: 1 fruit = 75 g"
+      }
+    ],
+    "protein_per_100g": 1.06,
+    "fat_per_100g": 0.44,
+    "carbs_per_100g": 14.0,
+    "calories_per_100g": 64.0,
+    "fiber_per_100g": 3.0
+  },
+  "peach": {
+    "evidence_status": "VERIFIED",
+    "source_item_id": "usda-fdc:2709249",
+    "locale": "en-US",
+    "display_name_tr": "Şeftali (çiğ)",
+    "default_portion_g": 100,
+    "serving_unit": "gram",
+    "serving_quantity": 100,
+    "portion_units": [
+      {
+        "unit": "adet",
+        "grams_per_unit": 150.0,
+        "source_item_id": "usda-fdc:2709249",
+        "source_measure": "FNDDS food portion: 1 fruit = 150 g"
+      }
+    ],
+    "protein_per_100g": 0.91,
+    "fat_per_100g": 0.27,
+    "carbs_per_100g": 10.1,
+    "calories_per_100g": 46.0,
+    "fiber_per_100g": 1.5
+  },
+  "pear": {
+    "evidence_status": "VERIFIED",
+    "source_item_id": "usda-fdc:2709254",
+    "locale": "en-US",
+    "display_name_tr": "Armut (çiğ)",
+    "default_portion_g": 100,
+    "serving_unit": "gram",
+    "serving_quantity": 100,
+    "portion_units": [
+      {
+        "unit": "adet",
+        "grams_per_unit": 180.0,
+        "source_item_id": "usda-fdc:2709254",
+        "source_measure": "FNDDS food portion: 1 fruit = 180 g"
+      }
+    ],
+    "protein_per_100g": 0.37,
+    "fat_per_100g": 0.15,
+    "carbs_per_100g": 15.2,
+    "calories_per_100g": 59.0,
+    "fiber_per_100g": 3.1
+  },
+  "pineapple": {
+    "evidence_status": "VERIFIED",
+    "source_item_id": "usda-fdc:2709260",
+    "locale": "en-US",
+    "display_name_tr": "Ananas (çiğ)",
+    "default_portion_g": 100,
+    "serving_unit": "gram",
+    "serving_quantity": 100,
+    "portion_units": [
+      {
+        "unit": "kase",
+        "grams_per_unit": 165.0,
+        "source_item_id": "usda-fdc:2709260",
+        "source_measure": "FNDDS food portion: 1 cup = 165 g"
+      }
+    ],
+    "protein_per_100g": 0.46,
+    "fat_per_100g": 0.21,
+    "carbs_per_100g": 14.1,
+    "calories_per_100g": 60.0,
+    "fiber_per_100g": 0.9
+  },
+  "plum": {
+    "evidence_status": "VERIFIED",
+    "source_item_id": "usda-fdc:2709265",
+    "locale": "en-US",
+    "display_name_tr": "Erik (çiğ)",
+    "default_portion_g": 100,
+    "serving_unit": "gram",
+    "serving_quantity": 100,
+    "portion_units": [
+      {
+        "unit": "adet",
+        "grams_per_unit": 75.0,
+        "source_item_id": "usda-fdc:2709265",
+        "source_measure": "FNDDS food portion: 1 fruit = 75 g"
+      }
+    ],
+    "protein_per_100g": 0.7,
+    "fat_per_100g": 0.28,
+    "carbs_per_100g": 11.4,
+    "calories_per_100g": 46.0,
+    "fiber_per_100g": 1.4
+  },
+  "pomegranate": {
+    "evidence_status": "VERIFIED",
+    "source_item_id": "usda-fdc:2709267",
+    "locale": "en-US",
+    "display_name_tr": "Nar (çiğ)",
+    "default_portion_g": 100,
+    "serving_unit": "gram",
+    "serving_quantity": 100,
+    "portion_units": [
+      {
+        "unit": "adet",
+        "grams_per_unit": 250.0,
+        "source_item_id": "usda-fdc:2709267",
+        "source_measure": "FNDDS food portion: 1 fruit = 250 g"
+      }
+    ],
+    "protein_per_100g": 1.67,
+    "fat_per_100g": 1.17,
+    "carbs_per_100g": 18.7,
+    "calories_per_100g": 83.0,
+    "fiber_per_100g": 4.0
+  },
   "watermelon": {
     "evidence_status": "VERIFIED",
     "source_item_id": "usda-fdc:2709270",
@@ -1914,6 +3986,50 @@
     "carbs_per_100g": 7.55,
     "calories_per_100g": 30.0,
     "fiber_per_100g": 0.4
+  },
+  "blueberries": {
+    "evidence_status": "VERIFIED",
+    "source_item_id": "usda-fdc:2709275",
+    "locale": "en-US",
+    "display_name_tr": "Yaban mersini (çiğ)",
+    "default_portion_g": 100,
+    "serving_unit": "gram",
+    "serving_quantity": 100,
+    "portion_units": [
+      {
+        "unit": "kase",
+        "grams_per_unit": 150.0,
+        "source_item_id": "usda-fdc:2709275",
+        "source_measure": "FNDDS food portion: 1 cup = 150 g"
+      }
+    ],
+    "protein_per_100g": 0.7,
+    "fat_per_100g": 0.31,
+    "carbs_per_100g": 14.6,
+    "calories_per_100g": 64.0,
+    "fiber_per_100g": 2.4
+  },
+  "raspberries": {
+    "evidence_status": "VERIFIED",
+    "source_item_id": "usda-fdc:2709281",
+    "locale": "en-US",
+    "display_name_tr": "Ahududu (çiğ)",
+    "default_portion_g": 100,
+    "serving_unit": "gram",
+    "serving_quantity": 100,
+    "portion_units": [
+      {
+        "unit": "kase",
+        "grams_per_unit": 150.0,
+        "source_item_id": "usda-fdc:2709281",
+        "source_measure": "FNDDS food portion: 1 cup = 150 g"
+      }
+    ],
+    "protein_per_100g": 1.01,
+    "fat_per_100g": 0.19,
+    "carbs_per_100g": 12.9,
+    "calories_per_100g": 57.0,
+    "fiber_per_100g": 6.5
   },
   "strawberry": {
     "evidence_status": "VERIFIED",
@@ -1981,6 +4097,21 @@
     "calories_per_100g": 126,
     "fiber_per_100g": 1.4
   },
+  "potato_chips": {
+    "evidence_status": "VERIFIED",
+    "source_item_id": "usda-fdc:2709421",
+    "locale": "en-US",
+    "display_name_tr": "Patates cipsi",
+    "default_portion_g": 100,
+    "serving_unit": "gram",
+    "serving_quantity": 100,
+    "portion_units": [],
+    "protein_per_100g": 6.39,
+    "fat_per_100g": 34.0,
+    "carbs_per_100g": 53.8,
+    "calories_per_100g": 532,
+    "fiber_per_100g": 3.1
+  },
   "french_fries": {
     "evidence_status": "VERIFIED",
     "source_item_id": "usda-fdc:2709458",
@@ -1995,6 +4126,116 @@
     "carbs_per_100g": 18.5,
     "calories_per_100g": 198,
     "fiber_per_100g": 1.6
+  },
+  "chard": {
+    "evidence_status": "VERIFIED",
+    "source_item_id": "usda-fdc:2709574",
+    "locale": "en-US",
+    "display_name_tr": "Pazı (çiğ)",
+    "default_portion_g": 100,
+    "serving_unit": "gram",
+    "serving_quantity": 100,
+    "portion_units": [
+      {
+        "unit": "kase",
+        "grams_per_unit": 36.0,
+        "source_item_id": "usda-fdc:2709574",
+        "source_measure": "FNDDS food portion: 1 cup = 36 g"
+      }
+    ],
+    "protein_per_100g": 1.8,
+    "fat_per_100g": 0.2,
+    "carbs_per_100g": 3.74,
+    "calories_per_100g": 19.0,
+    "fiber_per_100g": 1.6
+  },
+  "romaine": {
+    "evidence_status": "VERIFIED",
+    "source_item_id": "usda-fdc:2709590",
+    "locale": "en-US",
+    "display_name_tr": "Kıvırcık marul (çiğ)",
+    "default_portion_g": 100,
+    "serving_unit": "gram",
+    "serving_quantity": 100,
+    "portion_units": [
+      {
+        "unit": "kase",
+        "grams_per_unit": 35.0,
+        "source_item_id": "usda-fdc:2709590",
+        "source_measure": "FNDDS food portion: 1 cup = 35 g"
+      }
+    ],
+    "protein_per_100g": 0.98,
+    "fat_per_100g": 0.07,
+    "carbs_per_100g": 4.06,
+    "calories_per_100g": 21.0,
+    "fiber_per_100g": 1.8
+  },
+  "kale": {
+    "evidence_status": "VERIFIED",
+    "source_item_id": "usda-fdc:2709599",
+    "locale": "en-US",
+    "display_name_tr": "Kara lahana (çiğ)",
+    "default_portion_g": 100,
+    "serving_unit": "gram",
+    "serving_quantity": 100,
+    "portion_units": [
+      {
+        "unit": "kase",
+        "grams_per_unit": 25.0,
+        "source_item_id": "usda-fdc:2709599",
+        "source_measure": "FNDDS food portion: 1 cup = 25 g"
+      }
+    ],
+    "protein_per_100g": 2.92,
+    "fat_per_100g": 1.49,
+    "carbs_per_100g": 4.42,
+    "calories_per_100g": 43.0,
+    "fiber_per_100g": 4.1
+  },
+  "raw_spinach": {
+    "evidence_status": "VERIFIED",
+    "source_item_id": "usda-fdc:2709614",
+    "locale": "en-US",
+    "display_name_tr": "Ispanak (çiğ)",
+    "default_portion_g": 100,
+    "serving_unit": "gram",
+    "serving_quantity": 100,
+    "portion_units": [
+      {
+        "unit": "kase",
+        "grams_per_unit": 25.0,
+        "source_item_id": "usda-fdc:2709614",
+        "source_measure": "FNDDS food portion: 1 cup = 25 g"
+      }
+    ],
+    "protein_per_100g": 2.85,
+    "fat_per_100g": 0.62,
+    "carbs_per_100g": 2.41,
+    "calories_per_100g": 27.0,
+    "fiber_per_100g": 1.6
+  },
+  "broccoli": {
+    "evidence_status": "VERIFIED",
+    "source_item_id": "usda-fdc:2709643",
+    "locale": "en-US",
+    "display_name_tr": "Brokoli (çiğ)",
+    "default_portion_g": 100,
+    "serving_unit": "gram",
+    "serving_quantity": 100,
+    "portion_units": [
+      {
+        "unit": "kase",
+        "grams_per_unit": 90.0,
+        "source_item_id": "usda-fdc:2709643",
+        "source_measure": "FNDDS food portion: 1 cup = 90 g"
+      }
+    ],
+    "protein_per_100g": 2.57,
+    "fat_per_100g": 0.34,
+    "carbs_per_100g": 6.27,
+    "calories_per_100g": 39.0,
+    "fiber_per_100g": 2.4
   },
   "carrot": {
     "evidence_status": "VERIFIED",
@@ -2018,6 +4259,72 @@
     "calories_per_100g": 44.0,
     "fiber_per_100g": 2.9
   },
+  "peas_cooked": {
+    "evidence_status": "VERIFIED",
+    "source_item_id": "usda-fdc:2709687",
+    "locale": "en-US",
+    "display_name_tr": "Bezelye ve havuç (pişmiş)",
+    "default_portion_g": 100,
+    "serving_unit": "gram",
+    "serving_quantity": 100,
+    "portion_units": [
+      {
+        "unit": "kase",
+        "grams_per_unit": 165.0,
+        "source_item_id": "usda-fdc:2709687",
+        "source_measure": "FNDDS food portion: 1 cup = 165 g"
+      }
+    ],
+    "protein_per_100g": 3.22,
+    "fat_per_100g": 3.03,
+    "carbs_per_100g": 12.5,
+    "calories_per_100g": 89.0,
+    "fiber_per_100g": 4.4
+  },
+  "pumpkin": {
+    "evidence_status": "VERIFIED",
+    "source_item_id": "usda-fdc:2709692",
+    "locale": "en-US",
+    "display_name_tr": "Balkabağı (pişmiş)",
+    "default_portion_g": 100,
+    "serving_unit": "gram",
+    "serving_quantity": 100,
+    "portion_units": [
+      {
+        "unit": "kase",
+        "grams_per_unit": 230.0,
+        "source_item_id": "usda-fdc:2709692",
+        "source_measure": "FNDDS food portion: 1 cup = 230 g"
+      }
+    ],
+    "protein_per_100g": 1.05,
+    "fat_per_100g": 2.84,
+    "carbs_per_100g": 6.77,
+    "calories_per_100g": 52.0,
+    "fiber_per_100g": 0.5
+  },
+  "sweet_potato": {
+    "evidence_status": "VERIFIED",
+    "source_item_id": "usda-fdc:2709697",
+    "locale": "en-US",
+    "display_name_tr": "Tatlı patates",
+    "default_portion_g": 100,
+    "serving_unit": "gram",
+    "serving_quantity": 100,
+    "portion_units": [
+      {
+        "unit": "adet",
+        "grams_per_unit": 150.0,
+        "source_item_id": "usda-fdc:2709697",
+        "source_measure": "FNDDS food portion: 1 medium = 150 g"
+      }
+    ],
+    "protein_per_100g": 1.58,
+    "fat_per_100g": 4.53,
+    "carbs_per_100g": 17.1,
+    "calories_per_100g": 115,
+    "fiber_per_100g": 3.0
+  },
   "tomato": {
     "evidence_status": "VERIFIED",
     "source_item_id": "usda-fdc:2709719",
@@ -2039,6 +4346,21 @@
     "carbs_per_100g": 4.04,
     "calories_per_100g": 20.0,
     "fiber_per_100g": 1.2
+  },
+  "ketchup": {
+    "evidence_status": "VERIFIED",
+    "source_item_id": "usda-fdc:2709733",
+    "locale": "en-US",
+    "display_name_tr": "Ketçap",
+    "default_portion_g": 100,
+    "serving_unit": "gram",
+    "serving_quantity": 100,
+    "portion_units": [],
+    "protein_per_100g": 1.08,
+    "fat_per_100g": 0.32,
+    "carbs_per_100g": 27.1,
+    "calories_per_100g": 109,
+    "fiber_per_100g": 0.3
   },
   "tomato_soup": {
     "evidence_status": "VERIFIED",
@@ -2084,6 +4406,138 @@
     "calories_per_100g": 53.0,
     "fiber_per_100g": 5.7
   },
+  "beet": {
+    "evidence_status": "VERIFIED",
+    "source_item_id": "usda-fdc:2709770",
+    "locale": "en-US",
+    "display_name_tr": "Pancar (çiğ)",
+    "default_portion_g": 100,
+    "serving_unit": "gram",
+    "serving_quantity": 100,
+    "portion_units": [
+      {
+        "unit": "kase",
+        "grams_per_unit": 135.0,
+        "source_item_id": "usda-fdc:2709770",
+        "source_measure": "FNDDS food portion: 1 cup = 135 g"
+      }
+    ],
+    "protein_per_100g": 1.61,
+    "fat_per_100g": 0.17,
+    "carbs_per_100g": 9.56,
+    "calories_per_100g": 43.0,
+    "fiber_per_100g": 2.8
+  },
+  "green_cabbage": {
+    "evidence_status": "VERIFIED",
+    "source_item_id": "usda-fdc:2709773",
+    "locale": "en-US",
+    "display_name_tr": "Beyaz lahana (çiğ)",
+    "default_portion_g": 100,
+    "serving_unit": "gram",
+    "serving_quantity": 100,
+    "portion_units": [
+      {
+        "unit": "kase",
+        "grams_per_unit": 90.0,
+        "source_item_id": "usda-fdc:2709773",
+        "source_measure": "FNDDS food portion: 1 cup = 90 g"
+      }
+    ],
+    "protein_per_100g": 0.96,
+    "fat_per_100g": 0.23,
+    "carbs_per_100g": 6.38,
+    "calories_per_100g": 31.0,
+    "fiber_per_100g": 2.5
+  },
+  "cabbage": {
+    "evidence_status": "VERIFIED",
+    "source_item_id": "usda-fdc:2709775",
+    "locale": "en-US",
+    "display_name_tr": "Kırmızı lahana (çiğ)",
+    "default_portion_g": 100,
+    "serving_unit": "gram",
+    "serving_quantity": 100,
+    "portion_units": [
+      {
+        "unit": "kase",
+        "grams_per_unit": 90.0,
+        "source_item_id": "usda-fdc:2709775",
+        "source_measure": "FNDDS food portion: 1 cup = 90 g"
+      }
+    ],
+    "protein_per_100g": 1.24,
+    "fat_per_100g": 0.21,
+    "carbs_per_100g": 6.79,
+    "calories_per_100g": 34.0,
+    "fiber_per_100g": 2.1
+  },
+  "cauliflower": {
+    "evidence_status": "VERIFIED",
+    "source_item_id": "usda-fdc:2709777",
+    "locale": "en-US",
+    "display_name_tr": "Karnabahar (çiğ)",
+    "default_portion_g": 100,
+    "serving_unit": "gram",
+    "serving_quantity": 100,
+    "portion_units": [
+      {
+        "unit": "kase",
+        "grams_per_unit": 110.0,
+        "source_item_id": "usda-fdc:2709777",
+        "source_measure": "FNDDS food portion: 1 cup = 110 g"
+      }
+    ],
+    "protein_per_100g": 1.92,
+    "fat_per_100g": 0.28,
+    "carbs_per_100g": 4.97,
+    "calories_per_100g": 25.0,
+    "fiber_per_100g": 2.0
+  },
+  "celery": {
+    "evidence_status": "VERIFIED",
+    "source_item_id": "usda-fdc:2709778",
+    "locale": "en-US",
+    "display_name_tr": "Kereviz sapı (çiğ)",
+    "default_portion_g": 100,
+    "serving_unit": "gram",
+    "serving_quantity": 100,
+    "portion_units": [
+      {
+        "unit": "kase",
+        "grams_per_unit": 120.0,
+        "source_item_id": "usda-fdc:2709778",
+        "source_measure": "FNDDS food portion: 1 cup = 120 g"
+      }
+    ],
+    "protein_per_100g": 0.49,
+    "fat_per_100g": 0.16,
+    "carbs_per_100g": 3.32,
+    "calories_per_100g": 17.0,
+    "fiber_per_100g": 1.6
+  },
+  "corn_cooked": {
+    "evidence_status": "VERIFIED",
+    "source_item_id": "usda-fdc:2709783",
+    "locale": "en-US",
+    "display_name_tr": "Mısır (çiğ)",
+    "default_portion_g": 100,
+    "serving_unit": "gram",
+    "serving_quantity": 100,
+    "portion_units": [
+      {
+        "unit": "kase",
+        "grams_per_unit": 150.0,
+        "source_item_id": "usda-fdc:2709783",
+        "source_measure": "FNDDS food portion: 1 cup = 150 g"
+      }
+    ],
+    "protein_per_100g": 3.27,
+    "fat_per_100g": 1.35,
+    "carbs_per_100g": 18.7,
+    "calories_per_100g": 86.0,
+    "fiber_per_100g": 2.0
+  },
   "cucumber": {
     "evidence_status": "VERIFIED",
     "source_item_id": "usda-fdc:2709784",
@@ -2128,6 +4582,28 @@
     "calories_per_100g": 25.0,
     "fiber_per_100g": 3.0
   },
+  "garlic": {
+    "evidence_status": "VERIFIED",
+    "source_item_id": "usda-fdc:2709786",
+    "locale": "en-US",
+    "display_name_tr": "Sarımsak (çiğ)",
+    "default_portion_g": 100,
+    "serving_unit": "gram",
+    "serving_quantity": 100,
+    "portion_units": [
+      {
+        "unit": "adet",
+        "grams_per_unit": 3.0,
+        "source_item_id": "usda-fdc:2709786",
+        "source_measure": "FNDDS food portion: 1 clove = 3 g"
+      }
+    ],
+    "protein_per_100g": 6.62,
+    "fat_per_100g": 0.38,
+    "carbs_per_100g": 28.2,
+    "calories_per_100g": 143,
+    "fiber_per_100g": 2.7
+  },
   "lettuce": {
     "evidence_status": "VERIFIED",
     "source_item_id": "usda-fdc:2709789",
@@ -2149,6 +4625,28 @@
     "carbs_per_100g": 3.69,
     "calories_per_100g": 20.0,
     "fiber_per_100g": 1.3
+  },
+  "mushrooms": {
+    "evidence_status": "VERIFIED",
+    "source_item_id": "usda-fdc:2709793",
+    "locale": "en-US",
+    "display_name_tr": "Mantar (çiğ)",
+    "default_portion_g": 100,
+    "serving_unit": "gram",
+    "serving_quantity": 100,
+    "portion_units": [
+      {
+        "unit": "kase",
+        "grams_per_unit": 70.0,
+        "source_item_id": "usda-fdc:2709793",
+        "source_measure": "FNDDS food portion: 1 cup = 70 g"
+      }
+    ],
+    "protein_per_100g": 2.9,
+    "fat_per_100g": 0.35,
+    "carbs_per_100g": 4.13,
+    "calories_per_100g": 31.0,
+    "fiber_per_100g": 1.7
   },
   "onion": {
     "evidence_status": "VERIFIED",
@@ -2172,6 +4670,28 @@
     "calories_per_100g": 38.0,
     "fiber_per_100g": 1.7
   },
+  "parsley": {
+    "evidence_status": "VERIFIED",
+    "source_item_id": "usda-fdc:2709796",
+    "locale": "en-US",
+    "display_name_tr": "Maydanoz (çiğ)",
+    "default_portion_g": 100,
+    "serving_unit": "gram",
+    "serving_quantity": 100,
+    "portion_units": [
+      {
+        "unit": "kase",
+        "grams_per_unit": 60.0,
+        "source_item_id": "usda-fdc:2709796",
+        "source_measure": "FNDDS food portion: 1 cup = 60 g"
+      }
+    ],
+    "protein_per_100g": 2.97,
+    "fat_per_100g": 0.79,
+    "carbs_per_100g": 6.33,
+    "calories_per_100g": 36.0,
+    "fiber_per_100g": 3.3
+  },
   "green_pepper": {
     "evidence_status": "VERIFIED",
     "source_item_id": "usda-fdc:2709800",
@@ -2194,6 +4714,65 @@
     "calories_per_100g": 23.0,
     "fiber_per_100g": 0.9
   },
+  "red_pepper": {
+    "evidence_status": "VERIFIED",
+    "source_item_id": "usda-fdc:2709801",
+    "locale": "en-US",
+    "display_name_tr": "Kırmızı biber (çiğ)",
+    "default_portion_g": 100,
+    "serving_unit": "gram",
+    "serving_quantity": 100,
+    "portion_units": [
+      {
+        "unit": "adet",
+        "grams_per_unit": 120.0,
+        "source_item_id": "usda-fdc:2709801",
+        "source_measure": "FNDDS food portion: 1 regular = 120 g"
+      }
+    ],
+    "protein_per_100g": 0.9,
+    "fat_per_100g": 0.13,
+    "carbs_per_100g": 6.65,
+    "calories_per_100g": 31.0,
+    "fiber_per_100g": 1.2
+  },
+  "radish": {
+    "evidence_status": "VERIFIED",
+    "source_item_id": "usda-fdc:2709803",
+    "locale": "en-US",
+    "display_name_tr": "Turp",
+    "default_portion_g": 100,
+    "serving_unit": "gram",
+    "serving_quantity": 100,
+    "portion_units": [
+      {
+        "unit": "adet",
+        "grams_per_unit": 5.0,
+        "source_item_id": "usda-fdc:2709803",
+        "source_measure": "FNDDS food portion: 1 whole = 5 g"
+      }
+    ],
+    "protein_per_100g": 0.68,
+    "fat_per_100g": 0.1,
+    "carbs_per_100g": 3.4,
+    "calories_per_100g": 16.0,
+    "fiber_per_100g": 1.6
+  },
+  "mustard": {
+    "evidence_status": "VERIFIED",
+    "source_item_id": "usda-fdc:2710085",
+    "locale": "en-US",
+    "display_name_tr": "Hardal",
+    "default_portion_g": 100,
+    "serving_unit": "gram",
+    "serving_quantity": 100,
+    "portion_units": [],
+    "protein_per_100g": 4.25,
+    "fat_per_100g": 3.38,
+    "carbs_per_100g": 5.3,
+    "calories_per_100g": 69.0,
+    "fiber_per_100g": 4.3
+  },
   "green_olives": {
     "evidence_status": "VERIFIED",
     "source_item_id": "usda-fdc:2710089",
@@ -2215,6 +4794,50 @@
     "carbs_per_100g": 3.84,
     "calories_per_100g": 145,
     "fiber_per_100g": 3.3
+  },
+  "black_olives": {
+    "evidence_status": "VERIFIED",
+    "source_item_id": "usda-fdc:2710090",
+    "locale": "en-US",
+    "display_name_tr": "Siyah zeytin",
+    "default_portion_g": 100,
+    "serving_unit": "gram",
+    "serving_quantity": 100,
+    "portion_units": [
+      {
+        "unit": "adet",
+        "grams_per_unit": 5.0,
+        "source_item_id": "usda-fdc:2710090",
+        "source_measure": "FNDDS food portion: 1 olive = 5 g"
+      }
+    ],
+    "protein_per_100g": 0.84,
+    "fat_per_100g": 10.9,
+    "carbs_per_100g": 6.04,
+    "calories_per_100g": 116,
+    "fiber_per_100g": 1.6
+  },
+  "pickles": {
+    "evidence_status": "VERIFIED",
+    "source_item_id": "usda-fdc:2710097",
+    "locale": "en-US",
+    "display_name_tr": "Turşu",
+    "default_portion_g": 100,
+    "serving_unit": "gram",
+    "serving_quantity": 100,
+    "portion_units": [
+      {
+        "unit": "adet",
+        "grams_per_unit": 80.0,
+        "source_item_id": "usda-fdc:2710097",
+        "source_measure": "FNDDS food portion: 1 regular = 80 g"
+      }
+    ],
+    "protein_per_100g": 0.48,
+    "fat_per_100g": 0.43,
+    "carbs_per_100g": 1.99,
+    "calories_per_100g": 14.0,
+    "fiber_per_100g": 1.0
   },
   "vegetable_soup": {
     "evidence_status": "VERIFIED",
@@ -2275,6 +4898,21 @@
     "calories_per_100g": 743,
     "fiber_per_100g": 0.0
   },
+  "corn_oil": {
+    "evidence_status": "VERIFIED",
+    "source_item_id": "usda-fdc:2710183",
+    "locale": "en-US",
+    "display_name_tr": "Mısır yağı",
+    "default_portion_g": 100,
+    "serving_unit": "gram",
+    "serving_quantity": 100,
+    "portion_units": [],
+    "protein_per_100g": 0.0,
+    "fat_per_100g": 100,
+    "carbs_per_100g": 0.0,
+    "calories_per_100g": 900,
+    "fiber_per_100g": 0.0
+  },
   "olive_oil": {
     "evidence_status": "VERIFIED",
     "source_item_id": "usda-fdc:2710186",
@@ -2289,6 +4927,51 @@
     "carbs_per_100g": 0.0,
     "calories_per_100g": 900,
     "fiber_per_100g": 0.0
+  },
+  "sunflower_oil": {
+    "evidence_status": "VERIFIED",
+    "source_item_id": "usda-fdc:2710192",
+    "locale": "en-US",
+    "display_name_tr": "Ayçiçek yağı",
+    "default_portion_g": 100,
+    "serving_unit": "gram",
+    "serving_quantity": 100,
+    "portion_units": [],
+    "protein_per_100g": 0.0,
+    "fat_per_100g": 100,
+    "carbs_per_100g": 0.0,
+    "calories_per_100g": 900,
+    "fiber_per_100g": 0.0
+  },
+  "mayonnaise": {
+    "evidence_status": "VERIFIED",
+    "source_item_id": "usda-fdc:2710204",
+    "locale": "en-US",
+    "display_name_tr": "Mayonez",
+    "default_portion_g": 100,
+    "serving_unit": "gram",
+    "serving_quantity": 100,
+    "portion_units": [],
+    "protein_per_100g": 0.96,
+    "fat_per_100g": 74.8,
+    "carbs_per_100g": 0.57,
+    "calories_per_100g": 680,
+    "fiber_per_100g": 0.0
+  },
+  "tomato_sauce": {
+    "evidence_status": "VERIFIED",
+    "source_item_id": "usda-fdc:2710247",
+    "locale": "en-US",
+    "display_name_tr": "Domates sosu",
+    "default_portion_g": 100,
+    "serving_unit": "gram",
+    "serving_quantity": 100,
+    "portion_units": [],
+    "protein_per_100g": 0.48,
+    "fat_per_100g": 6.15,
+    "carbs_per_100g": 12.1,
+    "calories_per_100g": 104,
+    "fiber_per_100g": 0.6
   },
   "honey": {
     "evidence_status": "VERIFIED",
@@ -2305,6 +4988,21 @@
     "calories_per_100g": 304,
     "fiber_per_100g": 0.2
   },
+  "jelly": {
+    "evidence_status": "VERIFIED",
+    "source_item_id": "usda-fdc:2710300",
+    "locale": "en-US",
+    "display_name_tr": "Jöle reçeli",
+    "default_portion_g": 100,
+    "serving_unit": "gram",
+    "serving_quantity": 100,
+    "portion_units": [],
+    "protein_per_100g": 0.15,
+    "fat_per_100g": 0.02,
+    "carbs_per_100g": 70.0,
+    "calories_per_100g": 266,
+    "fiber_per_100g": 1.0
+  },
   "jam": {
     "evidence_status": "VERIFIED",
     "source_item_id": "usda-fdc:2710301",
@@ -2319,6 +5017,21 @@
     "carbs_per_100g": 68.9,
     "calories_per_100g": 278,
     "fiber_per_100g": 1.1
+  },
+  "chocolate": {
+    "evidence_status": "VERIFIED",
+    "source_item_id": "usda-fdc:2710328",
+    "locale": "en-US",
+    "display_name_tr": "Çikolata",
+    "default_portion_g": 100,
+    "serving_unit": "gram",
+    "serving_quantity": 100,
+    "portion_units": [],
+    "protein_per_100g": 7.65,
+    "fat_per_100g": 29.7,
+    "carbs_per_100g": 59.4,
+    "calories_per_100g": 535,
+    "fiber_per_100g": 3.4
   },
   "gummy_candy": {
     "evidence_status": "VERIFIED",
