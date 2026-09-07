@@ -45,7 +45,7 @@ doğrulamadan geçer. Eski prototipteki veriler korunmuştur, ancak doğrulanmı
 kalori sonucu olarak kullanılmaz.
 
 USDA'nın resmî FNDDS 2021-2023 arşivi 7 Eylül 2026'da indirilip kimlik ve besin
-değerleri doğrudan karşılaştırıldı. Katalog 86 kayıt içerir: içecekler (süt, çay,
+değerleri doğrudan karşılaştırıldı. Katalog 98 kayıt içerir (86 doğrulanmış, 12 tahmini): içecekler (süt, çay,
 Türk kahvesi, portakal suyu, kola), temel gıdalar (ekmek, yumurta, yoğurt, beyaz
 peynir, zeytin, ceviz), ana yemek ve garnitürler (pilav, makarna, bulgur,
 haşlanmış patates, tavuk göğsü, kuzu eti, humus, nohut), çorbalar, meyve ve
@@ -70,7 +70,7 @@ Su, sıfır kalorili olduğu için kataloga alınmadı: sıfır kalori dönen bi
 "bilinmeyen besini sıfır kalorili gösterme" korumasından geçemez. Su takibi
 uygulamada ayrı bir akışla yapılır.
 
-Görüntü tanıma modelinin 29 sınıfından 17'si karşılanır. Eşleme yalnız USDA
+Görüntü tanıma modelinin 29 sınıfının tamamı karşılanır: 17'si kaynak doğrulamalı USDA kaydıyla, 12'si tahmini kayıtla. Eşleme yalnız USDA
 kaydı gerçekten aynı yemek olduğunda kurulur: biber dolması, yaprak sarma,
 şiş kebap, karnıyarık, enginar, hamsi, ıspanak, taze fasulye gibi. Yakın ama
 aynı olmayan kayıtlar katalogda kendi dürüst adıyla durur, model sınıfına
@@ -83,6 +83,32 @@ desteklenmeyen sorgular benzer yiyecekle ikame edilmez. Yapılandırılmış
 Nutritionix sağlayıcısından geçerli sonuç alınabilir; aksi halde yerel kaynak
 bulunamadığı bildirilir. TürKomp doğrulama fixture'ları çalışma zamanı kataloğuna
 aktarılmadı; özellikle çiğ mantı kaydı pişmiş mantı için kullanılmaz.
+
+## 4.1 Tahmini kayıtlar
+
+USDA arşivinde karşılığı olmayan Türk yemekleri için (lahmacun, mantı, içli
+köfte, kısır, kuru fasulye, gözleme, mücver, hünkar beğendi, çiğ köfte, aşure,
+lokum, simit) herkese açık Türkçe kalori kaynaklarının yayımladığı değerler
+kullanılır. Bu kayıtlar laboratuvar ölçümü değildir ve öyle sunulmaz:
+
+- Katalogda `evidence_status: ESTIMATED` taşırlar.
+- Yanıtta `nutrition_reliability: estimated` dönerler; doğrulanmış kayıtlar
+  `verified_local` döner.
+- Türkçe adları `(tahmini)` ekiyle biter, kullanıcı ekranda görür.
+- Kayıt kendi kaynak listesini taşır; künye zorunluluğu doğrulanmış
+  kayıtlarla aynı sıkılıkta uygulanır, atıfsız kayıt reddedilir.
+- Porsiyon birimi sunulmaz: ölçülmüş bir adet/dilim ağırlığı yoktur.
+
+Kaynak seçiminde makro çapraz kontrolü uygulanır: protein×4 + karbonhidrat×4
++ yağ×9 ile bildirilen kalori arasındaki fark yüzde onu aşarsa kaynak elenir.
+Yayımlanan değerlerin bir kısmı porsiyon değerini 100 gram diye yazıyor;
+örneğin bir gözleme kaydı 100 gramda 103 gram karbonhidrat bildiriyordu. Bu
+kontrol `build_nutrition_catalog.py` içinde derleme sırasında çalışır ve
+tutmayan kayıt kataloğa giremez.
+
+Tahmini kayıtlar `test_estimated_dishes_are_marked_and_cite_their_sources`
+ve `test_estimated_record_still_needs_its_provenance` testleriyle korunur.
+Katalogda hiç karşılığı olmayan yemek yine benzeriyle doldurulmaz.
 
 Başlangıç 100 gramı yalnız hesaplama temelidir ve tahmin olarak işaretlenir.
 Gerçek bir adet/dilim/kase ağırlığı uydurulmaz. Kullanıcı gramı değiştirip

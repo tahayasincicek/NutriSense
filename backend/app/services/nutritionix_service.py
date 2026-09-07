@@ -108,7 +108,10 @@ class NutritionixService:
         """Reject incomplete records individually, even in a VERIFIED catalog."""
         try:
             data = self._local_db[key]
-            if data["evidence_status"] != "VERIFIED":
+            # Tahmini kayitlar da kabul edilir ama kendi
+            # guvenilirlik seviyesiyle isaretlenir; kaynak kunyesi
+            # dogrulanmis kayitlarla ayni sikilikta aranir.
+            if data["evidence_status"] not in {"VERIFIED", "ESTIMATED"}:
                 return None
             source_id = data["source_item_id"]
             source = self._local_meta["source_inventory"][source_id]
@@ -286,6 +289,7 @@ class NutritionixService:
             source="local_verified",
             source_item_id=source_item_id,
             source_locale=data.get("locale", "tr-TR"),
+            evidence_status=data["evidence_status"],
             retrieved_at=source_info["retrieved_at"],
             serving_unit=data.get("serving_unit", "gram"),
             serving_quantity=data.get("serving_quantity", 1),
@@ -303,6 +307,7 @@ class NutritionixService:
         *, canonical, profile, calculation, default_portion, portion_method,
         source, source_item_id, source_locale, retrieved_at, serving_unit,
         serving_quantity, license_name, attribution, declared_units=None,
+        evidence_status="VERIFIED",
     ) -> dict:
         unit_aliases = {
             "medium": "adet", "small": "adet", "large": "adet",
@@ -405,7 +410,11 @@ class NutritionixService:
             "macro_calorie_delta": float(calculation.macro_calorie_delta),
             "macro_calorie_delta_percent": float(calculation.macro_calorie_delta_percent),
             "source": source,
-            "nutrition_reliability": "verified_provider" if source == "nutritionix" else "verified_local",
+            "nutrition_reliability": (
+                "verified_provider" if source == "nutritionix"
+                else "estimated" if evidence_status == "ESTIMATED"
+                else "verified_local"
+            ),
             "provenance": {
                 "source": source,
                 "source_item_id": source_item_id,

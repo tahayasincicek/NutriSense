@@ -262,7 +262,10 @@ def _nutrition_is_traceable(nutrition: dict) -> bool:
     return (
         nutrition.get("available") is True
         and nutrition.get("nutrition_reliability")
-        in {"verified_provider", "verified_local", "user_entered"}
+        in {
+            "verified_provider", "verified_local", "estimated",
+            "user_entered",
+        }
         and nutrition.get("provenance") is not None
         and float(nutrition.get("total_calories") or 0) > 0
     )

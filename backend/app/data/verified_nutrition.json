@@ -609,6 +609,90 @@
         "retrieved_at": "2026-09-07T05:37:48Z",
         "license": "CC0 1.0",
         "attribution": "USDA FoodData Central, FNDDS 2021-2023. Green beans, cooked, as ingredient. https://fdc.nal.usda.gov/fdc-app.html#/food-details/2710803/nutrients"
+      },
+      "estimate:lahmacun": {
+        "source_url": "https://www.diyetkolik.com/kac-kalori/lahmacun",
+        "source_item_name": "Lahmacun (tahmini)",
+        "retrieved_at": "2026-09-07T00:00:00Z",
+        "license": "Public secondary sources; published estimates, not a laboratory measurement",
+        "attribution": "Piyasa ortalamasi tahmini. Kaynaklar: https://www.diyetkolik.com/kac-kalori/lahmacun, https://www.besinanaliz.com/foods/lahmacun"
+      },
+      "estimate:manti": {
+        "source_url": "https://www.diyetkolik.com/kac-kalori/manti",
+        "source_item_name": "Manti (haslanmis, sossuz, tahmini)",
+        "retrieved_at": "2026-09-07T00:00:00Z",
+        "license": "Public secondary sources; published estimates, not a laboratory measurement",
+        "attribution": "Piyasa ortalamasi tahmini. Kaynaklar: https://www.diyetkolik.com/kac-kalori/manti, https://www.fitekran.com/besin-degeri/manti/"
+      },
+      "estimate:icli_kofte": {
+        "source_url": "https://www.diyetkolik.com/kac-kalori/icli-kofte",
+        "source_item_name": "Icli kofte (tahmini)",
+        "retrieved_at": "2026-09-07T00:00:00Z",
+        "license": "Public secondary sources; published estimates, not a laboratory measurement",
+        "attribution": "Piyasa ortalamasi tahmini. Kaynaklar: https://www.diyetkolik.com/kac-kalori/icli-kofte, https://www.fitekran.com/besin-degeri/icli-kofte/"
+      },
+      "estimate:kisir": {
+        "source_url": "https://www.diyetkolik.com/kac-kalori/kisir",
+        "source_item_name": "Kisir (tahmini)",
+        "retrieved_at": "2026-09-07T00:00:00Z",
+        "license": "Public secondary sources; published estimates, not a laboratory measurement",
+        "attribution": "Piyasa ortalamasi tahmini. Kaynaklar: https://www.diyetkolik.com/kac-kalori/kisir, https://www.fitekran.com/besin-degeri/kisir/"
+      },
+      "estimate:kuru_fasulye": {
+        "source_url": "https://yemek.com/kuru-fasulye-kalori/",
+        "source_item_name": "Kuru fasulye yemegi (tahmini)",
+        "retrieved_at": "2026-09-07T00:00:00Z",
+        "license": "Public secondary sources; published estimates, not a laboratory measurement",
+        "attribution": "Piyasa ortalamasi tahmini. Kaynaklar: https://yemek.com/kuru-fasulye-kalori/, https://www.diyetkolik.com/kac-kalori/kuru-fasulye-etli"
+      },
+      "estimate:gozleme": {
+        "source_url": "https://www.diyetkolik.com/kac-kalori/gozleme",
+        "source_item_name": "Gozleme (peynirli, tahmini)",
+        "retrieved_at": "2026-09-07T00:00:00Z",
+        "license": "Public secondary sources; published estimates, not a laboratory measurement",
+        "attribution": "Piyasa ortalamasi tahmini. Kaynaklar: https://www.diyetkolik.com/kac-kalori/gozleme, https://www.fitekran.com/besin-degeri/gozleme/"
+      },
+      "estimate:mucver": {
+        "source_url": "https://www.diyetkolik.com/kac-kalori/mucver",
+        "source_item_name": "Mucver (tahmini)",
+        "retrieved_at": "2026-09-07T00:00:00Z",
+        "license": "Public secondary sources; published estimates, not a laboratory measurement",
+        "attribution": "Piyasa ortalamasi tahmini. Kaynaklar: https://www.diyetkolik.com/kac-kalori/mucver, https://www.fitekran.com/besin-degeri/mucver/"
+      },
+      "estimate:hunkar_begendi": {
+        "source_url": "https://www.diyetkolik.com/kac-kalori/hunkar-begendi",
+        "source_item_name": "Hunkar begendi (tahmini)",
+        "retrieved_at": "2026-09-07T00:00:00Z",
+        "license": "Public secondary sources; published estimates, not a laboratory measurement",
+        "attribution": "Piyasa ortalamasi tahmini. Kaynaklar: https://www.diyetkolik.com/kac-kalori/hunkar-begendi, https://www.dytseydaertas.com/besin/hunkar-begendi"
+      },
+      "estimate:cig_kofte": {
+        "source_url": "https://www.diyetkolik.com/kac-kalori/cig-kofte-etsiz",
+        "source_item_name": "Cig kofte (etsiz, tahmini)",
+        "retrieved_at": "2026-09-07T00:00:00Z",
+        "license": "Public secondary sources; published estimates, not a laboratory measurement",
+        "attribution": "Piyasa ortalamasi tahmini. Kaynaklar: https://www.diyetkolik.com/kac-kalori/cig-kofte-etsiz, https://www.fitekran.com/besin-degeri/cig-kofte-etsiz/"
+      },
+      "estimate:asure": {
+        "source_url": "https://www.diyetkolik.com/kac-kalori/asure",
+        "source_item_name": "Asure (tahmini)",
+        "retrieved_at": "2026-09-07T00:00:00Z",
+        "license": "Public secondary sources; published estimates, not a laboratory measurement",
+        "attribution": "Piyasa ortalamasi tahmini. Kaynaklar: https://www.diyetkolik.com/kac-kalori/asure, https://www.nefisyemektarifleri.com/kac-kalori/asure/"
+      },
+      "estimate:simit": {
+        "source_url": "https://www.diyetkolik.com/kac-kalori/susamli-simit",
+        "source_item_name": "Simit (tahmini)",
+        "retrieved_at": "2026-09-07T00:00:00Z",
+        "license": "Public secondary sources; published estimates, not a laboratory measurement",
+        "attribution": "Piyasa ortalamasi tahmini. Kaynaklar: https://www.diyetkolik.com/kac-kalori/susamli-simit, https://www.fitekran.com/besin-degeri/sokak-simiti/"
+      },
+      "estimate:lokum": {
+        "source_url": "https://www.diyetkolik.com/kac-kalori/lokum",
+        "source_item_name": "Lokum (tahmini)",
+        "retrieved_at": "2026-09-07T00:00:00Z",
+        "license": "Public secondary sources; published estimates, not a laboratory measurement",
+        "attribution": "Piyasa ortalamasi tahmini. Kaynaklar: https://www.diyetkolik.com/kac-kalori/lokum, https://www.dytseydaertas.com/besin/lokum"
       }
     }
   },
@@ -2419,5 +2503,245 @@
     "carbs_per_100g": 7.72,
     "calories_per_100g": 42.0,
     "fiber_per_100g": 3.1
+  },
+  "lahmacun": {
+    "evidence_status": "ESTIMATED",
+    "source_item_id": "estimate:lahmacun",
+    "locale": "tr-TR",
+    "display_name_tr": "Lahmacun (tahmini)",
+    "default_portion_g": 100,
+    "serving_unit": "gram",
+    "serving_quantity": 100,
+    "portion_units": [],
+    "estimate_sources": [
+      "https://www.diyetkolik.com/kac-kalori/lahmacun",
+      "https://www.besinanaliz.com/foods/lahmacun"
+    ],
+    "macro_delta_percent": 1.36,
+    "calories_per_100g": 221,
+    "protein_per_100g": 9.74,
+    "carbs_per_100g": 32.27,
+    "fat_per_100g": 5.55,
+    "fiber_per_100g": 2.87
+  },
+  "manti": {
+    "evidence_status": "ESTIMATED",
+    "source_item_id": "estimate:manti",
+    "locale": "tr-TR",
+    "display_name_tr": "Manti (haslanmis, sossuz, tahmini)",
+    "default_portion_g": 100,
+    "serving_unit": "gram",
+    "serving_quantity": 100,
+    "portion_units": [],
+    "estimate_sources": [
+      "https://www.diyetkolik.com/kac-kalori/manti",
+      "https://www.fitekran.com/besin-degeri/manti/"
+    ],
+    "macro_delta_percent": 1.87,
+    "calories_per_100g": 170,
+    "protein_per_100g": 4.12,
+    "carbs_per_100g": 29.71,
+    "fat_per_100g": 3.5,
+    "fiber_per_100g": 0.85
+  },
+  "icli_kofte": {
+    "evidence_status": "ESTIMATED",
+    "source_item_id": "estimate:icli_kofte",
+    "locale": "tr-TR",
+    "display_name_tr": "Icli kofte (tahmini)",
+    "default_portion_g": 100,
+    "serving_unit": "gram",
+    "serving_quantity": 100,
+    "portion_units": [],
+    "estimate_sources": [
+      "https://www.diyetkolik.com/kac-kalori/icli-kofte",
+      "https://www.fitekran.com/besin-degeri/icli-kofte/"
+    ],
+    "macro_delta_percent": 1.26,
+    "calories_per_100g": 233,
+    "protein_per_100g": 9.87,
+    "carbs_per_100g": 32.28,
+    "fat_per_100g": 6.83,
+    "fiber_per_100g": 2.4
+  },
+  "kisir": {
+    "evidence_status": "ESTIMATED",
+    "source_item_id": "estimate:kisir",
+    "locale": "tr-TR",
+    "display_name_tr": "Kisir (tahmini)",
+    "default_portion_g": 100,
+    "serving_unit": "gram",
+    "serving_quantity": 100,
+    "portion_units": [],
+    "estimate_sources": [
+      "https://www.diyetkolik.com/kac-kalori/kisir",
+      "https://www.fitekran.com/besin-degeri/kisir/"
+    ],
+    "macro_delta_percent": 0.49,
+    "calories_per_100g": 178,
+    "protein_per_100g": 4.59,
+    "carbs_per_100g": 31.69,
+    "fat_per_100g": 3.75,
+    "fiber_per_100g": 3.94
+  },
+  "kuru_fasulye": {
+    "evidence_status": "ESTIMATED",
+    "source_item_id": "estimate:kuru_fasulye",
+    "locale": "tr-TR",
+    "display_name_tr": "Kuru fasulye yemegi (tahmini)",
+    "default_portion_g": 100,
+    "serving_unit": "gram",
+    "serving_quantity": 100,
+    "portion_units": [],
+    "estimate_sources": [
+      "https://yemek.com/kuru-fasulye-kalori/",
+      "https://www.diyetkolik.com/kac-kalori/kuru-fasulye-etli"
+    ],
+    "macro_delta_percent": 0.0,
+    "calories_per_100g": 140,
+    "protein_per_100g": 7.0,
+    "carbs_per_100g": 19.0,
+    "fat_per_100g": 4.0,
+    "fiber_per_100g": 6.0
+  },
+  "gozleme": {
+    "evidence_status": "ESTIMATED",
+    "source_item_id": "estimate:gozleme",
+    "locale": "tr-TR",
+    "display_name_tr": "Gozleme (peynirli, tahmini)",
+    "default_portion_g": 100,
+    "serving_unit": "gram",
+    "serving_quantity": 100,
+    "portion_units": [],
+    "estimate_sources": [
+      "https://www.diyetkolik.com/kac-kalori/gozleme",
+      "https://www.fitekran.com/besin-degeri/gozleme/"
+    ],
+    "macro_delta_percent": 6.79,
+    "calories_per_100g": 269,
+    "protein_per_100g": 10.35,
+    "carbs_per_100g": 46.1,
+    "fat_per_100g": 6.83,
+    "fiber_per_100g": 2.2
+  },
+  "mucver": {
+    "evidence_status": "ESTIMATED",
+    "source_item_id": "estimate:mucver",
+    "locale": "tr-TR",
+    "display_name_tr": "Mucver (tahmini)",
+    "default_portion_g": 100,
+    "serving_unit": "gram",
+    "serving_quantity": 100,
+    "portion_units": [],
+    "estimate_sources": [
+      "https://www.diyetkolik.com/kac-kalori/mucver",
+      "https://www.fitekran.com/besin-degeri/mucver/"
+    ],
+    "macro_delta_percent": 0.07,
+    "calories_per_100g": 145,
+    "protein_per_100g": 6.43,
+    "carbs_per_100g": 10.0,
+    "fat_per_100g": 8.82,
+    "fiber_per_100g": 2.13
+  },
+  "hunkar_begendi": {
+    "evidence_status": "ESTIMATED",
+    "source_item_id": "estimate:hunkar_begendi",
+    "locale": "tr-TR",
+    "display_name_tr": "Hunkar begendi (tahmini)",
+    "default_portion_g": 100,
+    "serving_unit": "gram",
+    "serving_quantity": 100,
+    "portion_units": [],
+    "estimate_sources": [
+      "https://www.diyetkolik.com/kac-kalori/hunkar-begendi",
+      "https://www.dytseydaertas.com/besin/hunkar-begendi"
+    ],
+    "macro_delta_percent": 2.1,
+    "calories_per_100g": 174,
+    "protein_per_100g": 10.04,
+    "carbs_per_100g": 5.32,
+    "fat_per_100g": 12.1,
+    "fiber_per_100g": 1.08
+  },
+  "cig_kofte": {
+    "evidence_status": "ESTIMATED",
+    "source_item_id": "estimate:cig_kofte",
+    "locale": "tr-TR",
+    "display_name_tr": "Cig kofte (etsiz, tahmini)",
+    "default_portion_g": 100,
+    "serving_unit": "gram",
+    "serving_quantity": 100,
+    "portion_units": [],
+    "estimate_sources": [
+      "https://www.diyetkolik.com/kac-kalori/cig-kofte-etsiz",
+      "https://www.fitekran.com/besin-degeri/cig-kofte-etsiz/"
+    ],
+    "macro_delta_percent": 2.93,
+    "calories_per_100g": 181,
+    "protein_per_100g": 4.62,
+    "carbs_per_100g": 32.91,
+    "fat_per_100g": 4.02,
+    "fiber_per_100g": 4.28
+  },
+  "asure": {
+    "evidence_status": "ESTIMATED",
+    "source_item_id": "estimate:asure",
+    "locale": "tr-TR",
+    "display_name_tr": "Asure (tahmini)",
+    "default_portion_g": 100,
+    "serving_unit": "gram",
+    "serving_quantity": 100,
+    "portion_units": [],
+    "estimate_sources": [
+      "https://www.diyetkolik.com/kac-kalori/asure",
+      "https://www.nefisyemektarifleri.com/kac-kalori/asure/"
+    ],
+    "macro_delta_percent": 5.16,
+    "calories_per_100g": 344,
+    "protein_per_100g": 7.84,
+    "carbs_per_100g": 61.21,
+    "fat_per_100g": 5.56,
+    "fiber_per_100g": 6.82
+  },
+  "simit": {
+    "evidence_status": "ESTIMATED",
+    "source_item_id": "estimate:simit",
+    "locale": "tr-TR",
+    "display_name_tr": "Simit (tahmini)",
+    "default_portion_g": 100,
+    "serving_unit": "gram",
+    "serving_quantity": 100,
+    "portion_units": [],
+    "estimate_sources": [
+      "https://www.diyetkolik.com/kac-kalori/susamli-simit",
+      "https://www.fitekran.com/besin-degeri/sokak-simiti/"
+    ],
+    "macro_delta_percent": 0.0,
+    "calories_per_100g": 320,
+    "protein_per_100g": 9.0,
+    "carbs_per_100g": 62.0,
+    "fat_per_100g": 4.0,
+    "fiber_per_100g": 2.5
+  },
+  "lokum": {
+    "evidence_status": "ESTIMATED",
+    "source_item_id": "estimate:lokum",
+    "locale": "tr-TR",
+    "display_name_tr": "Lokum (tahmini)",
+    "default_portion_g": 100,
+    "serving_unit": "gram",
+    "serving_quantity": 100,
+    "portion_units": [],
+    "estimate_sources": [
+      "https://www.diyetkolik.com/kac-kalori/lokum",
+      "https://www.dytseydaertas.com/besin/lokum"
+    ],
+    "macro_delta_percent": 0.09,
+    "calories_per_100g": 359,
+    "protein_per_100g": 0.12,
+    "carbs_per_100g": 89.28,
+    "fat_per_100g": 0.19,
+    "fiber_per_100g": 0.5
   }
 }

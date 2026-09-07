@@ -99,7 +99,8 @@ class FoodAnalysisResponse(BaseModel):
     nutrition_source: str
     nutrition_status: Literal["available", "unverified", "not_found"]
     nutrition_reliability: Literal[
-        "verified_provider", "verified_local", "user_entered", "unverified", "not_found"
+        "verified_provider", "verified_local", "estimated",
+        "user_entered", "unverified", "not_found",
     ]
     provenance: Optional[NutritionProvenanceData] = None
     portion_options: list[PortionOption] = Field(default_factory=list)

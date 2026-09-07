@@ -103,9 +103,34 @@ async def test_search_filters_unverified_records_and_normalizes_turkish(catalog_
     ]
 
 
-@pytest.mark.parametrize("name", ["mantı", "menemen", "lahmacun", "bilinmeyen yemek"])
+@pytest.mark.parametrize("name", ["menemen", "kokoreç", "bilinmeyen yemek"])
 def test_no_silent_substitution_for_unsupported_food(catalog_service, name):
+    """Katalogda karşılığı olmayan yemek, benzeriyle doldurulmaz."""
     assert catalog_service._query_local_db(name, None)["available"] is False
+
+
+@pytest.mark.parametrize("name", ["lahmacun", "mantı", "kısır"])
+def test_estimated_dishes_are_marked_and_cite_their_sources(catalog_service, name):
+    """Tahmini kayıtlar doğrulanmış kayıtlarla aynı kefeye konmaz.
+
+    USDA'da karşılığı olmayan Türk yemekleri için yayımlanmış değerler
+    kullanılıyor. Sonuç kullanılabilir olmalı, ama nereden geldiği ve
+    laboratuvar ölçümü olmadığı yanıtta görünmeli.
+    """
+    result = catalog_service._query_local_db(name, None)
+    assert result["available"] is True
+    assert result["nutrition_reliability"] == "estimated"
+    assert result["provenance"]["source_item_id"].startswith("estimate:")
+    assert "http" in result["provenance"]["attribution"]
+    # Makro çapraz kontrolü tutmalı; tutmayan kaynak katalogda olmamalı.
+    assert result["macro_calorie_delta_percent"] <= 10
+
+
+def test_estimated_record_still_needs_its_provenance(catalog_service):
+    """Tahmini olmak, künyesiz olmak demek değildir."""
+    source_id = catalog_service._local_db["lahmacun"]["source_item_id"]
+    catalog_service._local_meta["source_inventory"][source_id]["attribution"] = ""
+    assert catalog_service._query_local_db("lahmacun", None)["available"] is False
 
 
 def test_bad_json_override_does_not_crash_startup(tmp_path, monkeypatch):
@@ -189,7 +214,9 @@ def test_real_catalog_search_portion_confirm_preserves_source(client, catalog_se
             assert float(log.total_calories) == pytest.approx(214.5)
             assert db.query(NutritionSource).filter_by(source_item_id="usda-fdc:2707205").count() == 1
 
-        unsupported = client.get("/api/v1/food/search", params={"query": "mantı"})
+        # Menemen kataloğa hiç girmedi; desteklenmeyen yol bununla sınanır,
+        # mantının artık tahmini bir kaydı var.
+        unsupported = client.get("/api/v1/food/search", params={"query": "menemen"})
         assert unsupported.status_code == 404
         with SessionLocal() as db:
             assert db.query(FoodLog).filter_by(user_id=user_id).count() == 1
