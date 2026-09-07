@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "reviewed_at": "2026-07-17",
+  "reviewed_at": "2026-09-07",
   "sources": [
     {
       "id": "food101_official",
@@ -41,6 +41,14 @@
       "allowed_for_training": false,
       "redistribution": true,
       "required_action": "Never use synthetic fixtures as scientific evidence or model evaluation data."
+    },
+    {
+      "id": "alpsahin_turkish_food_combined",
+      "official_url": "https://huggingface.co/datasets/alpsahin/Turkish-Food-Dataset-Combined",
+      "declared_terms": "No license is declared on the dataset card and no LICENSE file is published. Terms are unknown, not permissive.",
+      "allowed_for_training": true,
+      "redistribution": false,
+      "required_action": "Project owner decided on 2026-09-07 to train on this source despite the absent licence statement. Images stay local: never redistribute the dataset or its images, and disclose in the model card that training data includes a source with undeclared terms."
     }
   ]
 }
