@@ -139,7 +139,7 @@ REVIEWED = {
     ),
     2707353: (
         "white_beans", "White beans, NFS",
-        "Beyaz fasulye (sade, haşlanmış)", (("kase", "1 cup"),),
+        "Kuru fasulye (beyaz)", (("kase", "1 cup"),),
     ),
     2707425: (
         "lentils", "Lentils, from dried, no added fat",
@@ -323,6 +323,63 @@ REVIEWED = {
     2708614: (
         "pizza", "Pizza, cheese, from restaurant or fast food, NS as to type of crust",
         "Pizza (peynirli, restoran tipi)", (("dilim", "1 piece, large pizza"),),
+    ),
+    # ── Model sınıfları ─────────────────────────────────────────────
+    2709766: (
+        "artichoke", "Artichoke",
+        "Enginar", (("adet", "1 whole"),),
+    ),
+    2706232: (
+        "anchovy", "Fish, anchovy",
+        "Hamsi", (),
+    ),
+    2708404: (
+        "rice_with_oil", "Rice, white, cooked, made with oil",
+        "Pirinç pilavı (yağlı)", (("kase", "1 cup, cooked"),),
+    ),
+    2709073: (
+        "stuffed_pepper", "Stuffed pepper, with rice and meat",
+        "Biber dolması (pirinçli, etli)", (("kase", "1 cup"),),
+    ),
+    2709064: (
+        "stuffed_grape_leaves", "Grape leaves stuffed with rice",
+        "Yaprak sarma (pirinçli)", (("adet", "1 roll"),),
+    ),
+    2706730: (
+        "shish_kebab", "Beef shish kabob with vegetables, excluding potatoes",
+        "Şiş kebap (sebzeli, dana)", (("adet", "1 shishkabob"),),
+    ),
+    2710144: (
+        "eggplant_meat_casserole", "Eggplant and meat casserole",
+        "Patlıcanlı et yemeği (karnıyarık benzeri)", (("kase", "1 cup"),),
+    ),
+    2705849: (
+        "beef_stew_meat", "Beef, stew meat",
+        "Et sote için dana eti (haşlama)", (),
+    ),
+    2709131: (
+        "tabbouleh", "Tabbouleh",
+        "Kısır benzeri bulgur salatası (tabbouleh)", (("kase", "1 cup"),),
+    ),
+    2708708: (
+        "steamed_dumpling", "Wonton, dumpling or pot sticker, steamed",
+        "Buharda mantı benzeri hamur (etli)", (("adet", "1 item, any size"),),
+    ),
+    2710359: (
+        "gummy_candy", "Candy, gummy",
+        "Lokum benzeri jel şeker", (("adet", "1 piece"),),
+    ),
+    2710791: (
+        "cooked_spinach", "Spinach, cooked, as ingredient",
+        "Ispanak (pişmiş, sade)", (),
+    ),
+    2710803: (
+        "cooked_green_beans", "Green beans, cooked, as ingredient",
+        "Taze fasulye (pişmiş, sade)", (),
+    ),
+    2708024: (
+        "fritter", "Fritter, plain",
+        "Mücver benzeri kızartma (sade fritter)", (("adet", "1 fritter"),),
     ),
 }
 NUTRIENTS = {

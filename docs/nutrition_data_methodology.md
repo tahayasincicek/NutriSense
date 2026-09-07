@@ -45,7 +45,7 @@ doğrulamadan geçer. Eski prototipteki veriler korunmuştur, ancak doğrulanmı
 kalori sonucu olarak kullanılmaz.
 
 USDA'nın resmî FNDDS 2021-2023 arşivi 7 Eylül 2026'da indirilip kimlik ve besin
-değerleri doğrudan karşılaştırıldı. Katalog 72 kayıt içerir: içecekler (süt, çay,
+değerleri doğrudan karşılaştırıldı. Katalog 86 kayıt içerir: içecekler (süt, çay,
 Türk kahvesi, portakal suyu, kola), temel gıdalar (ekmek, yumurta, yoğurt, beyaz
 peynir, zeytin, ceviz), ana yemek ve garnitürler (pilav, makarna, bulgur,
 haşlanmış patates, tavuk göğsü, kuzu eti, humus, nohut), çorbalar, meyve ve
@@ -69,6 +69,14 @@ birim hiç sunulmaz; uydurulmuş bir ağırlık yerine yalnız gram girilir.
 Su, sıfır kalorili olduğu için kataloga alınmadı: sıfır kalori dönen bir sonuç
 "bilinmeyen besini sıfır kalorili gösterme" korumasından geçemez. Su takibi
 uygulamada ayrı bir akışla yapılır.
+
+Görüntü tanıma modelinin 29 sınıfından 17'si karşılanır. Eşleme yalnız USDA
+kaydı gerçekten aynı yemek olduğunda kurulur: biber dolması, yaprak sarma,
+şiş kebap, karnıyarık, enginar, hamsi, ıspanak, taze fasulye gibi. Yakın ama
+aynı olmayan kayıtlar katalogda kendi dürüst adıyla durur, model sınıfına
+bağlanmaz: buharda hamur mantı sayılmaz, jel şeker lokum sayılmaz, sade
+fritter mücver sayılmaz, tabbouleh kısır sayılmaz. Bu ayrımı
+`test_no_silent_substitution_for_unsupported_food` testi koruyor.
 
 Katalog, modelin 29 sınıfının tamamını kapsamaz. Mantı, lahmacun, menemen gibi
 desteklenmeyen sorgular benzer yiyecekle ikame edilmez. Yapılandırılmış

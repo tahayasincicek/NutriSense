@@ -57,6 +57,13 @@
         "license": "CC0 1.0",
         "attribution": "USDA FoodData Central, FNDDS 2021-2023. Cheese, cottage, NFS. https://fdc.nal.usda.gov/fdc-app.html#/food-details/2705747/nutrients"
       },
+      "usda-fdc:2705849": {
+        "source_url": "https://fdc.nal.usda.gov/fdc-app.html#/food-details/2705849/nutrients",
+        "source_item_name": "Beef, stew meat",
+        "retrieved_at": "2026-09-07T05:37:48Z",
+        "license": "CC0 1.0",
+        "attribution": "USDA FoodData Central, FNDDS 2021-2023. Beef, stew meat. https://fdc.nal.usda.gov/fdc-app.html#/food-details/2705849/nutrients"
+      },
       "usda-fdc:2705854": {
         "source_url": "https://fdc.nal.usda.gov/fdc-app.html#/food-details/2705854/nutrients",
         "source_item_name": "Beef, ground",
@@ -92,6 +99,13 @@
         "license": "CC0 1.0",
         "attribution": "USDA FoodData Central, FNDDS 2021-2023. Fish, NFS. https://fdc.nal.usda.gov/fdc-app.html#/food-details/2706224/nutrients"
       },
+      "usda-fdc:2706232": {
+        "source_url": "https://fdc.nal.usda.gov/fdc-app.html#/food-details/2706232/nutrients",
+        "source_item_name": "Fish, anchovy",
+        "retrieved_at": "2026-09-07T05:37:48Z",
+        "license": "CC0 1.0",
+        "attribution": "USDA FoodData Central, FNDDS 2021-2023. Fish, anchovy. https://fdc.nal.usda.gov/fdc-app.html#/food-details/2706232/nutrients"
+      },
       "usda-fdc:2706360": {
         "source_url": "https://fdc.nal.usda.gov/fdc-app.html#/food-details/2706360/nutrients",
         "source_item_name": "Shrimp, NFS",
@@ -105,6 +119,13 @@
         "retrieved_at": "2026-09-07T05:37:48Z",
         "license": "CC0 1.0",
         "attribution": "USDA FoodData Central, FNDDS 2021-2023. Meatballs, NS as to type of meat, with sauce. https://fdc.nal.usda.gov/fdc-app.html#/food-details/2706467/nutrients"
+      },
+      "usda-fdc:2706730": {
+        "source_url": "https://fdc.nal.usda.gov/fdc-app.html#/food-details/2706730/nutrients",
+        "source_item_name": "Beef shish kabob with vegetables, excluding potatoes",
+        "retrieved_at": "2026-09-07T05:37:48Z",
+        "license": "CC0 1.0",
+        "attribution": "USDA FoodData Central, FNDDS 2021-2023. Beef shish kabob with vegetables, excluding potatoes. https://fdc.nal.usda.gov/fdc-app.html#/food-details/2706730/nutrients"
       },
       "usda-fdc:2706920": {
         "source_url": "https://fdc.nal.usda.gov/fdc-app.html#/food-details/2706920/nutrients",
@@ -211,6 +232,13 @@
         "license": "CC0 1.0",
         "attribution": "USDA FoodData Central, FNDDS 2021-2023. Bread, whole wheat. https://fdc.nal.usda.gov/fdc-app.html#/food-details/2707709/nutrients"
       },
+      "usda-fdc:2708024": {
+        "source_url": "https://fdc.nal.usda.gov/fdc-app.html#/food-details/2708024/nutrients",
+        "source_item_name": "Fritter, plain",
+        "retrieved_at": "2026-09-07T05:37:48Z",
+        "license": "CC0 1.0",
+        "attribution": "USDA FoodData Central, FNDDS 2021-2023. Fritter, plain. https://fdc.nal.usda.gov/fdc-app.html#/food-details/2708024/nutrients"
+      },
       "usda-fdc:2708044": {
         "source_url": "https://fdc.nal.usda.gov/fdc-app.html#/food-details/2708044/nutrients",
         "source_item_name": "Baklava",
@@ -231,6 +259,13 @@
         "retrieved_at": "2026-09-07T05:37:48Z",
         "license": "CC0 1.0",
         "attribution": "USDA FoodData Central, FNDDS 2021-2023. Rice, white, cooked, NS as to fat. https://fdc.nal.usda.gov/fdc-app.html#/food-details/2708403/nutrients"
+      },
+      "usda-fdc:2708404": {
+        "source_url": "https://fdc.nal.usda.gov/fdc-app.html#/food-details/2708404/nutrients",
+        "source_item_name": "Rice, white, cooked, made with oil",
+        "retrieved_at": "2026-09-07T05:37:48Z",
+        "license": "CC0 1.0",
+        "attribution": "USDA FoodData Central, FNDDS 2021-2023. Rice, white, cooked, made with oil. https://fdc.nal.usda.gov/fdc-app.html#/food-details/2708404/nutrients"
       },
       "usda-fdc:2708409": {
         "source_url": "https://fdc.nal.usda.gov/fdc-app.html#/food-details/2708409/nutrients",
@@ -260,12 +295,40 @@
         "license": "CC0 1.0",
         "attribution": "USDA FoodData Central, FNDDS 2021-2023. Pizza, cheese, from restaurant or fast food, NS as to type of crust. https://fdc.nal.usda.gov/fdc-app.html#/food-details/2708614/nutrients"
       },
+      "usda-fdc:2708708": {
+        "source_url": "https://fdc.nal.usda.gov/fdc-app.html#/food-details/2708708/nutrients",
+        "source_item_name": "Wonton, dumpling or pot sticker, steamed",
+        "retrieved_at": "2026-09-07T05:37:48Z",
+        "license": "CC0 1.0",
+        "attribution": "USDA FoodData Central, FNDDS 2021-2023. Wonton, dumpling or pot sticker, steamed. https://fdc.nal.usda.gov/fdc-app.html#/food-details/2708708/nutrients"
+      },
       "usda-fdc:2708726": {
         "source_url": "https://fdc.nal.usda.gov/fdc-app.html#/food-details/2708726/nutrients",
         "source_item_name": "Pastry, cheese-filled",
         "retrieved_at": "2026-09-07T05:37:48Z",
         "license": "CC0 1.0",
         "attribution": "USDA FoodData Central, FNDDS 2021-2023. Pastry, cheese-filled. https://fdc.nal.usda.gov/fdc-app.html#/food-details/2708726/nutrients"
+      },
+      "usda-fdc:2709064": {
+        "source_url": "https://fdc.nal.usda.gov/fdc-app.html#/food-details/2709064/nutrients",
+        "source_item_name": "Grape leaves stuffed with rice",
+        "retrieved_at": "2026-09-07T05:37:48Z",
+        "license": "CC0 1.0",
+        "attribution": "USDA FoodData Central, FNDDS 2021-2023. Grape leaves stuffed with rice. https://fdc.nal.usda.gov/fdc-app.html#/food-details/2709064/nutrients"
+      },
+      "usda-fdc:2709073": {
+        "source_url": "https://fdc.nal.usda.gov/fdc-app.html#/food-details/2709073/nutrients",
+        "source_item_name": "Stuffed pepper, with rice and meat",
+        "retrieved_at": "2026-09-07T05:37:48Z",
+        "license": "CC0 1.0",
+        "attribution": "USDA FoodData Central, FNDDS 2021-2023. Stuffed pepper, with rice and meat. https://fdc.nal.usda.gov/fdc-app.html#/food-details/2709073/nutrients"
+      },
+      "usda-fdc:2709131": {
+        "source_url": "https://fdc.nal.usda.gov/fdc-app.html#/food-details/2709131/nutrients",
+        "source_item_name": "Tabbouleh",
+        "retrieved_at": "2026-09-07T05:37:48Z",
+        "license": "CC0 1.0",
+        "attribution": "USDA FoodData Central, FNDDS 2021-2023. Tabbouleh. https://fdc.nal.usda.gov/fdc-app.html#/food-details/2709131/nutrients"
       },
       "usda-fdc:2709149": {
         "source_url": "https://fdc.nal.usda.gov/fdc-app.html#/food-details/2709149/nutrients",
@@ -393,6 +456,13 @@
         "license": "CC0 1.0",
         "attribution": "USDA FoodData Central, FNDDS 2021-2023. Soup, tomato. https://fdc.nal.usda.gov/fdc-app.html#/food-details/2709757/nutrients"
       },
+      "usda-fdc:2709766": {
+        "source_url": "https://fdc.nal.usda.gov/fdc-app.html#/food-details/2709766/nutrients",
+        "source_item_name": "Artichoke",
+        "retrieved_at": "2026-09-07T05:37:48Z",
+        "license": "CC0 1.0",
+        "attribution": "USDA FoodData Central, FNDDS 2021-2023. Artichoke. https://fdc.nal.usda.gov/fdc-app.html#/food-details/2709766/nutrients"
+      },
       "usda-fdc:2709784": {
         "source_url": "https://fdc.nal.usda.gov/fdc-app.html#/food-details/2709784/nutrients",
         "source_item_name": "Cucumber, raw",
@@ -442,6 +512,13 @@
         "license": "CC0 1.0",
         "attribution": "USDA FoodData Central, FNDDS 2021-2023. Soup, vegetable. https://fdc.nal.usda.gov/fdc-app.html#/food-details/2710113/nutrients"
       },
+      "usda-fdc:2710144": {
+        "source_url": "https://fdc.nal.usda.gov/fdc-app.html#/food-details/2710144/nutrients",
+        "source_item_name": "Eggplant and meat casserole",
+        "retrieved_at": "2026-09-07T05:37:48Z",
+        "license": "CC0 1.0",
+        "attribution": "USDA FoodData Central, FNDDS 2021-2023. Eggplant and meat casserole. https://fdc.nal.usda.gov/fdc-app.html#/food-details/2710144/nutrients"
+      },
       "usda-fdc:2710154": {
         "source_url": "https://fdc.nal.usda.gov/fdc-app.html#/food-details/2710154/nutrients",
         "source_item_name": "Butter, NFS",
@@ -469,6 +546,13 @@
         "retrieved_at": "2026-09-07T05:37:48Z",
         "license": "CC0 1.0",
         "attribution": "USDA FoodData Central, FNDDS 2021-2023. Jam. https://fdc.nal.usda.gov/fdc-app.html#/food-details/2710301/nutrients"
+      },
+      "usda-fdc:2710359": {
+        "source_url": "https://fdc.nal.usda.gov/fdc-app.html#/food-details/2710359/nutrients",
+        "source_item_name": "Candy, gummy",
+        "retrieved_at": "2026-09-07T05:37:48Z",
+        "license": "CC0 1.0",
+        "attribution": "USDA FoodData Central, FNDDS 2021-2023. Candy, gummy. https://fdc.nal.usda.gov/fdc-app.html#/food-details/2710359/nutrients"
       },
       "usda-fdc:2710375": {
         "source_url": "https://fdc.nal.usda.gov/fdc-app.html#/food-details/2710375/nutrients",
@@ -511,6 +595,20 @@
         "retrieved_at": "2026-09-07T05:37:48Z",
         "license": "CC0 1.0",
         "attribution": "USDA FoodData Central, FNDDS 2021-2023. Lemonade, fruit juice drink. https://fdc.nal.usda.gov/fdc-app.html#/food-details/2710570/nutrients"
+      },
+      "usda-fdc:2710791": {
+        "source_url": "https://fdc.nal.usda.gov/fdc-app.html#/food-details/2710791/nutrients",
+        "source_item_name": "Spinach, cooked, as ingredient",
+        "retrieved_at": "2026-09-07T05:37:48Z",
+        "license": "CC0 1.0",
+        "attribution": "USDA FoodData Central, FNDDS 2021-2023. Spinach, cooked, as ingredient. https://fdc.nal.usda.gov/fdc-app.html#/food-details/2710791/nutrients"
+      },
+      "usda-fdc:2710803": {
+        "source_url": "https://fdc.nal.usda.gov/fdc-app.html#/food-details/2710803/nutrients",
+        "source_item_name": "Green beans, cooked, as ingredient",
+        "retrieved_at": "2026-09-07T05:37:48Z",
+        "license": "CC0 1.0",
+        "attribution": "USDA FoodData Central, FNDDS 2021-2023. Green beans, cooked, as ingredient. https://fdc.nal.usda.gov/fdc-app.html#/food-details/2710803/nutrients"
       }
     }
   },
@@ -668,6 +766,21 @@
     "calories_per_100g": 82.0,
     "fiber_per_100g": 0.0
   },
+  "beef_stew_meat": {
+    "evidence_status": "VERIFIED",
+    "source_item_id": "usda-fdc:2705849",
+    "locale": "en-US",
+    "display_name_tr": "Et sote için dana eti (haşlama)",
+    "default_portion_g": 100,
+    "serving_unit": "gram",
+    "serving_quantity": 100,
+    "portion_units": [],
+    "protein_per_100g": 28.4,
+    "fat_per_100g": 15.4,
+    "carbs_per_100g": 0.0,
+    "calories_per_100g": 251,
+    "fiber_per_100g": 0.0
+  },
   "ground_beef": {
     "evidence_status": "VERIFIED",
     "source_item_id": "usda-fdc:2705854",
@@ -764,6 +877,21 @@
     "calories_per_100g": 238,
     "fiber_per_100g": 0.3
   },
+  "anchovy": {
+    "evidence_status": "VERIFIED",
+    "source_item_id": "usda-fdc:2706232",
+    "locale": "en-US",
+    "display_name_tr": "Hamsi",
+    "default_portion_g": 100,
+    "serving_unit": "gram",
+    "serving_quantity": 100,
+    "portion_units": [],
+    "protein_per_100g": 28.9,
+    "fat_per_100g": 9.71,
+    "carbs_per_100g": 0.0,
+    "calories_per_100g": 210,
+    "fiber_per_100g": 0.0
+  },
   "shrimp": {
     "evidence_status": "VERIFIED",
     "source_item_id": "usda-fdc:2706360",
@@ -807,6 +935,28 @@
     "carbs_per_100g": 0.15,
     "calories_per_100g": 186,
     "fiber_per_100g": 0.0
+  },
+  "shish_kebab": {
+    "evidence_status": "VERIFIED",
+    "source_item_id": "usda-fdc:2706730",
+    "locale": "en-US",
+    "display_name_tr": "Şiş kebap (sebzeli, dana)",
+    "default_portion_g": 100,
+    "serving_unit": "gram",
+    "serving_quantity": 100,
+    "portion_units": [
+      {
+        "unit": "adet",
+        "grams_per_unit": 202.0,
+        "source_item_id": "usda-fdc:2706730",
+        "source_measure": "FNDDS food portion: 1 shishkabob = 202 g"
+      }
+    ],
+    "protein_per_100g": 14.8,
+    "fat_per_100g": 4.88,
+    "carbs_per_100g": 5.06,
+    "calories_per_100g": 122,
+    "fiber_per_100g": 0.8
   },
   "hamburger": {
     "evidence_status": "VERIFIED",
@@ -871,7 +1021,7 @@
     "evidence_status": "VERIFIED",
     "source_item_id": "usda-fdc:2707353",
     "locale": "en-US",
-    "display_name_tr": "Beyaz fasulye (sade, haşlanmış)",
+    "display_name_tr": "Kuru fasulye (beyaz)",
     "default_portion_g": 100,
     "serving_unit": "gram",
     "serving_quantity": 100,
@@ -1131,6 +1281,28 @@
     "calories_per_100g": 254,
     "fiber_per_100g": 6.0
   },
+  "fritter": {
+    "evidence_status": "VERIFIED",
+    "source_item_id": "usda-fdc:2708024",
+    "locale": "en-US",
+    "display_name_tr": "Mücver benzeri kızartma (sade fritter)",
+    "default_portion_g": 100,
+    "serving_unit": "gram",
+    "serving_quantity": 100,
+    "portion_units": [
+      {
+        "unit": "adet",
+        "grams_per_unit": 100.0,
+        "source_item_id": "usda-fdc:2708024",
+        "source_measure": "FNDDS food portion: 1 fritter = 100 g"
+      }
+    ],
+    "protein_per_100g": 6.56,
+    "fat_per_100g": 26.9,
+    "carbs_per_100g": 27.5,
+    "calories_per_100g": 378,
+    "fiber_per_100g": 0.9
+  },
   "baklava": {
     "evidence_status": "VERIFIED",
     "source_item_id": "usda-fdc:2708044",
@@ -1195,6 +1367,28 @@
     "fat_per_100g": 0.28,
     "carbs_per_100g": 28.0,
     "calories_per_100g": 129,
+    "fiber_per_100g": 0.4
+  },
+  "rice_with_oil": {
+    "evidence_status": "VERIFIED",
+    "source_item_id": "usda-fdc:2708404",
+    "locale": "en-US",
+    "display_name_tr": "Pirinç pilavı (yağlı)",
+    "default_portion_g": 100,
+    "serving_unit": "gram",
+    "serving_quantity": 100,
+    "portion_units": [
+      {
+        "unit": "kase",
+        "grams_per_unit": 163.0,
+        "source_item_id": "usda-fdc:2708404",
+        "source_measure": "FNDDS food portion: 1 cup, cooked = 163 g"
+      }
+    ],
+    "protein_per_100g": 2.6,
+    "fat_per_100g": 3.12,
+    "carbs_per_100g": 27.2,
+    "calories_per_100g": 151,
     "fiber_per_100g": 0.4
   },
   "brown_rice": {
@@ -1285,6 +1479,28 @@
     "calories_per_100g": 266,
     "fiber_per_100g": 2.3
   },
+  "steamed_dumpling": {
+    "evidence_status": "VERIFIED",
+    "source_item_id": "usda-fdc:2708708",
+    "locale": "en-US",
+    "display_name_tr": "Buharda mantı benzeri hamur (etli)",
+    "default_portion_g": 100,
+    "serving_unit": "gram",
+    "serving_quantity": 100,
+    "portion_units": [
+      {
+        "unit": "adet",
+        "grams_per_unit": 25.0,
+        "source_item_id": "usda-fdc:2708708",
+        "source_measure": "FNDDS food portion: 1 item, any size = 25 g"
+      }
+    ],
+    "protein_per_100g": 6.9,
+    "fat_per_100g": 4.6,
+    "carbs_per_100g": 11.1,
+    "calories_per_100g": 113,
+    "fiber_per_100g": 1.2
+  },
   "cheese_pastry": {
     "evidence_status": "VERIFIED",
     "source_item_id": "usda-fdc:2708726",
@@ -1306,6 +1522,72 @@
     "carbs_per_100g": 15.4,
     "calories_per_100g": 274,
     "fiber_per_100g": 0.4
+  },
+  "stuffed_grape_leaves": {
+    "evidence_status": "VERIFIED",
+    "source_item_id": "usda-fdc:2709064",
+    "locale": "en-US",
+    "display_name_tr": "Yaprak sarma (pirinçli)",
+    "default_portion_g": 100,
+    "serving_unit": "gram",
+    "serving_quantity": 100,
+    "portion_units": [
+      {
+        "unit": "adet",
+        "grams_per_unit": 56.0,
+        "source_item_id": "usda-fdc:2709064",
+        "source_measure": "FNDDS food portion: 1 roll = 56 g"
+      }
+    ],
+    "protein_per_100g": 2.28,
+    "fat_per_100g": 12.0,
+    "carbs_per_100g": 13.9,
+    "calories_per_100g": 168,
+    "fiber_per_100g": 3.1
+  },
+  "stuffed_pepper": {
+    "evidence_status": "VERIFIED",
+    "source_item_id": "usda-fdc:2709073",
+    "locale": "en-US",
+    "display_name_tr": "Biber dolması (pirinçli, etli)",
+    "default_portion_g": 100,
+    "serving_unit": "gram",
+    "serving_quantity": 100,
+    "portion_units": [
+      {
+        "unit": "kase",
+        "grams_per_unit": 198.0,
+        "source_item_id": "usda-fdc:2709073",
+        "source_measure": "FNDDS food portion: 1 cup = 198 g"
+      }
+    ],
+    "protein_per_100g": 7.83,
+    "fat_per_100g": 11.7,
+    "carbs_per_100g": 9.93,
+    "calories_per_100g": 178,
+    "fiber_per_100g": 0.7
+  },
+  "tabbouleh": {
+    "evidence_status": "VERIFIED",
+    "source_item_id": "usda-fdc:2709131",
+    "locale": "en-US",
+    "display_name_tr": "Kısır benzeri bulgur salatası (tabbouleh)",
+    "default_portion_g": 100,
+    "serving_unit": "gram",
+    "serving_quantity": 100,
+    "portion_units": [
+      {
+        "unit": "kase",
+        "grams_per_unit": 160.0,
+        "source_item_id": "usda-fdc:2709131",
+        "source_measure": "FNDDS food portion: 1 cup = 160 g"
+      }
+    ],
+    "protein_per_100g": 1.64,
+    "fat_per_100g": 9.66,
+    "carbs_per_100g": 9.65,
+    "calories_per_100g": 127,
+    "fiber_per_100g": 1.8
   },
   "chicken_noodle_soup": {
     "evidence_status": "VERIFIED",
@@ -1696,6 +1978,28 @@
     "calories_per_100g": 19.0,
     "fiber_per_100g": 0.9
   },
+  "artichoke": {
+    "evidence_status": "VERIFIED",
+    "source_item_id": "usda-fdc:2709766",
+    "locale": "en-US",
+    "display_name_tr": "Enginar",
+    "default_portion_g": 100,
+    "serving_unit": "gram",
+    "serving_quantity": 100,
+    "portion_units": [
+      {
+        "unit": "adet",
+        "grams_per_unit": 125.0,
+        "source_item_id": "usda-fdc:2709766",
+        "source_measure": "FNDDS food portion: 1 whole = 125 g"
+      }
+    ],
+    "protein_per_100g": 2.89,
+    "fat_per_100g": 0.34,
+    "carbs_per_100g": 12.0,
+    "calories_per_100g": 53.0,
+    "fiber_per_100g": 5.7
+  },
   "cucumber": {
     "evidence_status": "VERIFIED",
     "source_item_id": "usda-fdc:2709784",
@@ -1850,6 +2154,28 @@
     "calories_per_100g": 27.0,
     "fiber_per_100g": 1.0
   },
+  "eggplant_meat_casserole": {
+    "evidence_status": "VERIFIED",
+    "source_item_id": "usda-fdc:2710144",
+    "locale": "en-US",
+    "display_name_tr": "Patlıcanlı et yemeği (karnıyarık benzeri)",
+    "default_portion_g": 100,
+    "serving_unit": "gram",
+    "serving_quantity": 100,
+    "portion_units": [
+      {
+        "unit": "kase",
+        "grams_per_unit": 203.0,
+        "source_item_id": "usda-fdc:2710144",
+        "source_measure": "FNDDS food portion: 1 cup = 203 g"
+      }
+    ],
+    "protein_per_100g": 7.11,
+    "fat_per_100g": 5.53,
+    "carbs_per_100g": 4.67,
+    "calories_per_100g": 96.0,
+    "fiber_per_100g": 1.5
+  },
   "butter": {
     "evidence_status": "VERIFIED",
     "source_item_id": "usda-fdc:2710154",
@@ -1909,6 +2235,28 @@
     "carbs_per_100g": 68.9,
     "calories_per_100g": 278,
     "fiber_per_100g": 1.1
+  },
+  "gummy_candy": {
+    "evidence_status": "VERIFIED",
+    "source_item_id": "usda-fdc:2710359",
+    "locale": "en-US",
+    "display_name_tr": "Lokum benzeri jel şeker",
+    "default_portion_g": 100,
+    "serving_unit": "gram",
+    "serving_quantity": 100,
+    "portion_units": [
+      {
+        "unit": "adet",
+        "grams_per_unit": 2.0,
+        "source_item_id": "usda-fdc:2710359",
+        "source_measure": "FNDDS food portion: 1 piece = 2 g"
+      }
+    ],
+    "protein_per_100g": 0.0,
+    "fat_per_100g": 0.0,
+    "carbs_per_100g": 98.9,
+    "calories_per_100g": 396,
+    "fiber_per_100g": 0.1
   },
   "brewed_coffee": {
     "evidence_status": "VERIFIED",
@@ -2041,5 +2389,35 @@
     "carbs_per_100g": 12.1,
     "calories_per_100g": 46.0,
     "fiber_per_100g": 0.0
+  },
+  "cooked_spinach": {
+    "evidence_status": "VERIFIED",
+    "source_item_id": "usda-fdc:2710791",
+    "locale": "en-US",
+    "display_name_tr": "Ispanak (pişmiş, sade)",
+    "default_portion_g": 100,
+    "serving_unit": "gram",
+    "serving_quantity": 100,
+    "portion_units": [],
+    "protein_per_100g": 3.42,
+    "fat_per_100g": 0.71,
+    "carbs_per_100g": 3.11,
+    "calories_per_100g": 33.0,
+    "fiber_per_100g": 1.9
+  },
+  "cooked_green_beans": {
+    "evidence_status": "VERIFIED",
+    "source_item_id": "usda-fdc:2710803",
+    "locale": "en-US",
+    "display_name_tr": "Taze fasulye (pişmiş, sade)",
+    "default_portion_g": 100,
+    "serving_unit": "gram",
+    "serving_quantity": 100,
+    "portion_units": [],
+    "protein_per_100g": 2.05,
+    "fat_per_100g": 0.29,
+    "carbs_per_100g": 7.72,
+    "calories_per_100g": 42.0,
+    "fiber_per_100g": 3.1
   }
 }
