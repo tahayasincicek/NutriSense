@@ -4,11 +4,14 @@
 
 Bu depo **eğitilmiş bir besin tanıma modeli içermez**. Veri seti, checkpoint, gerçek `metrics.json`, TFLite modeli ve hedef cihaz gecikme ölçümü yoktur. Bu nedenle model doğruluğu hakkında nicel başarı iddiası kurulamaz. Makine tarafından okunabilir güvenli başlangıç kaydı `runs/NOT_RUN/metrics.json` dosyasındadır.
 
-TÜBİTAK önerisi “sınırlı sayıda besin tanıma” sınırı koyduğu için kapsam `configs/mvp_v1.json` içinde 10 sınıfta dondurulmuştur. Kapsamı değiştirmek yeni `scope_id`, veri kartı revizyonu ve önceden belirlenmiş değerlendirme planı gerektirir; mevcut test sonucuna bakarak sınıf eklenemez/çıkarılamaz.
+Güncel kapsam `configs/tr222_v1.json` içinde **221 sınıf** olarak dondurulmuştur (`scope_id: nutrisense-tr222-v1`); yaklaşık 90'ı Türk mutfağıdır. Kapsamı değiştirmek yeni `scope_id`, veri kartı revizyonu ve önceden belirlenmiş değerlendirme planı gerektirir; mevcut test sonucuna bakarak sınıf eklenemez/çıkarılamaz.
+
+Bu turda ayrı bir `__ood__` negatif sınıfı **yoktur**. Kapsam dışı fotoğraflar eğitilmiş bir negatif sınıfla değil, validation üzerinde seçilen güven eşiğiyle reddedilir. Sınırı açıkça yazmak gerekirse: negatif örnek görmeden eğitilen model kapsam dışı girdide fazla özgüvenli olabilir, bu yüzden reddetme yükünün tamamı eşiğin üzerindedir ve OOD yanlış kabul oranı bu turda ölçülemez.
 
 ## Tasarım ilkeleri
 
-- Otomatik görsel kazıma ve lisansı belirsiz veri indirme yoktur.
+- Otomatik görsel kazıma yoktur; her kaynak elle incelenip `sources/licenses.json` içine kaydedilir.
+- Bir istisna bilinçli olarak kabul edilmiştir: `alpsahin/Turkish-Food-Dataset-Combined` veri kümesinin kartında lisans beyanı yoktur. Proje sahibi 2026-09-07'de bu kaynakla eğitim yapmaya karar vermiştir. Şartları bilinmediği için görseller yalnız yerelde tutulur, yeniden dağıtılmaz ve model kartında bu durum açıkça belirtilir.
 - Her örnek kaynak, lisans, çekim grubu, SHA-256 ve algısal hash ile manifestte kayıtlıdır.
 - Aynı çekim grubu, birebir kopya veya yakın kopya farklı splitlere giremez.
 - Augmentation yalnızca `train` veri akışında uygulanır.

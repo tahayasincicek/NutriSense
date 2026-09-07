@@ -25,7 +25,8 @@ kullanıcıya sorulur.
 üretilebilir bir eğitim hattı bulunur: sürümlenmiş veri manifesti, gruplara göre
 bölme, iki aşamalı transfer öğrenme, mühürlü test kümesi ve TFLite dönüşümü.
 Test verisi bir kez açılır ve deney yeniden test edilemez; sonuç seçilerek
-iyileştirilemez.
+iyileştirilemez. Güncel kapsam `ml/configs/tr222_v1.json` içinde 221 sınıftır;
+bunların yaklaşık 90'ı Türk mutfağıdır.
 
 **Karşılıklı onaylı diyetisyen bağlantısı.** Eşleşme iki tarafın da onayını
 gerektirir. Hasta yalnız onayladığı diyetisyene rapor gönderebilir, dilediğinde
@@ -33,6 +34,14 @@ bağlantıyı sonlandırabilir. Diyetisyen raporu yanıtlayabilir.
 
 **Sağlık takibi.** Su, adım, uyku, kilo ve ruh hâli kaydedilir; veriler cihazda
 saklanır ve sunucuyla eşitlenir.
+
+**Kaynağı belli besin değerleri.** Uygulama kaloriyi tahmin etmez; 500
+kayıtlık yerel katalogdan okur. Kayıtların 488'i USDA FoodData Central FNDDS
+(CC0) arşivinden birebir çıkarılmıştır ve arşiv SHA-256 ile sabitlenmiştir.
+Kaynağı olmayan 12 Türk yemeği `ESTIMATED` olarak işaretlidir ve hangi
+kaynaklardan ortalandığı kayıtlıdır. Porsiyon gram/adet/dilim/kase/ml/litre
+olarak girilebilir; hacim birimleri yoğunluk üzerinden çevrilir, 1 ml = 1 g
+varsayılmaz. Ayrıntı: `docs/nutrition_data_methodology.md`.
 
 ## Teknoloji
 
@@ -132,7 +141,7 @@ flutter test
 docker compose -f backend/docker-compose.yml --profile test run --rm test
 ```
 
-Sırasıyla 239 ve 128 test koşar. Backend testleri kendi geçici MySQL örneğinde
+Sırasıyla 289 ve 232 test koşar. Backend testleri kendi geçici MySQL örneğinde
 çalışır, geliştirme veritabanına dokunmaz.
 
 Emülatörde uçtan uca yolculuk:
@@ -187,3 +196,10 @@ Model eğitiminde Food-101 veri kümesi kullanılmıştır:
 
 > Bossard, L., Guillaumin, M., Van Gool, L. (2014). *Food-101 – Mining
 > Discriminative Components with Random Forests.* ECCV.
+
+Türk mutfağı sınıfları için ek olarak `alpsahin/Turkish-Food-Dataset-Combined`
+kullanılmıştır. Bu veri kümesinin kartında lisans beyanı yoktur; şartları
+bilinmediği için görseller yalnız yerelde tutulur, yeniden dağıtılmaz. Durum
+`ml/sources/licenses.json` içinde açıkça kayıtlıdır.
+
+Besin değerleri USDA FoodData Central, FNDDS 2021-2023 (CC0) kaynaklıdır.
