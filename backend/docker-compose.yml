@@ -45,6 +45,12 @@ services:
       SMTP_FROM_EMAIL: no-reply@nutrisense.dev
       NOTIFICATION_MODE: sandbox
       CALORIE_DB_PATH: /app/app/data/verified_nutrition.json
+      # Sağlayıcı anahtarı .env dosyasından gelir. Anahtar yoksa mod
+      # verified_local kalır ve uygulama yalnız USDA kataloğuyla çalışır;
+      # boş anahtarla hybrid seçmek açılışta hata verir.
+      NUTRITION_PROVIDER_MODE: ${NUTRITION_PROVIDER_MODE:-verified_local}
+      NUTRITIONIX_APP_ID: ${NUTRITIONIX_APP_ID:-}
+      NUTRITIONIX_API_KEY: ${NUTRITIONIX_API_KEY:-}
     ports:
       - "8000:8000"
     depends_on:
