@@ -35,6 +35,13 @@ bağlantıyı sonlandırabilir. Diyetisyen raporu yanıtlayabilir.
 **Sağlık takibi.** Su, adım, uyku, kilo ve ruh hâli kaydedilir; veriler cihazda
 saklanır ve sunucuyla eşitlenir.
 
+**Araştırma verisi kendi hattında.** Uygulama içindeki anket ve kullanılabilirlik
+ölçümleri araştırma rızasına bağlıdır; rıza geri alınabilir ve geri alındığında
+kayıt dışarı aktarımdan düşer. `analysis/` altında önceden yazılmış analiz planı,
+veri sözlüğü ve nitel kodlama kitabıyla yeniden üretilebilir bir HCI analiz hattı
+bulunur. Hat hazırdır ancak **henüz gerçek veri işlenmemiştir**; depoda bilimsel
+sonuç iddiası yoktur.
+
 **Kaynağı belli besin değerleri.** Uygulama kaloriyi tahmin etmez; 500
 kayıtlık yerel katalogdan okur. Kayıtların 488'i USDA FoodData Central FNDDS
 (CC0) arşivinden birebir çıkarılmıştır ve arşiv SHA-256 ile sabitlenmiştir.
@@ -131,6 +138,20 @@ Manifest adımı lisansı onaylanmamış kaynağı reddeder, bozuk görselleri r
 ve sınıf/grup yeterlilik kapılarını uygular. Eşik yalnız doğrulama kümesinden
 seçilir; test kümesi tek kullanımlıktır.
 
+## Araştırma analizi
+
+Anket ve kullanılabilirlik verisi uygulamadan tidy CSV olarak dışa aktarılır
+(`/survey/export/tidy`, `/usability/export/tidy`); yalnız araştırma rızası veren
+ve rızasını geri almamış katılımcılar bu çıktıya girer.
+
+```bash
+python analysis/run_analysis.py
+```
+
+Analiz planı veri görülmeden yazılmıştır (`analysis/PRE_ANALYSIS_PLAN.md`).
+Depoda gerçek katılımcı verisi bulunmaz; hat çalıştırılabilir durumdadır ancak
+şu an bilimsel bir sonuç üretmemiştir.
+
 ## Test
 
 ```bash
@@ -179,16 +200,68 @@ işleme envanteri `docs/data_processing_inventory.md` altında sürümlenir.
 
 ## Belgeler
 
+**Akademik çıktılar**
+
+| Belge | İçerik |
+|---|---|
+| `docs/tubitak_sonuc_raporu.md` | TÜBİTAK 2209-A sonuç raporu |
+| `docs/akademik_makale_taslak.md` | Akademik makale taslağı |
+| `analysis/PRE_ANALYSIS_PLAN.md` | Önceden kayıtlı analiz planı |
+| `analysis/DATA_DICTIONARY.md` | Değişken sözlüğü |
+| `analysis/QUALITATIVE_CODEBOOK.md` | Nitel kodlama kitabı |
+| `ml/MODEL_CARD.md` | Model kartı |
+| `ml/DATA_CARD.md` | Veri kartı |
+
+**Mimari ve teknik**
+
 | Belge | İçerik |
 |---|---|
 | `docs/api_contract.md` | İstemci–backend sözleşmesi |
 | `docs/backend_data_architecture.md` | Veri modeli |
+| `docs/camera_food_scan_pipeline.md` | Kamera tarama akışı |
+| `docs/food_history_architecture.md` | Geçmiş ekranı mimarisi |
+| `docs/auth_and_dietitian_lifecycle.md` | Kimlik ve diyetisyen yaşam döngüsü |
+| `docs/dietitian_report_delivery.md` | Rapor iletimi |
+| `docs/nutrition_data_methodology.md` | Besin verisi yöntemi |
+| `docs/adr/` | Mimari karar kayıtları |
+
+**Hukuk, etik ve güvenlik**
+
+| Belge | İçerik |
+|---|---|
+| `docs/etik_kvkk_belgeleri.md` | Etik kurul ve KVKK belgeleri |
 | `docs/data_processing_inventory.md` | KVKK veri işleme envanteri |
+| `docs/data_collection_protocol.md` | Katılımcı veri toplama protokolü |
+| `docs/privacy_notice_draft.md` | Aydınlatma metni taslağı |
+| `docs/threat_model.md` | Tehdit modeli |
+| `docs/security_findings_register.md` | Güvenlik bulgu kaydı |
+| `ml/LICENSES.md` | Veri ve yazılım kaynak envanteri |
+
+**Erişilebilirlik ve test**
+
+| Belge | İçerik |
+|---|---|
 | `docs/accessibility_conformance_report.md` | Erişilebilirlik uygunluğu |
 | `docs/manual_screen_reader_test_plan.md` | TalkBack/VoiceOver test planı |
+| `docs/voiceover_manual_test_report.md` | VoiceOver elle test raporu |
+| `docs/test_strategy.md` | Test stratejisi |
+| `docs/requirements_test_matrix.md` | Gereksinim–test izlenebilirliği |
+| `docs/android_device_acceptance_report.md` | Gerçek cihaz kabul raporu |
+
+**Yayın ve işletme**
+
+| Belge | İçerik |
+|---|---|
 | `docs/deployment_runbook.md` | Dağıtım adımları |
-| `ml/MODEL_CARD.md` | Model kartı |
-| `ml/LICENSES.md` | Veri ve yazılım kaynak envanteri |
+| `docs/operations_runbook.md` | İşletme el kitabı |
+| `docs/android_release_runbook.md` | Android yayın adımları |
+| `docs/ios_release_runbook.md` | iOS yayın adımları |
+| `docs/backup_restore_plan.md` | Yedekleme ve geri dönüş planı |
+| `docs/environment_matrix.md` | Ortam matrisi |
+| `docs/play_store_listing_tr.md` | Play Store metni |
+| `docs/play_store_data_safety_draft.md` | Play Store veri güvenliği formu |
+| `docs/app_store_listing_tr.md` | App Store metni |
+| `docs/kullanici_el_kitabi.md` | Kullanıcı el kitabı |
 
 ## Atıf
 
