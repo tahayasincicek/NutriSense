@@ -391,6 +391,76 @@ NUTRIENTS = {
 }
 
 
+# TurKomp, Tarim ve Orman Bakanligi'nin ulusal gida kompozisyon veri
+# tabanidir. USDA'da karsiligi olmayan Turk yemekleri buradan gelir.
+#
+# Lisans: ticari olmayan kullanim, atif zorunlu. Sartlar yeniden dagitim
+# icin ayrica degerlendirme istiyor (bkz. TURKOMP_TERMS_URL); bu katalogda
+# kayitlar proje sahibinin karariyla yer aliyor ve her biri kendi kaynak
+# kimligini, adresini ve atfini tasiyor.
+TURKOMP_TERMS_URL = "https://turkomp.tarimorman.gov.tr/useofdata"
+TURKOMP_LICENSE = (
+    "Non-commercial use under TurKomp terms; attribution required; "
+    f"see {TURKOMP_TERMS_URL}"
+)
+TURKOMP_RETRIEVED_AT = "2026-07-18T00:00:00Z"
+TURKOMP = {
+    "12.02.0021": {
+        "key": "simit",
+        "source_item_name": "Simit, Izmir",
+        "source_url": "https://turkomp.tarimorman.gov.tr/food-simit-izmir-623",
+        "display_name_tr": "Simit (Izmir)",
+        "nutrients": {
+            "calories_per_100g": 368, "protein_per_100g": 12.14,
+            "carbs_per_100g": 38.42, "fat_per_100g": 16.46,
+            "fiber_per_100g": 8.94,
+        },
+    },
+    "12.02.0063": {
+        "key": "raw_manti",
+        "source_item_name": "Manti, cig, Kayseri",
+        "source_url": "https://turkomp.tarimorman.gov.tr/food-manti-cig-kayseri-472",
+        # Kayit cig hamuru olcer. Pisirilmis mantinin kutlesi ve sosu
+        # sonucu degistirdigi icin ad bunu acikca soyler ve `manti`
+        # model sinifi buna baglanmaz.
+        "display_name_tr": "Manti (cig, Kayseri)",
+        "nutrients": {
+            "calories_per_100g": 292, "protein_per_100g": 12.63,
+            "carbs_per_100g": 45.52, "fat_per_100g": 5.71,
+            "fiber_per_100g": 4.01,
+        },
+    },
+}
+
+
+def _add_turkomp(catalog: dict) -> None:
+    """Add the transcribed TurKomp dishes with their own provenance."""
+    for item_id, row in TURKOMP.items():
+        source_id = f"turkomp:{item_id}"
+        catalog["_meta"]["source_inventory"][source_id] = {
+            "source_url": row["source_url"],
+            "source_item_name": row["source_item_name"],
+            "retrieved_at": TURKOMP_RETRIEVED_AT,
+            "license": TURKOMP_LICENSE,
+            "attribution": (
+                "TurKomp, Ulusal Gida Kompozisyon Veri Tabani, surum 1.0, "
+                f"{row['source_item_name']}. {row['source_url']}"
+            ),
+        }
+        record = {
+            "evidence_status": "VERIFIED",
+            "source_item_id": source_id,
+            "locale": "tr-TR",
+            "display_name_tr": row["display_name_tr"],
+            # TurKomp degerleri 100 gram uzerinden verilir; olculmus bir
+            # porsiyon agirligi yok, bu yuzden birim sunulmaz.
+            "default_portion_g": 100, "serving_unit": "gram",
+            "serving_quantity": 100, "portion_units": [],
+        }
+        record.update(row["nutrients"])
+        catalog[row["key"]] = record
+
+
 def _portion_units(food: dict, specs, source_id: str) -> list:
     """Turn reviewed FNDDS portions into unit weights that carry their measure.
 
@@ -433,9 +503,13 @@ def build_catalog(archive: Path) -> dict:
     with zipfile.ZipFile(archive) as bundle:
         foods = json.loads(bundle.read("surveyDownload.json"))["SurveyFoods"]
     catalog = {"_meta": {
-        "version": "usda-fndds-2021-2023-subset-v1",
+        "version": "usda-fndds-2021-2023-subset-v1+turkomp-v1",
         "evidence_status": "VERIFIED",
-        "verification_method": "Exact nutrient extraction from pinned official USDA FNDDS archive",
+        "verification_method": (
+            "Exact nutrient extraction from the pinned official USDA FNDDS "
+            "archive; Turkish dishes transcribed from TurKomp records with "
+            "their own item id and source url"
+        ),
         "archive_url": SOURCE_URL,
         "archive_sha256": ARCHIVE_SHA256,
         "expert_reviewed_at": None,
@@ -474,6 +548,7 @@ def build_catalog(archive: Path) -> dict:
         catalog[key] = record
     if set(catalog) - {"_meta"} != {row[0] for row in REVIEWED.values()}:
         raise ValueError("Missing reviewed food")
+    _add_turkomp(catalog)
     return catalog
 
 
@@ -485,4 +560,4 @@ if __name__ == "__main__":
     result = build_catalog(args.archive)
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(json.dumps(result, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
-    print(f"Verified {len(result) - 1} USDA records: {args.output}")
+    print(f"Verified {len(result) - 1} records (USDA + TurKomp): {args.output}")

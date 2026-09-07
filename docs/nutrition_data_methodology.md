@@ -45,7 +45,7 @@ doğrulamadan geçer. Eski prototipteki veriler korunmuştur, ancak doğrulanmı
 kalori sonucu olarak kullanılmaz.
 
 USDA'nın resmî FNDDS 2021-2023 arşivi 7 Eylül 2026'da indirilip kimlik ve besin
-değerleri doğrudan karşılaştırıldı. Katalog 86 kayıt içerir: içecekler (süt, çay,
+değerleri doğrudan karşılaştırıldı. Katalog 88 kayıt içerir (86 USDA, 2 TürKomp): içecekler (süt, çay,
 Türk kahvesi, portakal suyu, kola), temel gıdalar (ekmek, yumurta, yoğurt, beyaz
 peynir, zeytin, ceviz), ana yemek ve garnitürler (pilav, makarna, bulgur,
 haşlanmış patates, tavuk göğsü, kuzu eti, humus, nohut), çorbalar, meyve ve
@@ -70,7 +70,7 @@ Su, sıfır kalorili olduğu için kataloga alınmadı: sıfır kalori dönen bi
 "bilinmeyen besini sıfır kalorili gösterme" korumasından geçemez. Su takibi
 uygulamada ayrı bir akışla yapılır.
 
-Görüntü tanıma modelinin 29 sınıfından 17'si karşılanır. Eşleme yalnız USDA
+Görüntü tanıma modelinin 29 sınıfından 18'i karşılanır. Eşleme yalnız USDA
 kaydı gerçekten aynı yemek olduğunda kurulur: biber dolması, yaprak sarma,
 şiş kebap, karnıyarık, enginar, hamsi, ıspanak, taze fasulye gibi. Yakın ama
 aynı olmayan kayıtlar katalogda kendi dürüst adıyla durur, model sınıfına
@@ -82,7 +82,15 @@ Katalog, modelin 29 sınıfının tamamını kapsamaz. Mantı, lahmacun, menemen
 desteklenmeyen sorgular benzer yiyecekle ikame edilmez. Yapılandırılmış
 Nutritionix sağlayıcısından geçerli sonuç alınabilir; aksi halde yerel kaynak
 bulunamadığı bildirilir. TürKomp doğrulama fixture'ları çalışma zamanı kataloğuna
-aktarılmadı; özellikle çiğ mantı kaydı pişmiş mantı için kullanılmaz.
+aktarıldı: simit ve çiğ Kayseri mantısı kayıtları çalışma zamanı kataloğunda
+kendi kaynak kimlikleri (`turkomp:12.02.0021`, `turkomp:12.02.0063`), kaynak
+adresleri ve atıflarıyla yer alır. Çiğ mantı kaydı pişmiş mantı için
+kullanılmaz; adı bunu söyler ve `manti` model sınıfına bağlanmaz.
+
+TürKomp şartları ticari olmayan kullanıma izin verir ve atıf ister; yeniden
+dağıtım için ayrıca değerlendirme öngörür (https://turkomp.tarimorman.gov.tr/useofdata).
+Kayıtların katalogda yer alması proje sahibinin kararıdır ve bu karar burada
+kayıt altına alınmıştır. Her kayıt kendi kaynak adresini ve atfını taşır.
 
 Başlangıç 100 gramı yalnız hesaplama temelidir ve tahmin olarak işaretlenir.
 Gerçek bir adet/dilim/kase ağırlığı uydurulmaz. Kullanıcı gramı değiştirip

@@ -1,8 +1,8 @@
 {
   "_meta": {
-    "version": "usda-fndds-2021-2023-subset-v1",
+    "version": "usda-fndds-2021-2023-subset-v1+turkomp-v1",
     "evidence_status": "VERIFIED",
-    "verification_method": "Exact nutrient extraction from pinned official USDA FNDDS archive",
+    "verification_method": "Exact nutrient extraction from the pinned official USDA FNDDS archive; Turkish dishes transcribed from TurKomp records with their own item id and source url",
     "archive_url": "https://fdc.nal.usda.gov/fdc-datasets/FoodData_Central_survey_food_json_2024-10-31.zip",
     "archive_sha256": "dfb06ae7ddc397ccd570b91c14b75438ab2ba39f64f22d321f61d4a52a77f3eb",
     "expert_reviewed_at": null,
@@ -609,6 +609,20 @@
         "retrieved_at": "2026-09-07T05:37:48Z",
         "license": "CC0 1.0",
         "attribution": "USDA FoodData Central, FNDDS 2021-2023. Green beans, cooked, as ingredient. https://fdc.nal.usda.gov/fdc-app.html#/food-details/2710803/nutrients"
+      },
+      "turkomp:12.02.0021": {
+        "source_url": "https://turkomp.tarimorman.gov.tr/food-simit-izmir-623",
+        "source_item_name": "Simit, Izmir",
+        "retrieved_at": "2026-07-18T00:00:00Z",
+        "license": "Non-commercial use under TurKomp terms; attribution required; see https://turkomp.tarimorman.gov.tr/useofdata",
+        "attribution": "TurKomp, Ulusal Gida Kompozisyon Veri Tabani, surum 1.0, Simit, Izmir. https://turkomp.tarimorman.gov.tr/food-simit-izmir-623"
+      },
+      "turkomp:12.02.0063": {
+        "source_url": "https://turkomp.tarimorman.gov.tr/food-manti-cig-kayseri-472",
+        "source_item_name": "Manti, cig, Kayseri",
+        "retrieved_at": "2026-07-18T00:00:00Z",
+        "license": "Non-commercial use under TurKomp terms; attribution required; see https://turkomp.tarimorman.gov.tr/useofdata",
+        "attribution": "TurKomp, Ulusal Gida Kompozisyon Veri Tabani, surum 1.0, Manti, cig, Kayseri. https://turkomp.tarimorman.gov.tr/food-manti-cig-kayseri-472"
       }
     }
   },
@@ -2419,5 +2433,35 @@
     "carbs_per_100g": 7.72,
     "calories_per_100g": 42.0,
     "fiber_per_100g": 3.1
+  },
+  "simit": {
+    "evidence_status": "VERIFIED",
+    "source_item_id": "turkomp:12.02.0021",
+    "locale": "tr-TR",
+    "display_name_tr": "Simit (Izmir)",
+    "default_portion_g": 100,
+    "serving_unit": "gram",
+    "serving_quantity": 100,
+    "portion_units": [],
+    "calories_per_100g": 368,
+    "protein_per_100g": 12.14,
+    "carbs_per_100g": 38.42,
+    "fat_per_100g": 16.46,
+    "fiber_per_100g": 8.94
+  },
+  "raw_manti": {
+    "evidence_status": "VERIFIED",
+    "source_item_id": "turkomp:12.02.0063",
+    "locale": "tr-TR",
+    "display_name_tr": "Manti (cig, Kayseri)",
+    "default_portion_g": 100,
+    "serving_unit": "gram",
+    "serving_quantity": 100,
+    "portion_units": [],
+    "calories_per_100g": 292,
+    "protein_per_100g": 12.63,
+    "carbs_per_100g": 45.52,
+    "fat_per_100g": 5.71,
+    "fiber_per_100g": 4.01
   }
 }
