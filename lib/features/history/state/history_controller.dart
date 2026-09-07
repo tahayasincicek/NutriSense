@@ -229,13 +229,15 @@ class HistoryController extends StateNotifier<HistoryState> {
   Future<HistoryActionResult> updateEntry({
     required String logId,
     String? foodNameTr,
-    double? portionGrams,
+    double? portionValue,
+    String portionUnit = 'gram',
     String? mealType,
   }) async {
     final result = await _repository.update(
       logId: logId,
       foodNameTr: foodNameTr,
-      portionGrams: portionGrams,
+      portionValue: portionValue,
+      portionUnit: portionUnit,
       mealType: mealType,
     );
     if (!result.isSuccess) {

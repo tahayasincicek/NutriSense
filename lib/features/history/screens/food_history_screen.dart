@@ -313,7 +313,8 @@ class _FoodHistoryScreenState extends ConsumerState<FoodHistoryScreen> {
         await ref.read(historyControllerProvider.notifier).updateEntry(
               logId: entry.id,
               foodNameTr: result.foodNameTr,
-              portionGrams: result.portionGrams,
+              portionValue: result.portionValue,
+              portionUnit: result.portionUnit,
             );
     if (!mounted) return;
     _accessibility.speak(outcome.message, priority: TtsPriority.high);
@@ -427,9 +428,14 @@ class _OfflineBanner extends StatelessWidget {
 }
 
 class _HistoryEditResult {
-  const _HistoryEditResult({this.foodNameTr, this.portionGrams});
+  const _HistoryEditResult({
+    this.foodNameTr,
+    this.portionValue,
+    this.portionUnit = 'gram',
+  });
   final String? foodNameTr;
-  final double? portionGrams;
+  final double? portionValue;
+  final String portionUnit;
 }
 
 /// Kayıt düzeltme diyaloğu. Controller'lar burada tutulur ki diyalog kapanma
@@ -457,17 +463,36 @@ class _HistoryEditDialogState extends State<_HistoryEditDialog> {
     super.dispose();
   }
 
+  /// Kaydın kendi birimi. Gram dışındaki birimlerde alan da o birimde okunur.
+  String get _unit =>
+      widget.entry.portionUnit.isEmpty ? 'gram' : widget.entry.portionUnit;
+
+  String get _limitLabel => switch (_unit) {
+        'gram' => '2000',
+        'ml' => '3000',
+        'litre' => '3',
+        _ => '20',
+      };
+
   void _save() {
     final name = _nameController.text.trim();
     final portion =
         double.tryParse(_portionController.text.trim().replaceAll(',', '.'));
+    // Üst sınır birime göre değişir: 2000 gram makul, 2000 adet değil.
+    final limit = switch (_unit) {
+      'gram' => 2000.0,
+      'ml' => 3000.0,
+      'litre' => 3.0,
+      _ => 20.0,
+    };
     Navigator.pop(
       context,
       _HistoryEditResult(
         foodNameTr: name.isEmpty ? null : name,
-        portionGrams: (portion != null && portion > 0 && portion <= 2000)
+        portionValue: (portion != null && portion > 0 && portion <= limit)
             ? portion
             : null,
+        portionUnit: _unit,
       ),
     );
   }
@@ -496,9 +521,9 @@ class _HistoryEditDialogState extends State<_HistoryEditDialog> {
               key: const Key('history_edit_portion'),
               controller: _portionController,
               keyboardType: const TextInputType.numberWithOptions(),
-              decoration: const InputDecoration(
-                labelText: 'Porsiyon (gram)',
-                helperText: '0 ile 2000 gram arasında olmalıdır.',
+              decoration: InputDecoration(
+                labelText: 'Porsiyon ($_unit)',
+                helperText: '0 ile ${_limitLabel} $_unit arasında olmalıdır.',
               ),
             ),
           ),

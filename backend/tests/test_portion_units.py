@@ -254,3 +254,80 @@ def test_manual_log_converts_volume_instead_of_storing_it_as_grams(
             db.close()
     finally:
         app.dependency_overrides.pop(get_current_user, None)
+
+
+def test_editing_a_millilitre_log_keeps_its_unit(client, monkeypatch):
+    """Editing 250 ml to 300 ml must stay millilitres, not become 300 grams.
+
+    The edit dialog pre-filled the entry's value but labelled it grams and
+    sent it as grams, so a drink silently lost both its unit and its amount.
+    """
+    from types import SimpleNamespace
+    import uuid as uuid_module
+
+    from app.main import app
+    from app.models.database import SessionLocal, User, FoodLog
+    from app.routers import food_router
+    from app.routers.food_router import get_current_user
+
+    from test_api_contract import traceable_nutrition
+
+    class MilkNutrition:
+        async def get_nutrition(self, *_args, **_kwargs):
+            payload = traceable_nutrition(
+                calories_per_100g=61, portion_grams=100,
+                protein=3.2, carb=4.8, fat=3.3, fiber=0.1,
+                food_name="milk", food_name_tr="Süt (tam yağlı)",
+            )
+            payload["portion_conversions"] = [{
+                "unit": "ml", "grams_per_unit": 1.03,
+                "source_item_id": "usda-fdc:2705385",
+                "source_name": "USDA FoodData Central",
+            }]
+            return payload
+
+    user_id = str(uuid_module.uuid4())
+    db = SessionLocal()
+    db.add(User(
+        id=user_id, email=f"{user_id}@example.com",
+        hashed_password="unused", full_name="Edit User",
+    ))
+    db.commit()
+    db.close()
+    app.dependency_overrides[get_current_user] = lambda: SimpleNamespace(id=user_id)
+    monkeypatch.setattr(food_router, "nutrition_service", MilkNutrition())
+    try:
+        created = client.post("/api/v1/food-log/manual", json={
+            "capture_id": str(uuid_module.uuid4()),
+            "food_name": "milk",
+            "food_name_tr": "Süt",
+            "meal_type": "atistirmalik",
+            "confirmed": True,
+            "portion_value": 250,
+            "portion_unit": "ml",
+        })
+        assert created.status_code == 200, created.text
+        log_id = created.json()["log_id"]
+
+        updated = client.patch(f"/api/v1/food-logs/{log_id}", json={
+            "portion_value": 300, "portion_unit": "ml",
+        })
+        assert updated.status_code == 200, updated.text
+
+        db = SessionLocal()
+        try:
+            log = db.query(FoodLog).filter(FoodLog.id == log_id).one()
+            assert log.portion_unit == "ml"
+            assert float(log.portion_value) == 300
+            assert float(log.estimated_portion_g) == pytest.approx(309.0)
+        finally:
+            db.close()
+
+        # Birim değiştirmek için doğrulanmış bir oran yok; sessizce
+        # dönüştürmek yerine reddedilir.
+        refused = client.patch(f"/api/v1/food-logs/{log_id}", json={
+            "portion_value": 2, "portion_unit": "adet",
+        })
+        assert refused.status_code == 422
+    finally:
+        app.dependency_overrides.pop(get_current_user, None)

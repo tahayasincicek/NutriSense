@@ -264,7 +264,8 @@ class _JourneyHistoryRepository implements HistoryRepository {
   Future<ApiResult<FoodLogEntry>> update({
     required String logId,
     String? foodNameTr,
-    double? portionGrams,
+    double? portionValue,
+    String portionUnit = 'gram',
     String? mealType,
   }) async =>
       ApiResult.success(history.dailyLogs.single.foods.single);

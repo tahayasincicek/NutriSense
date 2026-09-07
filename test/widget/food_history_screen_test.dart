@@ -348,6 +348,7 @@ class _FakeHistoryRepository implements HistoryRepository {
   Completer<void>? fetchGate;
   int fetchCount = 0;
   int updateCount = 0;
+  String? lastPortionUnit;
   int deleteCount = 0;
   int restoreCount = 0;
 
@@ -381,20 +382,23 @@ class _FakeHistoryRepository implements HistoryRepository {
   Future<ApiResult<FoodLogEntry>> update({
     required String logId,
     String? foodNameTr,
-    double? portionGrams,
+    double? portionValue,
+    String portionUnit = 'gram',
     String? mealType,
   }) async {
     updateCount += 1;
+    lastPortionUnit = portionUnit;
     final payload = remote.toJson();
     final day = (payload['daily_logs'] as List).single as Map<String, dynamic>;
     final food = (day['foods'] as List).single as Map<String, dynamic>;
     if (foodNameTr != null) food['food_name_tr'] = foodNameTr;
     if (mealType != null) food['meal_type'] = mealType;
-    if (portionGrams != null) {
+    if (portionValue != null) {
       food
-        ..['portion_g'] = portionGrams
-        ..['portion_value'] = portionGrams
-        ..['calories'] = 52 * portionGrams / 100;
+        ..['portion_g'] = portionValue
+        ..['portion_value'] = portionValue
+        ..['portion_unit'] = portionUnit
+        ..['calories'] = 52 * portionValue / 100;
     }
     food['is_corrected'] = true;
     remote = FoodHistoryResult.fromJson(payload);

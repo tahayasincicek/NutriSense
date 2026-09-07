@@ -1024,7 +1024,8 @@ class ApiService {
   Future<ApiResult<FoodLogEntry>> updateFoodLog({
     required String logId,
     String? foodNameTr,
-    double? portionGrams,
+    double? portionValue,
+    String portionUnit = 'gram',
     String? mealType,
     CancelToken? cancelToken,
   }) =>
@@ -1033,7 +1034,14 @@ class ApiService {
           '/food-logs/$logId',
           data: {
             if (foodNameTr != null) 'food_name_tr': foodNameTr,
-            if (portionGrams != null) 'portion_g': portionGrams,
+            // Gram alanı ayrı duruyor: uç, gram düzeltmesini eskiden beri
+            // `portion_g` ile alıyor ve birimli düzeltmeyle karışmamalı.
+            if (portionValue != null && portionUnit == 'gram')
+              'portion_g': portionValue,
+            if (portionValue != null && portionUnit != 'gram') ...{
+              'portion_value': portionValue,
+              'portion_unit': portionUnit,
+            },
             if (mealType != null) 'meal_type': mealType,
           },
           cancelToken: cancelToken,

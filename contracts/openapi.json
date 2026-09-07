@@ -2030,6 +2030,36 @@
               }
             ],
             "title": "Portion G"
+          },
+          "portion_unit": {
+            "anyOf": [
+              {
+                "enum": [
+                  "adet",
+                  "dilim",
+                  "kase",
+                  "ml",
+                  "litre"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Portion Unit"
+          },
+          "portion_value": {
+            "anyOf": [
+              {
+                "exclusiveMinimum": 0.0,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Portion Value"
           }
         },
         "title": "FoodLogUpdateRequest",

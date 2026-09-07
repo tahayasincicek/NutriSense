@@ -1250,10 +1250,29 @@ async def update_food_log(
         log.is_corrected = True
         changed_fields.append("meal_type")
 
-    if request.portion_g is not None:
+    if request.portion_g is not None or request.portion_value is not None:
         old_grams = Decimal(str(log.estimated_portion_g))
         if old_grams <= 0:
             raise HTTPException(status_code=409, detail="Mevcut porsiyon güvenli değil.")
+        if request.portion_value is not None:
+            # Birim başına gram, kaydın kendi değerlerinden çıkarılır: kayıt
+            # oluşurken doğrulanmış dönüşümle hesaplanmıştı, yeniden uydurma
+            # yapılmıyor. Kullanıcı yalnız kaydın kendi biriminde düzeltir;
+            # birim değiştirmek için elde doğrulanmış bir oran yok.
+            if request.portion_unit != log.portion_unit:
+                raise HTTPException(
+                    status_code=422,
+                    detail="Kayıt bu birimle oluşturulmadı; birim değiştirilemez.",
+                )
+            old_value = Decimal(str(log.portion_value))
+            if old_value <= 0:
+                raise HTTPException(
+                    status_code=409, detail="Mevcut porsiyon güvenli değil."
+                )
+            grams_per_unit = old_grams / old_value
+            target_grams = Decimal(str(request.portion_value)) * grams_per_unit
+        else:
+            target_grams = Decimal(str(request.portion_g))
         profile = NutrientsPer100g(
             calories=Decimal(str(log.calories_per_100g)),
             protein=Decimal(str(log.protein)) * 100 / old_grams,
@@ -1262,12 +1281,16 @@ async def update_food_log(
             fiber=Decimal(str(log.fiber)) * 100 / old_grams,
         )
         try:
-            calculation = calculate_nutrition(profile, request.portion_g)
+            calculation = calculate_nutrition(profile, target_grams)
         except NutritionDomainError as exc:
             raise HTTPException(status_code=422, detail=str(exc)) from exc
         log.estimated_portion_g = calculation.portion_grams
-        log.portion_value = calculation.portion_grams
-        log.portion_unit = "gram"
+        if request.portion_value is not None:
+            log.portion_value = request.portion_value
+            log.portion_unit = request.portion_unit
+        else:
+            log.portion_value = calculation.portion_grams
+            log.portion_unit = "gram"
         log.portion_method = "user_selected"
         log.portion_is_estimate = False
         log.total_calories = calculation.calories

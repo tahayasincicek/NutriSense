@@ -270,18 +270,32 @@ class FoodLogUpdateRequest(BaseModel):
 
     food_name_tr: Optional[str] = Field(None, min_length=2, max_length=120)
     portion_g: Optional[float] = Field(None, gt=0, le=2000, allow_inf_nan=False)
+    # Kayıt mililitre ya da adetle girildiyse düzeltme de o birimde yapılır.
+    # Yalnız gram kabul etmek, 97 ml'lik bir kaydı düzenlerken sayıyı gram
+    # sanıp miktarı sessizce değiştiriyordu.
+    portion_value: Optional[float] = Field(None, gt=0, allow_inf_nan=False)
+    portion_unit: Optional[Literal["adet", "dilim", "kase", "ml", "litre"]] = None
     meal_type: Optional[Literal[
         "kahvalti", "ogle", "aksam", "atistirmalik"
     ]] = None
 
     @model_validator(mode="after")
     def require_change(self):
+        if (self.portion_value is None) != (self.portion_unit is None):
+            raise ValueError("Porsiyon değeri ve birimi birlikte gönderilmelidir.")
+        if self.portion_g is not None and self.portion_value is not None:
+            raise ValueError("Porsiyon ya gram ya da birimle gönderilmelidir.")
         if (
             self.food_name_tr is None
             and self.portion_g is None
+            and self.portion_value is None
             and self.meal_type is None
         ):
             raise ValueError("En az bir düzeltme alanı gönderilmelidir.")
+        if self.portion_value is not None:
+            limit = PORTION_LIMITS[self.portion_unit]
+            if self.portion_value > limit:
+                raise ValueError(f"Porsiyon {limit} değerini aşamaz.")
         if self.food_name_tr is not None:
             self.food_name_tr = self.food_name_tr.strip()
         return self
