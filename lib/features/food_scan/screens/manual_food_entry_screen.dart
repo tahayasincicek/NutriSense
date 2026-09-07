@@ -127,7 +127,10 @@ class _ManualFoodEntryScreenState extends ConsumerState<ManualFoodEntryScreen> {
     if (result.isSuccess && result.data != null) {
       final analysis = result.data!;
       final searchResult = FoodSearchResult(
-        foodName: analysis.foodNameTr,
+        // Kayıt kanonik adla gönderilir. Türkçe görünen ad "Süt (tam yağlı)"
+        // gibi parantez taşıyor ve uç yalnız harf, rakam ve boşluk kabul
+        // ediyor; görünen adı göndermek kaydı 422 ile reddettiriyordu.
+        foodName: analysis.foodName,
         displayName: analysis.foodNameTr,
         caloriesPer100g: analysis.caloriesPer100g,
         portionOptions: analysis.portionOptions,

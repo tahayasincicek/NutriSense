@@ -167,3 +167,90 @@ def test_piece_serving_still_yields_a_count_unit_and_no_volume():
     rows = _conversions_for("medium", 1, "100")
     assert rows["adet"] == 100
     assert "ml" not in rows
+
+
+def test_response_schema_accepts_volume_portion_options():
+    """A drink's ml/litre options must survive response validation.
+
+    The response schema kept its own unit list and still rejected 'ml', so the
+    search endpoint answered 500 for every beverage while the domain tests
+    stayed green.
+    """
+    from app.models.schemas import PortionOption
+
+    for unit, grams in (("ml", 1.03), ("litre", 1030.0), ("adet", 50.0)):
+        option = PortionOption(
+            unit=unit,
+            grams_per_unit=grams,
+            source_item_id="usda-fdc:2705385",
+            source_name="USDA FoodData Central",
+        )
+        assert option.unit == unit
+
+
+def test_manual_log_converts_volume_instead_of_storing_it_as_grams(
+    client, monkeypatch
+):
+    """250 ml of milk is 257.5 g, not 250 g.
+
+    The manual endpoint passed portion_value straight through as grams. While
+    the schema pinned the unit to "gram" that was correct; once millilitres
+    were allowed it silently mislabelled every drink.
+    """
+    from types import SimpleNamespace
+    import uuid as uuid_module
+
+    from app.main import app
+    from app.models.database import SessionLocal, User, FoodLog
+    from app.routers import food_router
+    from app.routers.food_router import get_current_user
+
+    from test_api_contract import traceable_nutrition
+
+    class MilkNutrition:
+        async def get_nutrition(self, *_args, **kwargs):
+            payload = traceable_nutrition(
+                calories_per_100g=61, portion_grams=100,
+                protein=3.2, carb=4.8, fat=3.3, fiber=0.1,
+                food_name="milk", food_name_tr="Süt (tam yağlı)",
+            )
+            payload["portion_conversions"] = [{
+                "unit": "ml",
+                "grams_per_unit": 1.03,
+                "source_item_id": "usda-fdc:2705385",
+                "source_name": "USDA FoodData Central",
+            }]
+            return payload
+
+    user_id = str(uuid_module.uuid4())
+    db = SessionLocal()
+    db.add(User(
+        id=user_id, email=f"{user_id}@example.com",
+        hashed_password="unused", full_name="Volume User",
+    ))
+    db.commit()
+    db.close()
+    app.dependency_overrides[get_current_user] = lambda: SimpleNamespace(id=user_id)
+    monkeypatch.setattr(food_router, "nutrition_service", MilkNutrition())
+    try:
+        response = client.post("/api/v1/food-log/manual", json={
+            "capture_id": str(uuid_module.uuid4()),
+            "food_name": "milk",
+            "food_name_tr": "Süt",
+            "meal_type": "atistirmalik",
+            "confirmed": True,
+            "portion_value": 250,
+            "portion_unit": "ml",
+        })
+        assert response.status_code == 200, response.text
+        db = SessionLocal()
+        try:
+            log = db.query(FoodLog).filter(FoodLog.user_id == user_id).one()
+            assert log.portion_unit == "ml"
+            assert float(log.portion_value) == 250
+            assert float(log.estimated_portion_g) == pytest.approx(257.5)
+            assert float(log.total_calories) == pytest.approx(157.075, rel=1e-3)
+        finally:
+            db.close()
+    finally:
+        app.dependency_overrides.pop(get_current_user, None)

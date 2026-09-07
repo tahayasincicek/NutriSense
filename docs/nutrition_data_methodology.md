@@ -45,15 +45,30 @@ doğrulamadan geçer. Eski prototipteki veriler korunmuştur, ancak doğrulanmı
 kalori sonucu olarak kullanılmaz.
 
 USDA'nın resmî FNDDS 2021-2023 arşivi 7 Eylül 2026'da indirilip kimlik ve besin
-değerleri doğrudan karşılaştırıldı. Katalogdaki beş kayıt: baklava, genel
-hamburger, peynirli restoran pizzası, ilave yağsız omlet ve taze patatesten
-kızartma. Tarif ayrımları Türkçe sonuç adında görünür. Her kayıtta FDC kimliği,
-resmî URL, erişim zamanı, CC0 lisansı, atıf ve beş besin değeri bulunur.
+değerleri doğrudan karşılaştırıldı. Katalog 32 kayıt içerir: içecekler (süt, çay,
+Türk kahvesi, portakal suyu, kola), temel gıdalar (ekmek, yumurta, yoğurt, beyaz
+peynir, zeytin, ceviz), ana yemek ve garnitürler (pilav, makarna, bulgur,
+haşlanmış patates, tavuk göğsü, kuzu eti, humus, nohut), çorbalar, meyve ve
+sebzeler ile hazır yemekler (baklava, hamburger, pizza, omlet, patates
+kızartması). Tarif ayrımları Türkçe sonuç adında görünür. Her kayıtta FDC
+kimliği, resmî URL, erişim zamanı, CC0 lisansı, atıf ve beş besin değeri bulunur.
 `VERIFIED`, kaynak verisinden doğrulanmış çıkarım demektir; uzman değerlendirmesi,
 kişinin tabağı için ölçüm veya klinik doğrulama anlamına gelmez.
 
-Katalog, modelin 29 sınıfının yalnızca beşini kapsar. Mantı, lahmacun, menemen
-gibi desteklenmeyen sorgular benzer yiyecekle ikame edilmez. Yapılandırılmış
+Porsiyon birimleri (adet, dilim, kâse, mililitre) aynı arşivin `foodPortions`
+kayıtlarından alınır ve her satır ölçümün geldiği satırı `source_measure` ile
+gösterir; örneğin "1 medium or regular slice = 28 g". Mililitre yoğunluğu, hacim
+ölçüsünün gram ağırlığı hacme bölünerek bulunur; sabit "1 mL = 1 g" varsayılmaz.
+Hacim birimi yalnız içecek olarak incelenmiş kayıtlara verilir: katılarda "1 su
+bardağı" bir hacim ölçüsüdür ama yoğunluk değildir. Ölçüm satırı olmayan besinde
+birim hiç sunulmaz; uydurulmuş bir ağırlık yerine yalnız gram girilir.
+
+Su, sıfır kalorili olduğu için kataloga alınmadı: sıfır kalori dönen bir sonuç
+"bilinmeyen besini sıfır kalorili gösterme" korumasından geçemez. Su takibi
+uygulamada ayrı bir akışla yapılır.
+
+Katalog, modelin 29 sınıfının tamamını kapsamaz. Mantı, lahmacun, menemen gibi
+desteklenmeyen sorgular benzer yiyecekle ikame edilmez. Yapılandırılmış
 Nutritionix sağlayıcısından geçerli sonuç alınabilir; aksi halde yerel kaynak
 bulunamadığı bildirilir. TürKomp doğrulama fixture'ları çalışma zamanı kataloğuna
 aktarılmadı; özellikle çiğ mantı kaydı pişmiş mantı için kullanılmaz.
@@ -86,7 +101,7 @@ Hesaplama doğrulama fixture'ı [nutrition_validation_mvp_v1.json](../backend/te
 
 ### USDA FoodData Central
 
-[USDA FoodData Central API kılavuzu](https://fdc.nal.usda.gov/api-guide/) verilerin CC0 1.0 kapsamında kamu malı olduğunu ve kaynak gösterilmesini istediğini belirtir. [Veri türü dokümantasyonu](https://fdc.nal.usda.gov/data-documentation/) FNDDS kayıtlarının besin ve porsiyon değerleri için derlenmiş araştırma verisi olduğunu açıklar. Fixture'daki beş kayıt, [FNDDS 2021-2023 resmî indirme paketi](https://fdc.nal.usda.gov/fdc-datasets/FoodData_Central_survey_food_json_2024-10-31.zip) içinden FDC kimliğiyle alınmıştır. API anahtarı repoya veya mobil uygulamaya konmaz.
+[USDA FoodData Central API kılavuzu](https://fdc.nal.usda.gov/api-guide/) verilerin CC0 1.0 kapsamında kamu malı olduğunu ve kaynak gösterilmesini istediğini belirtir. [Veri türü dokümantasyonu](https://fdc.nal.usda.gov/data-documentation/) FNDDS kayıtlarının besin ve porsiyon değerleri için derlenmiş araştırma verisi olduğunu açıklar. Katalogdaki kayıtlar, [FNDDS 2021-2023 resmî indirme paketi](https://fdc.nal.usda.gov/fdc-datasets/FoodData_Central_survey_food_json_2024-10-31.zip) içinden FDC kimliğiyle alınmıştır. API anahtarı repoya veya mobil uygulamaya konmaz.
 
 Atıf: U.S. Department of Agriculture, Agricultural Research Service. FoodData Central, 2019. [fdc.nal.usda.gov](https://fdc.nal.usda.gov/).
 

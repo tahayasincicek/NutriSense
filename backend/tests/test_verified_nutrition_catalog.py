@@ -37,7 +37,12 @@ def test_official_catalog_portions_and_provenance(catalog_service, name, kcal, g
     assert result["provenance"]["source_item_id"].startswith("usda-fdc:")
     assert "https://fdc.nal.usda.gov/" in result["provenance"]["attribution"]
     assert result["portion_is_estimate"] is False
-    assert result["portion_conversions"] == []  # No fabricated item/bowl weights.
+    # Unit weights are allowed, but only when they cite the FNDDS portion row
+    # they were measured from. A food citation alone is not a weight.
+    for row in result["portion_conversions"]:
+        assert row["unit"] in {"adet", "dilim", "kase", "ml", "litre"}
+        assert row["grams_per_unit"] > 0
+        assert row["source_item_id"].startswith("usda-fdc:")
 
 
 def test_source_default_is_explicitly_an_estimate_and_variant_is_named(catalog_service):
@@ -134,7 +139,10 @@ async def test_incomplete_provider_response_does_not_invent_zero(catalog_service
 
     catalog_service._available = True
     monkeypatch.setattr(catalog_service, "_query_api", provider)
-    result = await catalog_service.get_nutrition("apple")
+    # A food outside the verified catalog: a broken provider answer must fail
+    # closed rather than fall back. "apple" is in the catalog now, so using it
+    # here would only prove the local fallback works.
+    result = await catalog_service.get_nutrition("kereviz")
     assert result["available"] is False
     assert "total_calories" not in result
 

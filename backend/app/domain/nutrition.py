@@ -207,6 +207,80 @@ _ALIASES: Mapping[tuple[str, str], tuple[str, str, str]] = {
     ("ekmek", "tr"): ("food.bread", "bread", "Ekmek"),
     ("egg", "en"): ("food.egg", "egg", "Yumurta"),
     ("yumurta", "tr"): ("food.egg", "egg", "Yumurta"),
+    # Doğrulanmış katalogdaki besinler Türkçe adlarıyla da bulunabilmeli.
+    # Kanonik ad katalog anahtarıyla birebir aynı olmalı; yoksa arama
+    # kaydı bulamaz ve "besin bulunamadı" döner.
+    ("milk", "en"): ("food.milk", "milk", "Süt"),
+    ("sut", "tr"): ("food.milk", "milk", "Süt"),
+    ("tea", "en"): ("food.tea", "tea", "Çay"),
+    ("cay", "tr"): ("food.tea", "tea", "Çay"),
+    ("turkish_coffee", "en"): (
+        "food.turkish_coffee", "turkish_coffee", "Türk kahvesi"
+    ),
+    ("turk_kahvesi", "tr"): (
+        "food.turkish_coffee", "turkish_coffee", "Türk kahvesi"
+    ),
+    ("kahve", "tr"): ("food.turkish_coffee", "turkish_coffee", "Türk kahvesi"),
+    ("orange_juice", "en"): (
+        "food.orange_juice", "orange_juice", "Portakal suyu"
+    ),
+    ("portakal_suyu", "tr"): (
+        "food.orange_juice", "orange_juice", "Portakal suyu"
+    ),
+    ("cola", "en"): ("food.cola", "cola", "Kola"),
+    ("kola", "tr"): ("food.cola", "cola", "Kola"),
+    ("yogurt", "en"): ("food.yogurt", "yogurt", "Yoğurt"),
+    ("yogurt", "tr"): ("food.yogurt", "yogurt", "Yoğurt"),
+    ("feta_cheese", "en"): ("food.feta_cheese", "feta_cheese", "Beyaz peynir"),
+    ("beyaz_peynir", "tr"): (
+        "food.feta_cheese", "feta_cheese", "Beyaz peynir"
+    ),
+    ("peynir", "tr"): ("food.feta_cheese", "feta_cheese", "Beyaz peynir"),
+    ("green_olives", "en"): (
+        "food.green_olives", "green_olives", "Yeşil zeytin"
+    ),
+    ("zeytin", "tr"): ("food.green_olives", "green_olives", "Yeşil zeytin"),
+    ("walnuts", "en"): ("food.walnuts", "walnuts", "Ceviz"),
+    ("ceviz", "tr"): ("food.walnuts", "walnuts", "Ceviz"),
+    ("bulgur", "en"): ("food.bulgur", "bulgur", "Bulgur"),
+    ("bulgur", "tr"): ("food.bulgur", "bulgur", "Bulgur"),
+    ("boiled_potato", "en"): (
+        "food.boiled_potato", "boiled_potato", "Haşlanmış patates"
+    ),
+    ("haslanmis_patates", "tr"): (
+        "food.boiled_potato", "boiled_potato", "Haşlanmış patates"
+    ),
+    ("patates", "tr"): (
+        "food.boiled_potato", "boiled_potato", "Haşlanmış patates"
+    ),
+    ("chicken_breast", "en"): (
+        "food.chicken_breast", "chicken_breast", "Tavuk göğsü"
+    ),
+    ("tavuk_gogsu", "tr"): (
+        "food.chicken_breast", "chicken_breast", "Tavuk göğsü"
+    ),
+    ("tavuk", "tr"): ("food.chicken_breast", "chicken_breast", "Tavuk göğsü"),
+    ("lamb", "en"): ("food.lamb", "lamb", "Kuzu eti"),
+    ("kuzu_eti", "tr"): ("food.lamb", "lamb", "Kuzu eti"),
+    ("kuzu", "tr"): ("food.lamb", "lamb", "Kuzu eti"),
+    ("hummus", "en"): ("food.hummus", "hummus", "Humus"),
+    ("humus", "tr"): ("food.hummus", "hummus", "Humus"),
+    ("chickpeas", "en"): ("food.chickpeas", "chickpeas", "Nohut"),
+    ("nohut", "tr"): ("food.chickpeas", "chickpeas", "Nohut"),
+    ("vegetable_soup", "en"): (
+        "food.vegetable_soup", "vegetable_soup", "Sebze çorbası"
+    ),
+    ("sebze_corbasi", "tr"): (
+        "food.vegetable_soup", "vegetable_soup", "Sebze çorbası"
+    ),
+    ("orange", "en"): ("food.orange", "orange", "Portakal"),
+    ("portakal", "tr"): ("food.orange", "orange", "Portakal"),
+    ("watermelon", "en"): ("food.watermelon", "watermelon", "Karpuz"),
+    ("karpuz", "tr"): ("food.watermelon", "watermelon", "Karpuz"),
+    ("tomato", "en"): ("food.tomato", "tomato", "Domates"),
+    ("domates", "tr"): ("food.tomato", "tomato", "Domates"),
+    ("cucumber", "en"): ("food.cucumber", "cucumber", "Salatalık"),
+    ("salatalik", "tr"): ("food.cucumber", "cucumber", "Salatalık"),
 }
 
 

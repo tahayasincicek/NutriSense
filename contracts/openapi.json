@@ -2458,7 +2458,9 @@
             "enum": [
               "adet",
               "dilim",
-              "kase"
+              "kase",
+              "ml",
+              "litre"
             ],
             "title": "Unit",
             "type": "string"

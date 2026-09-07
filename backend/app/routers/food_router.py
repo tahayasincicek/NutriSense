@@ -833,11 +833,27 @@ async def create_manual_food_log(
             )
         raise HTTPException(status_code=409, detail="Bu çekim kimliği başka analizde kullanıldı.")
 
+    # Porsiyon değeri gram olduğu varsayılamaz. Şema yalnız gram kabul
+    # ederken bu doğruydu; artık mililitre ve adet de gelebiliyor ve
+    # doğrudan gram diye geçirmek 250 ml sütü 250 gram olarak kaydediyordu.
+    # Grama çevirmeyi, tarama akışındaki gibi doğrulanmış dönüşüm yapar.
     nutrition = await nutrition_service.get_nutrition(
         request.food_name,
-        portion_grams=request.portion_value,
+        portion_grams=(
+            request.portion_value if request.portion_unit == "gram" else None
+        ),
         input_locale="tr-TR",
     )
+    if request.portion_unit != "gram":
+        try:
+            nutrition = _apply_portion(
+                nutrition,
+                portion_value=request.portion_value,
+                portion_unit=request.portion_unit,
+                portion_method=request.portion_method,
+            )
+        except NutritionDomainError as exc:
+            raise HTTPException(status_code=422, detail=str(exc)) from exc
     if not _nutrition_is_traceable(nutrition):
         raise HTTPException(
             status_code=422,

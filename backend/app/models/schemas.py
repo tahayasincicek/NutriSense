@@ -47,7 +47,10 @@ class NutritionProvenanceData(BaseModel):
 
 
 class PortionOption(BaseModel):
-    unit: Literal["adet", "dilim", "kase"]
+    unit: Literal["adet", "dilim", "kase", "ml", "litre"]
+    # Hacim birimlerinde bu alan bir porsiyon ağırlığı değil, yoğunluktur:
+    # bir mililitre yaklaşık bir gramdır, bir litre bin gram. Sayılabilir
+    # birimlerin üst sınırı ikisini birden karşılamıyordu.
     grams_per_unit: float = Field(..., gt=0, le=2000, allow_inf_nan=False)
     source_item_id: str
     source_name: str
