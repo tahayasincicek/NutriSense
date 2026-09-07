@@ -181,10 +181,6 @@ _ALIASES: Mapping[tuple[str, str], tuple[str, str, str]] = {
     ),
     ("simit", "en"): ("food.simit", "simit", "Simit"),
     ("simit", "tr"): ("food.simit", "simit", "Simit"),
-    # Cig hamur kaydi; pisirilmis manti degil, o yuzden `manti` sinifina
-    # baglanmaz, yalniz kendi adiyla aranir.
-    ("raw_manti", "en"): ("food.raw_manti", "raw_manti", "Mantı (çiğ)"),
-    ("cig_manti", "tr"): ("food.raw_manti", "raw_manti", "Mantı (çiğ)"),
     ("lahmacun", "en"): ("food.lahmacun", "lahmacun", "Lahmacun"),
     ("lahmacun", "tr"): ("food.lahmacun", "lahmacun", "Lahmacun"),
     ("manti", "en"): ("food.manti", "manti", "Mantı"),
