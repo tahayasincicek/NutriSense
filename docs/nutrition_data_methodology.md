@@ -45,7 +45,7 @@ doğrulamadan geçer. Eski prototipteki veriler korunmuştur, ancak doğrulanmı
 kalori sonucu olarak kullanılmaz.
 
 USDA'nın resmî FNDDS 2021-2023 arşivi 7 Eylül 2026'da indirilip kimlik ve besin
-değerleri doğrudan karşılaştırıldı. Katalog 200 kayıt içerir (188 doğrulanmış, 12 tahmini): içecekler (süt, çay,
+değerleri doğrudan karşılaştırıldı. Katalog 500 kayıt içerir (488 doğrulanmış, 12 tahmini): içecekler (süt, çay,
 Türk kahvesi, portakal suyu, kola), temel gıdalar (ekmek, yumurta, yoğurt, beyaz
 peynir, zeytin, ceviz), ana yemek ve garnitürler (pilav, makarna, bulgur,
 haşlanmış patates, tavuk göğsü, kuzu eti, humus, nohut), çorbalar, meyve ve
