@@ -252,6 +252,21 @@ def normalize_food_name(food_name: str, locale: str) -> CanonicalFood:
     )
 
 
+COUNT_UNITS = frozenset({"adet", "dilim", "kase"})
+VOLUME_UNITS = frozenset({"ml", "litre"})
+PORTION_UNITS = frozenset({"gram"}) | COUNT_UNITS | VOLUME_UNITS
+
+# Birim başına üst sınır. Sayılabilir birimlerde 20 adet makul bir tavan;
+# hacimde aynı tavanı kullanmak 20 ml'de kesip su kaydını imkânsız kılardı.
+_UNIT_LIMITS = {
+    "adet": Decimal("20"),
+    "dilim": Decimal("20"),
+    "kase": Decimal("20"),
+    "ml": Decimal("3000"),
+    "litre": Decimal("3"),
+}
+
+
 @dataclass(frozen=True)
 class UnitConversion:
     canonical_food_id: str
@@ -261,10 +276,20 @@ class UnitConversion:
     source_name: str
 
     def __post_init__(self) -> None:
-        object.__setattr__(
-            self, "grams_per_unit", validate_portion_grams(self.grams_per_unit)
-        )
-        if self.unit not in {"adet", "dilim", "kase"}:
+        # Bir mililitre gram cinsinden 1 civarıdır; porsiyon doğrulaması alt
+        # sınır olarak bir gram beklediği için hacim birimleri o denetimin
+        # dışında tutulur, yalnız pozitiflik ve akla yatkınlık aranır.
+        if self.unit in VOLUME_UNITS:
+            density = to_decimal(self.grams_per_unit, "grams_per_unit")
+            ceiling = Decimal("2000") if self.unit == "litre" else Decimal("2")
+            if density <= 0 or density > ceiling:
+                raise NutritionDomainError("Birim yoğunluğu akla yatkın değil.")
+            object.__setattr__(self, "grams_per_unit", density)
+        else:
+            object.__setattr__(
+                self, "grams_per_unit", validate_portion_grams(self.grams_per_unit)
+            )
+        if self.unit not in COUNT_UNITS | VOLUME_UNITS:
             raise NutritionDomainError("Desteklenmeyen porsiyon birimi.")
         if not self.source_item_id.strip() or not self.source_name.strip():
             raise NutritionDomainError("Birim dönüşüm kaynağı zorunludur.")
@@ -280,8 +305,13 @@ def portion_to_grams(
     amount = to_decimal(value, "portion_value")
     if unit == "gram":
         return validate_portion_grams(amount)
-    if amount <= 0 or amount > Decimal("20"):
-        raise NutritionDomainError("Birim adedi 0 ile 20 arasında olmalıdır.")
+    limit = _UNIT_LIMITS.get(unit)
+    if limit is None:
+        raise NutritionDomainError("Desteklenmeyen porsiyon birimi.")
+    if amount <= 0 or amount > limit:
+        raise NutritionDomainError(
+            f"Porsiyon miktarı 0 ile {limit.normalize()} arasında olmalıdır."
+        )
     conversion = conversions.get((canonical_food_id, unit))
     if conversion is None:
         raise NutritionDomainError(

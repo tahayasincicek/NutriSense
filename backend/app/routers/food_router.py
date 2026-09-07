@@ -936,7 +936,7 @@ async def search_food(
     db: Session = Depends(get_db),
 ):
     try:
-        nutrition = await nutrition_service.get_nutrition(query)
+        nutrition = await nutrition_service.get_nutrition(query, input_locale="tr-TR")
     except Exception as e:
         logger.error(f"Search error: {e}")
         raise HTTPException(
@@ -944,7 +944,7 @@ async def search_food(
             detail="Besin bulunamadı."
         )
 
-    if not nutrition.get("available"):
+    if not _nutrition_is_traceable(nutrition):
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Besin bulunamadı."
@@ -980,25 +980,16 @@ async def search_food(
         status="succeeded",
         food_name=food_name_tr,
         confidence=1.0,
-        analysis_payload={
-            "image_key": "manual_search",
-            "primary_candidate_name": nutrition.get("food_name", query),
-            "primary_candidate_name_tr": food_name_tr,
-            "recognition_source": "manual",
-            "nutrition_source": nutrition.get("source", "nutritionix"),
-            "nutrition_status": "available",
-            "calories_per_100g": calories_per_100g,
-            "portion_grams": portion_value,
-            "total_calories": total_calories,
-            "meal_type": "atistirmalik"
-        }
+        expires_at=utc_now() + timedelta(minutes=30),
     )
-    db.add(attempt)
-    db.commit()
 
-    tts_text = f"{food_name_tr} bulundu. Tahmini {total_calories:.0f} kalori."
+    tts_text = (
+        f"{food_name_tr} bulundu. Tahmini {portion_value:.0f} gram, "
+        f"yaklaşık {total_calories:.0f} kalori. "
+        "Tarif ve miktar farklı olabilir; porsiyonu kontrol edip onaylayın."
+    )
 
-    return FoodAnalysisResponse(
+    response = FoodAnalysisResponse(
         analysis_id=attempt.id,
         log_id=None,
         food_name=nutrition.get("food_name", query),
@@ -1023,10 +1014,16 @@ async def search_food(
         nutrition_source=nutrition.get("source", "nutritionix"),
         nutrition_status="available",
         nutrition_reliability=nutrition.get("nutrition_reliability", "verified_provider"),
-        needs_confirmation=False,
+        provenance=nutrition["provenance"],
+        portion_options=nutrition.get("portion_conversions", []),
+        needs_confirmation=True,
         can_confirm=True,
         tts_text=tts_text,
     )
+    attempt.analysis_payload = response.model_dump(mode="json")
+    db.add(attempt)
+    db.commit()
+    return response
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -1575,6 +1572,11 @@ def _delivery_response(delivery: NotificationDelivery) -> ChannelDeliveryRespons
 def _report_message(report: DietitianReport) -> str:
     if report.status == "sent":
         return "Seçilen kanallar sağlayıcı tarafından kabul edildi; nihai teslim ayrıca doğrulanmalıdır."
+    sms_parts = (report.payload_json or {}).get("_sms_delivery", {}).get("parts", [])
+    if any(part["status"] == "sent" for part in sms_parts) and not all(
+        part["status"] == "sent" for part in sms_parts
+    ):
+        return "SMS raporunun bazı parçaları kabul edildi; rapor henüz tamamlanmadı. Kanal ayrıntılarını kontrol edin."
     if report.status == "partial_failed":
         return "Bazı kanallar kabul edildi, bazıları başarısız oldu. Kanal ayrıntılarını kontrol edin."
     if report.status in {"queued", "sending"}:
@@ -1643,10 +1645,24 @@ async def _process_report_outbox(
         delivery.error_message = None
         db.commit()
         try:
+            sms_options = {}
+            if delivery.channel == "sms":
+                def checkpoint_sms(progress):
+                    # Separate delivery bookkeeping from the consent-hashed record snapshot.
+                    payload = dict(report.payload_json)
+                    payload["_sms_delivery"] = progress
+                    report.payload_json = payload
+                    db.commit()
+
+                sms_options = {
+                    "sms_progress": report.payload_json.get("_sms_delivery"),
+                    "sms_checkpoint": checkpoint_sms,
+                }
             result = await notification_service.send_channel(
                 channel=delivery.channel,
                 destination=destination,
                 report_data=report.payload_json,
+                **sms_options,
             )
         except ChannelDeliveryError as error:
             delivery.status = "failed"
@@ -1670,10 +1686,14 @@ async def _process_report_outbox(
     ).all()
     sent_count = sum(item.status == "sent" for item in deliveries)
     failed_count = sum(item.status == "failed" for item in deliveries)
+    sms_part_accepted = any(
+        part["status"] == "sent"
+        for part in report.payload_json.get("_sms_delivery", {}).get("parts", [])
+    )
     if sent_count == len(deliveries):
         report.status = "sent"
         report.sent_at = utc_now()
-    elif sent_count and failed_count:
+    elif (sent_count or sms_part_accepted) and failed_count:
         report.status = "partial_failed"
     elif failed_count == len(deliveries):
         report.status = "failed"
@@ -1691,7 +1711,7 @@ async def _process_report_outbox(
     db.add(AuthAuditLog(
         user_id=report.user_id,
         event="dietitian_report_delivery_processed",
-        success=sent_count > 0,
+        success=sent_count > 0 or sms_part_accepted,
         reason=report.status,
         metadata_json={
             "report_id": str(report.id),
@@ -1783,7 +1803,7 @@ async def send_to_dietitian(
         user_id=current_user.id,
         assignment_id=assignment.id,
         consent_type="dietitian_report_share",
-        policy_version="report-share-v2",
+        policy_version="report-share-v3",
         granted=True,
         context_hash=digest,
         channels_json=payload["channels"],

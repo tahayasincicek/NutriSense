@@ -26,26 +26,33 @@ def upgrade() -> None:
         "dietitian_notes",
         ["user_id", "dietitian_id", "created_at"],
     )
-    op.drop_constraint(
-        "uq_note_user_dietitian", "dietitian_notes", type_="unique"
-    )
+    # SQLite kisit dusurmeyi desteklemez; batch modu tabloyu yeniden kurar.
+    # MySQL'de ayni cagri dogrudan ALTER TABLE'a cevrilir.
+    with op.batch_alter_table("dietitian_notes") as batch:
+        batch.drop_constraint("uq_note_user_dietitian", type_="unique")
 
 
 def downgrade() -> None:
     # Tekillige donmek icin cift basina en yeni not disindakiler silinir;
-    # aksi halde kisit eklenemez.
+    # aksi halde kisit eklenemez. Alt sorgulu bicim hem MySQL'de hem
+    # SQLite'ta calisir; "DELETE n FROM ... JOIN" yalnizca MySQL soz dizimi.
     op.execute(
         """
-        DELETE n FROM dietitian_notes n
-        JOIN dietitian_notes newer
-          ON newer.user_id = n.user_id
-         AND newer.dietitian_id = n.dietitian_id
-         AND newer.created_at > n.created_at
+        DELETE FROM dietitian_notes
+        WHERE id IN (
+            SELECT id FROM (
+                SELECT n.id AS id
+                FROM dietitian_notes n
+                JOIN dietitian_notes newer
+                  ON newer.user_id = n.user_id
+                 AND newer.dietitian_id = n.dietitian_id
+                 AND newer.created_at > n.created_at
+            ) AS stale
+        )
         """
     )
-    op.create_unique_constraint(
-        "uq_note_user_dietitian",
-        "dietitian_notes",
-        ["user_id", "dietitian_id"],
-    )
+    with op.batch_alter_table("dietitian_notes") as batch:
+        batch.create_unique_constraint(
+            "uq_note_user_dietitian", ["user_id", "dietitian_id"]
+        )
     op.drop_index("ix_dietitian_notes_pair_created", "dietitian_notes")

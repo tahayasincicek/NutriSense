@@ -5,10 +5,12 @@ from __future__ import annotations
 import json
 import logging
 import os
+from dataclasses import replace
 from datetime import datetime, timezone
 from decimal import Decimal
 from pathlib import Path
 from typing import Optional
+from urllib.parse import urlsplit
 
 import httpx
 from tenacity import retry, retry_if_exception_type, stop_after_attempt, wait_exponential
@@ -23,6 +25,8 @@ from ..domain.nutrition import (
     food_lookup_key,
     normalize_food_name,
     validate_portion_grams,
+    UnitConversion,
+    to_decimal,
 )
 
 logger = logging.getLogger(__name__)
@@ -30,13 +34,10 @@ settings = get_settings()
 
 
 def _resolve_local_db_path() -> Path:
-    """Locate the verified calorie database across repo and container layouts.
+    """Use the source-verified catalog bundled with app code in every layout.
 
-    In the repo the file sits at `<root>/ai_model/`, four levels above this
-    module. Inside the image the app is copied to `/app/app/...`, so the same
-    relative walk lands on `/ai_model` and silently finds nothing — which made
-    every manual search answer "Besin bulunamadı". Try the known locations and
-    allow an explicit override.
+    An explicit override is supported, but it passes the same per-record
+    validation. The old ai_model prototype is never an automatic fallback.
     """
 
     override = os.getenv("CALORIE_DB_PATH", "").strip()
@@ -44,10 +45,7 @@ def _resolve_local_db_path() -> Path:
         return Path(override)
 
     here = Path(__file__).resolve()
-    candidates = (
-        here.parents[3] / "ai_model" / "calorie_database.json",  # repo layout
-        here.parents[2] / "ai_model" / "calorie_database.json",  # /app/ai_model
-    )
+    candidates = (here.parents[1] / "data" / "verified_nutrition.json",)
     for candidate in candidates:
         if candidate.exists():
             return candidate
@@ -94,11 +92,60 @@ class NutritionixService:
                 LOCAL_DB_PATH,
             )
             return {}, {}
-        with LOCAL_DB_PATH.open("r", encoding="utf-8") as file:
-            payload = json.load(file)
-        return payload.get("_meta", {}), {
-            key: value for key, value in payload.items() if key != "_meta"
-        }
+        try:
+            with LOCAL_DB_PATH.open("r", encoding="utf-8") as file:
+                payload = json.load(file)
+            if not isinstance(payload, dict) or not isinstance(payload.get("_meta"), dict):
+                raise ValueError("Invalid catalog")
+            return payload["_meta"], {
+                key: value for key, value in payload.items() if key != "_meta"
+            }
+        except (OSError, ValueError):
+            logger.error("Yerel besin kataloğu okunamadı; doğrulanmamış sonuç üretilmeyecek.")
+            return {}, {}
+
+    def _validated_local_record(self, key: str):
+        """Reject incomplete records individually, even in a VERIFIED catalog."""
+        try:
+            data = self._local_db[key]
+            if data["evidence_status"] != "VERIFIED":
+                return None
+            source_id = data["source_item_id"]
+            source = self._local_meta["source_inventory"][source_id]
+            for field in ("license", "attribution", "source_url", "source_item_name"):
+                value = source[field]
+                if not isinstance(value, str) or not value.strip():
+                    return None
+                if value.strip().lower() in {"local", "mock data", "unknown", "placeholder"}:
+                    return None
+            url = urlsplit(source["source_url"])
+            if url.scheme != "https" or not url.hostname:
+                return None
+            if not isinstance(source_id, str) or not source_id.strip():
+                return None
+            retrieved = datetime.fromisoformat(source["retrieved_at"].replace("Z", "+00:00"))
+            if retrieved.tzinfo is None or retrieved > datetime.now(timezone.utc):
+                return None
+            profile = NutrientsPer100g(**{
+                field: data[db_field] for field, db_field in (
+                    ("calories", "calories_per_100g"), ("protein", "protein_per_100g"),
+                    ("carbs", "carbs_per_100g"), ("fat", "fat_per_100g"),
+                    ("fiber", "fiber_per_100g"),
+                )
+            })
+            validate_portion_grams(data["default_portion_g"])
+            for row in data.get("portion_units", []):
+                # Units need their own evidence; a food citation alone is not a weight measurement.
+                if row["source_item_id"] != source_id or not row["source_measure"]:
+                    return None
+                UnitConversion(
+                    canonical_food_id=normalize_food_name(key, data.get("locale", "tr-TR")).canonical_food_id,
+                    unit=row["unit"], grams_per_unit=row["grams_per_unit"],
+                    source_item_id=source_id, source_name=source["attribution"],
+                )
+            return data, source, profile
+        except (KeyError, TypeError, ValueError, AttributeError):
+            return None
 
     @retry(
         stop=stop_after_attempt(3),
@@ -161,6 +208,8 @@ class NutritionixService:
         input_locale: str,
     ) -> dict:
         serving_weight = validate_portion_grams(api_food["serving_weight_grams"])
+        if not isinstance(api_food.get("food_name"), str) or not api_food["food_name"].strip():
+            raise NutritionDomainError("Sağlayıcının besin adı eksik.")
         canonical = normalize_food_name(api_food.get("food_name", ""), "en-US")
         profile = self._profile_from_serving(api_food, serving_weight)
         selected_grams = serving_weight if portion_grams is None else validate_portion_grams(portion_grams)
@@ -190,11 +239,11 @@ class NutritionixService:
     def _profile_from_serving(api_food: dict, serving_weight: Decimal) -> NutrientsPer100g:
         scale = Decimal("100") / serving_weight
         return NutrientsPer100g(
-            calories=Decimal(str(api_food.get("nf_calories", 0))) * scale,
-            protein=Decimal(str(api_food.get("nf_protein", 0))) * scale,
-            carbs=Decimal(str(api_food.get("nf_total_carbohydrate", 0))) * scale,
-            fat=Decimal(str(api_food.get("nf_total_fat", 0))) * scale,
-            fiber=Decimal(str(api_food.get("nf_dietary_fiber", 0))) * scale,
+            calories=to_decimal(api_food["nf_calories"], "calories") * scale,
+            protein=to_decimal(api_food["nf_protein"], "protein") * scale,
+            carbs=to_decimal(api_food["nf_total_carbohydrate"], "carbs") * scale,
+            fat=to_decimal(api_food["nf_total_fat"], "fat") * scale,
+            fiber=to_decimal(api_food["nf_dietary_fiber"], "fiber") * scale,
         )
 
     def _query_local_db(
@@ -207,28 +256,26 @@ class NutritionixService:
         # "Köfte", "kofte", "KÖFTE" hepsi `kofte` anahtarına inmeli; düz
         # lower()+replace() Türkçe karakterleri koruyup eşleşmeyi kaçırıyordu.
         key = food_lookup_key(food_name)
-        if not self._local_verified or key not in self._local_db:
+        if key not in self._local_db:
+            for candidate_key, candidate in self._local_db.items():
+                if isinstance(candidate, dict) and key == food_lookup_key(candidate.get("display_name_tr", "")):
+                    key = candidate_key
+                    break
+            else:
+                key = normalize_food_name(food_name, input_locale).canonical_name
+        validated = self._validated_local_record(key) if self._local_verified else None
+        if validated is None:
             runtime_metrics.provider_outcome("verified_local", "not_found")
             logger.warning("Doğrulanmış besin değeri bulunamadı")
             return self._not_found(food_name, input_locale)
 
-        data = self._local_db[key]
+        data, source_info, profile = validated
         canonical = normalize_food_name(key, input_locale)
-        profile = NutrientsPer100g(
-            calories=data["calories_per_100g"],
-            protein=data.get("protein_per_100g", 0),
-            carbs=data.get("carbs_per_100g", 0),
-            fat=data.get("fat_per_100g", 0),
-            fiber=data.get("fiber_per_100g", 0),
-        )
+        canonical = replace(canonical, food_name_tr=data.get("display_name_tr", canonical.food_name_tr))
         default_portion = validate_portion_grams(data["default_portion_g"])
         selected_grams = default_portion if portion_grams is None else validate_portion_grams(portion_grams)
         calculation = calculate_nutrition(profile, selected_grams)
-        source_item_id = data.get("source_item_id", "local_mock")
-        source_info = self._local_meta.get("source_inventory", {}).get(
-            source_item_id,
-            {"retrieved_at": "2026-01-01T00:00:00Z", "license": "Local", "attribution": "Mock Data"}
-        )
+        source_item_id = data["source_item_id"]
         runtime_metrics.provider_outcome("verified_local", "success")
         return self._result_dict(
             canonical=canonical,
@@ -244,19 +291,38 @@ class NutritionixService:
             serving_quantity=data.get("serving_quantity", 1),
             license_name=source_info["license"],
             attribution=source_info["attribution"],
+            # Yerel veritabanı besin başına birim karşılığı taşıyabilir:
+            # bir simit kaç gram, bir mililitre ayran kaç gram. Sağlayıcı
+            # ölçüsü yokken kullanıcı yine de "1 adet" ya da "200 ml"
+            # diyebilsin.
+            declared_units=data.get("portion_units"),
         )
 
     @staticmethod
     def _result_dict(
         *, canonical, profile, calculation, default_portion, portion_method,
         source, source_item_id, source_locale, retrieved_at, serving_unit,
-        serving_quantity, license_name, attribution,
+        serving_quantity, license_name, attribution, declared_units=None,
     ) -> dict:
         unit_aliases = {
             "medium": "adet", "small": "adet", "large": "adet",
             "item": "adet", "piece": "adet", "slice": "dilim", "bowl": "kase",
         }
-        converted_unit = unit_aliases.get(str(serving_unit).lower())
+        # Sağlayıcı hacim ölçüsü verdiğinde porsiyon ağırlığından besinin
+        # gerçek yoğunluğu çıkar: 8 fl oz = 240 g ise 1 ml = 1.014 g. Sabit
+        # "1 ml = 1 gram" varsaymak sütte ve meyve suyunda yüzde üç ile beş
+        # arası sapma bırakırdı.
+        volume_ml = {
+            "ml": Decimal("1"), "milliliter": Decimal("1"),
+            "millilitre": Decimal("1"),
+            "fl_oz": Decimal("29.5735"), "fl oz": Decimal("29.5735"),
+            "cup": Decimal("236.588"), "tbsp": Decimal("14.7868"),
+            "tsp": Decimal("4.92892"),
+            "l": Decimal("1000"), "liter": Decimal("1000"),
+            "litre": Decimal("1000"),
+        }
+        normalized_unit = str(serving_unit).lower().strip()
+        converted_unit = unit_aliases.get(normalized_unit)
         conversions = []
         quantity = Decimal(str(serving_quantity or 1))
         if converted_unit and quantity > 0:
@@ -266,6 +332,49 @@ class NutritionixService:
                 "source_item_id": source_item_id,
                 "source_name": attribution,
             })
+        millilitres = volume_ml.get(normalized_unit)
+        if millilitres is not None and quantity > 0:
+            density = Decimal(str(default_portion)) / (quantity * millilitres)
+            if Decimal("0") < density <= Decimal("2"):
+                conversions.append({
+                    "unit": "ml",
+                    "grams_per_unit": float(density),
+                    "source_item_id": source_item_id,
+                    "source_name": attribution,
+                })
+                conversions.append({
+                    "unit": "litre",
+                    "grams_per_unit": float(density * Decimal("1000")),
+                    "source_item_id": source_item_id,
+                    "source_name": attribution,
+                })
+        # Veritabanında elle tanımlanmış birimler. Sağlayıcıdan gelen ölçü
+        # önceliklidir; aynı birim iki kez tanımlanmaz.
+        seen = {row["unit"] for row in conversions}
+        for row in declared_units or []:
+            unit = str(row.get("unit", "")).strip()
+            # Doğrulayıcı litre satırını da kabul ediyor; burada elenirse
+            # kayıt geçerli sayılıp birim sessizce kaybolurdu.
+            if unit in seen or unit not in {"adet", "dilim", "kase", "ml", "litre"}:
+                continue
+            grams = Decimal(str(row["grams_per_unit"]))
+            if grams <= 0:
+                continue
+            conversions.append({
+                "unit": unit,
+                "grams_per_unit": float(grams),
+                "source_item_id": source_item_id,
+                "source_name": attribution,
+            })
+            seen.add(unit)
+            if unit == "ml" and "litre" not in seen:
+                conversions.append({
+                    "unit": "litre",
+                    "grams_per_unit": float(grams * Decimal("1000")),
+                    "source_item_id": source_item_id,
+                    "source_name": attribution,
+                })
+                seen.add("litre")
         return {
             "available": True,
             "canonical_food_id": canonical.canonical_food_id,
@@ -343,8 +452,10 @@ class NutritionixService:
                 logger.warning("Nutritionix araması kullanılamıyor")
         if not self._local_verified:
             return []
-        query_lower = query.lower()
+        query_lower = food_lookup_key(query)
         return [
             {"food_name": key, "photo": ""}
-            for key in self._local_db if query_lower in key
+            for key, data in self._local_db.items()
+            if self._validated_local_record(key) is not None
+            and (query_lower in key or query_lower in food_lookup_key(data.get("display_name_tr", "")))
         ][:limit]

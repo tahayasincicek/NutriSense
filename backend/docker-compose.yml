@@ -44,11 +44,7 @@ services:
       SMTP_PASSWORD: ""
       SMTP_FROM_EMAIL: no-reply@nutrisense.dev
       NOTIFICATION_MODE: sandbox
-      CALORIE_DB_PATH: /app/ai_model/calorie_database.json
-    # Doğrulanmış kalori veritabanı derleme bağlamının (backend/) dışında
-    # kaldığı için imaja kopyalanamıyor; salt okunur bağlanıyor.
-    volumes:
-      - ../ai_model:/app/ai_model:ro
+      CALORIE_DB_PATH: /app/app/data/verified_nutrition.json
     ports:
       - "8000:8000"
     depends_on:

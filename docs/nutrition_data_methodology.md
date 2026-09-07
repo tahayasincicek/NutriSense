@@ -36,6 +36,50 @@ Bir alan eksikse veri `NutritionProvenance` doğrulamasından geçmez. Mobil bin
 
 Eski `ai_model/calorie_database.json` küçük bir prototip listesidir. Kaynak kimliği ve lisans izi olmadığı için `UNVERIFIED` kabul edilir ve başarılı runtime fallback olarak kullanılmaz.
 
+### 7 Eylül 2026: çalışma zamanı kaynak doğrulaması
+
+Varsayılan yerel katalog artık `backend/app/data/verified_nutrition.json` dosyasıdır.
+Docker imajına `app/` ile birlikte girer; geliştirme dizinine bağlı bir volume
+gerektirmez. `CALORIE_DB_PATH` ile verilen özel kataloglar da aynı kayıt bazlı
+doğrulamadan geçer. Eski prototipteki veriler korunmuştur, ancak doğrulanmış
+kalori sonucu olarak kullanılmaz.
+
+USDA'nın resmî FNDDS 2021-2023 arşivi 7 Eylül 2026'da indirilip kimlik ve besin
+değerleri doğrudan karşılaştırıldı. Katalogdaki beş kayıt: baklava, genel
+hamburger, peynirli restoran pizzası, ilave yağsız omlet ve taze patatesten
+kızartma. Tarif ayrımları Türkçe sonuç adında görünür. Her kayıtta FDC kimliği,
+resmî URL, erişim zamanı, CC0 lisansı, atıf ve beş besin değeri bulunur.
+`VERIFIED`, kaynak verisinden doğrulanmış çıkarım demektir; uzman değerlendirmesi,
+kişinin tabağı için ölçüm veya klinik doğrulama anlamına gelmez.
+
+Katalog, modelin 29 sınıfının yalnızca beşini kapsar. Mantı, lahmacun, menemen
+gibi desteklenmeyen sorgular benzer yiyecekle ikame edilmez. Yapılandırılmış
+Nutritionix sağlayıcısından geçerli sonuç alınabilir; aksi halde yerel kaynak
+bulunamadığı bildirilir. TürKomp doğrulama fixture'ları çalışma zamanı kataloğuna
+aktarılmadı; özellikle çiğ mantı kaydı pişmiş mantı için kullanılmaz.
+
+Başlangıç 100 gramı yalnız hesaplama temelidir ve tahmin olarak işaretlenir.
+Gerçek bir adet/dilim/kase ağırlığı uydurulmaz. Kullanıcı gramı değiştirip
+onaylayabilir; kaynak ve makrolar aynı analiz kaydından günlük kaydına taşınır.
+Tarif ve gerçek porsiyon belirsizliği devam eder.
+
+Kaynak envanteri bulunması tek başına yeterli değildir. Her kayıt ayrı
+`VERIFIED` durumu, kaynak kimliği, HTTPS kaynak URL'si, tarih, atıf, lisans ve
+eksiksiz sonlu besin değerleri taşımalıdır. Eksik/bozuk kayıt ile `Mock Data`
+kaynağı reddedilir. Nutritionix'in eksik makroları da sıfırla tamamlanmaz.
+
+Yeniden üretim (backend dizininde, resmî arşiv indirildikten sonra):
+
+```text
+python scripts/build_nutrition_catalog.py --archive /path/to/FoodData_Central_survey_food_json_2024-10-31.zip
+```
+
+Betik ağ çağrısı yapmaz; arşivin SHA-256 değerini kontrol eder, seçilen FDC
+kimliklerini, açıklamalarını ve birimlerini doğrular. Farklı arşivde durur;
+yeni sürüme geçiş açık inceleme gerektirir. Kaynak ve indirme bağlantıları
+aşağıdaki USDA bölümündedir. Katalog arama/kayıt entegrasyonu ve olumsuz veri
+senaryoları `backend/tests/test_verified_nutrition_catalog.py` ile korunur.
+
 ## 3. Resmî referanslar ve lisans kararı
 
 Hesaplama doğrulama fixture'ı [nutrition_validation_mvp_v1.json](../backend/tests/fixtures/nutrition_validation_mvp_v1.json) dosyasındadır. Bu dosya uygulamanın çalışma zamanı besin veri tabanı değildir.

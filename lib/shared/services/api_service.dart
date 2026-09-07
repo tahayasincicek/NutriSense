@@ -957,6 +957,7 @@ class ApiService {
     String? foodNameTr,
     String mealType = 'atistirmalik',
     double portionValue = 100,
+    String portionUnit = 'gram',
     String portionMethod = 'user_selected',
     CancelToken? cancelToken,
   }) =>
@@ -970,7 +971,7 @@ class ApiService {
             'meal_type': mealType,
             'confirmed': true,
             'portion_value': portionValue,
-            'portion_unit': 'gram',
+            'portion_unit': portionUnit,
             'portion_method': portionMethod,
           },
           cancelToken: cancelToken,

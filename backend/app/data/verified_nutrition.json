@@ -1,0 +1,123 @@
+{
+  "_meta": {
+    "version": "usda-fndds-2021-2023-subset-v1",
+    "evidence_status": "VERIFIED",
+    "verification_method": "Exact nutrient extraction from pinned official USDA FNDDS archive",
+    "archive_url": "https://fdc.nal.usda.gov/fdc-datasets/FoodData_Central_survey_food_json_2024-10-31.zip",
+    "archive_sha256": "dfb06ae7ddc397ccd570b91c14b75438ab2ba39f64f22d321f61d4a52a77f3eb",
+    "expert_reviewed_at": null,
+    "limitations": "Source verification is not clinical validation. Recipe and actual portion may differ.",
+    "source_inventory": {
+      "usda-fdc:2706920": {
+        "source_url": "https://fdc.nal.usda.gov/fdc-app.html#/food-details/2706920/nutrients",
+        "source_item_name": "Hamburger, NFS",
+        "retrieved_at": "2026-09-07T05:37:48Z",
+        "license": "CC0 1.0",
+        "attribution": "USDA FoodData Central, FNDDS 2021-2023. Hamburger, NFS. https://fdc.nal.usda.gov/fdc-app.html#/food-details/2706920/nutrients"
+      },
+      "usda-fdc:2707205": {
+        "source_url": "https://fdc.nal.usda.gov/fdc-app.html#/food-details/2707205/nutrients",
+        "source_item_name": "Egg omelet or scrambled egg, no added fat",
+        "retrieved_at": "2026-09-07T05:37:48Z",
+        "license": "CC0 1.0",
+        "attribution": "USDA FoodData Central, FNDDS 2021-2023. Egg omelet or scrambled egg, no added fat. https://fdc.nal.usda.gov/fdc-app.html#/food-details/2707205/nutrients"
+      },
+      "usda-fdc:2708044": {
+        "source_url": "https://fdc.nal.usda.gov/fdc-app.html#/food-details/2708044/nutrients",
+        "source_item_name": "Baklava",
+        "retrieved_at": "2026-09-07T05:37:48Z",
+        "license": "CC0 1.0",
+        "attribution": "USDA FoodData Central, FNDDS 2021-2023. Baklava. https://fdc.nal.usda.gov/fdc-app.html#/food-details/2708044/nutrients"
+      },
+      "usda-fdc:2708614": {
+        "source_url": "https://fdc.nal.usda.gov/fdc-app.html#/food-details/2708614/nutrients",
+        "source_item_name": "Pizza, cheese, from restaurant or fast food, NS as to type of crust",
+        "retrieved_at": "2026-09-07T05:37:48Z",
+        "license": "CC0 1.0",
+        "attribution": "USDA FoodData Central, FNDDS 2021-2023. Pizza, cheese, from restaurant or fast food, NS as to type of crust. https://fdc.nal.usda.gov/fdc-app.html#/food-details/2708614/nutrients"
+      },
+      "usda-fdc:2709458": {
+        "source_url": "https://fdc.nal.usda.gov/fdc-app.html#/food-details/2709458/nutrients",
+        "source_item_name": "Potato, french fries, from fresh, fried",
+        "retrieved_at": "2026-09-07T05:37:48Z",
+        "license": "CC0 1.0",
+        "attribution": "USDA FoodData Central, FNDDS 2021-2023. Potato, french fries, from fresh, fried. https://fdc.nal.usda.gov/fdc-app.html#/food-details/2709458/nutrients"
+      }
+    }
+  },
+  "hamburger": {
+    "evidence_status": "VERIFIED",
+    "source_item_id": "usda-fdc:2706920",
+    "locale": "en-US",
+    "display_name_tr": "Hamburger (genel tarif)",
+    "default_portion_g": 100,
+    "serving_unit": "gram",
+    "serving_quantity": 100,
+    "portion_units": [],
+    "protein_per_100g": 17.5,
+    "fat_per_100g": 14.4,
+    "carbs_per_100g": 20.7,
+    "calories_per_100g": 288,
+    "fiber_per_100g": 0.7
+  },
+  "omelette": {
+    "evidence_status": "VERIFIED",
+    "source_item_id": "usda-fdc:2707205",
+    "locale": "en-US",
+    "display_name_tr": "Omlet (ilave yağsız)",
+    "default_portion_g": 100,
+    "serving_unit": "gram",
+    "serving_quantity": 100,
+    "portion_units": [],
+    "protein_per_100g": 12.4,
+    "fat_per_100g": 9.93,
+    "carbs_per_100g": 0.96,
+    "calories_per_100g": 143,
+    "fiber_per_100g": 0.0
+  },
+  "baklava": {
+    "evidence_status": "VERIFIED",
+    "source_item_id": "usda-fdc:2708044",
+    "locale": "en-US",
+    "display_name_tr": "Baklava (genel tarif)",
+    "default_portion_g": 100,
+    "serving_unit": "gram",
+    "serving_quantity": 100,
+    "portion_units": [],
+    "protein_per_100g": 6.58,
+    "fat_per_100g": 29.3,
+    "carbs_per_100g": 37.6,
+    "calories_per_100g": 440,
+    "fiber_per_100g": 2.5
+  },
+  "pizza": {
+    "evidence_status": "VERIFIED",
+    "source_item_id": "usda-fdc:2708614",
+    "locale": "en-US",
+    "display_name_tr": "Pizza (peynirli, restoran tipi)",
+    "default_portion_g": 100,
+    "serving_unit": "gram",
+    "serving_quantity": 100,
+    "portion_units": [],
+    "protein_per_100g": 11.4,
+    "fat_per_100g": 9.69,
+    "carbs_per_100g": 33.3,
+    "calories_per_100g": 266,
+    "fiber_per_100g": 2.3
+  },
+  "french_fries": {
+    "evidence_status": "VERIFIED",
+    "source_item_id": "usda-fdc:2709458",
+    "locale": "en-US",
+    "display_name_tr": "Patates kızartması (taze patatesten)",
+    "default_portion_g": 100,
+    "serving_unit": "gram",
+    "serving_quantity": 100,
+    "portion_units": [],
+    "protein_per_100g": 1.93,
+    "fat_per_100g": 13.1,
+    "carbs_per_100g": 18.5,
+    "calories_per_100g": 198,
+    "fiber_per_100g": 1.6
+  }
+}

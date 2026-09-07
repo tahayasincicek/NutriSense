@@ -53,6 +53,20 @@ class PortionOption(BaseModel):
     source_name: str
 
 
+# Porsiyon birimi başına üst sınır.
+#
+# Sayılabilir birimlerde 20 tavanı yeterli; hacimde aynı sayıyı kullanmak
+# 20 ml'de kesip bir bardak suyu bile kaydettirmezdi.
+PORTION_LIMITS: dict[str, float] = {
+    "gram": 2000,
+    "adet": 20,
+    "dilim": 20,
+    "kase": 20,
+    "ml": 3000,
+    "litre": 3,
+}
+
+
 class FoodAnalysisResponse(BaseModel):
     """Multipart POST /api/v1/analyze-food yanıt gövdesi."""
     analysis_id: UUID = Field(..., description="Onay bekleyen analiz UUID")
@@ -67,7 +81,7 @@ class FoodAnalysisResponse(BaseModel):
     confidence: float = Field(..., ge=0, le=1.0)
     portion_grams: Optional[float] = Field(None, gt=0, le=2000, allow_inf_nan=False)
     portion_value: Optional[float] = Field(None, gt=0, allow_inf_nan=False)
-    portion_unit: Optional[Literal["gram", "adet", "dilim", "kase"]] = None
+    portion_unit: Optional[Literal["gram", "adet", "dilim", "kase", "ml", "litre"]] = None
     portion_method: Optional[Literal["source_default", "user_selected", "user_voice"]] = None
     portion_is_estimate: bool = True
     calories_per_100g: Optional[float] = Field(None, gt=0, allow_inf_nan=False)
@@ -129,7 +143,7 @@ class FoodAnalysisDecisionRequest(BaseModel):
     corrected_food_name: Optional[str] = Field(None, min_length=2, max_length=120)
     corrected_food_name_tr: Optional[str] = Field(None, min_length=2, max_length=120)
     portion_value: Optional[float] = Field(None, gt=0, allow_inf_nan=False)
-    portion_unit: Optional[Literal["gram", "adet", "dilim", "kase"]] = None
+    portion_unit: Optional[Literal["gram", "adet", "dilim", "kase", "ml", "litre"]] = None
     portion_method: Optional[Literal["user_selected", "user_voice"]] = None
 
     @field_validator("corrected_food_name")
@@ -161,21 +175,23 @@ class FoodAnalysisDecisionRequest(BaseModel):
             value is not None for value in portion_fields
         ):
             raise ValueError("Porsiyon değeri, birimi ve yöntemi birlikte gönderilmelidir.")
-        if self.portion_unit == "gram" and self.portion_value is not None and self.portion_value > 2000:
-            raise ValueError("Gram porsiyonu 2000 değerini aşamaz.")
-        if self.portion_unit != "gram" and self.portion_value is not None and self.portion_value > 20:
-            raise ValueError("Birim adedi 20 değerini aşamaz.")
+        if self.portion_value is not None and self.portion_unit is not None:
+            limit = PORTION_LIMITS[self.portion_unit]
+            if self.portion_value > limit:
+                raise ValueError(
+                    f"{self.portion_unit} porsiyonu {limit} değerini aşamaz."
+                )
         return self
 
 
 class FoodPortionRequest(BaseModel):
     portion_value: float = Field(..., gt=0, allow_inf_nan=False)
-    portion_unit: Literal["gram", "adet", "dilim", "kase"]
+    portion_unit: Literal["gram", "adet", "dilim", "kase", "ml", "litre"]
     portion_method: Literal["user_selected", "user_voice"]
 
     @model_validator(mode="after")
     def validate_portion_limit(self):
-        limit = 2000 if self.portion_unit == "gram" else 20
+        limit = PORTION_LIMITS[self.portion_unit]
         if self.portion_value > limit:
             raise ValueError(f"Porsiyon {limit} değerini aşamaz.")
         return self
@@ -197,9 +213,16 @@ class ManualFoodLogRequest(BaseModel):
         pattern=r"^(kahvalti|ogle|aksam|atistirmalik)$",
     )
     confirmed: Literal[True]
-    portion_value: float = Field(default=100, gt=0, le=2000, allow_inf_nan=False)
-    portion_unit: Literal["gram"] = "gram"
+    portion_value: float = Field(default=100, gt=0, allow_inf_nan=False)
+    portion_unit: Literal["gram", "adet", "dilim", "kase", "ml", "litre"] = "gram"
     portion_method: Literal["user_selected", "user_voice"] = "user_selected"
+
+    @model_validator(mode="after")
+    def validate_portion_limit(self):
+        limit = PORTION_LIMITS[self.portion_unit]
+        if self.portion_value > limit:
+            raise ValueError(f"Porsiyon {limit} değerini aşamaz.")
+        return self
 
     @field_validator("food_name")
     @classmethod

@@ -1358,7 +1358,9 @@
                   "gram",
                   "adet",
                   "dilim",
-                  "kase"
+                  "kase",
+                  "ml",
+                  "litre"
                 ],
                 "type": "string"
               },
@@ -1663,7 +1665,9 @@
                   "gram",
                   "adet",
                   "dilim",
-                  "kase"
+                  "kase",
+                  "ml",
+                  "litre"
                 ],
                 "type": "string"
               },
@@ -2046,7 +2050,9 @@
               "gram",
               "adet",
               "dilim",
-              "kase"
+              "kase",
+              "ml",
+              "litre"
             ],
             "title": "Portion Unit",
             "type": "string"
@@ -2238,15 +2244,21 @@
             "type": "string"
           },
           "portion_unit": {
-            "const": "gram",
             "default": "gram",
+            "enum": [
+              "gram",
+              "adet",
+              "dilim",
+              "kase",
+              "ml",
+              "litre"
+            ],
             "title": "Portion Unit",
             "type": "string"
           },
           "portion_value": {
             "default": 100,
             "exclusiveMinimum": 0.0,
-            "maximum": 2000.0,
             "title": "Portion Value",
             "type": "number"
           }

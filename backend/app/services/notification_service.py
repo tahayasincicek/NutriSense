@@ -7,6 +7,8 @@ human delivery. Provider secrets and unmasked destinations are never logged.
 from __future__ import annotations
 
 import inspect
+import hashlib
+from copy import deepcopy
 import json
 import logging
 import uuid
@@ -23,6 +25,7 @@ from twilio.rest import Client as TwilioClient
 from ..config import Settings, get_settings
 from ..models.database import utc_now
 from ..operations.metrics import runtime_metrics
+from ..domain.report_messages import build_report_sms, build_sms_parts, report_number
 
 logger = logging.getLogger(__name__)
 
@@ -56,6 +59,8 @@ class NotificationService:
         channel: str,
         destination: str,
         report_data: dict,
+        sms_progress: dict | None = None,
+        sms_checkpoint: Callable[[dict], None] | None = None,
     ) -> dict:
         self._assert_mode_and_allowlist(channel, destination)
         try:
@@ -64,10 +69,9 @@ class NotificationService:
                 message["To"] = destination
                 result = await self._email_transport(message, destination)
             elif channel == "sms":
-                body = build_safe_sms(report_data)
-                result = self._sms_transport(body, destination)
-                if inspect.isawaitable(result):
-                    result = await result
+                result = await self._send_sms_parts(
+                    destination, report_data, sms_progress, sms_checkpoint,
+                )
             else:
                 raise ChannelDeliveryError("UNSUPPORTED_CHANNEL", retryable=False)
         except ChannelDeliveryError:
@@ -87,7 +91,7 @@ class NotificationService:
                 "smtp" if channel == "email" else "twilio",
                 "rejected",
             )
-            logger.exception("Bildirim sağlayıcısı redakte edilmiş bir hatayla başarısız oldu.")
+            logger.error("Bildirim sağlayıcısı başarısız oldu; mesaj ve alıcı loglanmadı.")
             raise ChannelDeliveryError("PROVIDER_REJECTED", retryable=False)
         runtime_metrics.provider_outcome(
             "smtp" if channel == "email" else "twilio",
@@ -96,6 +100,53 @@ class NotificationService:
         return {
             "provider_message_id": str(result.get("provider_message_id", "")) or None,
             "provider_status": str(result.get("provider_status", "accepted")),
+        }
+
+    async def _send_sms_parts(self, destination, report, progress, checkpoint):
+        bodies = build_sms_parts(report)
+        digest = hashlib.sha256(json.dumps(bodies, ensure_ascii=False).encode("utf-8")).hexdigest()
+        state = deepcopy(progress) if progress else {
+            "body_hash": digest,
+            "parts": [{"status": "queued"} for _ in bodies],
+        }
+        if state.get("body_hash") != digest or len(state.get("parts", [])) != len(bodies):
+            raise ChannelDeliveryError("SMS_CONTENT_CHANGED", retryable=False)
+        if len(bodies) > 1 and checkpoint is None:
+            raise ChannelDeliveryError("SMS_CHECKPOINT_REQUIRED", retryable=False)
+        for body, part in zip(bodies, state["parts"]):
+            if part["status"] == "sent":
+                continue
+            if part["status"] == "sending":
+                # A crash/timeout can happen after acceptance. Do not duplicate blindly.
+                raise ChannelDeliveryError("SMS_DELIVERY_UNCERTAIN", retryable=False)
+            part["status"] = "sending"
+            if checkpoint:
+                checkpoint(deepcopy(state))
+            try:
+                result = self._sms_transport(body, destination)
+                if inspect.isawaitable(result):
+                    result = await result
+                if not result or not result.get("provider_message_id"):
+                    raise ValueError("Provider acknowledgement missing")
+            except ChannelDeliveryError:
+                part["status"] = "failed"
+                if checkpoint:
+                    checkpoint(deepcopy(state))
+                raise
+            except Exception:
+                # State stays 'sending' until a provider reconciliation resolves it.
+                raise ChannelDeliveryError("SMS_DELIVERY_UNCERTAIN", retryable=False) from None
+            part.update({
+                "status": "sent",
+                "provider_message_id": result.get("provider_message_id"),
+                "provider_status": result.get("provider_status", "accepted"),
+            })
+            if checkpoint:
+                checkpoint(deepcopy(state))
+        last = state["parts"][-1]
+        return {
+            "provider_message_id": last["provider_message_id"],
+            "provider_status": last["provider_status"] if len(bodies) == 1 else f"accepted_parts:{len(bodies)}/{len(bodies)}",
         }
 
     async def send_email_message(
@@ -230,9 +281,9 @@ def build_report_email(report: dict, settings: Settings) -> MIMEMultipart:
     rows = "".join(
         "<tr>"
         f"<td>{escape(record['food_name_tr'])}</td>"
-        f"<td>{record['portion_grams']:.0f} g"
+        f"<td>{report_number(record['portion_grams'])} g"
         f"{' (tahmini)' if record['portion_is_estimate'] else ''}</td>"
-        f"<td>{record['total_calories']:.0f} kcal</td>"
+        f"<td>{report_number(record['total_calories'])} kcal</td>"
         f"<td>{escape(record['logged_at'])}</td>"
         f"<td>{escape(record['recognition_source'])}</td>"
         "</tr>"
@@ -258,9 +309,9 @@ beslenme verisinin güvenilirliği aynı ölçü değildir.</p>
 {report['estimated_portion_count']} kayıtta porsiyon tahminidir.</p>
 </main></body></html>"""
     plain_records = "\n".join(
-        f"- {item['food_name_tr']}; {item['portion_grams']:.0f} g"
+        f"- {item['food_name_tr']}; {report_number(item['portion_grams'])} g"
         f"{' (tahmini)' if item['portion_is_estimate'] else ''}; "
-        f"{item['total_calories']:.0f} kcal; {item['logged_at']}; "
+        f"{report_number(item['total_calories'])} kcal; {item['logged_at']}; "
         f"kaynak {item['recognition_source']}"
         for item in report["records"]
     )
@@ -284,12 +335,8 @@ beslenme verisinin güvenilirliği aynı ölçü değildir.</p>
 
 
 def build_safe_sms(report: dict) -> str:
-    return (
-        f"NutriSense: {report['from_date']} - {report['to_date']} dönemine ait "
-        f"{report['record_count']} onaylı kayıt için paylaşım özeti hazırlandı. "
-        "Ayrıntılı beslenme günlüğü SMS içinde paylaşılmadı. "
-        "Bu bilgi tıbbi tavsiye değildir."
-    )
+    """Compatibility entry point; v3 reports contain the explicitly approved details."""
+    return build_report_sms(report)
 
 
 def build_password_reset_email(

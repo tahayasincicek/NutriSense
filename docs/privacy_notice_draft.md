@@ -23,7 +23,10 @@ verisi bağlamında bir yazışmadır ve yalnız raporu gönderen danışana gö
 
 Nutritionix'e besin arama adı gönderilebilir. Kullanıcının her gönderimde
 onayladığı minimum rapor SMTP sağlayıcısı ve/veya Twilio üzerinden doğrulanmış
-diyetisyene iletilebilir. SMS tam besin günlüğünü içermez. Bu sağlayıcılar için
+diyetisyene iletilebilir. Yeni SMS raporları seçilen dönemin onaylı besin adı,
+gram miktarı, tarih-saat ve kalori bilgilerini içerir; uzun raporlar birden
+fazla mesaj halinde iletilebilir. Bu paylaşım gönderim öncesinde ayrıca
+açıklanır ve onaylanır. Bu sağlayıcılar için
 yurtdışı aktarım ve sözleşme değerlendirmesi yayın öncesi tamamlanmalıdır.
 
 ## Araştırma verisi

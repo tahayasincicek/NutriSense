@@ -47,7 +47,7 @@
 | Eğitim grafiği | **Yok** | Kodun hedeflediği `training_results.png` yok | Üretim komutu ve kaynak run | Grafik üretilmemiş. |
 | Confusion matrix | **Yok** | Kodun hedeflediği `confusion_matrix.png` yok | Etiket sırası ve sayımlar | Sınıf bazlı performans bilinmiyor. |
 | Model benchmark raporu | **Yok** | TFLite latency/boyut raporu yok | Cihaz modeli, tekrar sayısı, P50/P95 | “Hızlı” iddiası desteklenmiyor. |
-| Kalori veritabanı | **Var** | `ai_model/calorie_database.json` | Kaynak, sürüm, güncelleme tarihi, uzman doğrulaması | Fallback verisi var; bilimsel doğruluğu kanıtsız. |
+| Kalori veritabanı | **Var; kaynak doğrulamalı** | `backend/app/data/verified_nutrition.json` (USDA FNDDS alt kümesi, SHA sabitli arşivden `backend/scripts/build_nutrition_catalog.py` ile üretilir) | Uzman doğrulaması (`expert_reviewed_at` hâlâ `null`); porsiyon ağırlıklarının ölçüm kaynağı | Beş besin için kaynak kimliği, lisans ve atıf izlenebilir. Eski `ai_model/calorie_database.json` prototipi `UNVERIFIED` sayılır ve runtime'da kullanılmaz. Kaynak doğrulaması klinik doğrulama değildir. |
 | Model dönüştürme kodu | **Var; çalıştırılmadı** | `ml/src/nutrisense_ml/convert.py`; `ai_model/04_model_converter.py` | Gerçek eğitilmiş modelle dönüşüm/eşdeğerlik raporu | Demo ve rastgele kalibrasyon fallback’i kaldırıldı; model/validation kararı/gerçek kalibrasyon yoksa komut kapanır. |
 | Model card | **Yok** | Bulunmadı | Amaç, veri, metrik, sınırlama, etik risk | Model yönetişimi eksik. |
 

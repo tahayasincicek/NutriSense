@@ -15,6 +15,7 @@ import 'package:uuid/uuid.dart';
 
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/accessibility_utils.dart';
+import '../../../shared/models/food_analysis_model.dart';
 import '../../../shared/services/accessibility_service.dart';
 import '../../../shared/services/api_service.dart';
 import '../../../shared/services/stt_service.dart';
@@ -43,6 +44,7 @@ class _ManualFoodEntryScreenState extends ConsumerState<ManualFoodEntryScreen> {
   List<FoodSearchResult>? _results;
   FoodSearchResult? _selectedResult;
   double _portionGrams = 100;
+  String _portionUnit = 'gram';
   String? _error;
 
   @override
@@ -128,6 +130,7 @@ class _ManualFoodEntryScreenState extends ConsumerState<ManualFoodEntryScreen> {
         foodName: analysis.foodNameTr,
         displayName: analysis.foodNameTr,
         caloriesPer100g: analysis.caloriesPer100g,
+        portionOptions: analysis.portionOptions,
       );
 
       setState(() {
@@ -159,21 +162,81 @@ class _ManualFoodEntryScreenState extends ConsumerState<ManualFoodEntryScreen> {
   void _selectResult(FoodSearchResult result) {
     setState(() {
       _selectedResult = result;
+      _portionUnit = 'gram';
       _portionGrams = result.defaultPortionGrams;
     });
 
     _accessibility.speak(
       '${result.displayName} seçildi. '
-      'Porsiyon: ${_portionGrams.toStringAsFixed(0)} gram, '
+      'Porsiyon: $_portionLabel, '
       '${_calculateCalories().toStringAsFixed(0)} kalori. '
       'Porsiyonu değiştirebilir ya da kaydet diyerek kaydedebilirsiniz.',
       priority: TtsPriority.high,
     );
   }
 
+  /// Seçili besinin kabul ettiği birimler; gram her zaman ilk sırada.
+  List<String> get _availableUnits => [
+        'gram',
+        for (final option in _selectedResult?.portionOptions ?? const [])
+          if (option.unit != 'litre') option.unit,
+      ];
+
+  /// Seçili birimin bir biriminin kaç gram geldiği.
+  double get _gramsPerUnit {
+    if (_portionUnit == 'gram') return 1;
+    for (final option in _selectedResult?.portionOptions ?? const []) {
+      if (option.unit == _portionUnit) return option.gramsPerUnit;
+    }
+    return 1;
+  }
+
+  /// Kaydırıcının o birimdeki aralığı ve adımı.
+  ///
+  /// Gram için 10-1000 uygun; mililitrede 10 ml anlamsız küçük, adette ise
+  /// 1000 saçma. Aralık birime göre değişmezse kaydırıcı kullanılamaz hâle
+  /// geliyordu.
+  ({double min, double max, int divisions}) get _sliderRange =>
+      switch (_portionUnit) {
+        'gram' => (min: 10, max: 1000, divisions: 99),
+        'ml' => (min: 50, max: 1000, divisions: 38),
+        // adet, dilim, kase
+        _ => (min: 1, max: 10, divisions: 18),
+      };
+
+  /// Kullanıcının seçtiği porsiyonun kendi birimindeki yazımı.
+  String get _portionLabel {
+    if (_portionUnit == 'gram') return '${_portionGrams.toStringAsFixed(0)} g';
+    final value = _portionValue;
+    final written = value == value.roundToDouble()
+        ? value.toStringAsFixed(0)
+        : value.toStringAsFixed(1);
+    return '$written $_portionUnit';
+  }
+
+  /// Kaydırıcıda duran değer, seçili birim cinsinden.
+  double get _portionValue =>
+      _portionUnit == 'gram' ? _portionGrams : _portionGrams / _gramsPerUnit;
+
   double _calculateCalories() {
     if (_selectedResult == null) return 0;
     return (_selectedResult!.caloriesPer100g / 100) * _portionGrams;
+  }
+
+  /// Birim değişince gram karşılığı korunur, yalnız ölçek değişir.
+  void _changeUnit(String unit) {
+    if (unit == _portionUnit) return;
+    setState(() {
+      _portionUnit = unit;
+      final range = _sliderRange;
+      final converted = unit == 'gram' ? _portionGrams : _portionValue;
+      _portionGrams = converted.clamp(range.min, range.max) * _gramsPerUnit;
+    });
+    _accessibility.speak(
+      'Birim $unit. Porsiyon $_portionLabel, '
+      '${_calculateCalories().toStringAsFixed(0)} kalori.',
+      priority: TtsPriority.normal,
+    );
   }
 
   /// Besini kaydet
@@ -187,7 +250,10 @@ class _ManualFoodEntryScreenState extends ConsumerState<ManualFoodEntryScreen> {
       captureId: _uuid.v4(),
       foodName: _selectedResult!.foodName,
       foodNameTr: _selectedResult!.displayName,
-      portionValue: _portionGrams,
+      // Kullanıcının seçtiği birim aynen gönderilir; grama çevirmeyi sunucu
+      // doğrulanmış dönüşümle yapar, istemci tahmin yürütmez.
+      portionValue: _portionUnit == 'gram' ? _portionGrams : _portionValue,
+      portionUnit: _portionUnit,
     );
 
     if (!mounted) return;
@@ -196,7 +262,7 @@ class _ManualFoodEntryScreenState extends ConsumerState<ManualFoodEntryScreen> {
     if (result.isSuccess) {
       _accessibility.speak(
         '${_selectedResult!.displayName} kaydedildi. '
-        '${_portionGrams.toStringAsFixed(0)} gram, '
+        '$_portionLabel, '
         '${_calculateCalories().toStringAsFixed(0)} kalori.',
         priority: TtsPriority.high,
       );
@@ -413,24 +479,43 @@ class _ManualFoodEntryScreenState extends ConsumerState<ManualFoodEntryScreen> {
                         ),
                       ),
                       const SizedBox(height: 20),
+                      // Besin birden çok birim kabul ediyorsa seçim sunulur;
+                      // yalnız gram varsa satır hiç çizilmez.
+                      if (_availableUnits.length > 1) ...[
+                        Wrap(
+                          spacing: 8,
+                          children: [
+                            for (final unit in _availableUnits)
+                              ChoiceChip(
+                                label: Text(unit == 'gram' ? 'gram' : unit),
+                                selected: _portionUnit == unit,
+                                onSelected: (_) => _changeUnit(unit),
+                              ),
+                          ],
+                        ),
+                        const SizedBox(height: 12),
+                      ],
                       Text(
-                        'Porsiyon: ${_portionGrams.toStringAsFixed(0)}g',
+                        'Porsiyon: $_portionLabel',
                         style: theme.textTheme.bodyLarge,
                       ),
                       Semantics(
-                        label:
-                            'Porsiyon kaydırıcısı. Şu anki değer: ${_portionGrams.toStringAsFixed(0)} gram.',
+                        label: 'Porsiyon kaydırıcısı. '
+                            'Şu anki değer: $_portionLabel.',
                         slider: true,
                         child: Slider(
-                          value: _portionGrams,
-                          min: 10,
-                          max: 1000,
-                          divisions: 99,
-                          label: '${_portionGrams.toStringAsFixed(0)}g',
-                          onChanged: (v) => setState(() => _portionGrams = v),
+                          value: _portionValue.clamp(
+                              _sliderRange.min, _sliderRange.max),
+                          min: _sliderRange.min,
+                          max: _sliderRange.max,
+                          divisions: _sliderRange.divisions,
+                          label: _portionLabel,
+                          onChanged: (v) => setState(
+                            () => _portionGrams = v * _gramsPerUnit,
+                          ),
                           onChangeEnd: (v) {
                             _accessibility.speak(
-                              '${v.toStringAsFixed(0)} gram. '
+                              '$_portionLabel. '
                               '${_calculateCalories().toStringAsFixed(0)} kalori.',
                               priority: TtsPriority.normal,
                             );
@@ -460,7 +545,7 @@ class _ManualFoodEntryScreenState extends ConsumerState<ManualFoodEntryScreen> {
                             child: AccessibleButton(
                               label: _isSaving ? 'Kaydediliyor...' : 'Kaydet',
                               semanticLabel:
-                                  '${_selectedResult!.displayName}, ${_portionGrams.toStringAsFixed(0)} gram, ${_calculateCalories().toStringAsFixed(0)} kalori olarak kaydet',
+                                  '${_selectedResult!.displayName}, $_portionLabel, ${_calculateCalories().toStringAsFixed(0)} kalori olarak kaydet',
                               icon: Icons.save_rounded,
                               onPressed: _isSaving ? null : _saveEntry,
                             ),
@@ -507,7 +592,15 @@ class FoodSearchResult {
     this.carbs = 0,
     this.fat = 0,
     this.fiber = 0,
+    this.portionOptions = const [],
   });
+
+  /// Besinin gram dışında kabul ettiği birimler.
+  ///
+  /// Arama zaten bu bilgiyi döndürüyordu ama ekran yalnız kaloriyi alıp
+  /// gerisini atıyordu; bu yüzden bir bardak ayran gram cinsinden tahmin
+  /// edilmek zorundaydı.
+  final List<PortionOption> portionOptions;
 
   factory FoodSearchResult.fromJson(Map<String, dynamic> json) {
     return FoodSearchResult(

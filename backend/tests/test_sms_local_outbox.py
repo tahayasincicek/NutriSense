@@ -36,10 +36,15 @@ def _report() -> dict:
         "report_type": "weekly",
         "from_date": "2026-08-24",
         "to_date": "2026-08-30",
-        "record_count": 12,
+        "record_count": 1,
         "total_calories": 1850.0,
         "average_daily_calories": 264.0,
         "accessibility_summary": "12 kullanıcı onaylı kayıt paylaşılacak.",
+        "records": [{
+            "food_name_tr": "Mercimek Çorbası", "portion_grams": 150.5,
+            "total_calories": 78.25, "portion_is_estimate": True,
+            "logged_at": "2026-08-24T12:30:00+03:00",
+        }],
     }
 
 
@@ -65,13 +70,12 @@ async def test_sms_reaches_the_outbox_with_a_message_id(tmp_path):
 
 
 @pytest.mark.asyncio
-async def test_sms_body_never_contains_the_full_food_log(tmp_path):
-    """Rapor SMS'i ayrıntı taşımaz; bu bir gizlilik kuralıdır."""
+async def test_sms_body_contains_the_approved_food_details(tmp_path):
+    """Her onaylı kaydın adı, gramı, kalorisi ve zaman dilimi korunur."""
     settings = _settings(tmp_path)
     service = NotificationService(settings_override=settings)
 
     report = _report()
-    report["records"] = [{"food_name_tr": "Mercimek Çorbası"}]
     await service.send_channel(
         channel="sms", destination="+15005550006", report_data=report,
     )
@@ -79,9 +83,7 @@ async def test_sms_body_never_contains_the_full_food_log(tmp_path):
     body = json.loads(
         (tmp_path / "sms_outbox.jsonl").read_text(encoding="utf-8").strip()
     )["body"]
-    assert "Mercimek" not in body
-    # Uzun mesaj bölünüp maliyet/karışıklık yaratmasın.
-    assert len(body) <= 320
+    assert "Mercimek Çorbası; 150.5 g (tahmini); 78.25 kcal; 2026-08-24T12:30:00+03:00" in body
 
 
 @pytest.mark.asyncio

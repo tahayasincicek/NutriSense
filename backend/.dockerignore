@@ -12,6 +12,8 @@ __pycache__/
 *.db
 coverage/
 data/
+!app/data/
+!app/data/verified_nutrition.json
 .runtime/
 backups/
 .git/

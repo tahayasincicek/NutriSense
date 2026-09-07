@@ -39,7 +39,7 @@ mekanizması üniversite/hukuk birimi kararı olmadan kesinleştirilmemiştir.
 | Google Gemini (AI Studio) | Sanitize edilmiş görüntü byte'ları | Token, parola, kullanıcı UUID'si, günlük geçmişi | `VISION_PROVIDER_MODE=gemini` ile devreye girer. Vision ile aynı yurtdışı aktarım kararını gerektirir; çok modlu model şartları ayrıca incelenmelidir |
 | Nutritionix | Normalize besin arama adı | Görüntü, hesap kimliği, iletişim | API şartları/attribution ve aktarım değerlendirmesi gerekir |
 | SMTP sağlayıcısı | Onaylı dönem raporu ve alıcı e-posta | Parola/token; onaysız kayıt | Production secret store, TLS ve sağlayıcı sözleşmesi gerekir |
-| Twilio | Kısa, ayrıntısız SMS özeti ve telefon | Tam besin günlüğü/görüntü | Sandbox allowlist; production aktarım/hukuk kararı gerekir |
+| Twilio | Kullanıcının onayladığı besin adı, gram miktarı, tarih-saat, kalori ve alıcı telefon | Görüntü, parola/token, onaysız kayıt, serbest not | Her gönderimde v3 ayrıntılı paylaşım onayı; sandbox allowlist; production aktarım/hukuk kararı gerekir |
 | Firebase Crashlytics | Hiçbir veri | Tüm veriler | Yapılandırılmamış ve kod kapısı nedeniyle devre dışı |
 
 Sağlayıcıların ülke/alt işleyen/retention bilgileri teknik depodan
@@ -67,7 +67,7 @@ sözleşme ve aktarım mekanizması kaydedilmelidir.
 2. Besin kaydı yalnız kullanıcı onayından sonra oluşur.
 3. Diyetisyen raporu yalnız onaylanmış kayıtlardan ve her gönderimde yeni açık
    onayla hazırlanır; alıcı önizlemede maskelenir.
-4. SMS tam günlüğü içermez.
+4. Yeni SMS raporları seçilen dönemin onaylı besin adı, gram, tarih-saat ve kalori kayıtlarını içerir; uzun raporlar numaralı mesajlara bölünür. Eski v2 raporları yeniden denenirken yalnız eski özet korunur.
 5. Araştırma pseudonym'i hesap UUID'si değildir; onam sonucu verisinden ayrıdır.
 6. Gerçek araştırma modu gerçek protocol/consent/approval alanları olmadan
    açılmaz; geliştirme sentetik fixture kullanır.
