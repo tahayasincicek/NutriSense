@@ -76,6 +76,9 @@ void main() {
         .setError('Kamera izni verilmedi.');
     await tester.pump();
     await tester.ensureVisible(find.text('Galeriden fotoğraf seç'));
+    // Denetim paneli kısa ekranlarda kaydırılabilir olduğundan ensureVisible
+    // bir kaydırma animasyonu başlatır; dokunmadan önce oturması gerekir.
+    await tester.pumpAndSettle();
     await tester.tap(find.text('Galeriden fotoğraf seç'));
     await tester.pump();
     expect(picker.calls, 1);
@@ -86,6 +89,8 @@ void main() {
     await tester.pumpAndSettle();
     expect(tester.takeException(), isNull);
     picker.selection = Completer<XFile?>();
+    await tester.ensureVisible(find.text('Galeriden fotoğraf seç'));
+    await tester.pumpAndSettle();
     await tester.tap(find.text('Galeriden fotoğraf seç'));
     await tester.pump();
     expect(picker.calls, 2);

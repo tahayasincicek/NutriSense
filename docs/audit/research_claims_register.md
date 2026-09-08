@@ -6,6 +6,16 @@
 > **ARAŞTIRMA BÜTÜNLÜĞÜ UYARISI**  
 > Depoda etik kurul kararı, kurum izni, katılımcı onam kayıtları, anket ham verisi, kullanılabilirlik oturum ham verisi, veri sözlüğü ve istatistik analiz betiği bulunmamıştır. Bu nedenle aşağıdaki ampirik sonuçların tümü **“RAPORDA KULLANILMAMALI — doğrulanmamış taslak değer”** statüsündedir. Sayılar silinmemiş, yeniden üretilmiş veya gerçek sonuç gibi aktarılmamıştır.
 
+> **8 Eylül 2026 güncellemesi — çözüm**
+>
+> Aşağıda "RAPORDA KULLANILMAMALI" işaretli ampirik iddiaların tamamı
+> `tubitak_sonuc_raporu.md` ve `akademik_makale_taslak.md` belgelerinden
+> **çıkarılmıştır**. İddialar doğrulanmamış, kaldırılmıştır; yerlerine yalnız
+> depoda yeniden üretilebilir kanıtı olan teknik ölçümler yazılmıştır
+> (deney `20260908T060321Z-b000d69c58`, mühürlü test). Her iki belge de
+> kullanıcı çalışmasının yapılmadığını açıkça bildirmektedir. Bu kayıt defteri
+> tarihsel iz olarak korunmaktadır.
+
 ## Doğrulama ölçeği
 
 - **Doğrulandı — plan/belge:** Sayı kaynak PDF’de gerçekten yazılıdır; bu, planın gerçekleştirildiği anlamına gelmez.

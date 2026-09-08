@@ -770,12 +770,27 @@ class _CameraScreenState extends ConsumerState<CameraScreen>
       body: AnnotatedRegion<SystemUiOverlayStyle>(
         value: SystemUiOverlayStyle.light,
         child: SafeArea(
-          child: Column(
-            children: [
-              _topBar(state),
-              Expanded(child: _cameraBody(state)),
-              _bottomPanel(state),
-            ],
+          // Panel gerçekte kalan alanın yarısını geçemez: porsiyon seçici,
+          // onay düğmeleri ve galeri düğmesi birlikte göründüğünde kısa
+          // ekranlarda (Pixel 4) taşıyordu. Sınır MediaQuery'den değil
+          // LayoutBuilder'dan alınır; MediaQuery boyutu verilmeyen
+          // bağlamlarda sıfır dönebiliyor.
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              final maxPanel = constraints.hasBoundedHeight
+                  ? constraints.maxHeight * 0.5
+                  : double.infinity;
+              return Column(
+                children: [
+                  _topBar(state),
+                  Expanded(child: _cameraBody(state)),
+                  ConstrainedBox(
+                    constraints: BoxConstraints(maxHeight: maxPanel),
+                    child: _bottomPanel(state),
+                  ),
+                ],
+              );
+            },
           ),
         ),
       ),
@@ -931,6 +946,9 @@ class _CameraScreenState extends ConsumerState<CameraScreen>
       // Ekran okuyucu kaydırılabilir içeriği gezebildiği için erişilebilirlik
       // korunur.
       child: SingleChildScrollView(
+        // Alt boşluk, kaydırma sonundaki düğmenin tam görünür olmasını sağlar;
+        // aksi hâlde ekranın kenarına yapışıp dokunma alanı kırpılıyor.
+        padding: const EdgeInsets.only(bottom: 8),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -1076,18 +1094,32 @@ class _CameraScreenState extends ConsumerState<CameraScreen>
                   ],
                 ],
               ),
-            if (!_busy(state.status) && state.status != CameraStatus.saved) ...[
-              const SizedBox(height: 8),
-              AccessibleButton(
-                label: 'Galeriden fotoğraf seç',
-                semanticLabel: 'Galeriden besin fotoğrafı seç ve analiz et',
-                icon: Icons.photo_library_outlined,
-                onPressed: _singleFlight || _saving || _portionUpdating
-                    ? null
-                    : () =>
-                        _captureAndAnalyze(automatic: false, fromGallery: true),
+            // Galeri düğmesi kendi satırında değil, düğme grubunun içinde
+            // durur: onay ekranında porsiyon seçici de görünürken ayrı bir tam
+            // genişlik satırı kısa ekranlarda paneli taşırıyordu.
+            if (!_busy(state.status) && state.status != CameraStatus.saved)
+              Padding(
+                padding: const EdgeInsets.only(top: 8),
+                child: Wrap(
+                  alignment: WrapAlignment.center,
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: [
+                    AccessibleButton(
+                      label: 'Galeriden fotoğraf seç',
+                      semanticLabel:
+                          'Galeriden besin fotoğrafı seç ve analiz et',
+                      icon: Icons.photo_library_outlined,
+                      onPressed: _singleFlight || _saving || _portionUpdating
+                          ? null
+                          : () => _captureAndAnalyze(
+                                automatic: false,
+                                fromGallery: true,
+                              ),
+                    ),
+                  ],
+                ),
               ),
-            ],
           ],
         ),
       ),

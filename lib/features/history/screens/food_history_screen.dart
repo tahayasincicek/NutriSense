@@ -508,33 +508,37 @@ class _HistoryEditDialogState extends State<_HistoryEditDialog> {
   Widget build(BuildContext context) {
     return AlertDialog(
       title: const Text('Kaydı Düzelt'),
-      content: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Semantics(
-            label: 'Besin adı düzeltme alanı',
-            textField: true,
-            child: TextField(
-              key: const Key('history_edit_name'),
-              controller: _nameController,
-              decoration: const InputDecoration(labelText: 'Besin adı'),
-            ),
-          ),
-          const SizedBox(height: 12),
-          Semantics(
-            label: 'Porsiyon gram düzeltme alanı',
-            textField: true,
-            child: TextField(
-              key: const Key('history_edit_portion'),
-              controller: _portionController,
-              keyboardType: const TextInputType.numberWithOptions(),
-              decoration: InputDecoration(
-                labelText: 'Porsiyon ($_unit)',
-                helperText: '0 ile ${_limitLabel} $_unit arasında olmalıdır.',
+      // Kısa ekranlarda (ör. Pixel 4) klavye açıkken iki metin alanı ve
+      // porsiyon açıklaması diyaloğa sığmıyordu; içerik kaydırılabilir.
+      content: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Semantics(
+              label: 'Besin adı düzeltme alanı',
+              textField: true,
+              child: TextField(
+                key: const Key('history_edit_name'),
+                controller: _nameController,
+                decoration: const InputDecoration(labelText: 'Besin adı'),
               ),
             ),
-          ),
-        ],
+            const SizedBox(height: 12),
+            Semantics(
+              label: 'Porsiyon gram düzeltme alanı',
+              textField: true,
+              child: TextField(
+                key: const Key('history_edit_portion'),
+                controller: _portionController,
+                keyboardType: const TextInputType.numberWithOptions(),
+                decoration: InputDecoration(
+                  labelText: 'Porsiyon ($_unit)',
+                  helperText: '0 ile ${_limitLabel} $_unit arasında olmalıdır.',
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
       actions: [
         TextButton(

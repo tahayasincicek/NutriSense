@@ -4,7 +4,7 @@
 
 **STATUS: NO REAL DATA**
 
-Depoda yetkili gerçek usability/survey tidy export'u yoktur. Analiz hattı hazırdır; bilimsel sonuç yoktur. Eski sonuç raporundaki n=20, %85/%90, 4,2/12,7 saniye, Mann–Whitney U, p<0,001 ve Cohen's d=2,84 değerleri input değildir ve bu hat tarafından yeniden üretilmiş sayılmaz.
+Depoda yetkili gerçek usability/survey tidy export'u yoktur. Analiz hattı hazırdır; bilimsel sonuç yoktur. Daha önce sonuç raporunda ve makale taslağında yer alan n=20, %85/%90, 4,2/12,7 saniye, Mann–Whitney U, p<0,001 ve Cohen's d=2,84 değerleri 8 Eylül 2026'da o belgelerden çıkarılmıştır; hiçbiri bu hattın çıktısı değildir ve yeniden üretilmiş sayılmaz.
 
 ## Kurulum
 

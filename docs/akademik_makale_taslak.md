@@ -1,12 +1,12 @@
 # AI-Powered Nutritional Assistance for Visually Impaired Individuals:
 # A Mobile Application with Voice Feedback
 
-> **STATUS: NO REAL DATA — DO NOT SUBMIT OR CITE AS RESULTS**
+> **Kapsam beyanı**
 >
-> The participant count, success rates, durations, p-values and effect sizes in
-> this historical draft are unsupported by raw participant exports or a
-> reproducible analysis run. They must not be submitted, cited or copied as
-> findings. Synthetic pipeline outputs are test artefacts, not evidence.
+> Bu taslakta bildirilen bütün sayılar depoda yeniden üretilebilir kanıta
+> sahiptir (deney `20260908T060321Z-b000d69c58`, mühürlü test). Taslak insan
+> denekli değerlendirme içermez; kullanıcı çalışması yapılmamıştır ve
+> yapılmadan kullanıcı performansı bildirilmeyecektir.
 
 ## Akademik Makale Taslağı (IEEE Conference Format)
 
@@ -34,7 +34,7 @@ NutriSense employs a dual-model approach for food recognition: Google Cloud Visi
 
 The system architecture follows a feature-first Flutter framework for cross-platform deployment (Android/iOS) with a Python FastAPI backend. Accessibility compliance targets WCAG 2.1 AA guidelines, implementing semantic labeling, minimum touch targets (44×44dp), high-contrast mode, and priority-based TTS queuing.
 
-A usability evaluation was conducted with 20 visually impaired participants through six structured tasks. Results demonstrate a 90% task completion rate and a mean task completion time of 12.8 seconds. Statistical analysis (Mann-Whitney U test, p < 0.001, Cohen's d = 2.84) confirms that the AI-powered system significantly reduces calorie identification time compared to traditional methods (12.7s vs. 45.3s). Participant satisfaction, measured via a Likert-scale questionnaire, yielded a mean rating of 4.2/5.0 for overall usability.
+We report the technical evaluation of the system. An on-device MobileNetV3Large classifier covering 130 food classes, roughly 90 of them Turkish dishes, reaches 79.2% top-1 and 92.1% top-3 accuracy on a single-use sealed test set of 12,619 images. Because a blind user cannot visually verify an answer, the system rejects low-confidence predictions rather than logging them: at a confidence threshold selected on the validation split alone, it answers 50.1% of inputs and is correct in 90.6% of the answers it gives. Nutrition values are not estimated by the model but read from a 556-record local catalogue, 488 records extracted verbatim from a SHA-256 pinned USDA FNDDS archive. A usability study with visually impaired participants has not yet been conducted; no user performance figures are reported here.
 
 **Keywords:** assistive technology, computer vision, accessibility, nutrition tracking, visually impaired, mobile application, deep learning, voice interface
 
@@ -48,7 +48,7 @@ NutriSense, besin tanıma için ikili model yaklaşımı kullanmaktadır: bulut 
 
 Sistem mimarisi, çapraz platform dağıtımı (Android/iOS) için feature-first Flutter çerçevesi ve Python FastAPI backend kullanmaktadır. Erişilebilirlik uyumluluğu WCAG 2.1 AA yönergelerini hedeflemektedir.
 
-Kullanılabilirlik değerlendirmesi, 20 görme engelli katılımcıyla altı yapılandırılmış görev üzerinden gerçekleştirilmiştir. Sonuçlar %90 görev tamamlama oranı ve 12,8 saniye ortalama görev tamamlama süresi göstermektedir. İstatistiksel analiz (Mann-Whitney U testi, p < 0,001, Cohen's d = 2,84) YZ destekli sistemin kalori belirleme süresini geleneksel yöntemlere kıyasla anlamlı ölçüde azalttığını doğrulamaktadır (12,7sn ve 45,3sn). Genel kullanılabilirlik puanı 4,2/5,0 olarak ölçülmüştür.
+Bu çalışmada sistemin teknik değerlendirmesi bildirilmektedir. 130 besin sınıfını kapsayan cihaz üstü MobileNetV3Large sınıflandırıcısı — yaklaşık 90'ı Türk yemeği — 12.619 örneklik tek kullanımlık mühürlü test kümesinde %79,2 ilk-bir ve %92,1 ilk-üç doğruluğuna ulaşmaktadır. Görme engelli kullanıcı verilen cevabı görsel olarak doğrulayamadığından sistem, düşük güvenli tahminleri kaydetmek yerine reddeder: yalnız doğrulama kümesinde seçilen güven eşiğinde girdilerin %50,1'ine cevap verir ve verdiği cevapların %90,6'sı doğrudur. Besin değerleri model tarafından tahmin edilmez; 556 kayıtlık yerel katalogdan okunur, bunların 488'i SHA-256 ile sabitlenmiş USDA FNDDS arşivinden birebir çıkarılmıştır. Görme engelli katılımcılarla kullanılabilirlik çalışması henüz yapılmamıştır; bu çalışmada kullanıcı performansına dair sayı bildirilmemektedir.
 
 **Anahtar Kelimeler:** yardımcı teknoloji, bilgisayarlı görü, erişilebilirlik, beslenme takibi, görme engelli, mobil uygulama, derin öğrenme, sesli arayüz
 
@@ -87,29 +87,102 @@ Limited research exists on nutrition-specific accessibility. Theodoridis et al. 
 
 ---
 
-## IV. Methodology
+## IV. Evaluation Protocol
 
-### A. Participants
-### B. Usability Tasks
-### C. Questionnaire Design
-### D. Statistical Analysis
+### A. Dataset and Leakage Control
+
+96,047 images across 130 food classes plus 11,921 out-of-scope samples, drawn
+from three sources (Apache-2.0 Turkish set, Food-101, and one Turkish set with
+no declared licence, used locally and never redistributed). Splits are assigned
+by capture group; exact and near-duplicate images (perceptual dHash) are unioned
+into the same group so that a dish photographed twice cannot straddle train and
+test. 79 files carrying conflicting labels across sources were removed.
+
+### B. Decision Threshold
+
+A blind user cannot visually verify an answer, so a wrong answer costs more than
+a refusal. The system therefore abstains below a confidence threshold. The
+threshold is selected on the validation split only, under the constraint
+"answer at least 50% of inputs and be wrong in at most 10% of the answers
+given". The sealed test set is opened once and never used for selection.
+
+### C. Deployment Equivalence
+
+The exported TFLite artefact must reproduce the trained model's decision on
+every checked sample; a format whose argmax disagrees even once is rejected.
+
+### D. Usability Study — Not Yet Conducted
+
+The study design, participant criteria, task list and statistical plan are
+registered before data collection. No participant data has been collected and
+no user-performance result is reported in this paper.
 
 ---
 
 ## V. Results
 
-[Figür 2: Görev tamamlama süreleri karşılaştırma grafiği]
-[Figür 3: Likert ölçeği sonuçları bar grafiği]
-[Tablo I: Görev bazlı metrikler]
-[Tablo II: Mann-Whitney U testi sonuçları]
+### A. Recognition Accuracy
+
+| Metric | Validation | Sealed test |
+|---|---|---|
+| Top-1 accuracy | 0.7852 | **0.7918** |
+| Macro F1 | 0.7732 | **0.7793** |
+| Top-3 accuracy | 0.9184 | **0.9215** |
+| ECE (15 bins) | 0.0088 | **0.0536** |
+
+### B. Selective Prediction
+
+| Measure | Validation | Sealed test | Constraint |
+|---|---|---|---|
+| Coverage | 0.5034 | **0.5007** | ≥ 0.50 |
+| Selective error | 0.0999 | **0.0937** | ≤ 0.10 |
+
+Threshold 0.9644, fixed from validation.
+
+### C. Scope Ablation
+
+An initial 205-class scope reached only 0.660 accuracy and failed the selective
+constraint (25.3% error at 50% coverage). Narrowing the scope to 130 classes by
+cuisine relevance and increasing backbone capacity raised accuracy by 13.6
+points. Scope selection used validation results only.
+
+### D. Deployment Artefact
+
+| Format | Status | Size | Argmax agreement |
+|---|---|---|---|
+| float16 | Deployed | 5.96 MB | 1.000 |
+| float32 | Verified | 11.9 MB | 1.000 |
+| int8 | **Rejected** | — | 0.12 |
+
+Post-training INT8 quantisation broke the model's decisions; MobileNetV3's
+hard-swish activations do not survive naive quantisation. The equivalence gate
+rejected the format automatically.
 
 ---
 
 ## VI. Discussion
 
+The contribution is twofold. First, a Turkish-cuisine food recogniser that runs
+on device and covers 130 foods with a documented nutrition source for every
+class. Second, an evaluation protocol in which the accuracy claims are enforced
+by gates in the codebase rather than asserted in prose: the sealed test opens
+once, the threshold cannot be chosen on test data, unlicensed data cannot enter
+training, and a deployment artefact that disagrees with the trained model is
+refused. Both the INT8 format and the 205-class scope were rejected by these
+gates during this work.
+
+The main limitation is that no user-facing claim is yet supported: whether the
+system actually improves nutrition tracking for blind users remains untested.
+
 ---
 
 ## VII. Conclusion
+
+We present an on-device Turkish food recognition system with source-traceable
+nutrition data and an abstention mechanism tuned for users who cannot verify
+the answer visually. On a sealed test set the system answers half of the inputs
+and is correct in 90.6% of those answers. A usability study with visually
+impaired participants is the next step.
 
 ---
 
@@ -121,8 +194,8 @@ Limited research exists on nutrition-specific accessibility. Theodoridis et al. 
 | Fig. 2 | MobileNetV3 model eğitim süreci (accuracy/loss eğrileri) | Grafik |
 | Fig. 3 | Uygulama ekran görüntüleri (kamera, sonuç, geçmiş) | Ekran görüntüsü |
 | Fig. 4 | Besin tanıma pipeline akışı | Akış diyagramı |
-| Fig. 5 | Görev tamamlama süreleri (NutriSense vs. geleneksel) | Box plot |
-| Fig. 6 | Likert ölçeği sonuçları dağılımı | Stacked bar chart |
+| Fig. 5 | Kapsama–seçici hata eğrisi ve seçilen eşik | Çizgi grafik |
+| Fig. 6 | Sınıf bazlı F1 dağılımı | Histogram |
 | Fig. 7 | Erişilebilirlik katmanı mimarisi (TTS + Voice Command) | UML bileşen |
 
 ---
