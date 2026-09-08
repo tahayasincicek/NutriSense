@@ -184,6 +184,15 @@ yoktur.
 4. Signing/secret olayıysa `SECURITY.md` incident akışı uygulanır.
 5. Archive, iPhone P0 ve VoiceOver matrisi yeniden geçmeden dağıtım açılmaz.
 
+## Mac'te ilk çalıştırma
+
+Projeyi Mac'te ilk kez açan kişi için tek komutluk kurulum ve adım adım
+anlatım: `docs/ios_devir_notu.md`.
+
+```bash
+bash ios/scripts/mac_setup.sh
+```
+
 ## iOS tamamlandı demek için kalan kapılar
 
 - [ ] Mac'te CocoaPods kurulumu ve `flutter build ios --no-codesign` geçti.

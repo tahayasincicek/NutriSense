@@ -341,7 +341,8 @@ class _CameraScreenState extends ConsumerState<CameraScreen>
   ) async {
     if (failure?.kind == ApiFailureKind.cancelled) return;
     if (failure?.kind == ApiFailureKind.connection ||
-        failure?.kind == ApiFailureKind.timeout) {
+        failure?.kind == ApiFailureKind.timeout ||
+        failure?.kind == ApiFailureKind.server) {
       ref.read(cameraStateProvider.notifier).setOfflineInference();
       await _runOnDeviceModel(processedBytes, _generation);
       return;

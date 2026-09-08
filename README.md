@@ -256,6 +256,7 @@ işleme envanteri `docs/data_processing_inventory.md` altında sürümlenir.
 | `docs/operations_runbook.md` | İşletme el kitabı |
 | `docs/android_release_runbook.md` | Android yayın adımları |
 | `docs/ios_release_runbook.md` | iOS yayın adımları |
+| `docs/ios_devir_notu.md` | Mac'te ilk çalıştırma ve devir notu |
 | `docs/backup_restore_plan.md` | Yedekleme ve geri dönüş planı |
 | `docs/environment_matrix.md` | Ortam matrisi |
 | `docs/play_store_listing_tr.md` | Play Store metni |
