@@ -994,6 +994,21 @@ class ApiService {
         return FoodAnalysisDecisionResult.fromJson(response.data ?? const {});
       });
 
+  Future<ApiResult<Map<String, dynamic>>> getFoodShortcuts() =>
+      _safeCall(() async {
+        final response =
+            await _dio.get<Map<String, dynamic>>('/food-shortcuts');
+        return response.data!;
+      });
+
+  Future<ApiResult<Map<String, dynamic>>> applyFoodShortcut(
+          String action, Map<String, dynamic> data) =>
+      _safeCall(() async {
+        final response = await _dio
+            .post<Map<String, dynamic>>('/food-shortcuts/$action', data: data);
+        return response.data!;
+      });
+
   Future<ApiResult<FoodAnalysisResult>> searchFoodByName({
     required String query,
     CancelToken? cancelToken,

@@ -15,6 +15,7 @@ import 'shared/services/voice_command_service.dart';
 import 'shared/services/voice_help_service.dart';
 import 'features/food_scan/screens/food_scan_screen.dart';
 import 'features/history/screens/food_history_screen.dart';
+import 'features/history/screens/food_shortcuts_screen.dart';
 import 'features/discover/screens/discover_screen.dart';
 import 'features/water_tracker/screens/water_tracker_screen.dart'; // Bu dosya ActivityTrackerScreen sınıfını barındırıyor
 import 'features/dietitian/screens/dietitian_screen.dart';
@@ -150,6 +151,19 @@ class _AppShellState extends ConsumerState<AppShell>
             }
             if (result.command == VoiceCommand.logFood) {
               _logFoodByVoice(result.rawText);
+            }
+            if ({
+                  VoiceCommand.frequentMeals,
+                  VoiceCommand.usualBreakfast,
+                  VoiceCommand.undoFood
+                }.contains(result.command) &&
+                ModalRoute.of(context)?.isCurrent == true) {
+              Navigator.of(context).push(MaterialPageRoute(
+                  builder: (_) => FoodShortcutsScreen(
+                        openUndo: result.command == VoiceCommand.undoFood,
+                        breakfast:
+                            result.command == VoiceCommand.usualBreakfast,
+                      )));
             }
           } else {
             // Komut anlaşılmadığında kullanıcıyı çıkmazda bırakmamak için

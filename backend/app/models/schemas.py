@@ -23,6 +23,26 @@ class AutomaticShareSettings(BaseModel):
     enabled: bool
 
 
+class RepeatMealRequest(BaseModel):
+    request_id: UUID
+    log_ids: list[UUID] = Field(min_length=1, max_length=30)
+    context_hash: str = Field(min_length=64, max_length=64)
+    confirmed: Literal[True]
+
+    @field_validator("log_ids")
+    @classmethod
+    def unique_logs(cls, value):
+        if len(set(value)) != len(value):
+            raise ValueError("Aynı besin iki kez seçilemez.")
+        return value
+
+
+class UndoFoodRequest(BaseModel):
+    action_id: UUID
+    context_hash: str = Field(min_length=64, max_length=64)
+    confirmed: Literal[True]
+
+
 class NutrientData(BaseModel):
     """Besin değerleri."""
     protein: float = Field(0.0, ge=0, description="Protein (g)")

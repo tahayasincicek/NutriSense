@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'food_shortcuts_screen.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../shared/models/food_analysis_model.dart';
@@ -66,6 +67,12 @@ class _FoodHistoryScreenState extends ConsumerState<FoodHistoryScreen> {
       ),
       body: Column(
         children: [
+          TextButton.icon(
+            onPressed: () => Navigator.of(context).push(
+                MaterialPageRoute(builder: (_) => const FoodShortcutsScreen())),
+            icon: const Icon(Icons.history_rounded),
+            label: const Text('Sık tüketilenler ve geri alma'),
+          ),
           _PeriodSelector(
             selected: state.period,
             onSelected: (period) =>

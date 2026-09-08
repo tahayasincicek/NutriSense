@@ -40,6 +40,7 @@ from ..models.database import (
 )
 from ..models.schemas import (
     AutomaticShareSettings,
+    RepeatMealRequest, UndoFoodRequest,
     FoodAnalysisResponse, FoodCandidate, FoodAnalysisDecisionRequest,
     FoodAnalysisDecisionResponse, FoodPortionRequest, ManualFoodLogRequest,
     NutrientData,
@@ -76,6 +77,10 @@ from ..domain.report_delivery import (
 from ..domain.automatic_reports import (
     PURPOSE, POLICY, active_consent, recipient_digest, local_delivery_only,
     queue_automatic_report, guard_automatic_delivery,
+)
+from ..domain.food_shortcuts import (
+    snapshot, record_action, frequent_meals, repeat_sources, clone_food,
+    undo_preview, undo_action, EVENT as FOOD_ACTION_EVENT,
 )
 from ..middleware.auth import (
     get_current_user, hash_password, verify_password,
@@ -607,6 +612,7 @@ async def update_food_analysis_portion(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
+    db.query(User).filter(User.id == current_user.id).with_for_update().first()
     attempt = db.query(RecognitionAttempt).filter(
         RecognitionAttempt.id == analysis_id,
         RecognitionAttempt.user_id == current_user.id,
@@ -672,6 +678,7 @@ async def decide_food_analysis(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
+    db.query(User).filter(User.id == current_user.id).with_for_update().first()
     attempt = db.query(RecognitionAttempt).filter(
         RecognitionAttempt.id == analysis_id,
         RecognitionAttempt.user_id == current_user.id,
@@ -799,6 +806,7 @@ async def decide_food_analysis(
     try:
         db.add_all([nutrition_source, log_entry])
         automatic = _queue_food_share(db, current_user, log_entry)
+        record_action(db, current_user.id, [log_entry], [None], "Besin ekleme")
         db.commit()
     except Exception:
         db.rollback()
@@ -827,6 +835,7 @@ async def create_manual_food_log(
     current_user: User = Depends(get_current_user),
 ):
     capture_key = str(request.capture_id)
+    db.query(User).filter(User.id == current_user.id).with_for_update().first()
     existing_attempt = db.query(RecognitionAttempt).filter(
         RecognitionAttempt.user_id == current_user.id,
         RecognitionAttempt.capture_id == capture_key,
@@ -935,6 +944,7 @@ async def create_manual_food_log(
     try:
         db.add_all([attempt, nutrition_source, log_entry])
         automatic = _queue_food_share(db, current_user, log_entry)
+        record_action(db, current_user.id, [log_entry], [None], "Besin ekleme")
         db.commit()
     except Exception:
         db.rollback()
@@ -1223,6 +1233,7 @@ def _owned_food_log(
     log_id: str,
     include_deleted: bool = False,
 ) -> FoodLog:
+    db.query(User).filter(User.id == current_user.id).with_for_update().first()
     query = db.query(FoodLog).filter(
         FoodLog.id == log_id,
         FoodLog.user_id == str(current_user.id),
@@ -1248,6 +1259,7 @@ async def update_food_log(
     current_user: User = Depends(get_current_user),
 ):
     log = _owned_food_log(db, current_user=current_user, log_id=log_id)
+    previous = snapshot(log)
     changed_fields: list[str] = []
 
     if request.food_name_tr is not None and request.food_name_tr != log.food_name_tr:
@@ -1325,6 +1337,8 @@ async def update_food_log(
         metadata_json={"log_id": str(log.id), "changed_fields": changed_fields},
     ))
     try:
+        if changed_fields:
+            record_action(db, current_user.id, [log], [previous], "Besin düzenleme")
         db.commit()
         db.refresh(log)
     except Exception:
@@ -1348,6 +1362,7 @@ async def delete_food_log(
         db, current_user=current_user, log_id=log_id, include_deleted=True,
     )
     if log.deleted_at is None:
+        previous = snapshot(log)
         log.deleted_at = utc_now()
         log.updated_at = log.deleted_at
         db.add(AuthAuditLog(
@@ -1357,6 +1372,7 @@ async def delete_food_log(
             reason="user_request",
             metadata_json={"log_id": str(log.id)},
         ))
+        record_action(db, current_user.id, [log], [previous], "Besin silme")
         db.commit()
     return FoodLogDeleteResponse(
         log_id=log.id,
@@ -1379,6 +1395,7 @@ async def restore_food_log(
         db, current_user=current_user, log_id=log_id, include_deleted=True,
     )
     if log.deleted_at is not None:
+        previous = snapshot(log)
         log.deleted_at = None
         log.updated_at = utc_now()
         db.add(AuthAuditLog(
@@ -1388,12 +1405,53 @@ async def restore_food_log(
             reason="user_undo",
             metadata_json={"log_id": str(log.id)},
         ))
+        record_action(db, current_user.id, [log], [previous], "Silinen besini geri getirme")
         db.commit()
     return FoodLogDeleteResponse(
         log_id=log.id,
         status="restored",
         message="Kayıt geri alındı.",
     )
+
+
+@router.get("/food-shortcuts")
+def get_food_shortcuts(db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+    return {"meals": frequent_meals(db, current_user.id), "undo": undo_preview(db, current_user.id)}
+
+
+@router.post("/food-shortcuts/repeat")
+async def repeat_meal(
+    request: RepeatMealRequest, db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    user = db.query(User).filter(User.id == current_user.id).with_for_update().one()
+    existing = db.get(AuthAuditLog, str(request.request_id))
+    if existing:
+        if (existing.user_id != str(user.id) or existing.event != FOOD_ACTION_EVENT
+                or existing.metadata_json.get("repeat_hash") != request.context_hash):
+            raise HTTPException(409, "Bu istek kimliği farklı bir işlemde kullanılmış.")
+        return {"message": "Bu öğün isteği zaten işlendi.", "duplicate": True}
+    sources = repeat_sources(db, user.id, [str(i) for i in request.log_ids], request.context_hash)
+    copies = [clone_food(log) for log in sources]
+    db.add_all(copies)
+    automatic = [_queue_food_share(db, user, log) for log in copies]
+    event = record_action(db, user.id, copies, [None] * len(copies), "Öğünü tekrar ekleme", str(request.request_id))
+    event.metadata_json = {**event.metadata_json, "repeat_hash": request.context_hash}
+    db.commit()
+    for report in automatic:
+        await _deliver_food_share(db, report)
+    return {"message": "Öğün bugünkü günlüğünüze eklendi.", "duplicate": False}
+
+
+@router.post("/food-shortcuts/undo")
+def undo_food_operation(
+    request: UndoFoodRequest, db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    db.query(User).filter(User.id == current_user.id).with_for_update().one()
+    undo_action(db, current_user.id, str(request.action_id), request.context_hash)
+    db.commit()
+    return {"message": "Son besin işlemi geri alındı. Önceden gönderilen raporlar değişmedi."}
 
 
 @router.get(
@@ -3206,6 +3264,10 @@ async def delete_account(
     ).delete()
     db.query(DietitianReport).filter(DietitianReport.user_id == user_id).delete()
     db.query(ConsentRecord).filter(ConsentRecord.user_id == user_id).delete()
+    # Undo snapshots contain diary data and must be erased with the account.
+    db.query(AuthAuditLog).filter(
+        AuthAuditLog.user_id == user_id, AuthAuditLog.event == FOOD_ACTION_EVENT,
+    ).delete(synchronize_session=False)
     db.query(AuthAuditLog).filter(AuthAuditLog.user_id == user_id).update(
         {AuthAuditLog.user_id: None},
         synchronize_session=False,

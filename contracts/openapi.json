@@ -2617,6 +2617,44 @@
         "title": "RefreshTokenRequest",
         "type": "object"
       },
+      "RepeatMealRequest": {
+        "properties": {
+          "confirmed": {
+            "const": true,
+            "title": "Confirmed",
+            "type": "boolean"
+          },
+          "context_hash": {
+            "maxLength": 64,
+            "minLength": 64,
+            "title": "Context Hash",
+            "type": "string"
+          },
+          "log_ids": {
+            "items": {
+              "format": "uuid",
+              "type": "string"
+            },
+            "maxItems": 30,
+            "minItems": 1,
+            "title": "Log Ids",
+            "type": "array"
+          },
+          "request_id": {
+            "format": "uuid",
+            "title": "Request Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "request_id",
+          "log_ids",
+          "context_hash",
+          "confirmed"
+        ],
+        "title": "RepeatMealRequest",
+        "type": "object"
+      },
       "ResearchConsentCreateSchema": {
         "properties": {
           "consent_method": {
@@ -3116,6 +3154,33 @@
           "full_name"
         ],
         "title": "TokenResponse",
+        "type": "object"
+      },
+      "UndoFoodRequest": {
+        "properties": {
+          "action_id": {
+            "format": "uuid",
+            "title": "Action Id",
+            "type": "string"
+          },
+          "confirmed": {
+            "const": true,
+            "title": "Confirmed",
+            "type": "boolean"
+          },
+          "context_hash": {
+            "maxLength": 64,
+            "minLength": 64,
+            "title": "Context Hash",
+            "type": "string"
+          }
+        },
+        "required": [
+          "action_id",
+          "context_hash",
+          "confirmed"
+        ],
+        "title": "UndoFoodRequest",
         "type": "object"
       },
       "UsabilityResponseSchema": {
@@ -5569,6 +5634,118 @@
           }
         ],
         "summary": "Silinen besin günlüğü kaydını geri al",
+        "tags": [
+          "NutriSense API"
+        ]
+      }
+    },
+    "/api/v1/food-shortcuts": {
+      "get": {
+        "operationId": "get_food_shortcuts_api_v1_food_shortcuts_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Get Food Shortcuts",
+        "tags": [
+          "NutriSense API"
+        ]
+      }
+    },
+    "/api/v1/food-shortcuts/repeat": {
+      "post": {
+        "operationId": "repeat_meal_api_v1_food_shortcuts_repeat_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RepeatMealRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Repeat Meal",
+        "tags": [
+          "NutriSense API"
+        ]
+      }
+    },
+    "/api/v1/food-shortcuts/undo": {
+      "post": {
+        "operationId": "undo_food_operation_api_v1_food_shortcuts_undo_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UndoFoodRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Undo Food Operation",
         "tags": [
           "NutriSense API"
         ]

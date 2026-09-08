@@ -79,7 +79,7 @@ def guard_automatic_delivery(db, report, dietitian, settings):
     if not marker:
         return
     consent = db.get(ConsentRecord, marker["consent_id"])
-    from ..models.database import DietitianAssignment, User
+    from ..models.database import DietitianAssignment, User, FoodLog
     assignment = db.get(DietitianAssignment, consent.assignment_id) if consent else None
     user = db.get(User, report.user_id)
     if (
@@ -92,3 +92,7 @@ def guard_automatic_delivery(db, report, dietitian, settings):
     ):
         raise HTTPException(409, "Otomatik yerel gönderim kapalı veya paylaşım izni değişmiş.")
     verified_recipients(dietitian, ["email", "sms"])
+    for record in report.payload_json.get("records", []):
+        log = db.get(FoodLog, record["log_id"])
+        if log is None or log.deleted_at is not None:
+            raise HTTPException(409, "Geri alınmış veya silinmiş besin otomatik gönderilemez.")

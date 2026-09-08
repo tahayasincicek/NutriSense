@@ -38,6 +38,9 @@ enum HelpContext {
 
 /// Her yerde geçerli olan komutlar.
 const _globalCommands = <VoiceCommand>[
+  VoiceCommand.frequentMeals,
+  VoiceCommand.usualBreakfast,
+  VoiceCommand.undoFood,
   VoiceCommand.logFood,
   VoiceCommand.scan,
   VoiceCommand.history,

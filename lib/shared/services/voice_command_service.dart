@@ -35,6 +35,12 @@ import 'accessibility_service.dart';
 
 /// Tanınan sesli komut
 enum VoiceCommand {
+  frequentMeals('Sık tüketilen öğünler',
+      ['sık tüketilenler', 'sık tükettiklerim', 'sık tüketilen öğünler']),
+  usualBreakfast('Her zamanki kahvaltımı ekle',
+      ['her zamanki kahvaltımı ekle', 'kahvaltımı tekrar ekle']),
+  undoFood('Son işlemi geri al',
+      ['son işlemi geri al', 'son besin işlemini geri al']),
   scan('Tara', [
     'tara',
     'besin tara',
