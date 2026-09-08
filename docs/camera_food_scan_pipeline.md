@@ -4,9 +4,9 @@
 
 ## Ürün stratejisi
 
-Birincil yol, kimliği doğrulanmış kullanıcının görüntüyü kanonik FastAPI endpointine multipart olarak göndermesidir. Backend yalnız yapılandırılmış Google Vision sağlayıcısını veya ileride açıkça seçilecek sunucu modelini kullanır. Credential yoksa servis 503 döner; sahte başarı veya demo besin üretilmez.
+Birincil yol, kimliği doğrulanmış kullanıcının görüntüyü kanonik FastAPI endpointine multipart olarak göndermesidir. Backend yapılandırmaya göre Google Vision veya Gemini kullanır. Credential yoksa servis 503 döner; sahte başarı veya demo besin üretilmez.
 
-Çevrimdışı/mahremiyet yolu yalnız checksum'ı, etiketleri, preprocessing sözleşmesi ve cihaz eşdeğerlik testi doğrulanmış TFLite modeli bulunduğunda açılacaktır. Depoda böyle bir model olmadığı için mevcut `UnavailableOfflineFoodRecognizer` güvenli biçimde başarısız olur ve manuel giriş sunar. Cloud confidence ile ilerideki TFLite confidence ortak kalibre edilmeden karşılaştırılmaz; `recognition_source` her zaman gösterilir.
+Cihaz üstü tanıma uygulanmıştır. Dağıtılan model, etiketler ve SHA-256 manifesti `assets/models/` altındadır. Ayarlardan doğrudan seçilebilir; bağlantı, zaman aşımı ve sunucu hatalarında da cihaz üstü modele geçilir. Galeriden seçilen fotoğraf aynı analiz akışını kullanır. Modelin tanıma sonucu kullanıcı onayı ister; besin değerleri ve kayıt işlemleri backend gerektirir. Güncel ölçümler için [model kartına](../ml/MODEL_CARD.md) bakın.
 
 ## Kamera state machine
 
@@ -33,7 +33,7 @@ Her aktif aşama → qualityWarning | offlineInference | error
 | Düşük güven/OOD | Kesin ad veya kalori söylemez; yeniden çekim/manuel giriş sunar | Engellenir |
 | Nutrition bulunamadı veya 0 kalori | Model tanımış olsa bile beslenme sonucunu başarılı saymaz | Engellenir |
 
-`confidence` tanıma modeline aittir. `nutrition_status` ve `nutrition_source` beslenme verisinin ayrı köken/güven göstergesidir. Yerel veritabanı sonucu `unverified` olarak duyurulur.
+`confidence` tanıma modeline aittir. `nutrition_status` ve `nutrition_source` beslenme verisinin ayrı köken/güven göstergesidir. Katalog kayıtlarının güvenilirlik ve kaynak bilgileri ayrı gösterilir; yerel olması tek başına doğrulanmamış olduğu anlamına gelmez. [Besin verisi yöntemi](nutrition_data_methodology.md).
 
 ## Kalite yapılandırması
 
@@ -60,9 +60,9 @@ Kalibrasyon kanıtı en az üç orta sınıf Android cihaz, farklı ışık/mesa
 
 Mevcut rate limiter tek process belleğindedir. Çok instance production için Redis/gateway tabanlı paylaşılan limit zorunlu release kapısıdır.
 
-## TFLite açma kapısı
+## TFLite doğrulama ve cihaz kabulü
 
-Offline recognizer ancak şu artefaktların tümü varsa uygulanıp etkinleştirilebilir:
+Model dağıtımı ve gerçek cihaz kabulünde aşağıdaki kanıtlar ayrı izlenir. Modelin depoda bulunması gerçek cihaz ölçümlerinin tamamlandığını göstermez:
 
 - gerçek `.tflite`, SHA-256 checksum ve sürümlü `labels.txt`;
 - input shape, RGB sırası, resize/crop, normalization, dtype;
@@ -72,7 +72,7 @@ Offline recognizer ancak şu artefaktların tümü varsa uygulanıp etkinleştir
 - hedef Android cihazda cold/warm P50/P95 latency, bellek ve model boyutu;
 - düşük güven/OOD eşiği için kalibrasyon verisi.
 
-Bu artefaktlar yokken offline kodunun yiyecek sonucu döndürmesi yasaktır.
+Model veya manifest yüklenemediğinde sahte sonuç üretilmez; manuel giriş sunulur. Gerçek cihaz ölçümleri aşağıdaki tabloda ayrıca izlenir.
 
 ## Otomatik doğrulama
 

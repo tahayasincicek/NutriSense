@@ -29,7 +29,7 @@ Tek Dio istemcisi:
 - yanlış hesap-silme parolası gibi işleme özgü 401'i refresh tetikleyicisi yapmaz;
 - logout sırasında sunucudaki refresh tokenı revoke etmeyi dener ve sonuçtan bağımsız olarak cihaz kasasını temizler.
 
-Parola sıfırlama uygulanmamıştır. Mobil arayüz bunu “henüz kullanılamıyor” olarak açıkça gösterir; backend 501 döner. Çalışıyormuş gibi başarı mesajı verilmez.
+Parola sıfırlama uygulanmıştır: `/auth/password-reset` ile istek başlatılır, `/auth/password-reset/confirm` ile kod ve yeni parola doğrulanır. Geliştirme ortamında sıfırlama e-postası Mailpit üzerinden kontrol edilir.
 
 ## Backend oturum güvenliği
 

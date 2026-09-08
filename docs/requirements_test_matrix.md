@@ -23,7 +23,7 @@ Durumlar: **Otomatik** CI kanıtı, **Manuel** gerçek cihaz/insan gerekir,
 | P1 | Migration temiz DB ve downgrade | backend migration/data tests; CI `alembic upgrade head/current` | MySQL backup restore provası | Otomatik + Manuel |
 | P1 | Startup config/health/readiness | backend config/security tests | Staging TLS/DB readiness | Otomatik + Manuel |
 | P1 | ML split/checksum/label/OOD/metrics | `ml/tests/test_manifest.py`, `ml/tests/test_safety_gates.py` | Yok | Otomatik |
-| P0 | Keras–TFLite parity, regression threshold | `ml/src/nutrisense_ml/convert.py` doğrulama kapısı | Gerçek model/checkpoint/regression set | Bloke: model yok |
+| P0 | Keras–TFLite parity, regression threshold | `ml/src/nutrisense_ml/convert.py` doğrulama kapısı | Gerçek model/checkpoint/regression set | Dağıtım modeli mevcut; güncel dönüşüm ve ölçüm kanıtları için `ml/MODEL_CARD.md` ve `assets/models/model_manifest.json` incelenmeli |
 | P1 | Semantics/focus/%200/contrast | `test/accessibility`, production widget testleri | TalkBack iki Android sürümü | Otomatik + Manuel |
 | P1 | Release APK/AAB ve imza | CI dev debug APK; Gradle release blocker | Kurum app id + upload key ile signed AAB | AAB Bloke |
 
