@@ -6,6 +6,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:uuid/uuid.dart';
 
@@ -32,6 +33,9 @@ import 'nutrition_detail_screen.dart';
 final availableCamerasProvider = FutureProvider<List<CameraDescription>>((ref) {
   return availableCameras();
 });
+
+final galleryImagePickerProvider =
+    Provider<ImagePicker>((ref) => ImagePicker());
 
 class CameraScreen extends ConsumerStatefulWidget {
   const CameraScreen({
@@ -72,6 +76,7 @@ class _CameraScreenState extends ConsumerState<CameraScreen>
   String? _captureId;
   String? _voiceStatus;
   bool _voiceListening = false;
+  bool _pickingGallery = false;
 
   @override
   void initState() {
@@ -107,6 +112,9 @@ class _CameraScreenState extends ConsumerState<CameraScreen>
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
+    // Sistem fotoğraf seçicisi de uygulamayı geçici olarak arka plana alır.
+    // Dönüşte seçilen fotoğrafın analiz durumunu kamera başlangıcıyla ezmeyin.
+    if (_pickingGallery) return;
     if (state == AppLifecycleState.inactive ||
         state == AppLifecycleState.paused ||
         state == AppLifecycleState.detached) {
@@ -199,11 +207,12 @@ class _CameraScreenState extends ConsumerState<CameraScreen>
     _autoCaptureTimer = null;
   }
 
-  Future<void> _captureAndAnalyze({required bool automatic}) async {
+  Future<void> _captureAndAnalyze(
+      {required bool automatic, bool fromGallery = false}) async {
     final controller = _controller;
     if (_singleFlight ||
-        controller == null ||
-        !controller.value.isInitialized) {
+        (!fromGallery &&
+            (controller == null || !controller.value.isInitialized))) {
       return;
     }
     final generation = ++_generation;
@@ -213,13 +222,36 @@ class _CameraScreenState extends ConsumerState<CameraScreen>
     _requestCancelToken = CancelToken();
     _captureId = _uuid.v4();
     try {
-      notifier.setCapturing();
-      if (!automatic) {
-        await _tts.speak('Görüntü çekiliyor. Telefonu sabit tutun.');
+      late final Uint8List bytes;
+      if (fromGallery) {
+        _stopAutoCapture();
+        _pickingGallery = true;
+        setState(() {});
+        final selected = await ref.read(galleryImagePickerProvider).pickImage(
+              source: ImageSource.gallery,
+              maxWidth: 2048,
+              maxHeight: 2048,
+              requestFullMetadata: false,
+            );
+        _pickingGallery = false;
+        if (!_isCurrent(generation)) return;
+        if (selected == null) {
+          await _tts.speak('Fotoğraf seçimi iptal edildi.');
+          return;
+        }
+        // Galerideki asıl fotoğrafı silmeyin; yalnız baytlarını okuyun.
+        bytes = await selected.readAsBytes();
+        notifier.setCapturing();
+        await _tts.speak('Seçilen fotoğraf analiz ediliyor.');
+      } else {
+        notifier.setCapturing();
+        if (!automatic) {
+          await _tts.speak('Görüntü çekiliyor. Telefonu sabit tutun.');
+        }
+        final captured = await controller!.takePicture();
+        _temporaryCapture = File(captured.path);
+        bytes = await captured.readAsBytes();
       }
-      final captured = await controller.takePicture();
-      _temporaryCapture = File(captured.path);
-      final bytes = await captured.readAsBytes();
       if (!_isCurrent(generation)) return;
 
       final quality = await ImagePreprocessor.checkQuality(
@@ -288,8 +320,15 @@ class _CameraScreenState extends ConsumerState<CameraScreen>
         );
       }
     } finally {
+      _pickingGallery = false;
       await _deleteTemporaryCapture();
-      if (generation == _generation) _singleFlight = false;
+      if (generation == _generation) {
+        _singleFlight = false;
+        if (mounted) {
+          setState(() {});
+          if (fromGallery && _initialized) _startAutoCapture();
+        }
+      }
     }
   }
 
@@ -939,9 +978,25 @@ class _CameraScreenState extends ConsumerState<CameraScreen>
                   semanticLabel: 'Sonucu onayla ve yemek geçmişine kaydet',
                   icon: Icons.check,
                   isLoading: _saving,
-                  onPressed: analysis?.canConfirm == true && !_saving
-                      ? _confirm
-                      : null,
+                  // Cihaz üstü modelde sunucudan gelen bir analiz yoktur;
+                  // kalori değeri katalogdan çekileceği için onay, tanınan ad
+                  // önceden doldurulmuş porsiyon akışına gider. Aksi hâlde
+                  // ekran "onaylayın" der ama düğme çalışmaz.
+                  onPressed: _saving
+                      ? null
+                      : analysis?.canConfirm == true
+                          ? _confirm
+                          : state.recognizedFood != null
+                              ? () => _showManualEntry(
+                                    candidate: FoodCandidate(
+                                      foodName: state.recognizedFood!
+                                          .toLowerCase()
+                                          .replaceAll(' ', '_'),
+                                      foodNameTr: state.recognizedFood!,
+                                      confidence: state.confidence ?? 0,
+                                    ),
+                                  )
+                              : null,
                 ),
                 AccessibleButton(
                   label: 'Düzelt',
@@ -1016,6 +1071,18 @@ class _CameraScreenState extends ConsumerState<CameraScreen>
                 ],
               ],
             ),
+          if (!_busy(state.status) && state.status != CameraStatus.saved) ...[
+            const SizedBox(height: 8),
+            AccessibleButton(
+              label: 'Galeriden fotoğraf seç',
+              semanticLabel: 'Galeriden besin fotoğrafı seç ve analiz et',
+              icon: Icons.photo_library_outlined,
+              onPressed: _singleFlight || _saving || _portionUpdating
+                  ? null
+                  : () =>
+                      _captureAndAnalyze(automatic: false, fromGallery: true),
+            ),
+          ],
         ],
       ),
     );
