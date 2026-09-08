@@ -2030,9 +2030,13 @@ ESTIMATED = {
     "lahmacun": {
         "display_name_tr": "Lahmacun (tahmini)",
         "sources": [
-            "https://www.diyetkolik.com/kac-kalori/lahmacun",
+            "https://www.diyetkolik.com/kac-kalori/ev-yapimi-lahmacun",
             "https://www.besinanaliz.com/foods/lahmacun",
         ],
+        "portion_units": [{
+            "unit": "adet", "grams_per_unit": 205,
+            "source_measure": "Diyetkolik: 1 orta porsiyon ev yapimi lahmacun = 205 g",
+        }],
         "nutrients": {
             "calories_per_100g": 221, "protein_per_100g": 9.74,
             "carbs_per_100g": 32.27, "fat_per_100g": 5.55,
@@ -2056,7 +2060,12 @@ ESTIMATED = {
         "sources": [
             "https://www.diyetkolik.com/kac-kalori/icli-kofte",
             "https://www.fitekran.com/besin-degeri/icli-kofte/",
+            "https://www.yildirimgazetesi.com/icli-kofte",
         ],
+        "portion_units": [{
+            "unit": "adet", "grams_per_unit": 70,
+            "source_measure": "Yildirim Gazetesi besin tablosu: 1 adet icli kofte = 70 g",
+        }],
         "nutrients": {
             "calories_per_100g": 233, "protein_per_100g": 9.87,
             "carbs_per_100g": 32.28, "fat_per_100g": 6.83,
@@ -2092,7 +2101,12 @@ ESTIMATED = {
         "sources": [
             "https://www.diyetkolik.com/kac-kalori/gozleme",
             "https://www.fitekran.com/besin-degeri/gozleme/",
+            "https://kolayhesaplasana.com/kalori-hesaplama",
         ],
+        "portion_units": [{
+            "unit": "adet", "grams_per_unit": 120,
+            "source_measure": "Kolay Hesaplasana porsiyon tablosu: 1 adet peynirli gozleme = 120 g",
+        }],
         "nutrients": {
             "calories_per_100g": 269, "protein_per_100g": 10.35,
             "carbs_per_100g": 46.1, "fat_per_100g": 6.83,
@@ -2152,7 +2166,12 @@ ESTIMATED = {
         "sources": [
             "https://www.diyetkolik.com/kac-kalori/susamli-simit",
             "https://www.fitekran.com/besin-degeri/sokak-simiti/",
+            "https://www.dytseydaertas.com/besin/susamli-simit",
         ],
+        "portion_units": [{
+            "unit": "adet", "grams_per_unit": 109,
+            "source_measure": "Dyt. Seyda Ertas: 1 orta susamli simit = 109 g",
+        }],
         "nutrients": {
             "calories_per_100g": 320, "protein_per_100g": 9.0,
             "carbs_per_100g": 62.0, "fat_per_100g": 4.0,
@@ -2211,7 +2230,10 @@ def _add_estimates(catalog: dict) -> None:
             "default_portion_g": 100,
             "serving_unit": "gram",
             "serving_quantity": 100,
-            "portion_units": [],
+            "portion_units": [
+                {**unit, "source_item_id": source_id}
+                for unit in row.get("portion_units", [])
+            ],
             "estimate_sources": row["sources"],
             "macro_delta_percent": round(delta, 2),
         }

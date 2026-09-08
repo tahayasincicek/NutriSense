@@ -133,6 +133,27 @@ def test_estimated_record_still_needs_its_provenance(catalog_service):
     assert catalog_service._query_local_db("lahmacun", None)["available"] is False
 
 
+@pytest.mark.parametrize("name,grams", [
+    ("lahmacun", 205),
+    ("simit", 109),
+    ("gozleme", 120),
+    ("icli_kofte", 70),
+])
+def test_countable_turkish_foods_expose_sourced_item_weights(
+    catalog_service, name, grams,
+):
+    result = catalog_service._query_local_db(name, None, input_locale="tr-TR")
+
+    assert result["available"] is True
+    assert result["nutrition_reliability"] == "estimated"
+    assert result["portion_conversions"] == [{
+        "unit": "adet",
+        "grams_per_unit": float(grams),
+        "source_item_id": f"estimate:{name}",
+        "source_name": result["provenance"]["attribution"],
+    }]
+
+
 def test_bad_json_override_does_not_crash_startup(tmp_path, monkeypatch):
     path = tmp_path / "broken.json"
     path.write_text("{invalid", encoding="utf-8")

@@ -3425,11 +3425,11 @@
         "attribution": "USDA FoodData Central, FNDDS 2021-2023. Green beans, cooked, as ingredient. https://fdc.nal.usda.gov/fdc-app.html#/food-details/2710803/nutrients"
       },
       "estimate:lahmacun": {
-        "source_url": "https://www.diyetkolik.com/kac-kalori/lahmacun",
+        "source_url": "https://www.diyetkolik.com/kac-kalori/ev-yapimi-lahmacun",
         "source_item_name": "Lahmacun (tahmini)",
         "retrieved_at": "2026-09-07T00:00:00Z",
         "license": "Public secondary sources; published estimates, not a laboratory measurement",
-        "attribution": "Piyasa ortalamasi tahmini. Kaynaklar: https://www.diyetkolik.com/kac-kalori/lahmacun, https://www.besinanaliz.com/foods/lahmacun"
+        "attribution": "Piyasa ortalamasi tahmini. Kaynaklar: https://www.diyetkolik.com/kac-kalori/ev-yapimi-lahmacun, https://www.besinanaliz.com/foods/lahmacun"
       },
       "estimate:manti": {
         "source_url": "https://www.diyetkolik.com/kac-kalori/manti",
@@ -3443,7 +3443,7 @@
         "source_item_name": "Icli kofte (tahmini)",
         "retrieved_at": "2026-09-07T00:00:00Z",
         "license": "Public secondary sources; published estimates, not a laboratory measurement",
-        "attribution": "Piyasa ortalamasi tahmini. Kaynaklar: https://www.diyetkolik.com/kac-kalori/icli-kofte, https://www.fitekran.com/besin-degeri/icli-kofte/"
+        "attribution": "Piyasa ortalamasi tahmini. Kaynaklar: https://www.diyetkolik.com/kac-kalori/icli-kofte, https://www.fitekran.com/besin-degeri/icli-kofte/, https://www.yildirimgazetesi.com/icli-kofte"
       },
       "estimate:kisir": {
         "source_url": "https://www.diyetkolik.com/kac-kalori/kisir",
@@ -3464,7 +3464,7 @@
         "source_item_name": "Gozleme (peynirli, tahmini)",
         "retrieved_at": "2026-09-07T00:00:00Z",
         "license": "Public secondary sources; published estimates, not a laboratory measurement",
-        "attribution": "Piyasa ortalamasi tahmini. Kaynaklar: https://www.diyetkolik.com/kac-kalori/gozleme, https://www.fitekran.com/besin-degeri/gozleme/"
+        "attribution": "Piyasa ortalamasi tahmini. Kaynaklar: https://www.diyetkolik.com/kac-kalori/gozleme, https://www.fitekran.com/besin-degeri/gozleme/, https://kolayhesaplasana.com/kalori-hesaplama"
       },
       "estimate:mucver": {
         "source_url": "https://www.diyetkolik.com/kac-kalori/mucver",
@@ -3499,7 +3499,7 @@
         "source_item_name": "Simit (tahmini)",
         "retrieved_at": "2026-09-07T00:00:00Z",
         "license": "Public secondary sources; published estimates, not a laboratory measurement",
-        "attribution": "Piyasa ortalamasi tahmini. Kaynaklar: https://www.diyetkolik.com/kac-kalori/susamli-simit, https://www.fitekran.com/besin-degeri/sokak-simiti/"
+        "attribution": "Piyasa ortalamasi tahmini. Kaynaklar: https://www.diyetkolik.com/kac-kalori/susamli-simit, https://www.fitekran.com/besin-degeri/sokak-simiti/, https://www.dytseydaertas.com/besin/susamli-simit"
       },
       "estimate:lokum": {
         "source_url": "https://www.diyetkolik.com/kac-kalori/lokum",
@@ -13008,9 +13008,16 @@
     "default_portion_g": 100,
     "serving_unit": "gram",
     "serving_quantity": 100,
-    "portion_units": [],
+    "portion_units": [
+      {
+        "unit": "adet",
+        "grams_per_unit": 205,
+        "source_measure": "Diyetkolik: 1 orta porsiyon ev yapimi lahmacun = 205 g",
+        "source_item_id": "estimate:lahmacun"
+      }
+    ],
     "estimate_sources": [
-      "https://www.diyetkolik.com/kac-kalori/lahmacun",
+      "https://www.diyetkolik.com/kac-kalori/ev-yapimi-lahmacun",
       "https://www.besinanaliz.com/foods/lahmacun"
     ],
     "macro_delta_percent": 1.36,
@@ -13048,10 +13055,18 @@
     "default_portion_g": 100,
     "serving_unit": "gram",
     "serving_quantity": 100,
-    "portion_units": [],
+    "portion_units": [
+      {
+        "unit": "adet",
+        "grams_per_unit": 70,
+        "source_measure": "Yildirim Gazetesi besin tablosu: 1 adet icli kofte = 70 g",
+        "source_item_id": "estimate:icli_kofte"
+      }
+    ],
     "estimate_sources": [
       "https://www.diyetkolik.com/kac-kalori/icli-kofte",
-      "https://www.fitekran.com/besin-degeri/icli-kofte/"
+      "https://www.fitekran.com/besin-degeri/icli-kofte/",
+      "https://www.yildirimgazetesi.com/icli-kofte"
     ],
     "macro_delta_percent": 1.26,
     "calories_per_100g": 233,
@@ -13108,10 +13123,18 @@
     "default_portion_g": 100,
     "serving_unit": "gram",
     "serving_quantity": 100,
-    "portion_units": [],
+    "portion_units": [
+      {
+        "unit": "adet",
+        "grams_per_unit": 120,
+        "source_measure": "Kolay Hesaplasana porsiyon tablosu: 1 adet peynirli gozleme = 120 g",
+        "source_item_id": "estimate:gozleme"
+      }
+    ],
     "estimate_sources": [
       "https://www.diyetkolik.com/kac-kalori/gozleme",
-      "https://www.fitekran.com/besin-degeri/gozleme/"
+      "https://www.fitekran.com/besin-degeri/gozleme/",
+      "https://kolayhesaplasana.com/kalori-hesaplama"
     ],
     "macro_delta_percent": 6.79,
     "calories_per_100g": 269,
@@ -13208,10 +13231,18 @@
     "default_portion_g": 100,
     "serving_unit": "gram",
     "serving_quantity": 100,
-    "portion_units": [],
+    "portion_units": [
+      {
+        "unit": "adet",
+        "grams_per_unit": 109,
+        "source_measure": "Dyt. Seyda Ertas: 1 orta susamli simit = 109 g",
+        "source_item_id": "estimate:simit"
+      }
+    ],
     "estimate_sources": [
       "https://www.diyetkolik.com/kac-kalori/susamli-simit",
-      "https://www.fitekran.com/besin-degeri/sokak-simiti/"
+      "https://www.fitekran.com/besin-degeri/sokak-simiti/",
+      "https://www.dytseydaertas.com/besin/susamli-simit"
     ],
     "macro_delta_percent": 0.0,
     "calories_per_100g": 320,
