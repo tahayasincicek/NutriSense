@@ -1,0 +1,74 @@
+{
+  "converted_at": "2026-09-08T06:51:33.709019Z",
+  "experiment_id": "20260908T060321Z-b000d69c58",
+  "formats": {
+    "float16": {
+      "argmax_match_rate": 1.0,
+      "bytes": 6245440,
+      "desktop_median_inference_ms": 11.071148999690195,
+      "equivalence_samples": 50,
+      "held_out_test_accuracy_delta": null,
+      "held_out_test_accuracy_delta_status": "not_run; evaluate a predeclared deployment candidate without tuning on test",
+      "input_dtype": "<class 'numpy.float32'>",
+      "input_quantization": [
+        0.0,
+        0
+      ],
+      "input_shape": [
+        1,
+        224,
+        224,
+        3
+      ],
+      "max_abs_difference": 0.010910511016845703,
+      "output_dtype": "<class 'numpy.float32'>",
+      "output_quantization": [
+        0.0,
+        0
+      ],
+      "path": "/home/taha/ml/artifacts/20260908T060321Z-b000d69c58/nutrisense_float16.tflite",
+      "sha256": "270ae6ff459e942324df66387b1df1f6bf4c3e50a5e0811ef76e292c756a7d72",
+      "tolerance": 0.05,
+      "validation_subset_accuracy_delta": 0.0,
+      "validation_subset_keras_accuracy": 0.7,
+      "validation_subset_tflite_accuracy": 0.7
+    },
+    "float32": {
+      "argmax_match_rate": 1.0,
+      "bytes": 12400016,
+      "desktop_median_inference_ms": 10.665753000012046,
+      "equivalence_samples": 50,
+      "held_out_test_accuracy_delta": null,
+      "held_out_test_accuracy_delta_status": "not_run; evaluate a predeclared deployment candidate without tuning on test",
+      "input_dtype": "<class 'numpy.float32'>",
+      "input_quantization": [
+        0.0,
+        0
+      ],
+      "input_shape": [
+        1,
+        224,
+        224,
+        3
+      ],
+      "max_abs_difference": 4.887580871582031e-06,
+      "output_dtype": "<class 'numpy.float32'>",
+      "output_quantization": [
+        0.0,
+        0
+      ],
+      "path": "/home/taha/ml/artifacts/20260908T060321Z-b000d69c58/nutrisense_float32.tflite",
+      "sha256": "b287dc687bbcecc1edc50be482d6f87b1e87ab2d691c386d23fe49523e8d4ca6",
+      "tolerance": 0.0001,
+      "validation_subset_accuracy_delta": 0.0,
+      "validation_subset_keras_accuracy": 0.7,
+      "validation_subset_tflite_accuracy": 0.7
+    }
+  },
+  "keras_sha256": "2c222331b6780b44861869c24d23f5b400828692d56223466b7ff3b6eb0c854a",
+  "labels_sha256": "4cf1e86a3a4121c812bce222c1135f321b973714db2ce7ae9c3cde2175b407fb",
+  "preprocessing_sha256": "5f213967a546691fa37945d6d3365eea6c7f4503f114b905aa6c8fa9ee38030e",
+  "schema_version": 1,
+  "status": "converted",
+  "warning": "Desktop timing is not target-device latency evidence."
+}

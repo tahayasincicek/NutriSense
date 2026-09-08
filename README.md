@@ -61,28 +61,49 @@ varsayılmaz. Ayrıntı: `docs/nutrition_data_methodology.md`.
 | Görüntü servisi | Google Vision veya Gemini (yapılandırmayla seçilir) |
 | Çalışma ortamı | Docker Compose |
 
-## Çalıştırma
+## Kurulum
 
-Gereken: Docker Desktop, Flutter SDK, bir Android emülatörü.
+Depoyu klonladıktan sonra üç adım:
+
+```bash
+git clone https://github.com/tahayasincicek/NutriSense.git
+cd NutriSense
+python scripts/dev_setup.py
+```
+
+`dev_setup.py`, `backend/.env` dosyasını şablondan üretir ve gizli değerleri
+rastgele doldurur. Var olan bir `.env` dosyasının üzerine yazmaz. Bu dosya
+Git'e girmez.
+
+### Ortak gereksinimler
+
+| Araç | Ne için |
+|---|---|
+| [Flutter SDK](https://docs.flutter.dev/get-started/install) | Mobil uygulama |
+| [Docker Desktop](https://www.docker.com/products/docker-desktop/) | Backend, MySQL, Mailpit |
+| Python 3.11+ | Kurulum ve bakım betikleri |
 
 ### Backend
 
 ```bash
 docker compose -f backend/docker-compose.yml up -d
-```
-
-Üç servis başlar: backend (`:8000`), MySQL ve e-postaları yakalayan Mailpit
-(`:8025`). Hazır olduğunu doğrulamak için:
-
-```bash
 curl http://localhost:8000/health
 ```
 
-### Mobil uygulama
+Üç servis başlar: backend (`:8000`), MySQL ve e-postaları yakalayan Mailpit
+(`:8025`).
 
-Emülatörü açtıktan sonra:
+| Ne | Nerede |
+|---|---|
+| API dokümanı | http://localhost:8000/docs |
+| Gönderilen e-postalar | http://localhost:8025 |
+
+## Android üzerinde çalıştırma
+
+Bir emülatör açın (veya USB hata ayıklama açık bir cihaz bağlayın), sonra:
 
 ```bash
+flutter pub get
 flutter run --flavor dev --dart-define=APP_ENV=dev
 ```
 
@@ -90,12 +111,38 @@ flutter run --flavor dev --dart-define=APP_ENV=dev
 olur. Bu, emülatörün ana makineye baktığı adrestir; `localhost` yazmak çalışmaz
 çünkü emülatör kendi içine bakar.
 
-### Yararlı adresler
+Uçtan uca yolculuk testi:
 
-| Ne | Nerede |
-|---|---|
-| API dokümanı | http://localhost:8000/docs |
-| Gönderilen e-postalar | http://localhost:8025 |
+```bash
+flutter test integration_test/p0_fixture_journey_test.dart   --flavor dev --dart-define=APP_ENV=dev
+```
+
+## iOS üzerinde çalıştırma
+
+iOS derlemesi macOS ve Xcode gerektirir. Kaynak tarafı hazırdır ancak proje
+**henüz hiç derlenmemiştir**; ilk derlemeyi yapacak kişi için tek komut:
+
+```bash
+bash ios/scripts/mac_setup.sh
+```
+
+Betik ön koşulları denetler, `pod install` çalıştırır, imzasız derler ve bağlı
+cihaz varsa uçtan uca testi koşar. Adım adım anlatım, sorun giderme ve fiziksel
+cihaza kurulum: **`docs/ios_devir_notu.md`**.
+
+> iOS'ta flavor şeması tanımlı değildir; Android komutlarındaki `--flavor dev`
+> iOS'ta kullanılmaz.
+
+## Kamerayı denemek
+
+Emülatörde ve simülatörde gerçek kamera yoktur. Besin tanımayı denemek için:
+
+1. Uygulamada **Ayarlar → Cihaz Üstü Model** anahtarını açın
+2. Tarama ekranında **"Galeriden fotoğraf seç"** ile bir yemek fotoğrafı seçin
+
+Bu yol sunucuya gitmez, gömülü modeli doğrudan cihazda çalıştırır. Anahtar
+kapalıyken tarama sunucudaki görüntü servisine gider; o servisin sağlayıcı
+anahtarı yapılandırılmamışsa hata döner.
 
 ## Proje yapısı
 
@@ -162,17 +209,11 @@ flutter test
 docker compose -f backend/docker-compose.yml --profile test run --rm test
 ```
 
-Sırasıyla 289 ve 232 test koşar. Backend testleri kendi geçici MySQL örneğinde
+Sırasıyla 293 ve 240 test koşar. Backend testleri kendi geçici MySQL örneğinde
 çalışır, geliştirme veritabanına dokunmaz.
 
-Emülatörde uçtan uca yolculuk:
-
-```bash
-flutter test integration_test/p0_fixture_journey_test.dart --flavor dev --dart-define=APP_ENV=dev
-```
-
-Bu test giriş → tarama onayı → geçmiş → rapor önizleme zincirini gerçek bir
-Android emülatöründe doğrular.
+Uçtan uca yolculuk testi (giriş → tarama onayı → geçmiş → rapor önizleme)
+yukarıdaki platform bölümlerinde anlatılmıştır.
 
 ## CI
 

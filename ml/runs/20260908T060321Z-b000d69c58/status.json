@@ -1,0 +1,7 @@
+{
+  "experiment_id": "20260908T060321Z-b000d69c58",
+  "model_sha256": "2c222331b6780b44861869c24d23f5b400828692d56223466b7ff3b6eb0c854a",
+  "next_required_command": "python -m nutrisense_ml.evaluate --run /home/taha/ml/runs/20260908T060321Z-b000d69c58 --data-root <DATA_ROOT> --split validation",
+  "status": "trained_not_evaluated",
+  "warning": "No test metric is valid until the separately sealed test evaluation is run."
+}

@@ -1,0 +1,19 @@
+{
+  "config_sha256": "64d49f8e930212a43a6ede28d9c4b3fb13ac3fcffe577e383a824da8e8e363eb",
+  "data_root_at_training": "/home/taha/ml/raw224",
+  "dataset_version": "1ea7e7ab1c469cabacfe2510bcd770200c3f218a55a9c4a4c5bc820efec23eb7",
+  "experiment_id": "20260908T060321Z-b000d69c58",
+  "numpy": "2.0.2",
+  "physical_devices": [
+    "CPU:/physical_device:CPU:0",
+    "GPU:/physical_device:GPU:0"
+  ],
+  "platform": "Linux-6.6.87.2-microsoft-standard-WSL2-x86_64-with-glibc2.39",
+  "python": "3.12.3 (main, Jun 19 2026, 12:46:00) [GCC 13.3.0]",
+  "requirements_lock_sha256": "6fcf8154e1edf64d2480f5b77043df467931de27776288018f51b8656ddde073",
+  "schema_version": 1,
+  "seed": 2209,
+  "started_at": "2026-09-08T06:03:21.083198Z",
+  "tensorflow": "2.18.1",
+  "test_samples_read_during_training": 0
+}

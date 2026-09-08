@@ -122,3 +122,6 @@ app.*.map.json
 # Egitim ciktilarinin yerel yedekleri; eski model zaten git gecmisinde duruyor.
 /ml/runs_backup/
 /assets/models_backup/
+
+# Yerel tasarim/calisma dosyalari; depoya girmez.
+/tmp/
