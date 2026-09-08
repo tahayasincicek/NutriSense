@@ -58,6 +58,26 @@ flutter run --dart-define=APP_ENV=dev
 > **"Galeriden fotoğraf seç"** düğmesiyle bir yemek fotoğrafı seçin. Bu yol
 > sunucuya gitmez, modeli doğrudan cihazda çalıştırır.
 
+## Gerçek bir iPhone'a kurmak isterseniz
+
+Simülatör için hiçbir ek adım gerekmez. Fiziksel cihaza kurmak isterseniz
+Xcode bir geliştirici takımı ister:
+
+1. `open ios/Runner.xcworkspace`
+2. Sol panelde **Runner** hedefi → **Signing & Capabilities**
+3. **Team**: kendi Apple kimliğinizi seçin (ücretsiz hesap yeter; imza 7 gün
+   geçerlidir, geliştirme için sorun değil)
+4. Bundle ID `com.example.nutrisense` reddedilirse (başkası almış olabilir),
+   `ios/Config/Project.xcconfig` içindeki `NUTRISENSE_BUNDLE_ID` değerini
+   **yalnız kendi makinenizde** benzersiz bir şeyle değiştirin, örneğin
+   `com.adiniz.nutrisense`. **Bu değişikliği commit etmeyin.**
+
+> Neden commit edilmiyor: `com.example.` yer tutucusu bilinçli bir güvenlik
+> kapısıdır. Depoda kaldığı sürece kimse yanlışlıkla yer tutucu kimlikle
+> imzalı Archive üretemez (`ios/scripts/release_guard.sh` ve
+> `scripts/qa/ios_release_checks.py` bunu zorunlu tutar). Kurumun gerçek
+> kimliği belirlendiğinde bu değer ve ilgili kapı birlikte güncellenir.
+
 ## Sorun çıkarsa
 
 | Belirti | Yapılacak |
@@ -66,6 +86,7 @@ flutter run --dart-define=APP_ENV=dev
 | `CocoaPods could not find compatible versions` | `cd ios && pod repo update` sonra tekrar |
 | `Generated.xcconfig must exist` | Depo kökünde önce `flutter pub get` |
 | Derleme imzalama hatası veriyor | `--no-codesign` ile derlediğinizden emin olun |
+| Cihaza kurarken `bundle identifier is not available` | Yukarıdaki "Gerçek bir iPhone'a kurmak" adımına bakın |
 | `You cannot use the --flavor option` | iOS'ta flavor şeması yoktur; komutlarda `--flavor` kullanmayın (Android'e özgüdür) |
 
 ## Bilerek yapılmayan, karar gerektiren adımlar
