@@ -6,10 +6,34 @@ import 'package:nutrisense/core/theme/app_theme.dart';
 import 'package:nutrisense/features/auth/state/auth_controller.dart';
 import 'package:nutrisense/features/history/data/history_cache_store.dart';
 import 'package:nutrisense/features/settings/screens/settings_screen.dart';
+import 'package:nutrisense/shared/models/auth_model.dart';
 import 'package:nutrisense/shared/services/api_service.dart';
 import 'package:nutrisense/shared/services/stt_service.dart';
 
 void main() {
+  testWidgets('profil başlığında oturumdaki kullanıcı adı gösterilir',
+      (tester) async {
+    final auth = _FakeAuthController();
+    auth.state = const AuthState(
+      AuthStatus.authenticated,
+      user: UserProfile(
+        id: 'user-1',
+        email: 'ayse@example.com',
+        fullName: 'Ayşe Yılmaz',
+        isActive: true,
+      ),
+    );
+
+    await tester.pumpWidget(
+      _app(auth: auth, stt: _FakeSttService(const [])),
+    );
+    await tester.pump();
+
+    expect(find.text('Ayşe Yılmaz'), findsOneWidget);
+    expect(find.text('Kullanıcı Profili'), findsNothing);
+    expect(find.text('Premium Üye'), findsNothing);
+  });
+
   testWidgets('tek başına çıkış komutu oturumu kapatmaz, onay ister',
       (tester) async {
     final auth = _FakeAuthController();
@@ -146,6 +170,9 @@ class _FakeAuthController extends AuthController {
         );
 
   int logoutCount = 0;
+
+  @override
+  Future<void> bootstrap() async {}
 
   @override
   Future<void> logout() async {

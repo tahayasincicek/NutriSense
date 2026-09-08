@@ -185,10 +185,13 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final user = ref.watch(authControllerProvider).user;
     // Diyetisyen portalı hiç seslendirme yapmaz ve diyetisyen bir araştırma
     // katılımcısı değildir; hasta ayarlarını ona göstermek kafa karıştırır.
-    final isDietitian =
-        ref.watch(authControllerProvider).user?.accountType == 'dietitian';
+    final isDietitian = user?.accountType == 'dietitian';
+    final profileName = user?.fullName.trim().isNotEmpty == true
+        ? user!.fullName.trim()
+        : 'Kullanıcı';
 
     return Scaffold(
       // Bu ekran Navigator.push ile açılır; arkasında AppShell
@@ -229,7 +232,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 ),
               ),
             ),
-          _buildProfileHeader(),
+          _buildProfileHeader(profileName),
           const SizedBox(height: 32),
 
           _buildSectionTitle(isDietitian ? 'Görünüm' : 'Erişilebilirlik'),
@@ -396,7 +399,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     );
   }
 
-  Widget _buildProfileHeader() {
+  Widget _buildProfileHeader(String profileName) {
     final theme = Theme.of(context);
     return Container(
       padding: const EdgeInsets.all(20),
@@ -408,7 +411,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         container: true,
         header: true,
         excludeSemantics: true,
-        label: 'Kullanıcı profili. Premium üye.',
+        label: '$profileName profili.',
         child: Row(
           children: [
             CircleAvatar(
@@ -418,19 +421,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   color: Colors.white, size: 35),
             ),
             const SizedBox(width: 16),
-            // Büyük fontta metin sığmayınca taşıyordu; esnek hale getirildi.
             Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text('Kullanıcı Profili', style: theme.textTheme.titleLarge),
-                  Text('Premium Üye',
-                      style: theme.textTheme.bodyMedium?.copyWith(
-                          color: theme.colorScheme.primary,
-                          fontWeight: FontWeight.bold)),
-                ],
-              ),
+              child: Text(profileName, style: theme.textTheme.titleLarge),
             ),
           ],
         ),

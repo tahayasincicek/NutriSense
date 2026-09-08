@@ -222,7 +222,7 @@ class _DietitianDashboardScreenState
         // parçası gibi durması için aynı düzen kullanılır.
         title: Semantics(
           header: true,
-          label: 'Merhaba ${_firstName()}. NutriSense Pro paneli.',
+          label: 'Merhaba ${_firstName()}. Diyetisyen paneli.',
           excludeSemantics: true,
           child: Row(
             children: [

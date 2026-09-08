@@ -88,7 +88,7 @@ class _DietitianAccessScreenState extends ConsumerState<DietitianAccessScreen> {
                       ),
                       const SizedBox(width: 7),
                       Text(
-                        'NutriSense Pro',
+                        'Diyetisyen Paneli',
                         style: theme.textTheme.titleMedium?.copyWith(
                           color: AppTheme.primaryDark,
                           fontWeight: FontWeight.w800,
