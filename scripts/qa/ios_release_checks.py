@@ -55,6 +55,11 @@ def main() -> None:
         "NSCameraUsageDescription",
         "NSMicrophoneUsageDescription",
         "NSSpeechRecognitionUsageDescription",
+        # Galeriden fotograf secme yolu icin gerekli. Izin listeye alinirken
+        # KVKK veri isleme envanteri, aydinlatma metni ve Play Store veri
+        # guvenligi formu da guncellenmistir; yalniz kullanicinin sectigi tek
+        # fotograf okunur, kutuphane taranmaz.
+        "NSPhotoLibraryUsageDescription",
     )
     for key in privacy_keys:
         value = production.get(key)
@@ -65,7 +70,6 @@ def main() -> None:
     forbidden_production_keys = (
         "NSAppTransportSecurity",
         "UIBackgroundModes",
-        "NSPhotoLibraryUsageDescription",
         "NSPhotoLibraryAddUsageDescription",
         "NSLocationWhenInUseUsageDescription",
         "NSUserTrackingUsageDescription",

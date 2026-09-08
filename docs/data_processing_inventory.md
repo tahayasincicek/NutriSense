@@ -17,6 +17,7 @@ mekanizması üniversite/hukuk birimi kararı olmadan kesinleştirilmemiştir.
 | Access/refresh token | Oturum | Access mobil secure storage; refresh hash DB | Güvenlik zorunluluğu | Expiry/rotation/logout; hesap silmede cascade |
 | Besin adı, porsiyon, kalori, makro, zaman | Günlük ve onaylı rapor | `food_logs`, nutrition provenance | Beslenme verisi hassas kabul edilerek kurum kararı | Kullanıcı silene/hesabı kapatana kadar önerisi; yedek süresi bekliyor |
 | Tanıma sonucu/güven | Güvenli onay ve kalite | `recognition_attempts`; ham görüntü yok | Hizmet ve araştırma ayrımı kararı | Günlükle uyumlu; hesap silmede cascade |
+| Galeri fotoğrafı | Tek seferlik besin analizi; yalnız kullanıcının seçtiği tek dosya | Bellekte sanitize edilir; kamera görüntüsüyle aynı yolu izler | Kullanıcının her seferde açık seçimi; kütüphane taranmaz, dizin listelenmez | Varsayılan olarak dosya/DB/logda saklanmaz |
 | Kamera görüntüsü | Tek seferlik besin analizi | Bellekte sanitize edilir; Google Vision'a gönderilebilir | Açık aydınlatma ve yurtdışı aktarım kararı | Varsayılan olarak dosya/DB/logda saklanmaz |
 | Diyetisyen adı/iletişim/doğrulama | Kullanıcının seçtiği alıcı | `dietitians`, assignment | Diyetisyen doğrulama ve rol kararı | İlişki iptali/pasifleştirme; kesin süre bekliyor |
 | Onaylı rapor ve gönderim metadatası | Kullanıcı talebiyle paylaşım ve retry | DB; SMTP/Twilio | Her gönderimde ayrı onay; sağlayıcı sözleşmesi | Kurum retention ve provider silme süresi bekliyor |

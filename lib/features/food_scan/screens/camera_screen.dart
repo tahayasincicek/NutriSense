@@ -926,164 +926,170 @@ class _CameraScreenState extends ConsumerState<CameraScreen>
     return Container(
       color: const Color(0xEE000000),
       padding: const EdgeInsets.all(16),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          if (_voiceStatus != null)
-            Semantics(
-              liveRegion: true,
-              label: _voiceStatus,
-              child: Text(
-                _voiceStatus!,
-                key: const Key('camera_voice_status'),
-                textAlign: TextAlign.center,
-                style: const TextStyle(color: Colors.white),
+      // Denetim alanı kaydırılabilir: porsiyon seçici, onay düğmeleri ve
+      // galeri düğmesi birlikte göründüğünde kısa ekranlarda taşıyordu.
+      // Ekran okuyucu kaydırılabilir içeriği gezebildiği için erişilebilirlik
+      // korunur.
+      child: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (_voiceStatus != null)
+              Semantics(
+                liveRegion: true,
+                label: _voiceStatus,
+                child: Text(
+                  _voiceStatus!,
+                  key: const Key('camera_voice_status'),
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(color: Colors.white),
+                ),
               ),
-            ),
-          if (analysis?.canConfirm == true) ...[
-            AccessiblePortionSelector(
-              result: analysis!,
-              enabled: !_saving,
-              loading: _portionUpdating,
-              onSelected: (value, unit) => _updatePortion(value, unit),
-              onManual: _editPortion,
-              onVoice: _listenForPortion,
-            ),
-            const SizedBox(height: 8),
-          ],
-          if (state.status == CameraStatus.confirmationRequired)
-            Wrap(
-              spacing: 8,
-              children: [
-                for (final candidate in candidates)
-                  ActionChip(
-                    label: Text(candidate.foodNameTr),
-                    onPressed: () => _confirm(
-                      correctedName: candidate.foodName,
-                      correctedNameTr: candidate.foodNameTr,
+            if (analysis?.canConfirm == true) ...[
+              AccessiblePortionSelector(
+                result: analysis!,
+                enabled: !_saving,
+                loading: _portionUpdating,
+                onSelected: (value, unit) => _updatePortion(value, unit),
+                onManual: _editPortion,
+                onVoice: _listenForPortion,
+              ),
+              const SizedBox(height: 8),
+            ],
+            if (state.status == CameraStatus.confirmationRequired)
+              Wrap(
+                spacing: 8,
+                children: [
+                  for (final candidate in candidates)
+                    ActionChip(
+                      label: Text(candidate.foodNameTr),
+                      onPressed: () => _confirm(
+                        correctedName: candidate.foodName,
+                        correctedNameTr: candidate.foodNameTr,
+                      ),
                     ),
+                ],
+              ),
+            const SizedBox(height: 8),
+            if ({CameraStatus.resultReady, CameraStatus.confirmationRequired}
+                .contains(state.status))
+              Wrap(
+                alignment: WrapAlignment.center,
+                spacing: 8,
+                runSpacing: 8,
+                children: [
+                  AccessibleButton(
+                    label: 'Onayla',
+                    semanticLabel: 'Sonucu onayla ve yemek geçmişine kaydet',
+                    icon: Icons.check,
+                    isLoading: _saving,
+                    // Cihaz üstü modelde sunucudan gelen bir analiz yoktur;
+                    // kalori değeri katalogdan çekileceği için onay, tanınan ad
+                    // önceden doldurulmuş porsiyon akışına gider. Aksi hâlde
+                    // ekran "onaylayın" der ama düğme çalışmaz.
+                    onPressed: _saving
+                        ? null
+                        : analysis?.canConfirm == true
+                            ? _confirm
+                            : state.recognizedFood != null
+                                ? () => _showManualEntry(
+                                      candidate: FoodCandidate(
+                                        foodName: state.recognizedFood!
+                                            .toLowerCase()
+                                            .replaceAll(' ', '_'),
+                                        foodNameTr: state.recognizedFood!,
+                                        confidence: state.confidence ?? 0,
+                                      ),
+                                    )
+                                : null,
                   ),
-              ],
-            ),
-          const SizedBox(height: 8),
-          if ({CameraStatus.resultReady, CameraStatus.confirmationRequired}
-              .contains(state.status))
-            Wrap(
-              alignment: WrapAlignment.center,
-              spacing: 8,
-              runSpacing: 8,
-              children: [
-                AccessibleButton(
-                  label: 'Onayla',
-                  semanticLabel: 'Sonucu onayla ve yemek geçmişine kaydet',
-                  icon: Icons.check,
-                  isLoading: _saving,
-                  // Cihaz üstü modelde sunucudan gelen bir analiz yoktur;
-                  // kalori değeri katalogdan çekileceği için onay, tanınan ad
-                  // önceden doldurulmuş porsiyon akışına gider. Aksi hâlde
-                  // ekran "onaylayın" der ama düğme çalışmaz.
-                  onPressed: _saving
-                      ? null
-                      : analysis?.canConfirm == true
-                          ? _confirm
-                          : state.recognizedFood != null
-                              ? () => _showManualEntry(
-                                    candidate: FoodCandidate(
-                                      foodName: state.recognizedFood!
-                                          .toLowerCase()
-                                          .replaceAll(' ', '_'),
-                                      foodNameTr: state.recognizedFood!,
-                                      confidence: state.confidence ?? 0,
-                                    ),
-                                  )
-                              : null,
-                ),
-                AccessibleButton(
-                  label: 'Düzelt',
-                  semanticLabel: 'Besin adını düzelt',
-                  icon: Icons.edit,
-                  onPressed: () => _showManualEntry(),
-                ),
-                AccessibleButton(
-                  label: 'Reddet',
-                  semanticLabel: 'Sonucu reddet ve kaydetme',
-                  icon: Icons.close,
-                  onPressed: _reject,
-                ),
-                IconButton(
-                  tooltip: _voiceListening
-                      ? 'Sesli komut dinleniyor'
-                      : 'Sesli evet, hayır, tekrar çek veya seçenek söyle',
-                  onPressed: _listenForDecision,
-                  icon: Icon(
-                    _voiceListening ? Icons.mic : Icons.mic_none,
-                    color: Colors.white,
-                  ),
-                ),
-              ],
-            )
-          else if (state.status == CameraStatus.saved)
-            AccessibleButton(
-              label: 'Geçmişe Dön',
-              semanticLabel: 'Kaydedilen yemeği geçmişte görmek için dön',
-              icon: Icons.history,
-              onPressed: () => Navigator.pop(context, state),
-            )
-          else
-            Row(
-              children: [
-                Expanded(
-                  child: AccessibleButton(
-                    label: 'Manuel Giriş',
-                    semanticLabel: 'Besin adını elle gir',
-                    icon: Icons.edit_note,
+                  AccessibleButton(
+                    label: 'Düzelt',
+                    semanticLabel: 'Besin adını düzelt',
+                    icon: Icons.edit,
                     onPressed: () => _showManualEntry(),
                   ),
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: AccessibleButton(
-                    label: state.permissionPermanentlyDenied
-                        ? 'Ayarları Aç'
-                        : 'Tara',
-                    semanticLabel: state.permissionPermanentlyDenied
-                        ? 'Kamera izni için uygulama ayarlarını aç'
-                        : 'Şimdi fotoğraf çek ve analiz et',
-                    icon: state.permissionPermanentlyDenied
-                        ? Icons.settings
-                        : Icons.camera,
-                    isLoading: _singleFlight,
-                    onPressed: state.permissionPermanentlyDenied
-                        ? openAppSettings
-                        : _initialized && !_singleFlight
-                            ? () => _captureAndAnalyze(automatic: false)
-                            : null,
+                  AccessibleButton(
+                    label: 'Reddet',
+                    semanticLabel: 'Sonucu reddet ve kaydetme',
+                    icon: Icons.close,
+                    onPressed: _reject,
                   ),
-                ),
-                if ({CameraStatus.rejected, CameraStatus.error}
-                    .contains(state.status)) ...[
-                  const SizedBox(width: 8),
                   IconButton(
-                    tooltip: 'Yeniden dene',
-                    onPressed: _reset,
-                    icon: const Icon(Icons.refresh, color: Colors.white),
+                    tooltip: _voiceListening
+                        ? 'Sesli komut dinleniyor'
+                        : 'Sesli evet, hayır, tekrar çek veya seçenek söyle',
+                    onPressed: _listenForDecision,
+                    icon: Icon(
+                      _voiceListening ? Icons.mic : Icons.mic_none,
+                      color: Colors.white,
+                    ),
                   ),
                 ],
-              ],
-            ),
-          if (!_busy(state.status) && state.status != CameraStatus.saved) ...[
-            const SizedBox(height: 8),
-            AccessibleButton(
-              label: 'Galeriden fotoğraf seç',
-              semanticLabel: 'Galeriden besin fotoğrafı seç ve analiz et',
-              icon: Icons.photo_library_outlined,
-              onPressed: _singleFlight || _saving || _portionUpdating
-                  ? null
-                  : () =>
-                      _captureAndAnalyze(automatic: false, fromGallery: true),
-            ),
+              )
+            else if (state.status == CameraStatus.saved)
+              AccessibleButton(
+                label: 'Geçmişe Dön',
+                semanticLabel: 'Kaydedilen yemeği geçmişte görmek için dön',
+                icon: Icons.history,
+                onPressed: () => Navigator.pop(context, state),
+              )
+            else
+              Row(
+                children: [
+                  Expanded(
+                    child: AccessibleButton(
+                      label: 'Manuel Giriş',
+                      semanticLabel: 'Besin adını elle gir',
+                      icon: Icons.edit_note,
+                      onPressed: () => _showManualEntry(),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: AccessibleButton(
+                      label: state.permissionPermanentlyDenied
+                          ? 'Ayarları Aç'
+                          : 'Tara',
+                      semanticLabel: state.permissionPermanentlyDenied
+                          ? 'Kamera izni için uygulama ayarlarını aç'
+                          : 'Şimdi fotoğraf çek ve analiz et',
+                      icon: state.permissionPermanentlyDenied
+                          ? Icons.settings
+                          : Icons.camera,
+                      isLoading: _singleFlight,
+                      onPressed: state.permissionPermanentlyDenied
+                          ? openAppSettings
+                          : _initialized && !_singleFlight
+                              ? () => _captureAndAnalyze(automatic: false)
+                              : null,
+                    ),
+                  ),
+                  if ({CameraStatus.rejected, CameraStatus.error}
+                      .contains(state.status)) ...[
+                    const SizedBox(width: 8),
+                    IconButton(
+                      tooltip: 'Yeniden dene',
+                      onPressed: _reset,
+                      icon: const Icon(Icons.refresh, color: Colors.white),
+                    ),
+                  ],
+                ],
+              ),
+            if (!_busy(state.status) && state.status != CameraStatus.saved) ...[
+              const SizedBox(height: 8),
+              AccessibleButton(
+                label: 'Galeriden fotoğraf seç',
+                semanticLabel: 'Galeriden besin fotoğrafı seç ve analiz et',
+                icon: Icons.photo_library_outlined,
+                onPressed: _singleFlight || _saving || _portionUpdating
+                    ? null
+                    : () =>
+                        _captureAndAnalyze(automatic: false, fromGallery: true),
+              ),
+            ],
           ],
-        ],
+        ),
       ),
     );
   }

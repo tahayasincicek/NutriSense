@@ -9,7 +9,7 @@ gizlilik politikası olarak sunulamaz.
 
 NutriSense; hesap için e-posta, ad, parola hash'i ve tercihleri; hizmet için
 onaylanan besin adı, porsiyon, kalori/makro ve zamanı; kullanıcı seçerse
-diyetisyen iletişimi ve gönderim kayıtlarını işler. Kamera görüntüsü analiz
+diyetisyen iletişimi ve gönderim kayıtlarını işler. Besin fotoğrafı ya kameradan çekilir ya da kullanıcının galerisinden tek tek seçtiği dosyadan alınır; uygulama fotoğraf kütüphanesini taramaz, yalnız seçilen dosyayı okur. Kamera görüntüsü analiz
 için geçici işlenir ve yapılandırılmışsa Google Vision veya Google Gemini'ye
 gönderilebilir; varsayılan akış görüntüyü dosya, veritabanı veya logda
 saklamaz.
