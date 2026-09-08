@@ -63,6 +63,8 @@ varsayılmaz. Ayrıntı: `docs/nutrition_data_methodology.md`.
 
 ## Kurulum
 
+**İlk kez klonlayan Android/iOS geliştiricileri: [Geliştirici başlangıç rehberi](docs/developer_setup.md).** Emülatör, simülatör, USB telefon, yerel backend ve test hesabı adımları bu rehberdedir. CI ile aynı Flutter **3.41.4** sürümünü kullanın.
+
 Depoyu klonladıktan sonra üç adım:
 
 ```bash
@@ -86,7 +88,7 @@ Git'e girmez.
 ### Backend
 
 ```bash
-docker compose -f backend/docker-compose.yml up -d
+docker compose -f backend/docker-compose.yml up -d --build --wait
 curl http://localhost:8000/health
 ```
 
@@ -110,6 +112,8 @@ flutter run --flavor dev --dart-define=APP_ENV=dev
 `APP_ENV=dev` verildiğinde API adresi otomatik olarak `http://10.0.2.2:8000`
 olur. Bu, emülatörün ana makineye baktığı adrestir; `localhost` yazmak çalışmaz
 çünkü emülatör kendi içine bakar.
+
+Fiziksel Android ve iOS için adres farklıdır; [cihaz bağlantı komutlarını](docs/developer_setup.md) kullanın. API kökü `/api/v1` ile bitmelidir.
 
 Uçtan uca yolculuk testi:
 
@@ -143,6 +147,8 @@ Emülatörde ve simülatörde gerçek kamera yoktur. Besin tanımayı denemek i�
 Bu yol sunucuya gitmez, gömülü modeli doğrudan cihazda çalıştırır. Anahtar
 kapalıyken tarama sunucudaki görüntü servisine gider; o servisin sağlayıcı
 anahtarı yapılandırılmamışsa hata döner.
+
+Uygulama bu servis hatasında cihaz üstü modele geçer. Kalori sorgulama ve onaylanan besini kaydetme için backend bağlantısı gerekir.
 
 ## Proje yapısı
 

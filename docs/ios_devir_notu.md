@@ -19,6 +19,8 @@ derlenmemiştir**, çünkü iOS derlemesi Windows'ta mümkün değildir.
 
 ## Tek komut
 
+Önce [ortak geliştirme kurulumunu](developer_setup.md) tamamlayın; bu adım backend `.env` dosyasını ve ilk veritabanı tablolarını hazırlar. Flutter 3.41.4 kullanın.
+
 Depo kökünde:
 
 ```bash
@@ -47,11 +49,13 @@ docker compose -f backend/docker-compose.yml up -d
 Sonra simülatörde veya cihazda:
 
 ```bash
-flutter run --dart-define=APP_ENV=dev
+flutter run -d <IOS_CIHAZ_ID> --debug --dart-define=APP_ENV=dev --dart-define=API_BASE_URL=http://127.0.0.1:8000/api/v1
 ```
 
 > Android komutlarındaki `--flavor dev` iOS'ta kullanılmaz: iOS projesinde
 > flavor şeması tanımlı değildir, yalnız `Runner` şeması vardır.
+
+Yukarıdaki adres simülatör içindir. Fiziksel iPhone'da `127.0.0.1` yerine aynı ağdaki Mac'in IP adresini kullanın.
 
 > Simülatörde kamera yoktur. Besin tanımayı denemek için uygulamada
 > **Ayarlar → Cihaz Üstü Model** anahtarını açın, ardından tarama ekranındaki
@@ -82,7 +86,7 @@ Xcode bir geliştirici takımı ister:
 
 | Belirti | Yapılacak |
 |---|---|
-| `pod install` mimari hatası veriyor | Apple Silicon'da: `cd ios && arch -x86_64 pod install` |
+| `pod install` mimari hatası veriyor | Flutter, Ruby ve CocoaPods'un aynı mimaride çalıştığını kontrol edin; Apple Silicon'da önce yerel arm64 kurulumu kullanın |
 | `CocoaPods could not find compatible versions` | `cd ios && pod repo update` sonra tekrar |
 | `Generated.xcconfig must exist` | Depo kökünde önce `flutter pub get` |
 | Derleme imzalama hatası veriyor | `--no-codesign` ile derlediğinizden emin olun |
