@@ -5,6 +5,7 @@ import '../../../core/utils/accessibility_utils.dart';
 import '../../../shared/services/accessibility_service.dart';
 import '../../../shared/services/meal_reminder_service.dart';
 import '../../settings/screens/settings_screen.dart';
+import '../../auth/state/auth_controller.dart';
 import '../../history/state/daily_goal_provider.dart';
 import '../../water_tracker/state/water_provider.dart';
 import 'camera_screen.dart';
@@ -44,6 +45,8 @@ class _FoodScanScreenState extends ConsumerState<FoodScanScreen> {
     final theme = Theme.of(context);
     final activity = ref.watch(activityProvider);
     final goal = ref.watch(dailyGoalControllerProvider);
+    final name = ref.watch(authControllerProvider).user?.fullName.trim() ?? '';
+    final greeting = name.isEmpty ? 'Merhaba' : 'Merhaba, $name';
 
     return Scaffold(
       backgroundColor: Colors.transparent,
@@ -51,7 +54,7 @@ class _FoodScanScreenState extends ConsumerState<FoodScanScreen> {
         backgroundColor: Colors.transparent,
         title: Semantics(
           header: true,
-          label: 'Merhaba Taha. Harika gidiyorsun.',
+          label: '$greeting. Harika gidiyorsun.',
           excludeSemantics: true,
           child: Row(
             children: [
@@ -80,7 +83,7 @@ class _FoodScanScreenState extends ConsumerState<FoodScanScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Text('Merhaba, Taha',
+                    Text(greeting,
                         overflow: TextOverflow.ellipsis,
                         style: theme.textTheme.titleMedium
                             ?.copyWith(fontWeight: FontWeight.bold)),
