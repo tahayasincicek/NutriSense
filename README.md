@@ -1,345 +1,176 @@
 # NutriSense
 
-**Görme engelli bireyler için yapay zekâ destekli besin tanıma ve kalori takip uygulaması.**
+**Görme engelli bireyler için sesli beslenme takibi.**
 
-Kullanıcı yemeğinin fotoğrafını çeker; uygulama besini tanır, kaloriyi sesli
-olarak bildirir, kullanıcı onayladıktan sonra kaydeder ve raporu diyetisyenine
-iletir. Tüm akış ekrana bakmadan tamamlanabilir.
+NutriSense; kamera veya galeriden besin tanıma, porsiyon ve kalori takibi, sesli komutlar ve diyetisyenle rapor paylaşımı sunan bir Flutter uygulamasıdır. Besin kayıtları kullanıcı onayından sonra oluşturulur.
 
-TÜBİTAK 2209-A kapsamında Kocaeli Üniversitesi'nde yürütülmektedir.
+TÜBİTAK 2209-A kapsamında Kocaeli Üniversitesi'nde geliştirilmektedir.
 
----
+## Neler yapabilirsiniz?
 
-## Öne çıkanlar
+- Kamera veya galeriden fotoğraf seçerek besin tanıma.
+- Manuel besin girişi, porsiyon seçimi ve günlük kalori takibi.
+- Sesli komutlarla işlem yapma ve besin bilgilerini dinleme.
+- Sık tüketilen besinleri tekrar ekleme ve son işlemi geri alma.
+- Diyetisyenle eşleşme, rapor paylaşma ve yanıtları görüntüleme.
+- Su, adım, kilo, uyku ve ruh hâli kaydı.
 
-**Ekranı görmeden tam kullanım.** Her ekran ekran okuyucuyla gezilebilir,
-sonuçlar sesli bildirilir, sesli komut desteklenir. Telefonu sallamak komut
-dinlemeyi başlatır — kullanıcının ekranda düğme araması gerekmez. Erişilebilirlik
-her push'ta ayrı bir CI işiyle denetlenir.
+## Başlamadan önce
 
-**Onaya dayalı kayıt.** Model bir tahmin üretir, kullanıcı duyar ve onaylar;
-kayıt ancak ondan sonra oluşur. Emin olunmayan tahminler sessizce kaydedilmez,
-kullanıcıya sorulur.
+Projenin iki parçası var: telefonda çalışan **Flutter uygulaması** ve bilgisayarda Docker ile çalışan **backend**. Hesap, besin değerleri ve kayıt işlemleri için backend açık olmalı.
 
-**Kendi görüntü tanıma modeli.** `ml/` altında sızıntıya dirençli, yeniden
-üretilebilir bir eğitim hattı bulunur: sürümlenmiş veri manifesti, gruplara göre
-bölme, iki aşamalı transfer öğrenme, mühürlü test kümesi ve TFLite dönüşümü.
-Test verisi bir kez açılır ve deney yeniden test edilemez; sonuç seçilerek
-iyileştirilemez. Güncel kapsam `ml/configs/tr222_v1.json` içinde 221 sınıftır;
-bunların yaklaşık 90'ı Türk mutfağıdır.
+**Model depoda hazır gelir; uygulamayı kullanmak için eğitim yapmanız veya API anahtarı almanız gerekmez.**
 
-**Karşılıklı onaylı diyetisyen bağlantısı.** Eşleşme iki tarafın da onayını
-gerektirir. Hasta yalnız onayladığı diyetisyene rapor gönderebilir, dilediğinde
-bağlantıyı sonlandırabilir. Diyetisyen raporu yanıtlayabilir.
+| Ortak araçlar | Android için ayrıca | iOS için ayrıca |
+|---|---|---|
+| Git, Flutter **3.41.4**, Python **3.11+**, Docker Desktop | Android Studio ve emülatör veya Android telefon | **Mac**, Xcode, CocoaPods ve simülatör veya iPhone |
 
-**Sağlık takibi.** Su, adım, uyku, kilo ve ruh hâli kaydedilir; veriler cihazda
-saklanır ve sunucuyla eşitlenir.
+Docker Desktop'ı açın. Flutter kurulumunu `flutter doctor -v` ile kontrol edin.
 
-**Araştırma verisi kendi hattında.** Uygulama içindeki anket ve kullanılabilirlik
-ölçümleri araştırma rızasına bağlıdır; rıza geri alınabilir ve geri alındığında
-kayıt dışarı aktarımdan düşer. `analysis/` altında önceden yazılmış analiz planı,
-veri sözlüğü ve nitel kodlama kitabıyla yeniden üretilebilir bir HCI analiz hattı
-bulunur. Hat hazırdır ancak **henüz gerçek veri işlenmemiştir**; depoda bilimsel
-sonuç iddiası yoktur.
+## 1. Projeyi indirin
 
-**Kaynağı belli besin değerleri.** Uygulama kaloriyi tahmin etmez; 500
-kayıtlık yerel katalogdan okur. Kayıtların 488'i USDA FoodData Central FNDDS
-(CC0) arşivinden birebir çıkarılmıştır ve arşiv SHA-256 ile sabitlenmiştir.
-Kaynağı olmayan 12 Türk yemeği `ESTIMATED` olarak işaretlidir ve hangi
-kaynaklardan ortalandığı kayıtlıdır. Porsiyon gram/adet/dilim/kase/ml/litre
-olarak girilebilir; hacim birimleri yoğunluk üzerinden çevrilir, 1 ml = 1 g
-varsayılmaz. Ayrıntı: `docs/nutrition_data_methodology.md`.
-
-## Teknoloji
-
-| Katman | Kullanılan |
-|---|---|
-| Mobil | Flutter (Dart SDK ≥ 3.2), Riverpod |
-| Backend | FastAPI, SQLAlchemy, Alembic, Python 3.11 |
-| Veritabanı | MySQL 8.4 |
-| Model | TensorFlow 2.18, MobileNetV3Small, TFLite |
-| Görüntü servisi | Google Vision veya Gemini (yapılandırmayla seçilir) |
-| Çalışma ortamı | Docker Compose |
-
-## Kurulum
-
-**İlk kez klonlayan Android/iOS geliştiricileri: [Geliştirici başlangıç rehberi](docs/developer_setup.md).** Emülatör, simülatör, USB telefon, yerel backend ve test hesabı adımları bu rehberdedir. CI ile aynı Flutter **3.41.4** sürümünü kullanın.
-
-Depoyu klonladıktan sonra üç adım:
-
-```bash
+```sh
 git clone https://github.com/tahayasincicek/NutriSense.git
 cd NutriSense
-python scripts/dev_setup.py
 ```
 
-`dev_setup.py`, `backend/.env` dosyasını şablondan üretir ve gizli değerleri
-rastgele doldurur. Var olan bir `.env` dosyasının üzerine yazmaz. Bu dosya
-Git'e girmez.
+Bundan sonraki komutları, aksi belirtilmedikçe **bu klasörde** çalıştırın.
 
-### Ortak gereksinimler
+## 2. Backend'i hazırlayın
 
-| Araç | Ne için |
-|---|---|
-| [Flutter SDK](https://docs.flutter.dev/get-started/install) | Mobil uygulama |
-| [Docker Desktop](https://www.docker.com/products/docker-desktop/) | Backend, MySQL, Mailpit |
-| Python 3.11+ | Kurulum ve bakım betikleri |
+Yerel ayar dosyasını oluşturun.
 
-### Backend
+**Windows:**
 
-```bash
+```powershell
+py -3 scripts/dev_setup.py
+```
+
+**macOS / Linux:**
+
+```sh
+python3 scripts/dev_setup.py
+```
+
+Bu betik `backend/.env` dosyasını oluşturur ve gerekli parolaları üretir. Mevcut dosyanın üzerine yazmaz.
+
+Ardından servisleri başlatın ve mobil bağımlılıkları yükleyin:
+
+```sh
 docker compose -f backend/docker-compose.yml up -d --build --wait
-curl http://localhost:8000/health
-```
-
-Üç servis başlar: backend (`:8000`), MySQL ve e-postaları yakalayan Mailpit
-(`:8025`).
-
-| Ne | Nerede |
-|---|---|
-| API dokümanı | http://localhost:8000/docs |
-| Gönderilen e-postalar | http://localhost:8025 |
-
-## Android üzerinde çalıştırma
-
-Bir emülatör açın (veya USB hata ayıklama açık bir cihaz bağlayın), sonra:
-
-```bash
 flutter pub get
-flutter run --flavor dev --dart-define=APP_ENV=dev
 ```
 
-`APP_ENV=dev` verildiğinde API adresi otomatik olarak `http://10.0.2.2:8000`
-olur. Bu, emülatörün ana makineye baktığı adrestir; `localhost` yazmak çalışmaz
-çünkü emülatör kendi içine bakar.
+İlk kurulum indirmeler nedeniyle zaman alabilir. Komut bitince [backend hazırlık kontrolünü](http://localhost:8000/health/ready) tarayıcıda açın. Sonra aşağıdan kendi platformunuzu seçin.
 
-Fiziksel Android ve iOS için adres farklıdır; [cihaz bağlantı komutlarını](docs/developer_setup.md) kullanın. API kökü `/api/v1` ile bitmelidir.
+## 3. Uygulamayı çalıştırın
 
-Uçtan uca yolculuk testi:
+### Android emülatörü
 
-```bash
-flutter test integration_test/p0_fixture_journey_test.dart   --flavor dev --dart-define=APP_ENV=dev
+Android Studio'dan emülatörü açın:
+
+```sh
+flutter run --flavor dev --dart-define=APP_ENV=dev --dart-define=API_BASE_URL=http://10.0.2.2:8000/api/v1
 ```
 
-## iOS üzerinde çalıştırma
+### USB ile Android telefon
 
-iOS derlemesi macOS ve Xcode gerektirir. Kaynak tarafı hazırdır ancak proje
-**henüz hiç derlenmemiştir**; ilk derlemeyi yapacak kişi için tek komut:
+Telefonda USB hata ayıklamayı açın, USB kablosuyla bağlayın ve telefondaki bağlantı iznini onaylayın. Tek cihaz bağlıyken:
 
-```bash
-bash ios/scripts/mac_setup.sh
+```sh
+adb reverse tcp:8000 tcp:8000
+flutter run --flavor dev --dart-define=APP_ENV=dev --dart-define=API_BASE_URL=http://127.0.0.1:8000/api/v1
 ```
 
-Betik ön koşulları denetler, `pod install` çalıştırır, imzasız derler ve bağlı
-cihaz varsa uçtan uca testi koşar. Adım adım anlatım, sorun giderme ve fiziksel
-cihaza kurulum: **`docs/ios_devir_notu.md`**.
+### iOS simülatörü — yalnız Mac
 
-> iOS'ta flavor şeması tanımlı değildir; Android komutlarındaki `--flavor dev`
-> iOS'ta kullanılmaz.
+Önce yukarıdaki ortak kurulumu tamamlayın. Ardından:
 
-## Hesap oluşturma
-
-Depoda hiçbir kullanıcı hesabı, parola veya veritabanı dökümü bulunmaz.
-Klonlayan herkes boş bir veritabanıyla başlar ve kendi hesabını oluşturur:
-
-Uygulamayı açın → **Hesap Aç** → ad, e-posta ve parola girin. Doğrulama
-e-postaları gerçek bir adrese gitmez; geliştirme ortamında Mailpit'te birikir:
-http://localhost:8025
-
-Diyetisyen tarafını denemek isterseniz, yalnız `dev`/`test` ortamında
-çalışan sanal bir diyetisyen kaydı oluşturulabilir:
-
-```bash
-docker compose -f backend/docker-compose.yml exec backend python scripts/seed_synthetic.py
+```sh
+cd ios
+pod install
+cd ..
+open -a Simulator
+flutter run --debug --dart-define=APP_ENV=dev --dart-define=API_BASE_URL=http://127.0.0.1:8000/api/v1
 ```
 
-Bu kayıt açıkça sentetiktir, parolası yoktur ve giriş için kullanılamaz;
-yalnızca hasta–diyetisyen eşleşme akışını denemeye yarar.
+iOS komutlarında `--flavor dev` kullanmayın.
 
-## Kamerayı denemek
+**Gerçek iPhone için:** Xcode'da imzalama takımı seçilmeli ve API adresinde Mac'in yerel ağ IP'si kullanılmalı. [iPhone kurulum adımları](docs/developer_setup.md#3-ios).
 
-Emülatörde ve simülatörde gerçek kamera yoktur. Besin tanımayı denemek için:
+> iOS kaynak kontrolleri yapılmıştır; Xcode derlemesi ve gerçek iPhone doğrulaması henüz tamamlanmamıştır.
 
-1. Uygulamada **Ayarlar → Cihaz Üstü Model** anahtarını açın
-2. Tarama ekranında **"Galeriden fotoğraf seç"** ile bir yemek fotoğrafı seçin
+Birden fazla cihaz bağlıysa `flutter devices` ile cihaz kimliğini bulun ve çalıştırma komutuna `-d CIHAZ_KIMLIGI` ekleyin.
 
-Bu yol sunucuya gitmez, gömülü modeli doğrudan cihazda çalıştırır. Anahtar
-kapalıyken tarama sunucudaki görüntü servisine gider; o servisin sağlayıcı
-anahtarı yapılandırılmamışsa hata döner.
+## 4. İlk denemenizi yapın
 
-Uygulama bu servis hatasında cihaz üstü modele geçer. Kalori sorgulama ve onaylanan besini kaydetme için backend bağlantısı gerekir.
+1. Uygulamada **Hesap Aç** bölümünden kendi hesabınızı oluşturun. Yeni kurulum boş veritabanıyla başlar.
+2. **Ayarlar → Cihaz Üstü Model** seçeneğini açın.
+3. Tarama ekranında **Galeriden fotoğraf seç** ile bir yemek fotoğrafı seçin. Gerçek telefonda kamerayı da kullanabilirsiniz.
+4. Tanınan besini ve porsiyonu kontrol edip onaylayın.
+5. Kaydınızı günlük ekranından görüntüleyin.
 
-## Proje yapısı
+Cihaz üstü model fotoğrafı telefonda analiz eder. Besin değerlerini alma ve kayıt işlemleri için backend bağlantısı gerekir.
 
-```
-lib/                  Flutter uygulaması
-  features/           auth, food_scan, history, dietitian, water_tracker,
-                      discover, settings, onboarding, survey
-  shared/             Servisler, modeller, ortak bileşenler
-  core/               Yapılandırma, tema, sabitler
-backend/              FastAPI servisi, Alembic göçleri, testler
-ml/                   Model eğitim hattı
-analysis/             Araştırma verisi analiz hattı
-contracts/            openapi.json — CI'da sapmaya karşı korunur
-integration_test/     Emülatörde koşan uçtan uca test
-docs/                 Mimari, gizlilik, erişilebilirlik belgeleri
-```
+**E-posta ve SMS bu kurulumda test amaçlıdır.** Gerçek alıcılara gönderilmez: e-postalar Mailpit'te, SMS'ler backend'in yerel test kutusunda görüntülenir. Diyetisyen ve rapor testi için [geliştirici rehberine](docs/developer_setup.md) bakın.
 
-`ai_model/` altındaki betikler geriye dönük uyumluluk giriş noktalarıdır ve
-`ml/` hattını çağırır; yeni çalışmalar doğrudan `ml/` üzerinden yürütülür.
+## Yararlı adresler
 
-## Model eğitimi
+Backend açıkken bilgisayarınızın tarayıcısından erişebilirsiniz:
 
-```bash
-cd ml
-python -m nutrisense_ml.manifest --intake data/intake.csv --data-root data/raw \
-  --config configs/<config>.json --licenses sources/licenses.json \
-  --output data/versions/<sürüm>/manifest.csv
+| Adres | Ne için? |
+|---|---|
+| [Hazırlık kontrolü](http://localhost:8000/health/ready) | Backend çalışıyor mu? |
+| [API dokümanı](http://localhost:8000/docs) | Sunucu uçlarını incelemek |
+| [Mailpit](http://localhost:8025) | Test e-postalarını görmek |
 
-python -m nutrisense_ml.train --config configs/<config>.json \
-  --manifest data/versions/<sürüm>/manifest.csv --data-root data/raw --runs-dir runs
+## Sorun yaşarsanız
 
-python -m nutrisense_ml.evaluate --run runs/<DENEY_ID> --data-root data/raw --split validation
-python -m nutrisense_ml.evaluate --run runs/<DENEY_ID> --data-root data/raw --split test
+| Sorun | İlk kontrol |
+|---|---|
+| Sunucuya bağlanılamıyor | Docker açık mı? Hazırlık kontrolü yanıt veriyor mu? Platformunuza uygun komutu kullandınız mı? |
+| Cihaz bulunamadı | Emülatörü/simülatörü açın veya USB bağlantısını kontrol edin; `flutter devices` çalıştırın. |
+| Android APK bulunamadı | Derleme komutuna `--flavor dev` ekleyin. |
+| iOS scheme/flavor hatası | Komuttan `--flavor dev` parametresini kaldırın. |
+| Fotoğraf tanınmadı | Daha net fotoğraf seçin veya manuel besin girişini kullanın. |
 
-python -m nutrisense_ml.convert --run runs/<DENEY_ID> --data-root data/raw \
-  --output artifacts/<DENEY_ID> --formats float32 float16 int8
-```
+SDK/NDK sürümleri, APK oluşturma, fiziksel cihaz bağlantısı ve güncelleme adımları: **[Ayrıntılı geliştirici rehberi](docs/developer_setup.md)**.
 
-Manifest adımı lisansı onaylanmamış kaynağı reddeder, bozuk görselleri raporlar
-ve sınıf/grup yeterlilik kapılarını uygular. Eşik yalnız doğrulama kümesinden
-seçilir; test kümesi tek kullanımlıktır.
+## Geliştiriciler için
 
-## Araştırma analizi
+| Klasör | İçerik |
+|---|---|
+| `lib/` | Flutter ekranları ve uygulama mantığı |
+| `backend/` | FastAPI sunucusu ve veritabanı işlemleri |
+| `assets/models/` | Hazır TFLite modeli ve etiketler |
+| `test/`, `integration_test/` | Mobil testler |
+| `ml/` | Model eğitimi ve değerlendirme |
+| `analysis/` | Araştırma analizleri |
+| `docs/` | Teknik belgeler ve rehberler |
 
-Anket ve kullanılabilirlik verisi uygulamadan tidy CSV olarak dışa aktarılır
-(`/survey/export/tidy`, `/usability/export/tidy`); yalnız araştırma rızası veren
-ve rızasını geri almamış katılımcılar bu çıktıya girer.
+Mobil testleri:
 
-```bash
-python analysis/run_analysis.py
-```
-
-Analiz planı veri görülmeden yazılmıştır (`analysis/PRE_ANALYSIS_PLAN.md`).
-Depoda gerçek katılımcı verisi bulunmaz; hat çalıştırılabilir durumdadır ancak
-şu an bilimsel bir sonuç üretmemiştir.
-
-## Test
-
-```bash
+```sh
 flutter test
 ```
 
-```bash
+Backend testleri:
+
+```sh
 docker compose -f backend/docker-compose.yml --profile test run --rm test
 ```
 
-Sırasıyla 293 ve 240 test koşar. Backend testleri kendi geçici MySQL örneğinde
-çalışır, geliştirme veritabanına dokunmaz.
-
-Uçtan uca yolculuk testi (giriş → tarama onayı → geçmiş → rapor önizleme)
-yukarıdaki platform bölümlerinde anlatılmıştır.
-
-## CI
-
-Her push'ta 10 iş çalışır: Flutter ve backend testleri, Android emülatör
-yolculuğu, güvenlik taramaları, ML kapıları, erişilebilirlik denetimi, sentetik
-staging smoke testi, SBOM üretimi ve build kontrolü. iOS derlemesi elle
-tetiklenir.
-
-CI birkaç kuralı zorunlu kılar:
-
-- OpenAPI sözleşmesi koddan sapamaz
-- Bağımlılık kilitleri hash doğrulamalıdır
-- İş akışında hata maskeleyen ifade (`continue-on-error`, `|| true`) bulunamaz
-- Konteyner imajı kök dosya sistemine yazamaz ve tüm Linux capability'leri kapalıdır
-
-## Gizlilik
-
-Uygulama sağlık verisi işler; KVKK m.6 uyarınca bu özel nitelikli veridir ve
-açık rıza gerektirir. Rıza burada bir onay kutusu değil, uygulanan bir kapıdır:
-`image_cross_border_transfer` rızası verilmemişse fotoğraf analiz uçları 403
-döner ve görüntü yurt dışındaki sağlayıcıya gönderilmez.
-
-Rızalar amaç bazlıdır, ayrı ayrı verilir ve istendiğinde geri alınabilir. Veri
-işleme envanteri `docs/data_processing_inventory.md` altında sürümlenir.
+Kendi dalınızda çalışıp pull request açın. `.env`, kişisel imzalama dosyaları ve kullanıcı verilerini Git'e eklemeyin.
 
 ## Belgeler
 
-**Akademik çıktılar**
+- [Android ve iOS geliştirici rehberi](docs/developer_setup.md)
+- [iOS devir notu](docs/ios_devir_notu.md)
+- [Kullanıcı el kitabı](docs/kullanici_el_kitabi.md)
+- [Besin değerlerinin kaynakları](docs/nutrition_data_methodology.md)
+- [Model kartı](ml/MODEL_CARD.md) · [Veri ve lisans bilgileri](ml/LICENSES.md)
+- [Erişilebilirlik doğrulama durumu](docs/accessibility_conformance_report.md)
+- [Android yayın rehberi](docs/android_release_runbook.md) · [iOS yayın rehberi](docs/ios_release_runbook.md)
+- [TÜBİTAK sonuç raporu](docs/tubitak_sonuc_raporu.md) · [Makale taslağı](docs/akademik_makale_taslak.md)
 
-| Belge | İçerik |
-|---|---|
-| `docs/tubitak_sonuc_raporu.md` | TÜBİTAK 2209-A sonuç raporu |
-| `docs/akademik_makale_taslak.md` | Akademik makale taslağı |
-| `analysis/PRE_ANALYSIS_PLAN.md` | Önceden kayıtlı analiz planı |
-| `analysis/DATA_DICTIONARY.md` | Değişken sözlüğü |
-| `analysis/QUALITATIVE_CODEBOOK.md` | Nitel kodlama kitabı |
-| `ml/MODEL_CARD.md` | Model kartı |
-| `ml/DATA_CARD.md` | Veri kartı |
-
-**Mimari ve teknik**
-
-| Belge | İçerik |
-|---|---|
-| `docs/api_contract.md` | İstemci–backend sözleşmesi |
-| `docs/backend_data_architecture.md` | Veri modeli |
-| `docs/camera_food_scan_pipeline.md` | Kamera tarama akışı |
-| `docs/food_history_architecture.md` | Geçmiş ekranı mimarisi |
-| `docs/auth_and_dietitian_lifecycle.md` | Kimlik ve diyetisyen yaşam döngüsü |
-| `docs/dietitian_report_delivery.md` | Rapor iletimi |
-| `docs/nutrition_data_methodology.md` | Besin verisi yöntemi |
-| `docs/adr/` | Mimari karar kayıtları |
-
-**Hukuk, etik ve güvenlik**
-
-| Belge | İçerik |
-|---|---|
-| `docs/etik_kvkk_belgeleri.md` | Etik kurul ve KVKK belgeleri |
-| `docs/data_processing_inventory.md` | KVKK veri işleme envanteri |
-| `docs/data_collection_protocol.md` | Katılımcı veri toplama protokolü |
-| `docs/privacy_notice_draft.md` | Aydınlatma metni taslağı |
-| `docs/threat_model.md` | Tehdit modeli |
-| `docs/security_findings_register.md` | Güvenlik bulgu kaydı |
-| `ml/LICENSES.md` | Veri ve yazılım kaynak envanteri |
-
-**Erişilebilirlik ve test**
-
-| Belge | İçerik |
-|---|---|
-| `docs/accessibility_conformance_report.md` | Erişilebilirlik uygunluğu |
-| `docs/manual_screen_reader_test_plan.md` | TalkBack/VoiceOver test planı |
-| `docs/voiceover_manual_test_report.md` | VoiceOver elle test raporu |
-| `docs/test_strategy.md` | Test stratejisi |
-| `docs/requirements_test_matrix.md` | Gereksinim–test izlenebilirliği |
-| `docs/android_device_acceptance_report.md` | Gerçek cihaz kabul raporu |
-
-**Yayın ve işletme**
-
-| Belge | İçerik |
-|---|---|
-| `docs/deployment_runbook.md` | Dağıtım adımları |
-| `docs/operations_runbook.md` | İşletme el kitabı |
-| `docs/android_release_runbook.md` | Android yayın adımları |
-| `docs/ios_release_runbook.md` | iOS yayın adımları |
-| `docs/ios_devir_notu.md` | Mac'te ilk çalıştırma ve devir notu |
-| `docs/backup_restore_plan.md` | Yedekleme ve geri dönüş planı |
-| `docs/environment_matrix.md` | Ortam matrisi |
-| `docs/play_store_listing_tr.md` | Play Store metni |
-| `docs/play_store_data_safety_draft.md` | Play Store veri güvenliği formu |
-| `docs/app_store_listing_tr.md` | App Store metni |
-| `docs/kullanici_el_kitabi.md` | Kullanıcı el kitabı |
-
-## Atıf
-
-Model eğitiminde Food-101 veri kümesi kullanılmıştır:
-
-> Bossard, L., Guillaumin, M., Van Gool, L. (2014). *Food-101 – Mining
-> Discriminative Components with Random Forests.* ECCV.
-
-Türk mutfağı sınıfları için ek olarak `alpsahin/Turkish-Food-Dataset-Combined`
-kullanılmıştır. Bu veri kümesinin kartında lisans beyanı yoktur; şartları
-bilinmediği için görseller yalnız yerelde tutulur, yeniden dağıtılmaz. Durum
-`ml/sources/licenses.json` içinde açıkça kayıtlıdır.
-
-Besin değerleri USDA FoodData Central, FNDDS 2021-2023 (CC0) kaynaklıdır.
+Model eğitimindeki Food-101 ve Türk mutfağı veri kaynaklarının kullanım koşulları lisans belgesindedir. Besin kataloğu USDA FoodData Central verilerini ve tahmini olduğu belirtilen kayıtları içerir.
