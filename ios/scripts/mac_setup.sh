@@ -10,7 +10,7 @@
 # Bu betik imzalama, Archive veya TestFlight adımlarını YAPMAZ; onlar kurum
 # kararı gerektirir ve docs/ios_release_runbook.md içinde anlatılır.
 
-set -u
+set -euo pipefail
 
 BOLD=$'\033[1m'; RED=$'\033[31m'; GREEN=$'\033[32m'; YELLOW=$'\033[33m'; OFF=$'\033[0m'
 fail=0
@@ -45,23 +45,23 @@ fi
 [ $fail -eq 1 ] && { printf "\n${RED}Ön koşullar eksik; yukarıdakileri tamamlayın.${OFF}\n"; exit 1; }
 
 step "2/6  Flutter bağımlılıkları"
-flutter pub get || bad "flutter pub get başarısız"
+flutter pub get || { bad "flutter pub get başarısız"; exit 1; }
 
 step "3/6  CocoaPods bağımlılıkları"
-( cd ios && pod install --repo-update ) || bad "pod install başarısız"
+( cd ios && pod install --repo-update ) || { bad "pod install başarısız"; exit 1; }
 
 step "4/6  Kaynak doğrulama kapısı"
 if command -v python3 >/dev/null 2>&1; then
-  python3 scripts/qa/ios_release_checks.py | tail -3 || bad "iOS kaynak kapısı düştü"
+  python3 scripts/qa/ios_release_checks.py || { bad "iOS kaynak kapısı düştü"; exit 1; }
 else
-  warn "python3 yok; kaynak kapısı atlandı"
+  bad "python3 gerekli; kurup yeniden çalıştırın"; exit 1
 fi
 
 step "5/6  İmzasız derleme"
 # iOS tarafinda flavor semasi tanimli degil (yalniz Runner semasi vardir);
 # --flavor kullanmak "custom scheme yok" hatasi verir. Android'de flavor
 # kullanilir, iOS'ta yalnizca APP_ENV tanimi gecilir.
-if flutter build ios --no-codesign --dart-define=APP_ENV=dev; then
+if flutter build ios --debug --no-codesign --dart-define=APP_ENV=dev --dart-define=API_BASE_URL=http://127.0.0.1:8000/api/v1; then
   ok "iOS kaynağı derlendi (imzasız)"
 else
   bad "flutter build ios başarısız — çıktıdaki ilk hatayı runbook ile karşılaştırın"
@@ -71,7 +71,7 @@ step "6/6  Cihaz/simülatör testi"
 if flutter devices 2>/dev/null | grep -qiE "ios|iphone|ipad"; then
   ok "iOS cihazı bulundu; P0 yolculuk testi koşuluyor"
   flutter test integration_test/p0_fixture_journey_test.dart \
-    --dart-define=APP_ENV=dev || bad "P0 yolculuk testi düştü"
+    --dart-define=APP_ENV=dev --dart-define=API_BASE_URL=http://127.0.0.1:8000/api/v1 || bad "P0 yolculuk testi düştü"
 else
   warn "Bağlı iOS cihazı/simülatörü yok; P0 testi atlandı."
   warn "Simülatör açmak için: open -a Simulator"

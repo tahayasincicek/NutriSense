@@ -49,6 +49,8 @@ def main() -> int:
     db_password = _password()
     text = text.replace("REPLACE_DB_PASSWORD", db_password)
     text = text.replace("REPLACE_ROOT_PASSWORD", _password())
+    # Fresh local databases need their schema before readiness can succeed.
+    text = text.replace("MIGRATION_STARTUP_MODE=verify", "MIGRATION_STARTUP_MODE=apply")
 
     # Kalan REPLACE_* değerleri bağımsız rastgele belirteçlerdir.
     text = re.sub(r"REPLACE[A-Z_]*", lambda _m: _token(), text)

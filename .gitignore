@@ -125,3 +125,4 @@ app.*.map.json
 
 # Yerel tasarim/calisma dosyalari; depoya girmez.
 /tmp/
+/android/.kotlin/
