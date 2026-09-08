@@ -35,7 +35,7 @@ NutriSense production hazır değildir ve production'a dağıtılmamıştır.**
 Gerekenler: güncel Docker Desktop (Linux containers), Git ve Python launcher.
 
 ```powershell
-Set-Location C:\Users\TAHA\Desktop\2209\nutrisense\backend
+Set-Location C:\projeler\NutriSense\backend
 powershell -ExecutionPolicy Bypass -File .\scripts\staging_up.ps1
 ```
 
@@ -92,7 +92,7 @@ uygulanır.
 ## İzlenebilir build
 
 ```powershell
-Set-Location C:\Users\TAHA\Desktop\2209\nutrisense
+Set-Location C:\projeler\NutriSense
 $revision = git rev-parse HEAD
 docker build --target production `
   --build-arg BUILD_VERSION=0.0.0-candidate `

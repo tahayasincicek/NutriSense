@@ -84,34 +84,30 @@ Başka kullanıcının UUID'siyle geçmiş okuma 403; başka kullanıcının rap
 
 Gerçek kullanıcı veya sağlık verisi kullanmayın. E-posta/SMS gönderimi için sandbox fake kullanılmalıdır.
 
-```powershell
-cd C:\Users\TAHA\Desktop\2209\nutrisense\backend
-.\venv\Scripts\python.exe -m pip install -r requirements.txt
-$env:DATABASE_URL = "sqlite:///./nutrisense_demo.db"
-$env:JWT_SECRET_KEY = "yalniz-yerel-demo-icin-uzun-rastgele-deger"
-$env:APP_ENVIRONMENT = "dev"
-.\venv\Scripts\python.exe -m uvicorn app.main:app --host 127.0.0.1 --port 8000
-```
+Depo kökünden, Windows PowerShell ile:
 
 ```powershell
-cd C:\Users\TAHA\Desktop\2209\nutrisense
+py -3 scripts/dev_setup.py
+docker compose -f backend/docker-compose.yml up -d --build --wait
 flutter pub get
-flutter run --dart-define=APP_ENV=dev --dart-define=API_BASE_URL=http://10.0.2.2:8000/api/v1
+flutter run --flavor dev --dart-define=APP_ENV=dev --dart-define=API_BASE_URL=http://10.0.2.2:8000/api/v1
 ```
+
+Bu komut Android emülatörü içindir. iOS ve fiziksel telefon için [kurulum rehberini](developer_setup.md) kullanın. SQLite test veritabanı örneklerini geliştirme sunucusu kurulumu olarak kullanmayın.
 
 Test hesabı uygulamadaki **Hesap Oluştur** ekranından, yalnız sentetik ad ve `example.com` e-posta adresiyle oluşturulur. Diyetisyen testi için veritabanına sentetik, `email_verified=true` bir sandbox kaydı fixture/migration ile eklenmelidir; production doğrulaması taklit edilmemelidir.
 
 Tekrar üretim komutları:
 
 ```powershell
-cd C:\Users\TAHA\Desktop\2209\nutrisense\backend
+cd C:\projeler\NutriSense\backend
 .\venv\Scripts\python.exe -m pytest -q
 
-cd C:\Users\TAHA\Desktop\2209\nutrisense
+cd C:\projeler\NutriSense
 flutter pub get
 flutter analyze --no-pub
 flutter test --no-pub test\contract\api_contract_test.dart test\widget_test.dart
-flutter build apk --debug --no-pub
+flutter build apk --debug --flavor dev --no-pub
 ```
 
 ## Production kabul kapıları

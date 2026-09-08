@@ -47,7 +47,7 @@ Her besin kaydının görünür ayrıntıları `ExcludeSemantics` içindedir ve 
 ## Yeniden üretim
 
 ```powershell
-cd C:\Users\TAHA\Desktop\2209\nutrisense
+cd C:\projeler\NutriSense
 flutter test test\widget\food_history_screen_test.dart
 flutter test test\unit\food_entry_test.dart test\unit\history_cache_store_test.dart
 flutter test test\contract\api_contract_test.dart

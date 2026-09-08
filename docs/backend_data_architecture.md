@@ -63,16 +63,15 @@ Test ortamı yalnız SQLite'a veya adı `_test` ile biten bir veritabanına bağ
 ## Yeniden üretilebilir yerel ortam
 
 ```powershell
-cd C:\Users\TAHA\Desktop\2209\nutrisense\backend
-Copy-Item .env.example .env
-# .env içindeki REPLACE alanlarını yerel secret store değerleriyle doldurun.
-docker compose up --build
+cd C:\projeler\NutriSense\backend
+py -3 ../scripts/dev_setup.py
+docker compose up -d --build --wait
 ```
 
 Mailpit arayüzü `http://127.0.0.1:8025`, API readiness adresi `http://127.0.0.1:8000/health/ready` olur. Sentetik diyetisyen kaydı yalnız dev/test ortamında oluşturulabilir:
 
 ```powershell
-.\venv\Scripts\python.exe scripts\seed_synthetic.py
+docker compose exec backend python -m scripts.seed_synthetic
 ```
 
 Testcontainer benzeri izole MySQL çalışması:
@@ -80,5 +79,7 @@ Testcontainer benzeri izole MySQL çalışması:
 ```powershell
 docker compose --profile test run --rm test
 ```
+
+Seed yalnız `sandbox-dietitian@example.com` adresli sentetik referans kaydı oluşturur; bu kayıt parolalı bir giriş hesabı değildir. Varsayılan bildirim izin listesiyle aynı adres değildir; rapor testi yaparken izin listesini ayrıca ayarlayın.
 
 Gerçek kullanıcı, sağlık veya saha araştırma verisi seed edilmez.

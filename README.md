@@ -98,7 +98,7 @@ iOS komutlarında `--flavor dev` kullanmayın.
 
 **Gerçek iPhone için:** Xcode'da imzalama takımı seçilmeli ve API adresinde Mac'in yerel ağ IP'si kullanılmalı. [iPhone kurulum adımları](docs/developer_setup.md#3-ios).
 
-> iOS kaynak kontrolleri yapılmıştır; Xcode derlemesi ve gerçek iPhone doğrulaması henüz tamamlanmamıştır.
+> iOS için CI imzasız derlemesi geçti. İmzalı dağıtım ve gerçek iPhone doğrulaması henüz tamamlanmamıştır. [Doğrulama kaydı](docs/ios_release_runbook.md).
 
 Birden fazla cihaz bağlıysa `flutter devices` ile cihaz kimliğini bulun ve çalıştırma komutuna `-d CIHAZ_KIMLIGI` ekleyin.
 

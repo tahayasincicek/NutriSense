@@ -77,14 +77,14 @@ Bu artefaktlar yokken offline kodunun yiyecek sonucu döndürmesi yasaktır.
 ## Otomatik doğrulama
 
 ```powershell
-cd C:\Users\TAHA\Desktop\2209\nutrisense\backend
+cd C:\projeler\NutriSense\backend
 .\venv\Scripts\python.exe -m pytest -q
 .\venv\Scripts\python.exe scripts\export_openapi.py --check
 
-cd C:\Users\TAHA\Desktop\2209\nutrisense
+cd C:\projeler\NutriSense
 flutter test
 flutter analyze
-flutter build apk --debug
+flutter build apk --debug --flavor dev
 ```
 
 Backend testleri yetkisiz/bozuk/büyük/MIME uyumsuz görüntü, timeout, düşük güven, onay öncesi kayıt yokluğu ve idempotent onayı kapsar. Flutter testleri state/policy, karanlık-kaliteli fixture ve offline fail-closed davranışını kapsar.
@@ -98,7 +98,7 @@ Bu bölüm gerçek cihaz çalıştırılmadan doldurulamaz ve kabul ölçütü t
 | Cihaz marka/model, Android sürümü | **NOT RUN** |
 | Uygulamayı aç → giriş → tara → dinle → onayla/düzelt → geçmiş | **NOT RUN** |
 | Online cold/warm P50/P95 latency, en az 30 koşu | **NOT RUN** |
-| Offline TFLite cold/warm latency | **NOT RUN — doğrulanmış model yok** |
+| Offline TFLite cold/warm latency | **NOT RUN — gerçek cihaz gecikmesi ölçülmedi** |
 | İzin ret/kalıcı ret manuel kontrolü | **NOT RUN** |
 | Ağ kesintisi ve manuel giriş | **NOT RUN** |
 | Kişisel veri içermeyen ekran kaydı/log yolu | **NOT RUN** |

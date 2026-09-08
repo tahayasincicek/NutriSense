@@ -197,10 +197,10 @@ göstermez.
 
 ## Tekrar üretilebilir Mailpit kanıtı
 
-Aşağıdaki komut yalnız localhost'ta geçici Mailpit açar ve RFC tarafından gerçek kullanım için ayrılmış `example.invalid` alıcısına sentetik fixture gönderir:
+Aşağıdaki komut yalnız localhost'ta geçici Mailpit açar ve RFC tarafından örnek kullanım için ayrılmış `example.invalid` alıcısına sentetik fixture gönderir:
 
 ```powershell
-cd C:\Users\TAHA\Desktop\2209\nutrisense
+cd C:\projeler\NutriSense
 docker run --rm -d --name nutrisense-mailpit-evidence `
   -p 127.0.0.1:8025:8025 -p 127.0.0.1:1025:1025 axllent/mailpit:v1.21
 
@@ -227,12 +227,12 @@ Twilio yolu otomatik testlerde enjekte edilen mock transport ile doğrulanır. M
 ## Test kapsamı ve komutlar
 
 ```powershell
-cd C:\Users\TAHA\Desktop\2209\nutrisense\backend
+cd C:\projeler\NutriSense\backend
 .\venv\Scripts\python.exe -m pytest tests\test_dietitian_report_delivery.py -q
 .\venv\Scripts\python.exe -m pytest -q
 .\venv\Scripts\python.exe scripts\export_openapi.py --check
 
-cd C:\Users\TAHA\Desktop\2209\nutrisense
+cd C:\projeler\NutriSense
 flutter test test\widget\dietitian_report_wizard_test.dart `
   test\contract\api_contract_test.dart
 flutter analyze --no-fatal-infos

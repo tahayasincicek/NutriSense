@@ -61,7 +61,7 @@ onaylanmadan taahhüt değildir.
 Yerel sentetik test:
 
 ```powershell
-Set-Location C:\Users\TAHA\Desktop\2209\nutrisense\backend
+Set-Location C:\projeler\NutriSense\backend
 powershell -ExecutionPolicy Bypass -File .\scripts\staging_up.ps1
 powershell -ExecutionPolicy Bypass -File .\scripts\backup_restore_smoke.ps1
 ```

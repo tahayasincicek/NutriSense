@@ -6,7 +6,11 @@ Bu kaynaklar Flutter 3.41.4 stable şablonuyla Windows 11 üzerinde hazırlandı
 Windows ortamında Xcode, CocoaPods, iOS Simulator, codesign veya gerçek iPhone
 çalıştırılamadığı için iOS build/archive başarısı iddia edilmez.
 
-## Windows kaynak doğrulama sonucu
+## Güncel derleme durumu
+
+8 Eylül 2026 doğrulaması: [GitHub koşusu 33510763349](https://github.com/tahayasincicek/NutriSense/actions/runs/33510763349) içindeki **iOS Derleme** işi başarılıdır. Koşunun tamamı iptal edilmiştir; bu başarı yalnız ilgili iOS işine aittir. İmzalı Archive, TestFlight ve gerçek iPhone/VoiceOver testleri ayrıca doğrulanmalıdır.
+
+## Windows kaynak doğrulama sonucu (tarihsel kayıt)
 
 27 Temmuz 2026 tarihinde:
 
@@ -46,13 +50,15 @@ değildir.
 
 ## İzin ve ağ politikası
 
-Production `Info.plist` yalnız kullanılan üç izni açıklar:
+Production `Info.plist` kullanılan dört izin açıklamasını içerir:
 
 - Kamera: kullanıcı taramayı başlattığında yiyecek görüntüsü.
 - Mikrofon: kullanıcı sesli komutu başlattığında ses girişi.
 - Speech recognition: sesli komutun Türkçe metne dönüştürülmesi.
 
-Fotoğraf kitaplığı, konum, bildirim, tracking ve background audio izni yoktur.
+- Fotoğraf kitaplığı: kullanıcının seçtiği besin fotoğrafını okumak.
+
+Fotoğraf kitaplığına yazma, konum, bildirim, tracking ve background audio izni yoktur. Galeri seçimi `image_picker` üzerinden yapılır.
 `permission_handler_apple` yalnız kamera, mikrofon ve speech recognizer
 stratejilerini derler.
 
@@ -60,10 +66,8 @@ Production plist'inde ATS gevşetmesi yoktur. Sadece Debug plist'i
 `NSAllowsLocalNetworking=true` içerir; `NSAllowsArbitraryLoads` hiçbir
 konfigürasyonda yoktur. iOS Simulator yerel backend örneği:
 
-```powershell
-flutter run -d <IOS_SIMULATOR_ID> `
-  --dart-define=APP_ENV=dev `
-  --dart-define=API_BASE_URL=http://localhost:8000/api/v1
+```sh
+flutter run -d IOS_SIMULATOR_ID --debug --dart-define=APP_ENV=dev --dart-define=API_BASE_URL=http://127.0.0.1:8000/api/v1
 ```
 
 Staging ve production `AppConfig` tarafından HTTPS kullanmaya zorlanır.

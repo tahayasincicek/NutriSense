@@ -1,15 +1,13 @@
 # iOS Devir Notu — Mac'te ne yapılacak
 
-Bu belge, projeyi Mac'te ilk kez açacak kişi içindir. Windows'ta yapılabilecek
-her şey tamamlanmıştır; kalan işler yalnız macOS gerektiren adımlardır.
+Bu belge, projeyi Mac'te ilk kez açacak geliştirici içindir. Yerel kurulum ve cihaz doğrulama adımlarını açıklar.
 
 ## Durum
 
 Kaynak tarafı hazır ve otomatik kapıdan geçiyor
 (`python3 scripts/qa/ios_release_checks.py` → `IOS_SOURCE_CHECK=PASS`).
 Xcode projesi, merkezi yapılandırma, izin metinleri, ağ politikası, plugin
-kayıtları, uygulama simgeleri ve açılış ekranı yerinde. Proje **hiç
-derlenmemiştir**, çünkü iOS derlemesi Windows'ta mümkün değildir.
+kayıtları, uygulama simgeleri ve açılış ekranı yerinde. 8 Eylül 2026 doğrulaması: [GitHub koşusu 33510763349](https://github.com/tahayasincicek/NutriSense/actions/runs/33510763349) içindeki **iOS Derleme** işi başarılıdır. Koşunun tamamı iptal edilmiştir; bu başarı yalnız ilgili iOS işine aittir. İmzalı Archive, TestFlight ve gerçek iPhone/VoiceOver testleri ayrıca doğrulanmalıdır.
 
 ## Gereken
 
@@ -33,7 +31,7 @@ Betik sırayla şunları yapar ve her adımı ✓/✗ olarak bildirir:
 2. `flutter pub get`
 3. `cd ios && pod install --repo-update`
 4. iOS kaynak doğrulama kapısını çalıştırır
-5. `flutter build ios --no-codesign` ile imzasız derler
+5. `flutter build ios --debug --no-codesign` ile imzasız derler
 6. Bağlı bir iPhone veya simülatör varsa P0 uçtan uca testini koşar
 
 Beklenen sonuç: **"Kaynak doğrulaması tamam."**

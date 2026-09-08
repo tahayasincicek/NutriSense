@@ -12,7 +12,7 @@ flutter pub get
 docker compose -f backend/docker-compose.yml up -d --build --wait
 ```
 
-macOS'ta `python` yerine `python3` kullanın. Betik kişiye özel rastgele sırlarla `backend/.env` üretir; mevcut dosyayı değiştirmez. Yeni ortamda `MIGRATION_STARTUP_MODE=apply` tabloları Alembic ile oluşturur. Önceden üretilmiş yerel `.env` ile migration hatası alırsanız bu alanı `apply` yapıp Compose komutunu yeniden çalıştırın. Üretim ortamında ayrı migration süreci kullanılır.
+Windows'ta aşağıdaki Python komutlarında `python` yerine `py -3`, macOS/Linux'ta `python3` kullanın. `ANDROID_CIHAZ_ID` ve `IOS_SIMULATOR_ID` yerlerini `flutter devices` çıktısındaki kimlikle değiştirin; köşeli ayraçları komuta yazmayın. Betik kişiye özel rastgele sırlarla `backend/.env` üretir; mevcut dosyayı değiştirmez. Yeni ortamda `MIGRATION_STARTUP_MODE=apply` tabloları Alembic ile oluşturur. Önceden üretilmiş yerel `.env` ile migration hatası alırsanız bu alanı `apply` yapıp Compose komutunu yeniden çalıştırın. Üretim ortamında ayrı migration süreci kullanılır.
 
 Hazırlık kontrolü: `http://localhost:8000/health/ready`. API: `http://localhost:8000/docs`. Test e-postaları: `http://localhost:8025`.
 
@@ -62,7 +62,7 @@ iOS kaynak kontrolleri Windows'ta çalıştırılabilir; Xcode derlemesi ve ger�
 - Türkçe ses ve mikrofon/kamera izinlerini cihazda hazırlayın. Emülatör ses davranışı gerçek telefon testi yerine geçmez.
 - Ayarlar → **Cihaz Üstü Model** seçin; tarama ekranında galeriden yemek fotoğrafı seçin. Simülatöre fotoğrafı sürükleyip bırakabilirsiniz. Model sonucu kullanıcı onayı ister; kalori sorgulama ve kayıt için backend açık olmalı.
 - Varsayılan dış görüntü sağlayıcısı kapalıdır. Sunucu kullanılamıyorsa uygulama cihaz üstü modele geçer. Google/Gemini kullanımı için yalnız `backend/.env` içinde sağlayıcı ayarı ve anahtarı gerekir; mobil uygulamaya anahtar yazmayın.
-- E-posta Mailpit'e, SMS yerel test kutusuna gider; gerçek kişilere iletilmez. Diyetisyen test hesabını `sandbox-dietitian@nutrisense.invalid` adresiyle oluşturun veya `backend/.env` içindeki sandbox izin listesini kendi test adresinize göre ayarlayın; Compose'u yeniden başlatın. Hasta/diyetisyen eşleşmesini iki tarafta onaylayın.
+- E-posta Mailpit'e, SMS yerel test kutusuna gider; gerçek kişilere iletilmez. Normal kullanıcı hesabı diyetisyen yetkisi vermez. Diyetisyen hesabının oluşturulması/doğrulanması için [hesap yaşam döngüsü belgesini](auth_and_dietitian_lifecycle.md) izleyin. Kullanılacak test alıcısı için `backend/.env` içindeki sandbox izin listesini kendi test adresinize göre ayarlayın; Compose'u yeniden başlatın. Hasta/diyetisyen eşleşmesini iki tarafta onaylayın.
 - Yerel SMS kutusunu görmek: `docker compose -f backend/docker-compose.yml exec backend cat /tmp/sms_outbox.jsonl`. İlk SMS'ten önce dosyanın bulunmaması normaldir.
 
 ## 5. Güncelleme ve doğrulama
