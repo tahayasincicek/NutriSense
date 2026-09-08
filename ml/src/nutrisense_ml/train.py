@@ -72,24 +72,55 @@ def train(config_path: Path, manifest_path: Path, data_root: Path, runs_dir: Pat
     image = config["image"]
     model_cfg = config["model"]
     batch_size = int(model_cfg["batch_size"])
-    train_ds = build_dataset(train_rows, labels, image["height"], image["width"], batch_size, True, seed)
-    val_ds = build_dataset(validation_rows, labels, image["height"], image["width"], batch_size, False, seed)
+    decoder = image.get("decoder", "pil")
+    train_ds = build_dataset(train_rows, labels, image["height"], image["width"], batch_size, True, seed, decoder=decoder)
+    val_ds = build_dataset(validation_rows, labels, image["height"], image["width"], batch_size, False, seed, decoder=decoder)
     if model_cfg["mixed_precision"] and tf.config.list_physical_devices("GPU"):
         tf.keras.mixed_precision.set_global_policy("mixed_float16")
 
+    # Mimari yapılandırmadan gelir; sabit yazılırsa config'teki değer sessizce
+    # yok sayılır ve provenance kaydı gerçekte eğitilenle uyuşmaz.
+    architectures = {
+        "MobileNetV3Small": tf.keras.applications.MobileNetV3Small,
+        "MobileNetV3Large": tf.keras.applications.MobileNetV3Large,
+        "EfficientNetB0": tf.keras.applications.EfficientNetB0,
+    }
+    architecture = str(model_cfg["architecture"])
+    if architecture not in architectures:
+        raise ValueError(f"Desteklenmeyen mimari: {architecture}")
+
     inputs = tf.keras.Input(shape=(image["height"], image["width"], 3), name="rgb_0_255")
-    base = tf.keras.applications.MobileNetV3Small(
-        input_shape=(image["height"], image["width"], 3),
-        alpha=float(model_cfg["alpha"]), include_top=False,
-        weights="imagenet" if model_cfg["imagenet_weights"] else None,
-        include_preprocessing=bool(image["include_preprocessing"]), pooling="avg",
-    )
+    base_kwargs = {
+        "input_shape": (image["height"], image["width"], 3),
+        "include_top": False,
+        "weights": "imagenet" if model_cfg["imagenet_weights"] else None,
+        "pooling": "avg",
+    }
+    if architecture.startswith("MobileNetV3"):
+        base_kwargs["alpha"] = float(model_cfg["alpha"])
+        base_kwargs["include_preprocessing"] = bool(image["include_preprocessing"])
+    base = architectures[architecture](**base_kwargs)
     base.trainable = False
     x = base(inputs, training=False)
     x = tf.keras.layers.Dropout(0.2)(x)
     outputs = tf.keras.layers.Dense(len(labels), activation="softmax", dtype="float32", name="probabilities")(x)
-    model = tf.keras.Model(inputs, outputs, name="nutrisense_mobilenetv3small")
-    model.compile(
+    model = tf.keras.Model(inputs, outputs, name=f"nutrisense_{architecture.lower()}")
+
+    # Augmentation eğitim sırasında GPU'da çalışsın diye modeli sarmalar.
+    # Ölçüm: tf.data içinde CPU'da çalışırken hat 2548 görsel/sn'den
+    # 248'e düşüyordu. Sarmalanan model kaydedilmez; diske yazılan ve
+    # TFLite'a giden model bu katmanları içermez.
+    augmenter = tf.keras.Sequential([
+        tf.keras.layers.RandomFlip("horizontal", seed=seed),
+        tf.keras.layers.RandomRotation(0.06, seed=seed + 1),
+        tf.keras.layers.RandomZoom(0.12, seed=seed + 2),
+        tf.keras.layers.RandomContrast(0.15, seed=seed + 3),
+    ], name="train_only_augmentation")
+    train_inputs = tf.keras.Input(shape=(image["height"], image["width"], 3), name="rgb_0_255")
+    train_model = tf.keras.Model(
+        train_inputs, model(augmenter(train_inputs)), name="nutrisense_training_wrapper"
+    )
+    train_model.compile(
         optimizer=tf.keras.optimizers.Adam(float(model_cfg["learning_rate_head"])),
         loss="sparse_categorical_crossentropy", metrics=["accuracy", tf.keras.metrics.SparseTopKCategoricalAccuracy(k=min(3, len(labels)), name="top3")],
     )
@@ -101,7 +132,7 @@ def train(config_path: Path, manifest_path: Path, data_root: Path, runs_dir: Pat
         tf.keras.callbacks.CSVLogger(run_dir / "training.csv"),
         tf.keras.callbacks.TerminateOnNaN(),
     ]
-    head_history = model.fit(train_ds, validation_data=val_ds, epochs=int(model_cfg["head_epochs"]), callbacks=callbacks, class_weight=class_weights)
+    head_history = train_model.fit(train_ds, validation_data=val_ds, epochs=int(model_cfg["head_epochs"]), callbacks=callbacks, class_weight=class_weights)
 
     base.trainable = True
     freeze_until = max(0, len(base.layers) - int(model_cfg["fine_tune_last_layers"]))
@@ -110,11 +141,11 @@ def train(config_path: Path, manifest_path: Path, data_root: Path, runs_dir: Pat
     for layer in base.layers[freeze_until:]:
         if isinstance(layer, tf.keras.layers.BatchNormalization):
             layer.trainable = False
-    model.compile(
+    train_model.compile(
         optimizer=tf.keras.optimizers.Adam(float(model_cfg["learning_rate_fine_tune"])),
         loss="sparse_categorical_crossentropy", metrics=["accuracy", tf.keras.metrics.SparseTopKCategoricalAccuracy(k=min(3, len(labels)), name="top3")],
     )
-    fine_history = model.fit(train_ds, validation_data=val_ds, epochs=int(model_cfg["fine_tune_epochs"]), callbacks=callbacks, class_weight=class_weights)
+    fine_history = train_model.fit(train_ds, validation_data=val_ds, epochs=int(model_cfg["fine_tune_epochs"]), callbacks=callbacks, class_weight=class_weights)
     model.save(run_dir / "model.keras")
     write_json(run_dir / "history.json", {"head": head_history.history, "fine_tune": fine_history.history})
     try:

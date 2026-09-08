@@ -1,25 +1,27 @@
-# MODEL CARD — NutriSense MobileNetV3Small
+# MODEL CARD — NutriSense MobileNetV3Large
 
 Durum: **EĞİTİLDİ VE DEĞERLENDİRİLDİ**
 
 | Alan | Değer |
 |---|---|
-| Deney kimliği | `20260902T090009Z-7871b6adb5` |
-| Kapsam | `nutrisense-tr29-v1` (29 sınıf + OOD) |
-| Model SHA-256 (TFLite float16) | `74e155e2508eb3a3d58fda0d7faf41d1ac01f7082edca361d470b4e0e0209b57` |
-| Veri sürümü | `1cc07ec705f54849e2e8a55af0aa7b24e8dc1de76fe332b2f7acfea4cfd64d9c` |
-| Veri kaynakları | TurkishFoods-25 (Apache-2.0) ve Food-101 (Bossard ve ark., 2014) |
-| Eğitim örneği | 17.051 görsel |
-| Son değerlendirme | 2 Eylül 2026, mühürlü test |
+| Deney kimliği | `20260908T060321Z-b000d69c58` |
+| Kapsam | `nutrisense-tr130-v1` (130 sınıf + OOD) |
+| Mimari | MobileNetV3Large, alpha 1,0, 224×224 |
+| Model SHA-256 (TFLite float16) | `270ae6ff459e942324df66387b1df1f6bf4c3e50a5e0811ef76e292c756a7d72` |
+| Veri sürümü | `1ea7e7ab1c469cabacfe2510bcd770200c3f218a55a9c4a4c5bc820efec23eb7` |
+| Veri kaynakları | TurkishFoods-25 (Apache-2.0), Food-101 (Bossard ve ark., 2014), Turkish-Food-Dataset-Combined (lisans beyanı yok — bkz. `sources/licenses.json`) |
+| Eğitim örneği | 96.047 görsel (130 sınıf + 11.921 OOD) |
+| Son değerlendirme | 8 Eylül 2026, mühürlü test |
 
 ## Kapsam
 
-Model 29 sınıf tanır:
+Model 130 sınıf tanır:
 
-aşure, baklava, biber dolması, börek, çiğ köfte, enginar, et sote, gözleme,
-hamsi, hünkar beğendi, içli köfte, ıspanak, İzmir köfte, karnıyarık, kebap,
-kısır, kuru fasulye, lahmacun, lokum, mantı, mücver, pirinç pilavı, simit,
-taze fasulye, yaprak sarma, hamburger, patates kızartması, omlet, pizza.
+Adana kebap, ananas, ev köftesi, armut, aşure, avokado, ayran, baklava, beyaz lahana sarması, biber dolması, börek, brokoli, Brüksel lahanası, bulgur pilavı, cacık, çay, cheesecake, çiğ köfte, çilek, çipura, kulüp sandviç, çoban salatası, domates, domates çorbası, döner, ekmek, elma, enginar, erik, et sote, patates kızartması, gözleme, hamburger, hamsi, haşlanmış yumurta, havuç, sosisli sandviç, hünkar beğendi, dondurma, içli köfte, incir, İskender, ıspanak yemeği, İzmir köfte, kalburabastı, karides, karnabahar, karnıyarık, karpuz, kavun, kayısı, kazandibi, kebap, Kemalpaşa tatlısı, kiraz, kısır, kivi, kıymalı börek, kıymalı pide, kokoreç, kola, kurabiye, kuru fasulye, lahmacun, levrek, limon, lokma, lokum, mango, mantı, menemen, mercimek çorbası, mercimek köftesi, meyve suyu, midye dolma, midye tava, mısır, mücver, mumbar dolması, muz, nar, omlet, pankek, patates püresi, patates salatası, patlamış mısır, patlıcan kebabı, peynir, pırasa, pirinç pilavı, pizza, portakal, salep, salatalık, salçalı makarna, sandviç, şeftali, şehriye çorbası, simit, siyah zeytin, somon, bolonez spagetti, karbonara spagetti, su böreği, sucuklu yumurta, bamya yemeği, barbunya yemeği, bezelye yemeği, mercimek yemeği, nohut yemeği, patates yemeği, sütlaç, tantuni, tarhana çorbası, taş kebabı, tavuk sote, taze fasulye, tiramisu, tulumba tatlısı, Türk kahvesi, turşu, üzüm, waffle, yaprak sarma, yaş pasta, yayla çorbası, yeşil zeytin, yoğurt, yoğurtlu makarna, zeytinyağlı fasulye.
+
+Kapsam dışı bırakılan 75 batı ve uzakdoğu yemeği (suşi, ramen, pad thai, tako,
+paella gibi) desteklenmeyen yemek örneği olarak OOD kümesinde kullanılır; model
+bunları isimlendirmez, eşiğin altında kalarak elle onaya düşer.
 
 ## Ölçülen sonuçlar
 
@@ -28,21 +30,39 @@ kümesinden seçilmiş, test bir kez açılmıştır.
 
 | Metrik | Doğrulama | Test |
 |---|---|---|
-| Accuracy | 0,8335 | **0,8375** |
-| Macro F1 | 0,8250 | **0,8268** |
-| Top-3 accuracy | 0,9514 | **0,9497** |
-| ECE (15 bin) | 0,0364 | **0,0332** |
-| Kapsama (sabit eşikte) | 0,7350 | **0,7454** |
-| Seçici hata | 0,0997 | **0,1031** |
+| Accuracy | 0,7852 | **0.7918** |
+| Macro F1 | 0,7732 | **0.7793** |
+| Top-3 accuracy | 0,9184 | **0.9215** |
+| ECE (15 bin) | 0,0088 | **0.0536** |
+| Kapsama (sabit eşikte) | 0,5034 | **0.5007** |
+| Seçici hata | 0,0999 | **0.0937** |
 
-Güven eşiği: **0,8069** (doğrulamadan sabitlendi). Eğitim 16. epoch'ta erken
-durdurma ile tamamlandı.
+Güven eşiği: **0.9644** (doğrulamadan sabitlendi). Baş eğitimi 13, ince ayar 8
+epoch'ta erken durdurma ile tamamlandı.
+
+### Önceki sürümle karşılaştırma
+
+Bir önceki dağıtılan model (`nutrisense-tr29-v1`) 29 sınıfta 0,8375 doğruluk ve
+0,7454 kapsama veriyordu. Yeni model sınıf sayısını 4,5 katına çıkarırken
+sınıf başına doğruluğun bir kısmını bırakır: tek tahminde 0,7918, kapsamada
+0,5007. Cevap verdiğinde isabet oranı ise korunur (0,9063'e karşı 0,8969).
+Takas bilinçlidir: uygulama emin olmadığında sormaya devam eder, bu yüzden
+düşen kapsama yanlış bilgi değil daha sık soru anlamına gelir.
+
+### Bilinen sınırlar
+
+- INT8 biçimi dağıtılmaz: nicelemeden sonra argmax uyumu 0,12'ye düşüyor.
+  MobileNetV3'ün hard-swish katmanları düz eğitim sonrası nicelemede bozuluyor.
+- Sınıf başına başarı eşit değil. Meyve ve sebzeler 0,90 üstü F1 verirken
+  birbirine benzeyen sulu yemekler 0,40 bandında kalır.
+- Eğitim verisinin bir bölümü lisans beyanı olmayan bir kaynaktan gelir;
+  görseller yeniden dağıtılmaz.
 
 ## Dağıtım artefaktı
 
 | Biçim | Durum | Boyut | Argmax uyumu | Keras farkı |
 |---|---|---|---|---|
-| float16 | **Dağıtılan** | 1,23 MB | 1,000 | 0,0312 |
+| float16 | **Dağıtılan** | 5.96 MB | 1.000 | 0.0109 |
 
 Dönüşüm kapısı argmax uyumunun 1,0 olmasını şart koşar: tek örnekte bile
 farklı sınıf seçen biçim dağıtılamaz. Ham olasılık farkı ikinci ölçüttür.

@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "scope_id": "nutrisense-tr222-v1",
+  "scope_id": "nutrisense-tr130-v1",
   "seed": 2209,
   "image": {
     "height": 224,
@@ -49,14 +49,6 @@
       "confusions": []
     },
     {
-      "id": "apple_pie",
-      "tr": "elmalı turta",
-      "target": 200,
-      "source_plan": "Food-101, Turkish-Food-Dataset-Combined ve proje cekimleri",
-      "min_groups": 60,
-      "confusions": []
-    },
-    {
       "id": "armut",
       "tr": "armut",
       "target": 200,
@@ -89,32 +81,8 @@
       "confusions": []
     },
     {
-      "id": "baby_back_ribs",
-      "tr": "domuz kaburga",
-      "target": 200,
-      "source_plan": "Food-101, Turkish-Food-Dataset-Combined ve proje cekimleri",
-      "min_groups": 60,
-      "confusions": []
-    },
-    {
       "id": "baklava",
       "tr": "baklava",
-      "target": 200,
-      "source_plan": "Food-101, Turkish-Food-Dataset-Combined ve proje cekimleri",
-      "min_groups": 60,
-      "confusions": []
-    },
-    {
-      "id": "beet_salad",
-      "tr": "pancar salatası",
-      "target": 200,
-      "source_plan": "Food-101, Turkish-Food-Dataset-Combined ve proje cekimleri",
-      "min_groups": 60,
-      "confusions": []
-    },
-    {
-      "id": "beignets",
-      "tr": "beignet hamur tatlısı",
       "target": 200,
       "source_plan": "Food-101, Turkish-Food-Dataset-Combined ve proje cekimleri",
       "min_groups": 60,
@@ -145,22 +113,6 @@
       "confusions": []
     },
     {
-      "id": "bread_pudding",
-      "tr": "ekmek pudingi",
-      "target": 200,
-      "source_plan": "Food-101, Turkish-Food-Dataset-Combined ve proje cekimleri",
-      "min_groups": 60,
-      "confusions": []
-    },
-    {
-      "id": "breakfast_burrito",
-      "tr": "kahvaltı burrito",
-      "target": 200,
-      "source_plan": "Food-101, Turkish-Food-Dataset-Combined ve proje cekimleri",
-      "min_groups": 60,
-      "confusions": []
-    },
-    {
       "id": "brokoli",
       "tr": "brokoli",
       "target": 200,
@@ -171,14 +123,6 @@
     {
       "id": "bruksel_lahanasi",
       "tr": "Brüksel lahanası",
-      "target": 200,
-      "source_plan": "Food-101, Turkish-Food-Dataset-Combined ve proje cekimleri",
-      "min_groups": 60,
-      "confusions": []
-    },
-    {
-      "id": "bruschetta",
-      "tr": "bruschetta",
       "target": 200,
       "source_plan": "Food-101, Turkish-Food-Dataset-Combined ve proje cekimleri",
       "min_groups": 60,
@@ -201,38 +145,6 @@
       "confusions": []
     },
     {
-      "id": "caesar_salad",
-      "tr": "sezar salata",
-      "target": 200,
-      "source_plan": "Food-101, Turkish-Food-Dataset-Combined ve proje cekimleri",
-      "min_groups": 60,
-      "confusions": []
-    },
-    {
-      "id": "cannoli",
-      "tr": "cannoli",
-      "target": 200,
-      "source_plan": "Food-101, Turkish-Food-Dataset-Combined ve proje cekimleri",
-      "min_groups": 60,
-      "confusions": []
-    },
-    {
-      "id": "caprese_salad",
-      "tr": "caprese salata",
-      "target": 200,
-      "source_plan": "Food-101, Turkish-Food-Dataset-Combined ve proje cekimleri",
-      "min_groups": 60,
-      "confusions": []
-    },
-    {
-      "id": "carrot_cake",
-      "tr": "havuçlu kek",
-      "target": 200,
-      "source_plan": "Food-101, Turkish-Food-Dataset-Combined ve proje cekimleri",
-      "min_groups": 60,
-      "confusions": []
-    },
-    {
       "id": "cay",
       "tr": "çay",
       "target": 200,
@@ -241,64 +153,8 @@
       "confusions": []
     },
     {
-      "id": "cheese_plate",
-      "tr": "peynir tabağı",
-      "target": 200,
-      "source_plan": "Food-101, Turkish-Food-Dataset-Combined ve proje cekimleri",
-      "min_groups": 60,
-      "confusions": []
-    },
-    {
       "id": "cheesecake",
       "tr": "cheesecake",
-      "target": 200,
-      "source_plan": "Food-101, Turkish-Food-Dataset-Combined ve proje cekimleri",
-      "min_groups": 60,
-      "confusions": []
-    },
-    {
-      "id": "chicken_curry",
-      "tr": "tavuk körü",
-      "target": 200,
-      "source_plan": "Food-101, Turkish-Food-Dataset-Combined ve proje cekimleri",
-      "min_groups": 60,
-      "confusions": []
-    },
-    {
-      "id": "chicken_quesadilla",
-      "tr": "tavuklu quesadilla",
-      "target": 200,
-      "source_plan": "Food-101, Turkish-Food-Dataset-Combined ve proje cekimleri",
-      "min_groups": 60,
-      "confusions": []
-    },
-    {
-      "id": "chicken_wings",
-      "tr": "tavuk kanat",
-      "target": 200,
-      "source_plan": "Food-101, Turkish-Food-Dataset-Combined ve proje cekimleri",
-      "min_groups": 60,
-      "confusions": []
-    },
-    {
-      "id": "chocolate_cake",
-      "tr": "çikolatalı kek",
-      "target": 200,
-      "source_plan": "Food-101, Turkish-Food-Dataset-Combined ve proje cekimleri",
-      "min_groups": 60,
-      "confusions": []
-    },
-    {
-      "id": "chocolate_mousse",
-      "tr": "çikolatalı mus",
-      "target": 200,
-      "source_plan": "Food-101, Turkish-Food-Dataset-Combined ve proje cekimleri",
-      "min_groups": 60,
-      "confusions": []
-    },
-    {
-      "id": "churros",
-      "tr": "churros",
       "target": 200,
       "source_plan": "Food-101, Turkish-Food-Dataset-Combined ve proje cekimleri",
       "min_groups": 60,
@@ -329,14 +185,6 @@
       "confusions": []
     },
     {
-      "id": "clam_chowder",
-      "tr": "deniz tarağı çorbası",
-      "target": 200,
-      "source_plan": "Food-101, Turkish-Food-Dataset-Combined ve proje cekimleri",
-      "min_groups": 60,
-      "confusions": []
-    },
-    {
       "id": "club_sandwich",
       "tr": "kulüp sandviç",
       "target": 200,
@@ -347,46 +195,6 @@
     {
       "id": "coban_salatasi",
       "tr": "çoban salatası",
-      "target": 200,
-      "source_plan": "Food-101, Turkish-Food-Dataset-Combined ve proje cekimleri",
-      "min_groups": 60,
-      "confusions": []
-    },
-    {
-      "id": "crab_cakes",
-      "tr": "yengeç köftesi",
-      "target": 200,
-      "source_plan": "Food-101, Turkish-Food-Dataset-Combined ve proje cekimleri",
-      "min_groups": 60,
-      "confusions": []
-    },
-    {
-      "id": "creme_brulee",
-      "tr": "krem brüle",
-      "target": 200,
-      "source_plan": "Food-101, Turkish-Food-Dataset-Combined ve proje cekimleri",
-      "min_groups": 60,
-      "confusions": []
-    },
-    {
-      "id": "croque_madame",
-      "tr": "croque madame",
-      "target": 200,
-      "source_plan": "Food-101, Turkish-Food-Dataset-Combined ve proje cekimleri",
-      "min_groups": 60,
-      "confusions": []
-    },
-    {
-      "id": "cup_cakes",
-      "tr": "kapkek",
-      "target": 200,
-      "source_plan": "Food-101, Turkish-Food-Dataset-Combined ve proje cekimleri",
-      "min_groups": 60,
-      "confusions": []
-    },
-    {
-      "id": "deviled_eggs",
-      "tr": "baharatlı yumurta",
       "target": 200,
       "source_plan": "Food-101, Turkish-Food-Dataset-Combined ve proje cekimleri",
       "min_groups": 60,
@@ -417,30 +225,6 @@
       "confusions": []
     },
     {
-      "id": "donuts",
-      "tr": "donut",
-      "target": 200,
-      "source_plan": "Food-101, Turkish-Food-Dataset-Combined ve proje cekimleri",
-      "min_groups": 60,
-      "confusions": []
-    },
-    {
-      "id": "dumplings",
-      "tr": "buğulama mantı",
-      "target": 200,
-      "source_plan": "Food-101, Turkish-Food-Dataset-Combined ve proje cekimleri",
-      "min_groups": 60,
-      "confusions": []
-    },
-    {
-      "id": "eggs_benedict",
-      "tr": "eggs benedict",
-      "target": 200,
-      "source_plan": "Food-101, Turkish-Food-Dataset-Combined ve proje cekimleri",
-      "min_groups": 60,
-      "confusions": []
-    },
-    {
       "id": "ekmek",
       "tr": "ekmek",
       "target": 200,
@@ -451,14 +235,6 @@
     {
       "id": "elma",
       "tr": "elma",
-      "target": 200,
-      "source_plan": "Food-101, Turkish-Food-Dataset-Combined ve proje cekimleri",
-      "min_groups": 60,
-      "confusions": []
-    },
-    {
-      "id": "elmali_turta",
-      "tr": "elmalı turta",
       "target": 200,
       "source_plan": "Food-101, Turkish-Food-Dataset-Combined ve proje cekimleri",
       "min_groups": 60,
@@ -489,30 +265,6 @@
       "confusions": []
     },
     {
-      "id": "falafel",
-      "tr": "falafel",
-      "target": 200,
-      "source_plan": "Food-101, Turkish-Food-Dataset-Combined ve proje cekimleri",
-      "min_groups": 60,
-      "confusions": []
-    },
-    {
-      "id": "filet_mignon",
-      "tr": "fileto mignon",
-      "target": 200,
-      "source_plan": "Food-101, Turkish-Food-Dataset-Combined ve proje cekimleri",
-      "min_groups": 60,
-      "confusions": []
-    },
-    {
-      "id": "fish_and_chips",
-      "tr": "balık ve patates",
-      "target": 200,
-      "source_plan": "Food-101, Turkish-Food-Dataset-Combined ve proje cekimleri",
-      "min_groups": 60,
-      "confusions": []
-    },
-    {
       "id": "french_fries",
       "tr": "patates kızartması",
       "target": 200,
@@ -521,104 +273,8 @@
       "confusions": []
     },
     {
-      "id": "french_onion_soup",
-      "tr": "soğan çorbası",
-      "target": 200,
-      "source_plan": "Food-101, Turkish-Food-Dataset-Combined ve proje cekimleri",
-      "min_groups": 60,
-      "confusions": []
-    },
-    {
-      "id": "french_toast",
-      "tr": "fransız tostu",
-      "target": 200,
-      "source_plan": "Food-101, Turkish-Food-Dataset-Combined ve proje cekimleri",
-      "min_groups": 60,
-      "confusions": []
-    },
-    {
-      "id": "fried_calamari",
-      "tr": "kalamar tava",
-      "target": 200,
-      "source_plan": "Food-101, Turkish-Food-Dataset-Combined ve proje cekimleri",
-      "min_groups": 60,
-      "confusions": []
-    },
-    {
-      "id": "fried_rice",
-      "tr": "kızarmış pilav",
-      "target": 200,
-      "source_plan": "Food-101, Turkish-Food-Dataset-Combined ve proje cekimleri",
-      "min_groups": 60,
-      "confusions": []
-    },
-    {
-      "id": "frozen_yogurt",
-      "tr": "donmuş yoğurt",
-      "target": 200,
-      "source_plan": "Food-101, Turkish-Food-Dataset-Combined ve proje cekimleri",
-      "min_groups": 60,
-      "confusions": []
-    },
-    {
-      "id": "garlic_bread",
-      "tr": "sarımsaklı ekmek",
-      "target": 200,
-      "source_plan": "Food-101, Turkish-Food-Dataset-Combined ve proje cekimleri",
-      "min_groups": 60,
-      "confusions": []
-    },
-    {
-      "id": "gnocchi",
-      "tr": "gnocchi",
-      "target": 200,
-      "source_plan": "Food-101, Turkish-Food-Dataset-Combined ve proje cekimleri",
-      "min_groups": 60,
-      "confusions": []
-    },
-    {
       "id": "gozleme",
       "tr": "gözleme",
-      "target": 200,
-      "source_plan": "Food-101, Turkish-Food-Dataset-Combined ve proje cekimleri",
-      "min_groups": 60,
-      "confusions": []
-    },
-    {
-      "id": "greek_salad",
-      "tr": "yunan salatası",
-      "target": 200,
-      "source_plan": "Food-101, Turkish-Food-Dataset-Combined ve proje cekimleri",
-      "min_groups": 60,
-      "confusions": []
-    },
-    {
-      "id": "grilled_cheese_sandwich",
-      "tr": "kaşarlı tost",
-      "target": 200,
-      "source_plan": "Food-101, Turkish-Food-Dataset-Combined ve proje cekimleri",
-      "min_groups": 60,
-      "confusions": []
-    },
-    {
-      "id": "grilled_salmon",
-      "tr": "ızgara somon",
-      "target": 200,
-      "source_plan": "Food-101, Turkish-Food-Dataset-Combined ve proje cekimleri",
-      "min_groups": 60,
-      "confusions": []
-    },
-    {
-      "id": "guacamole",
-      "tr": "guacamole",
-      "target": 200,
-      "source_plan": "Food-101, Turkish-Food-Dataset-Combined ve proje cekimleri",
-      "min_groups": 60,
-      "confusions": []
-    },
-    {
-      "id": "halka_corek",
-      "tr": "halka çörek",
       "target": 200,
       "source_plan": "Food-101, Turkish-Food-Dataset-Combined ve proje cekimleri",
       "min_groups": 60,
@@ -657,24 +313,8 @@
       "confusions": []
     },
     {
-      "id": "hot_and_sour_soup",
-      "tr": "acı ekşi çorba",
-      "target": 200,
-      "source_plan": "Food-101, Turkish-Food-Dataset-Combined ve proje cekimleri",
-      "min_groups": 60,
-      "confusions": []
-    },
-    {
       "id": "hot_dog",
       "tr": "sosisli sandviç",
-      "target": 200,
-      "source_plan": "Food-101, Turkish-Food-Dataset-Combined ve proje cekimleri",
-      "min_groups": 60,
-      "confusions": []
-    },
-    {
-      "id": "hummus",
-      "tr": "humus",
       "target": 200,
       "source_plan": "Food-101, Turkish-Food-Dataset-Combined ve proje cekimleri",
       "min_groups": 60,
@@ -897,14 +537,6 @@
       "confusions": []
     },
     {
-      "id": "lasagna",
-      "tr": "lazanya",
-      "target": 200,
-      "source_plan": "Food-101, Turkish-Food-Dataset-Combined ve proje cekimleri",
-      "min_groups": 60,
-      "confusions": []
-    },
-    {
       "id": "levrek",
       "tr": "levrek",
       "target": 200,
@@ -921,22 +553,6 @@
       "confusions": []
     },
     {
-      "id": "lobster_bisque",
-      "tr": "ıstakoz çorbası",
-      "target": 200,
-      "source_plan": "Food-101, Turkish-Food-Dataset-Combined ve proje cekimleri",
-      "min_groups": 60,
-      "confusions": []
-    },
-    {
-      "id": "lobster_roll_sandwich",
-      "tr": "ıstakoz sandviç",
-      "target": 200,
-      "source_plan": "Food-101, Turkish-Food-Dataset-Combined ve proje cekimleri",
-      "min_groups": 60,
-      "confusions": []
-    },
-    {
       "id": "lokma",
       "tr": "lokma",
       "target": 200,
@@ -947,22 +563,6 @@
     {
       "id": "lokum",
       "tr": "lokum",
-      "target": 200,
-      "source_plan": "Food-101, Turkish-Food-Dataset-Combined ve proje cekimleri",
-      "min_groups": 60,
-      "confusions": []
-    },
-    {
-      "id": "macaroni_and_cheese",
-      "tr": "peynirli makarna",
-      "target": 200,
-      "source_plan": "Food-101, Turkish-Food-Dataset-Combined ve proje cekimleri",
-      "min_groups": 60,
-      "confusions": []
-    },
-    {
-      "id": "macarons",
-      "tr": "makaron",
       "target": 200,
       "source_plan": "Food-101, Turkish-Food-Dataset-Combined ve proje cekimleri",
       "min_groups": 60,
@@ -1049,14 +649,6 @@
       "confusions": []
     },
     {
-      "id": "muffin_kek",
-      "tr": "muffin kek",
-      "target": 200,
-      "source_plan": "Food-101, Turkish-Food-Dataset-Combined ve proje cekimleri",
-      "min_groups": 60,
-      "confusions": []
-    },
-    {
       "id": "mumbar_dolmasi",
       "tr": "mumbar dolması",
       "target": 200,
@@ -1065,24 +657,8 @@
       "confusions": []
     },
     {
-      "id": "mussels",
-      "tr": "midye",
-      "target": 200,
-      "source_plan": "Food-101, Turkish-Food-Dataset-Combined ve proje cekimleri",
-      "min_groups": 60,
-      "confusions": []
-    },
-    {
       "id": "muz",
       "tr": "muz",
-      "target": 200,
-      "source_plan": "Food-101, Turkish-Food-Dataset-Combined ve proje cekimleri",
-      "min_groups": 60,
-      "confusions": []
-    },
-    {
-      "id": "nachos",
-      "tr": "nachos",
       "target": 200,
       "source_plan": "Food-101, Turkish-Food-Dataset-Combined ve proje cekimleri",
       "min_groups": 60,
@@ -1105,48 +681,8 @@
       "confusions": []
     },
     {
-      "id": "onion_rings",
-      "tr": "soğan halkası",
-      "target": 200,
-      "source_plan": "Food-101, Turkish-Food-Dataset-Combined ve proje cekimleri",
-      "min_groups": 60,
-      "confusions": []
-    },
-    {
-      "id": "oysters",
-      "tr": "istiridye",
-      "target": 200,
-      "source_plan": "Food-101, Turkish-Food-Dataset-Combined ve proje cekimleri",
-      "min_groups": 60,
-      "confusions": []
-    },
-    {
-      "id": "pad_thai",
-      "tr": "pad thai",
-      "target": 200,
-      "source_plan": "Food-101, Turkish-Food-Dataset-Combined ve proje cekimleri",
-      "min_groups": 60,
-      "confusions": []
-    },
-    {
-      "id": "paella",
-      "tr": "paella",
-      "target": 200,
-      "source_plan": "Food-101, Turkish-Food-Dataset-Combined ve proje cekimleri",
-      "min_groups": 60,
-      "confusions": []
-    },
-    {
       "id": "pancakes",
       "tr": "pankek",
-      "target": 200,
-      "source_plan": "Food-101, Turkish-Food-Dataset-Combined ve proje cekimleri",
-      "min_groups": 60,
-      "confusions": []
-    },
-    {
-      "id": "panna_cotta",
-      "tr": "panna cotta",
       "target": 200,
       "source_plan": "Food-101, Turkish-Food-Dataset-Combined ve proje cekimleri",
       "min_groups": 60,
@@ -1193,14 +729,6 @@
       "confusions": []
     },
     {
-      "id": "peynirli_borek",
-      "tr": "peynirli börek",
-      "target": 200,
-      "source_plan": "Food-101, Turkish-Food-Dataset-Combined ve proje cekimleri",
-      "min_groups": 60,
-      "confusions": []
-    },
-    {
       "id": "pirasa",
       "tr": "pırasa",
       "target": 200,
@@ -1225,64 +753,8 @@
       "confusions": []
     },
     {
-      "id": "pork_chop",
-      "tr": "domuz pirzola",
-      "target": 200,
-      "source_plan": "Food-101, Turkish-Food-Dataset-Combined ve proje cekimleri",
-      "min_groups": 60,
-      "confusions": []
-    },
-    {
       "id": "portakal",
       "tr": "portakal",
-      "target": 200,
-      "source_plan": "Food-101, Turkish-Food-Dataset-Combined ve proje cekimleri",
-      "min_groups": 60,
-      "confusions": []
-    },
-    {
-      "id": "prime_rib",
-      "tr": "kaburga rosto",
-      "target": 200,
-      "source_plan": "Food-101, Turkish-Food-Dataset-Combined ve proje cekimleri",
-      "min_groups": 60,
-      "confusions": []
-    },
-    {
-      "id": "pulled_pork_sandwich",
-      "tr": "didilmiş domuz sandviç",
-      "target": 200,
-      "source_plan": "Food-101, Turkish-Food-Dataset-Combined ve proje cekimleri",
-      "min_groups": 60,
-      "confusions": []
-    },
-    {
-      "id": "ramen",
-      "tr": "ramen",
-      "target": 200,
-      "source_plan": "Food-101, Turkish-Food-Dataset-Combined ve proje cekimleri",
-      "min_groups": 60,
-      "confusions": []
-    },
-    {
-      "id": "ravioli",
-      "tr": "ravioli",
-      "target": 200,
-      "source_plan": "Food-101, Turkish-Food-Dataset-Combined ve proje cekimleri",
-      "min_groups": 60,
-      "confusions": []
-    },
-    {
-      "id": "red_velvet_cake",
-      "tr": "red velvet kek",
-      "target": 200,
-      "source_plan": "Food-101, Turkish-Food-Dataset-Combined ve proje cekimleri",
-      "min_groups": 60,
-      "confusions": []
-    },
-    {
-      "id": "risotto",
-      "tr": "rizotto",
       "target": 200,
       "source_plan": "Food-101, Turkish-Food-Dataset-Combined ve proje cekimleri",
       "min_groups": 60,
@@ -1313,24 +785,8 @@
       "confusions": []
     },
     {
-      "id": "samosa",
-      "tr": "samosa",
-      "target": 200,
-      "source_plan": "Food-101, Turkish-Food-Dataset-Combined ve proje cekimleri",
-      "min_groups": 60,
-      "confusions": []
-    },
-    {
       "id": "sandvic",
       "tr": "sandviç",
-      "target": 200,
-      "source_plan": "Food-101, Turkish-Food-Dataset-Combined ve proje cekimleri",
-      "min_groups": 60,
-      "confusions": []
-    },
-    {
-      "id": "scallops",
-      "tr": "deniz tarağı",
       "target": 200,
       "source_plan": "Food-101, Turkish-Food-Dataset-Combined ve proje cekimleri",
       "min_groups": 60,
@@ -1347,14 +803,6 @@
     {
       "id": "sehriye_corbasi",
       "tr": "şehriye çorbası",
-      "target": 200,
-      "source_plan": "Food-101, Turkish-Food-Dataset-Combined ve proje cekimleri",
-      "min_groups": 60,
-      "confusions": []
-    },
-    {
-      "id": "shrimp_and_grits",
-      "tr": "karidesli irmik",
       "target": 200,
       "source_plan": "Food-101, Turkish-Food-Dataset-Combined ve proje cekimleri",
       "min_groups": 60,
@@ -1395,30 +843,6 @@
     {
       "id": "spaghetti_carbonara",
       "tr": "karbonara spagetti",
-      "target": 200,
-      "source_plan": "Food-101, Turkish-Food-Dataset-Combined ve proje cekimleri",
-      "min_groups": 60,
-      "confusions": []
-    },
-    {
-      "id": "spring_rolls",
-      "tr": "bahar rulosu",
-      "target": 200,
-      "source_plan": "Food-101, Turkish-Food-Dataset-Combined ve proje cekimleri",
-      "min_groups": 60,
-      "confusions": []
-    },
-    {
-      "id": "steak",
-      "tr": "biftek",
-      "target": 200,
-      "source_plan": "Food-101, Turkish-Food-Dataset-Combined ve proje cekimleri",
-      "min_groups": 60,
-      "confusions": []
-    },
-    {
-      "id": "strawberry_shortcake",
-      "tr": "çilekli pasta",
       "target": 200,
       "source_plan": "Food-101, Turkish-Food-Dataset-Combined ve proje cekimleri",
       "min_groups": 60,
@@ -1489,24 +913,8 @@
       "confusions": []
     },
     {
-      "id": "sushi",
-      "tr": "suşi",
-      "target": 200,
-      "source_plan": "Food-101, Turkish-Food-Dataset-Combined ve proje cekimleri",
-      "min_groups": 60,
-      "confusions": []
-    },
-    {
       "id": "sutlac",
       "tr": "sütlaç",
-      "target": 200,
-      "source_plan": "Food-101, Turkish-Food-Dataset-Combined ve proje cekimleri",
-      "min_groups": 60,
-      "confusions": []
-    },
-    {
-      "id": "tacos",
-      "tr": "tako",
       "target": 200,
       "source_plan": "Food-101, Turkish-Food-Dataset-Combined ve proje cekimleri",
       "min_groups": 60,
@@ -1563,14 +971,6 @@
     {
       "id": "tulumba_tatlisi",
       "tr": "tulumba tatlısı",
-      "target": 200,
-      "source_plan": "Food-101, Turkish-Food-Dataset-Combined ve proje cekimleri",
-      "min_groups": 60,
-      "confusions": []
-    },
-    {
-      "id": "tuna_tartare",
-      "tr": "ton balığı tartar",
       "target": 200,
       "source_plan": "Food-101, Turkish-Food-Dataset-Combined ve proje cekimleri",
       "min_groups": 60,
@@ -1668,21 +1068,100 @@
   "ood": {
     "target": 500,
     "label": "__ood__",
-    "sources": "Kapsam disi birakilan Food-101 siniflari (Japon/Fransiz/Meksika mutfagindan, Turk kullanicinin kameraya tutmasi beklenmeyen yemekler). Desteklenmeyen yemek yerine gecer, ayri bir yemek sinifi olarak egitilmez."
+    "sources": "Kapsam disi birakilan siniflar. Kapsam mutfak alakasina gore daraltildi: Turk veri kaynaklarindan gelen siniflar tutuldu, Food-101'e ozgu bati ve uzakdogu yemekleri desteklenmeyen yemek ornegi olarak ayrildi. Secimde yalniz tr222-v1 denemesinin DOGRULAMA sonuclari kullanildi; muhurlu test kumesi acilmadi.",
+    "narrowed_from": "nutrisense-tr222-v1",
+    "dropped_classes": [
+      "apple_pie",
+      "baby_back_ribs",
+      "beet_salad",
+      "beignets",
+      "bread_pudding",
+      "breakfast_burrito",
+      "bruschetta",
+      "caesar_salad",
+      "cannoli",
+      "caprese_salad",
+      "carrot_cake",
+      "cheese_plate",
+      "chicken_curry",
+      "chicken_quesadilla",
+      "chicken_wings",
+      "chocolate_cake",
+      "chocolate_mousse",
+      "churros",
+      "clam_chowder",
+      "crab_cakes",
+      "creme_brulee",
+      "croque_madame",
+      "cup_cakes",
+      "deviled_eggs",
+      "donuts",
+      "dumplings",
+      "eggs_benedict",
+      "elmali_turta",
+      "falafel",
+      "filet_mignon",
+      "fish_and_chips",
+      "french_onion_soup",
+      "french_toast",
+      "fried_calamari",
+      "fried_rice",
+      "frozen_yogurt",
+      "garlic_bread",
+      "gnocchi",
+      "greek_salad",
+      "grilled_cheese_sandwich",
+      "grilled_salmon",
+      "guacamole",
+      "halka_corek",
+      "hot_and_sour_soup",
+      "hummus",
+      "lasagna",
+      "lobster_bisque",
+      "lobster_roll_sandwich",
+      "macaroni_and_cheese",
+      "macarons",
+      "muffin_kek",
+      "mussels",
+      "nachos",
+      "onion_rings",
+      "oysters",
+      "pad_thai",
+      "paella",
+      "panna_cotta",
+      "peynirli_borek",
+      "pork_chop",
+      "prime_rib",
+      "pulled_pork_sandwich",
+      "ramen",
+      "ravioli",
+      "red_velvet_cake",
+      "risotto",
+      "samosa",
+      "scallops",
+      "shrimp_and_grits",
+      "spring_rolls",
+      "steak",
+      "strawberry_shortcake",
+      "sushi",
+      "tacos",
+      "tuna_tartare"
+    ]
   },
   "model": {
-    "architecture": "MobileNetV3Small",
-    "alpha": 0.75,
+    "architecture": "MobileNetV3Large",
+    "alpha": 1.0,
     "imagenet_weights": true,
     "batch_size": 96,
     "head_epochs": 14,
     "fine_tune_epochs": 14,
-    "fine_tune_last_layers": 30,
+    "fine_tune_last_layers": 40,
     "learning_rate_head": 0.001,
     "learning_rate_fine_tune": 0.0001,
     "mixed_precision": true,
     "early_stopping_patience": 4,
-    "speed_note": "Parti 48->96, epoch 20+20->14+14, sabir 5->4: sure kisitina karsilik verilen bilincli odun. Kalite yetersiz cikarsa eski degerlerle yeniden egitilebilir."
+    "speed_note": "Parti 48->96, epoch 20+20->14+14, sabir 5->4: sure kisitina karsilik verilen bilincli odun. Kalite yetersiz cikarsa eski degerlerle yeniden egitilebilir.",
+    "capacity_note": "tr222-v1 MobileNetV3Small(0.75) ile %66 dogrulukta kaldi ve guvenlik kapisini gecemedi; kapasite bu turda buyutuldu."
   },
   "decision": {
     "threshold_selection_split": "validation",

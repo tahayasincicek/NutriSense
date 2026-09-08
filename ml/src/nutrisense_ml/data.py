@@ -24,6 +24,40 @@ def read_manifest(path: Path, data_root: Path, split: str | None = None, include
     return rows
 
 
+def native_center_crop_resize(path, height: int, width: int):
+    """TensorFlow'un kendi çözücüsüyle okur; ImageOps.fit ile aynı kırpma.
+
+    `center_crop_resize` PIL'i `tf.numpy_function` içinden çağırdığı için her
+    görsel Python kilidini (GIL) tutar ve `num_parallel_calls` işe yaramaz.
+    Bu yol saf TF operasyonlarıdır, gerçekten paralel çalışır.
+
+    EXIF döndürmesi burada uygulanmaz; girdilerin `scripts/prefit_images.py`
+    ile önceden düzeltilmiş olması gerekir. Kaynak hâlâ ham ise
+    `center_crop_resize` kullanılmalıdır.
+    """
+    import tensorflow as tf
+
+    image = tf.io.decode_jpeg(
+        tf.io.read_file(path), channels=3, dct_method="INTEGER_ACCURATE"
+    )
+    shape = tf.shape(image)
+    source_h = tf.cast(shape[0], tf.float32)
+    source_w = tf.cast(shape[1], tf.float32)
+    target_ratio = tf.cast(width, tf.float32) / tf.cast(height, tf.float32)
+
+    # ImageOps.fit: hedef en-boy oranındaki en büyük ortalanmış bölgeyi kırpar.
+    crop_w = tf.minimum(source_w, source_h * target_ratio)
+    crop_h = tf.minimum(source_h, source_w / target_ratio)
+    offset_w = tf.cast(tf.round((source_w - crop_w) / 2.0), tf.int32)
+    offset_h = tf.cast(tf.round((source_h - crop_h) / 2.0), tf.int32)
+    image = tf.image.crop_to_bounding_box(
+        image, offset_h, offset_w, tf.cast(tf.round(crop_h), tf.int32), tf.cast(tf.round(crop_w), tf.int32)
+    )
+    image = tf.image.resize(image, [height, width], method="bilinear", antialias=True)
+    image.set_shape([height, width, 3])
+    return image
+
+
 def center_crop_resize(path: str, height: int, width: int):
     import numpy as np
     import tensorflow as tf
@@ -56,6 +90,7 @@ def build_dataset(
     training: bool,
     seed: int,
     allow_unknown_labels: bool = False,
+    decoder: str = "pil",
 ):
     """Görselleri okuyan tf.data hattını kurar.
 
@@ -75,19 +110,19 @@ def build_dataset(
     if training:
         ds = ds.shuffle(len(rows), seed=seed, reshuffle_each_iteration=True)
 
-    augmenter = tf.keras.Sequential([
-        tf.keras.layers.RandomFlip("horizontal", seed=seed),
-        tf.keras.layers.RandomRotation(0.06, seed=seed + 1),
-        tf.keras.layers.RandomZoom(0.12, seed=seed + 2),
-        tf.keras.layers.RandomContrast(0.15, seed=seed + 3),
-    ], name="train_only_augmentation")
+
+    if decoder not in {"pil", "native_prefitted"}:
+        raise ValueError(f"Bilinmeyen decoder: {decoder}")
+    read_image = native_center_crop_resize if decoder == "native_prefitted" else center_crop_resize
 
     def load(path, label):
-        image = center_crop_resize(path, height, width)
-        if training:
-            image = augmenter(image, training=True)
-        return image, label
+        return read_image(path, height, width), label
 
     options = tf.data.Options()
     options.experimental_deterministic = True
-    return ds.map(load, num_parallel_calls=tf.data.AUTOTUNE, deterministic=True).batch(batch_size).with_options(options).prefetch(tf.data.AUTOTUNE)
+    pipeline = (
+        ds.map(load, num_parallel_calls=tf.data.AUTOTUNE, deterministic=True)
+        .batch(batch_size)
+        .with_options(options)
+    )
+    return pipeline.prefetch(tf.data.AUTOTUNE)

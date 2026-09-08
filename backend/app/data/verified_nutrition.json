@@ -3507,6 +3507,398 @@
         "retrieved_at": "2026-09-07T00:00:00Z",
         "license": "Public secondary sources; published estimates, not a laboratory measurement",
         "attribution": "Piyasa ortalamasi tahmini. Kaynaklar: https://www.diyetkolik.com/kac-kalori/lokum, https://www.dytseydaertas.com/besin/lokum"
+      },
+      "estimate:adana_kebap": {
+        "source_url": "https://www.fitekran.com/besin-degeri/adana-kebap/",
+        "source_item_name": "Adana kebap (tahmini)",
+        "retrieved_at": "2026-09-07T00:00:00Z",
+        "license": "Public secondary sources; published estimates, not a laboratory measurement",
+        "attribution": "Piyasa ortalamasi tahmini. Kaynaklar: https://www.fitekran.com/besin-degeri/adana-kebap/, https://com.com.tr/beslenme/kalori/adana-kebap"
+      },
+      "estimate:anne_koftesi": {
+        "source_url": "https://www.fitekran.com/besin-degeri/kofte/",
+        "source_item_name": "Ev koftesi (tahmini)",
+        "retrieved_at": "2026-09-07T00:00:00Z",
+        "license": "Public secondary sources; published estimates, not a laboratory measurement",
+        "attribution": "Piyasa ortalamasi tahmini. Kaynaklar: https://www.fitekran.com/besin-degeri/kofte/"
+      },
+      "estimate:ayran": {
+        "source_url": "https://www.fitekran.com/besin-degeri/bardak-ayran/",
+        "source_item_name": "Ayran (tahmini)",
+        "retrieved_at": "2026-09-07T00:00:00Z",
+        "license": "Public secondary sources; published estimates, not a laboratory measurement",
+        "attribution": "Piyasa ortalamasi tahmini. Kaynaklar: https://www.fitekran.com/besin-degeri/bardak-ayran/"
+      },
+      "estimate:beyaz_lahana_sarmasi": {
+        "source_url": "https://www.haberturk.com/kac-kalori/etli-lahana-sarma-besin-degeri",
+        "source_item_name": "Beyaz lahana sarmasi (tahmini)",
+        "retrieved_at": "2026-09-07T00:00:00Z",
+        "license": "Public secondary sources; published estimates, not a laboratory measurement",
+        "attribution": "Piyasa ortalamasi tahmini. Kaynaklar: https://www.haberturk.com/kac-kalori/etli-lahana-sarma-besin-degeri"
+      },
+      "estimate:borek": {
+        "source_url": "https://www.fitekran.com/besin-degeri/kiymali-borek/",
+        "source_item_name": "Borek (tahmini, kiymali ve peynirli borek ortalamasi)",
+        "retrieved_at": "2026-09-07T00:00:00Z",
+        "license": "Public secondary sources; published estimates, not a laboratory measurement",
+        "attribution": "Piyasa ortalamasi tahmini. Kaynaklar: https://www.fitekran.com/besin-degeri/kiymali-borek/, https://www.fitekran.com/besin-degeri/peynirli-borek/"
+      },
+      "estimate:cacik": {
+        "source_url": "https://www.fitekran.com/besin-degeri/cacik/",
+        "source_item_name": "Cacik (tahmini)",
+        "retrieved_at": "2026-09-07T00:00:00Z",
+        "license": "Public secondary sources; published estimates, not a laboratory measurement",
+        "attribution": "Piyasa ortalamasi tahmini. Kaynaklar: https://www.fitekran.com/besin-degeri/cacik/"
+      },
+      "estimate:cheesecake": {
+        "source_url": "https://yemek.com/cheesecake-kac-kalori/",
+        "source_item_name": "Cheesecake (tahmini)",
+        "retrieved_at": "2026-09-07T00:00:00Z",
+        "license": "Public secondary sources; published estimates, not a laboratory measurement",
+        "attribution": "Piyasa ortalamasi tahmini. Kaynaklar: https://yemek.com/cheesecake-kac-kalori/"
+      },
+      "estimate:cipura": {
+        "source_url": "https://www.fitekran.com/besin-degeri/cipura/",
+        "source_item_name": "Cipura (tahmini)",
+        "retrieved_at": "2026-09-07T00:00:00Z",
+        "license": "Public secondary sources; published estimates, not a laboratory measurement",
+        "attribution": "Piyasa ortalamasi tahmini. Kaynaklar: https://www.fitekran.com/besin-degeri/cipura/"
+      },
+      "estimate:club_sandwich": {
+        "source_url": "https://www.besinanaliz.com/foods/sandvic-belirtilmemis",
+        "source_item_name": "Kulup sandvic (tahmini, kalori makrolardan turetildi)",
+        "retrieved_at": "2026-09-07T00:00:00Z",
+        "license": "Public secondary sources; published estimates, not a laboratory measurement",
+        "attribution": "Piyasa ortalamasi tahmini. Kaynaklar: https://www.besinanaliz.com/foods/sandvic-belirtilmemis"
+      },
+      "estimate:coban_salatasi": {
+        "source_url": "https://www.fitekran.com/besin-degeri/coban-salata/",
+        "source_item_name": "Coban salatasi (tahmini)",
+        "retrieved_at": "2026-09-07T00:00:00Z",
+        "license": "Public secondary sources; published estimates, not a laboratory measurement",
+        "attribution": "Piyasa ortalamasi tahmini. Kaynaklar: https://www.fitekran.com/besin-degeri/coban-salata/"
+      },
+      "estimate:doner": {
+        "source_url": "https://www.fitekran.com/besin-degeri/hazir-et-doner/",
+        "source_item_name": "Doner (tahmini)",
+        "retrieved_at": "2026-09-07T00:00:00Z",
+        "license": "Public secondary sources; published estimates, not a laboratory measurement",
+        "attribution": "Piyasa ortalamasi tahmini. Kaynaklar: https://www.fitekran.com/besin-degeri/hazir-et-doner/"
+      },
+      "estimate:et_sote": {
+        "source_url": "https://www.fitekran.com/besin-degeri/et-sote/",
+        "source_item_name": "Et sote (tahmini)",
+        "retrieved_at": "2026-09-07T00:00:00Z",
+        "license": "Public secondary sources; published estimates, not a laboratory measurement",
+        "attribution": "Piyasa ortalamasi tahmini. Kaynaklar: https://www.fitekran.com/besin-degeri/et-sote/"
+      },
+      "estimate:hamsi": {
+        "source_url": "https://www.fitekran.com/besin-degeri/hamsi/",
+        "source_item_name": "Hamsi (tahmini)",
+        "retrieved_at": "2026-09-07T00:00:00Z",
+        "license": "Public secondary sources; published estimates, not a laboratory measurement",
+        "attribution": "Piyasa ortalamasi tahmini. Kaynaklar: https://www.fitekran.com/besin-degeri/hamsi/"
+      },
+      "estimate:hot_dog": {
+        "source_url": "https://www.fitekran.com/besin-degeri/sosisli-sandvic/",
+        "source_item_name": "Sosisli sandvic (tahmini)",
+        "retrieved_at": "2026-09-07T00:00:00Z",
+        "license": "Public secondary sources; published estimates, not a laboratory measurement",
+        "attribution": "Piyasa ortalamasi tahmini. Kaynaklar: https://www.fitekran.com/besin-degeri/sosisli-sandvic/"
+      },
+      "estimate:iskender": {
+        "source_url": "https://www.fitekran.com/besin-degeri/iskender-kebap/",
+        "source_item_name": "Iskender (tahmini)",
+        "retrieved_at": "2026-09-07T00:00:00Z",
+        "license": "Public secondary sources; published estimates, not a laboratory measurement",
+        "attribution": "Piyasa ortalamasi tahmini. Kaynaklar: https://www.fitekran.com/besin-degeri/iskender-kebap/"
+      },
+      "estimate:izmir_kofte": {
+        "source_url": "https://www.fitekran.com/besin-degeri/izmir-kofte/",
+        "source_item_name": "Izmir kofte (tahmini)",
+        "retrieved_at": "2026-09-07T00:00:00Z",
+        "license": "Public secondary sources; published estimates, not a laboratory measurement",
+        "attribution": "Piyasa ortalamasi tahmini. Kaynaklar: https://www.fitekran.com/besin-degeri/izmir-kofte/"
+      },
+      "estimate:kalburabasti": {
+        "source_url": "https://www.fitekran.com/besin-degeri/cevizli-kalburabasti/",
+        "source_item_name": "Kalburabasti (tahmini)",
+        "retrieved_at": "2026-09-07T00:00:00Z",
+        "license": "Public secondary sources; published estimates, not a laboratory measurement",
+        "attribution": "Piyasa ortalamasi tahmini. Kaynaklar: https://www.fitekran.com/besin-degeri/cevizli-kalburabasti/"
+      },
+      "estimate:karniyarik": {
+        "source_url": "https://www.fitekran.com/besin-degeri/karniyarik/",
+        "source_item_name": "Karniyarik (tahmini)",
+        "retrieved_at": "2026-09-07T00:00:00Z",
+        "license": "Public secondary sources; published estimates, not a laboratory measurement",
+        "attribution": "Piyasa ortalamasi tahmini. Kaynaklar: https://www.fitekran.com/besin-degeri/karniyarik/"
+      },
+      "estimate:kazandibi": {
+        "source_url": "https://www.fitekran.com/besin-degeri/kazandibi/",
+        "source_item_name": "Kazandibi (tahmini)",
+        "retrieved_at": "2026-09-07T00:00:00Z",
+        "license": "Public secondary sources; published estimates, not a laboratory measurement",
+        "attribution": "Piyasa ortalamasi tahmini. Kaynaklar: https://www.fitekran.com/besin-degeri/kazandibi/"
+      },
+      "estimate:kebap": {
+        "source_url": "https://www.diyetkolik.com/kac-kalori/kuzu-sis-kebabi",
+        "source_item_name": "Kebap (kuzu sis) (tahmini)",
+        "retrieved_at": "2026-09-07T00:00:00Z",
+        "license": "Public secondary sources; published estimates, not a laboratory measurement",
+        "attribution": "Piyasa ortalamasi tahmini. Kaynaklar: https://www.diyetkolik.com/kac-kalori/kuzu-sis-kebabi"
+      },
+      "estimate:kemal_pasa_tatlisi": {
+        "source_url": "https://www.fitekran.com/besin-degeri/kemalpasa-tatlisi/",
+        "source_item_name": "Kemalpasa tatlisi (tahmini, kalori makrolardan turetildi)",
+        "retrieved_at": "2026-09-07T00:00:00Z",
+        "license": "Public secondary sources; published estimates, not a laboratory measurement",
+        "attribution": "Piyasa ortalamasi tahmini. Kaynaklar: https://www.fitekran.com/besin-degeri/kemalpasa-tatlisi/"
+      },
+      "estimate:kiymali_borek": {
+        "source_url": "https://www.fitekran.com/besin-degeri/kiymali-borek/",
+        "source_item_name": "Kiymali borek (tahmini)",
+        "retrieved_at": "2026-09-07T00:00:00Z",
+        "license": "Public secondary sources; published estimates, not a laboratory measurement",
+        "attribution": "Piyasa ortalamasi tahmini. Kaynaklar: https://www.fitekran.com/besin-degeri/kiymali-borek/"
+      },
+      "estimate:kiymali_pide": {
+        "source_url": "https://www.fitekran.com/besin-degeri/kiymali-pide/",
+        "source_item_name": "Kiymali pide (tahmini)",
+        "retrieved_at": "2026-09-07T00:00:00Z",
+        "license": "Public secondary sources; published estimates, not a laboratory measurement",
+        "attribution": "Piyasa ortalamasi tahmini. Kaynaklar: https://www.fitekran.com/besin-degeri/kiymali-pide/"
+      },
+      "estimate:kokorec": {
+        "source_url": "https://www.fitekran.com/besin-degeri/kokorec/",
+        "source_item_name": "Kokorec (tahmini)",
+        "retrieved_at": "2026-09-07T00:00:00Z",
+        "license": "Public secondary sources; published estimates, not a laboratory measurement",
+        "attribution": "Piyasa ortalamasi tahmini. Kaynaklar: https://www.fitekran.com/besin-degeri/kokorec/"
+      },
+      "estimate:lokma": {
+        "source_url": "https://www.fitekran.com/besin-degeri/lokma-tatlisi/",
+        "source_item_name": "Lokma (tahmini)",
+        "retrieved_at": "2026-09-07T00:00:00Z",
+        "license": "Public secondary sources; published estimates, not a laboratory measurement",
+        "attribution": "Piyasa ortalamasi tahmini. Kaynaklar: https://www.fitekran.com/besin-degeri/lokma-tatlisi/"
+      },
+      "estimate:menemen": {
+        "source_url": "https://www.fitekran.com/besin-degeri/menemen/",
+        "source_item_name": "Menemen (tahmini)",
+        "retrieved_at": "2026-09-07T00:00:00Z",
+        "license": "Public secondary sources; published estimates, not a laboratory measurement",
+        "attribution": "Piyasa ortalamasi tahmini. Kaynaklar: https://www.fitekran.com/besin-degeri/menemen/"
+      },
+      "estimate:mercimek_koftesi": {
+        "source_url": "https://www.fitekran.com/besin-degeri/mercimek-koftesi/",
+        "source_item_name": "Mercimek koftesi (tahmini)",
+        "retrieved_at": "2026-09-07T00:00:00Z",
+        "license": "Public secondary sources; published estimates, not a laboratory measurement",
+        "attribution": "Piyasa ortalamasi tahmini. Kaynaklar: https://www.fitekran.com/besin-degeri/mercimek-koftesi/"
+      },
+      "estimate:meyve_suyu": {
+        "source_url": "https://www.fitekran.com/besin-degeri/portakal-suyu/",
+        "source_item_name": "Meyve suyu (tahmini, portakal suyu degerleri uzerinden)",
+        "retrieved_at": "2026-09-07T00:00:00Z",
+        "license": "Public secondary sources; published estimates, not a laboratory measurement",
+        "attribution": "Piyasa ortalamasi tahmini. Kaynaklar: https://www.fitekran.com/besin-degeri/portakal-suyu/"
+      },
+      "estimate:midye_dolma": {
+        "source_url": "https://www.fitekran.com/besin-degeri/midye-dolma/",
+        "source_item_name": "Midye dolma (tahmini)",
+        "retrieved_at": "2026-09-07T00:00:00Z",
+        "license": "Public secondary sources; published estimates, not a laboratory measurement",
+        "attribution": "Piyasa ortalamasi tahmini. Kaynaklar: https://www.fitekran.com/besin-degeri/midye-dolma/"
+      },
+      "estimate:midye_tava": {
+        "source_url": "https://www.fitekran.com/besin-degeri/midye-tava/",
+        "source_item_name": "Midye tava (tahmini)",
+        "retrieved_at": "2026-09-07T00:00:00Z",
+        "license": "Public secondary sources; published estimates, not a laboratory measurement",
+        "attribution": "Piyasa ortalamasi tahmini. Kaynaklar: https://www.fitekran.com/besin-degeri/midye-tava/"
+      },
+      "estimate:mumbar_dolmasi": {
+        "source_url": "https://www.haberturk.com/kac-kalori/mumbar-dolmasi-besin-degeri",
+        "source_item_name": "Mumbar dolmasi (tahmini)",
+        "retrieved_at": "2026-09-07T00:00:00Z",
+        "license": "Public secondary sources; published estimates, not a laboratory measurement",
+        "attribution": "Piyasa ortalamasi tahmini. Kaynaklar: https://www.haberturk.com/kac-kalori/mumbar-dolmasi-besin-degeri"
+      },
+      "estimate:patates_salatasi": {
+        "source_url": "https://www.fitekran.com/besin-degeri/patates-salatasi/",
+        "source_item_name": "Patates salatasi (tahmini)",
+        "retrieved_at": "2026-09-07T00:00:00Z",
+        "license": "Public secondary sources; published estimates, not a laboratory measurement",
+        "attribution": "Piyasa ortalamasi tahmini. Kaynaklar: https://www.fitekran.com/besin-degeri/patates-salatasi/"
+      },
+      "estimate:patlican_kebabi": {
+        "source_url": "https://www.fitekran.com/besin-degeri/patlican-kebabi/",
+        "source_item_name": "Patlican kebabi (tahmini)",
+        "retrieved_at": "2026-09-07T00:00:00Z",
+        "license": "Public secondary sources; published estimates, not a laboratory measurement",
+        "attribution": "Piyasa ortalamasi tahmini. Kaynaklar: https://www.fitekran.com/besin-degeri/patlican-kebabi/"
+      },
+      "estimate:sahlep": {
+        "source_url": "https://www.haberturk.com/kac-kalori/salep-besin-degeri",
+        "source_item_name": "Salep (tahmini)",
+        "retrieved_at": "2026-09-07T00:00:00Z",
+        "license": "Public secondary sources; published estimates, not a laboratory measurement",
+        "attribution": "Piyasa ortalamasi tahmini. Kaynaklar: https://www.haberturk.com/kac-kalori/salep-besin-degeri"
+      },
+      "estimate:salcali_makarna": {
+        "source_url": "https://www.fitekran.com/besin-degeri/salcali-makarna/",
+        "source_item_name": "Salcali makarna (tahmini)",
+        "retrieved_at": "2026-09-07T00:00:00Z",
+        "license": "Public secondary sources; published estimates, not a laboratory measurement",
+        "attribution": "Piyasa ortalamasi tahmini. Kaynaklar: https://www.fitekran.com/besin-degeri/salcali-makarna/"
+      },
+      "estimate:sandvic": {
+        "source_url": "https://www.besinanaliz.com/foods/sandvic-belirtilmemis",
+        "source_item_name": "Sandvic (tahmini, kalori makrolardan turetildi)",
+        "retrieved_at": "2026-09-07T00:00:00Z",
+        "license": "Public secondary sources; published estimates, not a laboratory measurement",
+        "attribution": "Piyasa ortalamasi tahmini. Kaynaklar: https://www.besinanaliz.com/foods/sandvic-belirtilmemis"
+      },
+      "estimate:sehriye_corbasi": {
+        "source_url": "https://www.fitekran.com/besin-degeri/sehriye-corbasi/",
+        "source_item_name": "Sehriye corbasi (tahmini)",
+        "retrieved_at": "2026-09-07T00:00:00Z",
+        "license": "Public secondary sources; published estimates, not a laboratory measurement",
+        "attribution": "Piyasa ortalamasi tahmini. Kaynaklar: https://www.fitekran.com/besin-degeri/sehriye-corbasi/"
+      },
+      "estimate:spaghetti_bolognese": {
+        "source_url": "https://www.fitekran.com/besin-degeri/spagetti-bolognez/",
+        "source_item_name": "Bolonez spagetti (tahmini)",
+        "retrieved_at": "2026-09-07T00:00:00Z",
+        "license": "Public secondary sources; published estimates, not a laboratory measurement",
+        "attribution": "Piyasa ortalamasi tahmini. Kaynaklar: https://www.fitekran.com/besin-degeri/spagetti-bolognez/"
+      },
+      "estimate:spaghetti_carbonara": {
+        "source_url": "https://foods.fatsecret.com/calories-nutrition/generic/pasta-with-carbonara-sauce",
+        "source_item_name": "Karbonara spagetti (tahmini)",
+        "retrieved_at": "2026-09-07T00:00:00Z",
+        "license": "Public secondary sources; published estimates, not a laboratory measurement",
+        "attribution": "Piyasa ortalamasi tahmini. Kaynaklar: https://foods.fatsecret.com/calories-nutrition/generic/pasta-with-carbonara-sauce"
+      },
+      "estimate:su_boregi": {
+        "source_url": "https://www.fitekran.com/besin-degeri/su-boregi/",
+        "source_item_name": "Su boregi (tahmini)",
+        "retrieved_at": "2026-09-07T00:00:00Z",
+        "license": "Public secondary sources; published estimates, not a laboratory measurement",
+        "attribution": "Piyasa ortalamasi tahmini. Kaynaklar: https://www.fitekran.com/besin-degeri/su-boregi/"
+      },
+      "estimate:sucuklu_yumurta": {
+        "source_url": "https://www.fitekran.com/besin-degeri/sucuklu-yumurta/",
+        "source_item_name": "Sucuklu yumurta (tahmini)",
+        "retrieved_at": "2026-09-07T00:00:00Z",
+        "license": "Public secondary sources; published estimates, not a laboratory measurement",
+        "attribution": "Piyasa ortalamasi tahmini. Kaynaklar: https://www.fitekran.com/besin-degeri/sucuklu-yumurta/"
+      },
+      "estimate:sulu_bamya_yemegi": {
+        "source_url": "https://www.fitekran.com/besin-degeri/etli-bamya/",
+        "source_item_name": "Bamya yemegi (tahmini)",
+        "retrieved_at": "2026-09-07T00:00:00Z",
+        "license": "Public secondary sources; published estimates, not a laboratory measurement",
+        "attribution": "Piyasa ortalamasi tahmini. Kaynaklar: https://www.fitekran.com/besin-degeri/etli-bamya/"
+      },
+      "estimate:sulu_barbunya_yemegi": {
+        "source_url": "https://www.fitekran.com/besin-degeri/zeytinyagli-barbunya/",
+        "source_item_name": "Barbunya yemegi (tahmini)",
+        "retrieved_at": "2026-09-07T00:00:00Z",
+        "license": "Public secondary sources; published estimates, not a laboratory measurement",
+        "attribution": "Piyasa ortalamasi tahmini. Kaynaklar: https://www.fitekran.com/besin-degeri/zeytinyagli-barbunya/"
+      },
+      "estimate:sulu_bezelye_yemegi": {
+        "source_url": "https://www.fitekran.com/besin-degeri/zeytinyagli-bezelye/",
+        "source_item_name": "Bezelye yemegi (tahmini)",
+        "retrieved_at": "2026-09-07T00:00:00Z",
+        "license": "Public secondary sources; published estimates, not a laboratory measurement",
+        "attribution": "Piyasa ortalamasi tahmini. Kaynaklar: https://www.fitekran.com/besin-degeri/zeytinyagli-bezelye/"
+      },
+      "estimate:sulu_mercimek_yemegi": {
+        "source_url": "https://www.fitekran.com/besin-degeri/mercimek-yemegi/",
+        "source_item_name": "Mercimek yemegi (tahmini, kalori makrolardan turetildi)",
+        "retrieved_at": "2026-09-07T00:00:00Z",
+        "license": "Public secondary sources; published estimates, not a laboratory measurement",
+        "attribution": "Piyasa ortalamasi tahmini. Kaynaklar: https://www.fitekran.com/besin-degeri/mercimek-yemegi/"
+      },
+      "estimate:sulu_nohut_yemegi": {
+        "source_url": "https://www.haberturk.com/kac-kalori/nohut-yemegi-etli-besin-degeri",
+        "source_item_name": "Nohut yemegi (tahmini)",
+        "retrieved_at": "2026-09-07T00:00:00Z",
+        "license": "Public secondary sources; published estimates, not a laboratory measurement",
+        "attribution": "Piyasa ortalamasi tahmini. Kaynaklar: https://www.haberturk.com/kac-kalori/nohut-yemegi-etli-besin-degeri"
+      },
+      "estimate:sulu_patates_yemegi": {
+        "source_url": "https://ye-mek.net/kalori/firinda-zeytinyagli-patates",
+        "source_item_name": "Patates yemegi (tahmini)",
+        "retrieved_at": "2026-09-07T00:00:00Z",
+        "license": "Public secondary sources; published estimates, not a laboratory measurement",
+        "attribution": "Piyasa ortalamasi tahmini. Kaynaklar: https://ye-mek.net/kalori/firinda-zeytinyagli-patates"
+      },
+      "estimate:tantuni": {
+        "source_url": "https://www.fitekran.com/besin-degeri/tantuni/",
+        "source_item_name": "Tantuni (tahmini, kalori makrolardan turetildi)",
+        "retrieved_at": "2026-09-07T00:00:00Z",
+        "license": "Public secondary sources; published estimates, not a laboratory measurement",
+        "attribution": "Piyasa ortalamasi tahmini. Kaynaklar: https://www.fitekran.com/besin-degeri/tantuni/"
+      },
+      "estimate:tarhana_corbasi": {
+        "source_url": "https://www.fitekran.com/besin-degeri/tarhana-corbasi/",
+        "source_item_name": "Tarhana corbasi (tahmini)",
+        "retrieved_at": "2026-09-07T00:00:00Z",
+        "license": "Public secondary sources; published estimates, not a laboratory measurement",
+        "attribution": "Piyasa ortalamasi tahmini. Kaynaklar: https://www.fitekran.com/besin-degeri/tarhana-corbasi/"
+      },
+      "estimate:tas_kebabi": {
+        "source_url": "https://www.fitekran.com/besin-degeri/tas-kebabi/",
+        "source_item_name": "Tas kebabi (tahmini)",
+        "retrieved_at": "2026-09-07T00:00:00Z",
+        "license": "Public secondary sources; published estimates, not a laboratory measurement",
+        "attribution": "Piyasa ortalamasi tahmini. Kaynaklar: https://www.fitekran.com/besin-degeri/tas-kebabi/"
+      },
+      "estimate:tavuk_sote": {
+        "source_url": "https://www.fitekran.com/besin-degeri/tavuk-sote/",
+        "source_item_name": "Tavuk sote (tahmini)",
+        "retrieved_at": "2026-09-07T00:00:00Z",
+        "license": "Public secondary sources; published estimates, not a laboratory measurement",
+        "attribution": "Piyasa ortalamasi tahmini. Kaynaklar: https://www.fitekran.com/besin-degeri/tavuk-sote/"
+      },
+      "estimate:tulumba_tatlisi": {
+        "source_url": "https://www.fitekran.com/besin-degeri/tulumba-tatlisi/",
+        "source_item_name": "Tulumba tatlisi (tahmini)",
+        "retrieved_at": "2026-09-07T00:00:00Z",
+        "license": "Public secondary sources; published estimates, not a laboratory measurement",
+        "attribution": "Piyasa ortalamasi tahmini. Kaynaklar: https://www.fitekran.com/besin-degeri/tulumba-tatlisi/"
+      },
+      "estimate:yas_pasta": {
+        "source_url": "https://www.fitekran.com/besin-degeri/yas-pasta/",
+        "source_item_name": "Yas pasta (tahmini)",
+        "retrieved_at": "2026-09-07T00:00:00Z",
+        "license": "Public secondary sources; published estimates, not a laboratory measurement",
+        "attribution": "Piyasa ortalamasi tahmini. Kaynaklar: https://www.fitekran.com/besin-degeri/yas-pasta/"
+      },
+      "estimate:yayla_corbasi": {
+        "source_url": "https://www.fitekran.com/besin-degeri/yayla-corbasi/",
+        "source_item_name": "Yayla corbasi (tahmini)",
+        "retrieved_at": "2026-09-07T00:00:00Z",
+        "license": "Public secondary sources; published estimates, not a laboratory measurement",
+        "attribution": "Piyasa ortalamasi tahmini. Kaynaklar: https://www.fitekran.com/besin-degeri/yayla-corbasi/"
+      },
+      "estimate:yogurtlu_makarna": {
+        "source_url": "https://www.fitekran.com/besin-degeri/yogurtlu-makarna/",
+        "source_item_name": "Yogurtlu makarna (tahmini)",
+        "retrieved_at": "2026-09-07T00:00:00Z",
+        "license": "Public secondary sources; published estimates, not a laboratory measurement",
+        "attribution": "Piyasa ortalamasi tahmini. Kaynaklar: https://www.fitekran.com/besin-degeri/yogurtlu-makarna/"
+      },
+      "estimate:zeytinyagli_fasulye": {
+        "source_url": "https://www.haberturk.com/kac-kalori/zeytinyagli-taze-fasulye-besin-degeri",
+        "source_item_name": "Zeytinyagli fasulye (tahmini)",
+        "retrieved_at": "2026-09-07T00:00:00Z",
+        "license": "Public secondary sources; published estimates, not a laboratory measurement",
+        "attribution": "Piyasa ortalamasi tahmini. Kaynaklar: https://www.haberturk.com/kac-kalori/zeytinyagli-taze-fasulye-besin-degeri"
       }
     }
   },
@@ -13270,5 +13662,1092 @@
     "carbs_per_100g": 89.28,
     "fat_per_100g": 0.19,
     "fiber_per_100g": 0.5
+  },
+  "adana_kebap": {
+    "evidence_status": "ESTIMATED",
+    "source_item_id": "estimate:adana_kebap",
+    "locale": "tr-TR",
+    "display_name_tr": "Adana kebap (tahmini)",
+    "default_portion_g": 100,
+    "serving_unit": "gram",
+    "serving_quantity": 100,
+    "portion_units": [
+      {
+        "unit": "porsiyon",
+        "grams_per_unit": 151,
+        "source_measure": "Kaynak porsiyon gramaji",
+        "source_item_id": "estimate:adana_kebap"
+      }
+    ],
+    "estimate_sources": [
+      "https://www.fitekran.com/besin-degeri/adana-kebap/",
+      "https://com.com.tr/beslenme/kalori/adana-kebap"
+    ],
+    "macro_delta_percent": 0.9,
+    "calories_per_100g": 254.5,
+    "protein_per_100g": 15.45,
+    "carbs_per_100g": 1.03,
+    "fat_per_100g": 20.7,
+    "fiber_per_100g": 0.6
+  },
+  "anne_koftesi": {
+    "evidence_status": "ESTIMATED",
+    "source_item_id": "estimate:anne_koftesi",
+    "locale": "tr-TR",
+    "display_name_tr": "Ev koftesi (tahmini)",
+    "default_portion_g": 100,
+    "serving_unit": "gram",
+    "serving_quantity": 100,
+    "portion_units": [],
+    "estimate_sources": [
+      "https://www.fitekran.com/besin-degeri/kofte/"
+    ],
+    "macro_delta_percent": 0.85,
+    "calories_per_100g": 168,
+    "protein_per_100g": 13.1,
+    "carbs_per_100g": 4.92,
+    "fat_per_100g": 10.5,
+    "fiber_per_100g": 0.8
+  },
+  "ayran": {
+    "evidence_status": "ESTIMATED",
+    "source_item_id": "estimate:ayran",
+    "locale": "tr-TR",
+    "display_name_tr": "Ayran (tahmini)",
+    "default_portion_g": 100,
+    "serving_unit": "gram",
+    "serving_quantity": 100,
+    "portion_units": [
+      {
+        "unit": "bardak",
+        "grams_per_unit": 300,
+        "source_measure": "Kaynak porsiyon gramaji",
+        "source_item_id": "estimate:ayran"
+      }
+    ],
+    "estimate_sources": [
+      "https://www.fitekran.com/besin-degeri/bardak-ayran/"
+    ],
+    "macro_delta_percent": 0.26,
+    "calories_per_100g": 38,
+    "protein_per_100g": 2.0,
+    "carbs_per_100g": 2.8,
+    "fat_per_100g": 2.1,
+    "fiber_per_100g": 0.0
+  },
+  "beyaz_lahana_sarmasi": {
+    "evidence_status": "ESTIMATED",
+    "source_item_id": "estimate:beyaz_lahana_sarmasi",
+    "locale": "tr-TR",
+    "display_name_tr": "Beyaz lahana sarmasi (tahmini)",
+    "default_portion_g": 100,
+    "serving_unit": "gram",
+    "serving_quantity": 100,
+    "portion_units": [],
+    "estimate_sources": [
+      "https://www.haberturk.com/kac-kalori/etli-lahana-sarma-besin-degeri"
+    ],
+    "macro_delta_percent": 2.14,
+    "calories_per_100g": 122.22,
+    "protein_per_100g": 8.95,
+    "carbs_per_100g": 8.8,
+    "fat_per_100g": 5.4,
+    "fiber_per_100g": 2.8
+  },
+  "borek": {
+    "evidence_status": "ESTIMATED",
+    "source_item_id": "estimate:borek",
+    "locale": "tr-TR",
+    "display_name_tr": "Borek (tahmini, kiymali ve peynirli borek ortalamasi)",
+    "default_portion_g": 100,
+    "serving_unit": "gram",
+    "serving_quantity": 100,
+    "portion_units": [],
+    "estimate_sources": [
+      "https://www.fitekran.com/besin-degeri/kiymali-borek/",
+      "https://www.fitekran.com/besin-degeri/peynirli-borek/"
+    ],
+    "macro_delta_percent": 1.02,
+    "calories_per_100g": 253.5,
+    "protein_per_100g": 9.65,
+    "carbs_per_100g": 31.14,
+    "fat_per_100g": 9.75,
+    "fiber_per_100g": 1.85
+  },
+  "cacik": {
+    "evidence_status": "ESTIMATED",
+    "source_item_id": "estimate:cacik",
+    "locale": "tr-TR",
+    "display_name_tr": "Cacik (tahmini)",
+    "default_portion_g": 100,
+    "serving_unit": "gram",
+    "serving_quantity": 100,
+    "portion_units": [],
+    "estimate_sources": [
+      "https://www.fitekran.com/besin-degeri/cacik/"
+    ],
+    "macro_delta_percent": 3.66,
+    "calories_per_100g": 41,
+    "protein_per_100g": 2.0,
+    "carbs_per_100g": 3.15,
+    "fat_per_100g": 2.1,
+    "fiber_per_100g": 0.2
+  },
+  "cheesecake": {
+    "evidence_status": "ESTIMATED",
+    "source_item_id": "estimate:cheesecake",
+    "locale": "tr-TR",
+    "display_name_tr": "Cheesecake (tahmini)",
+    "default_portion_g": 100,
+    "serving_unit": "gram",
+    "serving_quantity": 100,
+    "portion_units": [],
+    "estimate_sources": [
+      "https://yemek.com/cheesecake-kac-kalori/"
+    ],
+    "macro_delta_percent": 2.59,
+    "calories_per_100g": 270,
+    "protein_per_100g": 5.0,
+    "carbs_per_100g": 27.0,
+    "fat_per_100g": 15.0,
+    "fiber_per_100g": 0.0
+  },
+  "cipura": {
+    "evidence_status": "ESTIMATED",
+    "source_item_id": "estimate:cipura",
+    "locale": "tr-TR",
+    "display_name_tr": "Cipura (tahmini)",
+    "default_portion_g": 100,
+    "serving_unit": "gram",
+    "serving_quantity": 100,
+    "portion_units": [],
+    "estimate_sources": [
+      "https://www.fitekran.com/besin-degeri/cipura/"
+    ],
+    "macro_delta_percent": 0.52,
+    "calories_per_100g": 96,
+    "protein_per_100g": 19.6,
+    "carbs_per_100g": 0.0,
+    "fat_per_100g": 1.9,
+    "fiber_per_100g": 0.0
+  },
+  "club_sandwich": {
+    "evidence_status": "ESTIMATED",
+    "source_item_id": "estimate:club_sandwich",
+    "locale": "tr-TR",
+    "display_name_tr": "Kulup sandvic (tahmini, kalori makrolardan turetildi)",
+    "default_portion_g": 100,
+    "serving_unit": "gram",
+    "serving_quantity": 100,
+    "portion_units": [],
+    "estimate_sources": [
+      "https://www.besinanaliz.com/foods/sandvic-belirtilmemis"
+    ],
+    "macro_delta_percent": 0.0,
+    "calories_per_100g": 394.3,
+    "protein_per_100g": 12.8,
+    "carbs_per_100g": 33.8,
+    "fat_per_100g": 23.1,
+    "fiber_per_100g": 0.0
+  },
+  "coban_salatasi": {
+    "evidence_status": "ESTIMATED",
+    "source_item_id": "estimate:coban_salatasi",
+    "locale": "tr-TR",
+    "display_name_tr": "Coban salatasi (tahmini)",
+    "default_portion_g": 100,
+    "serving_unit": "gram",
+    "serving_quantity": 100,
+    "portion_units": [],
+    "estimate_sources": [
+      "https://www.fitekran.com/besin-degeri/coban-salata/"
+    ],
+    "macro_delta_percent": 1.73,
+    "calories_per_100g": 52,
+    "protein_per_100g": 1.4,
+    "carbs_per_100g": 7.55,
+    "fat_per_100g": 1.7,
+    "fiber_per_100g": 2.2
+  },
+  "doner": {
+    "evidence_status": "ESTIMATED",
+    "source_item_id": "estimate:doner",
+    "locale": "tr-TR",
+    "display_name_tr": "Doner (tahmini)",
+    "default_portion_g": 100,
+    "serving_unit": "gram",
+    "serving_quantity": 100,
+    "portion_units": [
+      {
+        "unit": "adet",
+        "grams_per_unit": 200,
+        "source_measure": "Kaynak porsiyon gramaji",
+        "source_item_id": "estimate:doner"
+      }
+    ],
+    "estimate_sources": [
+      "https://www.fitekran.com/besin-degeri/hazir-et-doner/"
+    ],
+    "macro_delta_percent": 0.29,
+    "calories_per_100g": 239,
+    "protein_per_100g": 12.0,
+    "carbs_per_100g": 22.5,
+    "fat_per_100g": 11.3,
+    "fiber_per_100g": 1.0
+  },
+  "et_sote": {
+    "evidence_status": "ESTIMATED",
+    "source_item_id": "estimate:et_sote",
+    "locale": "tr-TR",
+    "display_name_tr": "Et sote (tahmini)",
+    "default_portion_g": 100,
+    "serving_unit": "gram",
+    "serving_quantity": 100,
+    "portion_units": [],
+    "estimate_sources": [
+      "https://www.fitekran.com/besin-degeri/et-sote/"
+    ],
+    "macro_delta_percent": 0.93,
+    "calories_per_100g": 107,
+    "protein_per_100g": 7.6,
+    "carbs_per_100g": 3.15,
+    "fat_per_100g": 7.0,
+    "fiber_per_100g": 0.9
+  },
+  "hamsi": {
+    "evidence_status": "ESTIMATED",
+    "source_item_id": "estimate:hamsi",
+    "locale": "tr-TR",
+    "display_name_tr": "Hamsi (tahmini)",
+    "default_portion_g": 100,
+    "serving_unit": "gram",
+    "serving_quantity": 100,
+    "portion_units": [],
+    "estimate_sources": [
+      "https://www.fitekran.com/besin-degeri/hamsi/"
+    ],
+    "macro_delta_percent": 1.74,
+    "calories_per_100g": 115,
+    "protein_per_100g": 17.0,
+    "carbs_per_100g": 0.0,
+    "fat_per_100g": 5.0,
+    "fiber_per_100g": 0.0
+  },
+  "hot_dog": {
+    "evidence_status": "ESTIMATED",
+    "source_item_id": "estimate:hot_dog",
+    "locale": "tr-TR",
+    "display_name_tr": "Sosisli sandvic (tahmini)",
+    "default_portion_g": 100,
+    "serving_unit": "gram",
+    "serving_quantity": 100,
+    "portion_units": [],
+    "estimate_sources": [
+      "https://www.fitekran.com/besin-degeri/sosisli-sandvic/"
+    ],
+    "macro_delta_percent": 0.28,
+    "calories_per_100g": 253,
+    "protein_per_100g": 8.3,
+    "carbs_per_100g": 28.0,
+    "fat_per_100g": 11.9,
+    "fiber_per_100g": 2.3
+  },
+  "iskender": {
+    "evidence_status": "ESTIMATED",
+    "source_item_id": "estimate:iskender",
+    "locale": "tr-TR",
+    "display_name_tr": "Iskender (tahmini)",
+    "default_portion_g": 100,
+    "serving_unit": "gram",
+    "serving_quantity": 100,
+    "portion_units": [],
+    "estimate_sources": [
+      "https://www.fitekran.com/besin-degeri/iskender-kebap/"
+    ],
+    "macro_delta_percent": 0.95,
+    "calories_per_100g": 151,
+    "protein_per_100g": 9.7,
+    "carbs_per_100g": 15.54,
+    "fat_per_100g": 5.4,
+    "fiber_per_100g": 1.3
+  },
+  "izmir_kofte": {
+    "evidence_status": "ESTIMATED",
+    "source_item_id": "estimate:izmir_kofte",
+    "locale": "tr-TR",
+    "display_name_tr": "Izmir kofte (tahmini)",
+    "default_portion_g": 100,
+    "serving_unit": "gram",
+    "serving_quantity": 100,
+    "portion_units": [],
+    "estimate_sources": [
+      "https://www.fitekran.com/besin-degeri/izmir-kofte/"
+    ],
+    "macro_delta_percent": 0.84,
+    "calories_per_100g": 98,
+    "protein_per_100g": 6.9,
+    "carbs_per_100g": 3.22,
+    "fat_per_100g": 6.3,
+    "fiber_per_100g": 0.7
+  },
+  "kalburabasti": {
+    "evidence_status": "ESTIMATED",
+    "source_item_id": "estimate:kalburabasti",
+    "locale": "tr-TR",
+    "display_name_tr": "Kalburabasti (tahmini)",
+    "default_portion_g": 100,
+    "serving_unit": "gram",
+    "serving_quantity": 100,
+    "portion_units": [],
+    "estimate_sources": [
+      "https://www.fitekran.com/besin-degeri/cevizli-kalburabasti/"
+    ],
+    "macro_delta_percent": 3.96,
+    "calories_per_100g": 272,
+    "protein_per_100g": 1.4,
+    "carbs_per_100g": 42.98,
+    "fat_per_100g": 9.3,
+    "fiber_per_100g": 0.8
+  },
+  "karniyarik": {
+    "evidence_status": "ESTIMATED",
+    "source_item_id": "estimate:karniyarik",
+    "locale": "tr-TR",
+    "display_name_tr": "Karniyarik (tahmini)",
+    "default_portion_g": 100,
+    "serving_unit": "gram",
+    "serving_quantity": 100,
+    "portion_units": [],
+    "estimate_sources": [
+      "https://www.fitekran.com/besin-degeri/karniyarik/"
+    ],
+    "macro_delta_percent": 1.05,
+    "calories_per_100g": 55,
+    "protein_per_100g": 3.2,
+    "carbs_per_100g": 2.53,
+    "fat_per_100g": 3.5,
+    "fiber_per_100g": 1.8
+  },
+  "kazandibi": {
+    "evidence_status": "ESTIMATED",
+    "source_item_id": "estimate:kazandibi",
+    "locale": "tr-TR",
+    "display_name_tr": "Kazandibi (tahmini)",
+    "default_portion_g": 100,
+    "serving_unit": "gram",
+    "serving_quantity": 100,
+    "portion_units": [],
+    "estimate_sources": [
+      "https://www.fitekran.com/besin-degeri/kazandibi/"
+    ],
+    "macro_delta_percent": 4.85,
+    "calories_per_100g": 130,
+    "protein_per_100g": 3.2,
+    "carbs_per_100g": 19.4,
+    "fat_per_100g": 3.7,
+    "fiber_per_100g": 0.2
+  },
+  "kebap": {
+    "evidence_status": "ESTIMATED",
+    "source_item_id": "estimate:kebap",
+    "locale": "tr-TR",
+    "display_name_tr": "Kebap (kuzu sis) (tahmini)",
+    "default_portion_g": 100,
+    "serving_unit": "gram",
+    "serving_quantity": 100,
+    "portion_units": [],
+    "estimate_sources": [
+      "https://www.diyetkolik.com/kac-kalori/kuzu-sis-kebabi"
+    ],
+    "macro_delta_percent": 1.1,
+    "calories_per_100g": 167,
+    "protein_per_100g": 16.52,
+    "carbs_per_100g": 3.82,
+    "fat_per_100g": 9.72,
+    "fiber_per_100g": 0.81
+  },
+  "kemal_pasa_tatlisi": {
+    "evidence_status": "ESTIMATED",
+    "source_item_id": "estimate:kemal_pasa_tatlisi",
+    "locale": "tr-TR",
+    "display_name_tr": "Kemalpasa tatlisi (tahmini, kalori makrolardan turetildi)",
+    "default_portion_g": 100,
+    "serving_unit": "gram",
+    "serving_quantity": 100,
+    "portion_units": [],
+    "estimate_sources": [
+      "https://www.fitekran.com/besin-degeri/kemalpasa-tatlisi/"
+    ],
+    "macro_delta_percent": 0.01,
+    "calories_per_100g": 184.9,
+    "protein_per_100g": 5.8,
+    "carbs_per_100g": 29.62,
+    "fat_per_100g": 4.8,
+    "fiber_per_100g": 0.0
+  },
+  "kiymali_borek": {
+    "evidence_status": "ESTIMATED",
+    "source_item_id": "estimate:kiymali_borek",
+    "locale": "tr-TR",
+    "display_name_tr": "Kiymali borek (tahmini)",
+    "default_portion_g": 100,
+    "serving_unit": "gram",
+    "serving_quantity": 100,
+    "portion_units": [],
+    "estimate_sources": [
+      "https://www.fitekran.com/besin-degeri/kiymali-borek/"
+    ],
+    "macro_delta_percent": 0.97,
+    "calories_per_100g": 248,
+    "protein_per_100g": 9.2,
+    "carbs_per_100g": 28.8,
+    "fat_per_100g": 10.4,
+    "fiber_per_100g": 1.8
+  },
+  "kiymali_pide": {
+    "evidence_status": "ESTIMATED",
+    "source_item_id": "estimate:kiymali_pide",
+    "locale": "tr-TR",
+    "display_name_tr": "Kiymali pide (tahmini)",
+    "default_portion_g": 100,
+    "serving_unit": "gram",
+    "serving_quantity": 100,
+    "portion_units": [],
+    "estimate_sources": [
+      "https://www.fitekran.com/besin-degeri/kiymali-pide/"
+    ],
+    "macro_delta_percent": 0.85,
+    "calories_per_100g": 209,
+    "protein_per_100g": 8.2,
+    "carbs_per_100g": 24.48,
+    "fat_per_100g": 8.5,
+    "fiber_per_100g": 1.6
+  },
+  "kokorec": {
+    "evidence_status": "ESTIMATED",
+    "source_item_id": "estimate:kokorec",
+    "locale": "tr-TR",
+    "display_name_tr": "Kokorec (tahmini)",
+    "default_portion_g": 100,
+    "serving_unit": "gram",
+    "serving_quantity": 100,
+    "portion_units": [],
+    "estimate_sources": [
+      "https://www.fitekran.com/besin-degeri/kokorec/"
+    ],
+    "macro_delta_percent": 1.16,
+    "calories_per_100g": 86,
+    "protein_per_100g": 14.3,
+    "carbs_per_100g": 2.0,
+    "fat_per_100g": 2.2,
+    "fiber_per_100g": 0.8
+  },
+  "lokma": {
+    "evidence_status": "ESTIMATED",
+    "source_item_id": "estimate:lokma",
+    "locale": "tr-TR",
+    "display_name_tr": "Lokma (tahmini)",
+    "default_portion_g": 100,
+    "serving_unit": "gram",
+    "serving_quantity": 100,
+    "portion_units": [],
+    "estimate_sources": [
+      "https://www.fitekran.com/besin-degeri/lokma-tatlisi/"
+    ],
+    "macro_delta_percent": 3.67,
+    "calories_per_100g": 518,
+    "protein_per_100g": 2.4,
+    "carbs_per_100g": 50.12,
+    "fat_per_100g": 32.1,
+    "fiber_per_100g": 0.7
+  },
+  "menemen": {
+    "evidence_status": "ESTIMATED",
+    "source_item_id": "estimate:menemen",
+    "locale": "tr-TR",
+    "display_name_tr": "Menemen (tahmini)",
+    "default_portion_g": 100,
+    "serving_unit": "gram",
+    "serving_quantity": 100,
+    "portion_units": [],
+    "estimate_sources": [
+      "https://www.fitekran.com/besin-degeri/menemen/"
+    ],
+    "macro_delta_percent": 0.34,
+    "calories_per_100g": 71,
+    "protein_per_100g": 3.5,
+    "carbs_per_100g": 3.39,
+    "fat_per_100g": 4.8,
+    "fiber_per_100g": 1.4
+  },
+  "mercimek_koftesi": {
+    "evidence_status": "ESTIMATED",
+    "source_item_id": "estimate:mercimek_koftesi",
+    "locale": "tr-TR",
+    "display_name_tr": "Mercimek koftesi (tahmini)",
+    "default_portion_g": 100,
+    "serving_unit": "gram",
+    "serving_quantity": 100,
+    "portion_units": [],
+    "estimate_sources": [
+      "https://www.fitekran.com/besin-degeri/mercimek-koftesi/"
+    ],
+    "macro_delta_percent": 4.45,
+    "calories_per_100g": 130,
+    "protein_per_100g": 4.0,
+    "carbs_per_100g": 16.93,
+    "fat_per_100g": 4.5,
+    "fiber_per_100g": 4.5
+  },
+  "meyve_suyu": {
+    "evidence_status": "ESTIMATED",
+    "source_item_id": "estimate:meyve_suyu",
+    "locale": "tr-TR",
+    "display_name_tr": "Meyve suyu (tahmini, portakal suyu degerleri uzerinden)",
+    "default_portion_g": 100,
+    "serving_unit": "gram",
+    "serving_quantity": 100,
+    "portion_units": [],
+    "estimate_sources": [
+      "https://www.fitekran.com/besin-degeri/portakal-suyu/"
+    ],
+    "macro_delta_percent": 3.27,
+    "calories_per_100g": 60,
+    "protein_per_100g": 0.4,
+    "carbs_per_100g": 14.64,
+    "fat_per_100g": 0.2,
+    "fiber_per_100g": 0.0
+  },
+  "midye_dolma": {
+    "evidence_status": "ESTIMATED",
+    "source_item_id": "estimate:midye_dolma",
+    "locale": "tr-TR",
+    "display_name_tr": "Midye dolma (tahmini)",
+    "default_portion_g": 100,
+    "serving_unit": "gram",
+    "serving_quantity": 100,
+    "portion_units": [],
+    "estimate_sources": [
+      "https://www.fitekran.com/besin-degeri/midye-dolma/"
+    ],
+    "macro_delta_percent": 3.08,
+    "calories_per_100g": 87,
+    "protein_per_100g": 5.4,
+    "carbs_per_100g": 10.28,
+    "fat_per_100g": 2.4,
+    "fiber_per_100g": 0.4
+  },
+  "midye_tava": {
+    "evidence_status": "ESTIMATED",
+    "source_item_id": "estimate:midye_tava",
+    "locale": "tr-TR",
+    "display_name_tr": "Midye tava (tahmini)",
+    "default_portion_g": 100,
+    "serving_unit": "gram",
+    "serving_quantity": 100,
+    "portion_units": [],
+    "estimate_sources": [
+      "https://www.fitekran.com/besin-degeri/midye-tava/"
+    ],
+    "macro_delta_percent": 1.2,
+    "calories_per_100g": 198,
+    "protein_per_100g": 9.3,
+    "carbs_per_100g": 17.78,
+    "fat_per_100g": 9.7,
+    "fiber_per_100g": 2.6
+  },
+  "mumbar_dolmasi": {
+    "evidence_status": "ESTIMATED",
+    "source_item_id": "estimate:mumbar_dolmasi",
+    "locale": "tr-TR",
+    "display_name_tr": "Mumbar dolmasi (tahmini)",
+    "default_portion_g": 100,
+    "serving_unit": "gram",
+    "serving_quantity": 100,
+    "portion_units": [],
+    "estimate_sources": [
+      "https://www.haberturk.com/kac-kalori/mumbar-dolmasi-besin-degeri"
+    ],
+    "macro_delta_percent": 1.54,
+    "calories_per_100g": 229.93,
+    "protein_per_100g": 5.61,
+    "carbs_per_100g": 29.75,
+    "fat_per_100g": 9.44,
+    "fiber_per_100g": 0.0
+  },
+  "patates_salatasi": {
+    "evidence_status": "ESTIMATED",
+    "source_item_id": "estimate:patates_salatasi",
+    "locale": "tr-TR",
+    "display_name_tr": "Patates salatasi (tahmini)",
+    "default_portion_g": 100,
+    "serving_unit": "gram",
+    "serving_quantity": 100,
+    "portion_units": [],
+    "estimate_sources": [
+      "https://www.fitekran.com/besin-degeri/patates-salatasi/"
+    ],
+    "macro_delta_percent": 4.28,
+    "calories_per_100g": 71,
+    "protein_per_100g": 1.3,
+    "carbs_per_100g": 11.64,
+    "fat_per_100g": 1.8,
+    "fiber_per_100g": 2.0
+  },
+  "patlican_kebabi": {
+    "evidence_status": "ESTIMATED",
+    "source_item_id": "estimate:patlican_kebabi",
+    "locale": "tr-TR",
+    "display_name_tr": "Patlican kebabi (tahmini)",
+    "default_portion_g": 100,
+    "serving_unit": "gram",
+    "serving_quantity": 100,
+    "portion_units": [],
+    "estimate_sources": [
+      "https://www.fitekran.com/besin-degeri/patlican-kebabi/"
+    ],
+    "macro_delta_percent": 5.86,
+    "calories_per_100g": 102,
+    "protein_per_100g": 9.1,
+    "carbs_per_100g": 4.78,
+    "fat_per_100g": 4.5,
+    "fiber_per_100g": 1.9
+  },
+  "sahlep": {
+    "evidence_status": "ESTIMATED",
+    "source_item_id": "estimate:sahlep",
+    "locale": "tr-TR",
+    "display_name_tr": "Salep (tahmini)",
+    "default_portion_g": 100,
+    "serving_unit": "gram",
+    "serving_quantity": 100,
+    "portion_units": [],
+    "estimate_sources": [
+      "https://www.haberturk.com/kac-kalori/salep-besin-degeri"
+    ],
+    "macro_delta_percent": 0.21,
+    "calories_per_100g": 94,
+    "protein_per_100g": 2.8,
+    "carbs_per_100g": 13.9,
+    "fat_per_100g": 3.0,
+    "fiber_per_100g": 0.2
+  },
+  "salcali_makarna": {
+    "evidence_status": "ESTIMATED",
+    "source_item_id": "estimate:salcali_makarna",
+    "locale": "tr-TR",
+    "display_name_tr": "Salcali makarna (tahmini)",
+    "default_portion_g": 100,
+    "serving_unit": "gram",
+    "serving_quantity": 100,
+    "portion_units": [],
+    "estimate_sources": [
+      "https://www.fitekran.com/besin-degeri/salcali-makarna/"
+    ],
+    "macro_delta_percent": 1.15,
+    "calories_per_100g": 120,
+    "protein_per_100g": 3.5,
+    "carbs_per_100g": 24.82,
+    "fat_per_100g": 0.9,
+    "fiber_per_100g": 1.0
+  },
+  "sandvic": {
+    "evidence_status": "ESTIMATED",
+    "source_item_id": "estimate:sandvic",
+    "locale": "tr-TR",
+    "display_name_tr": "Sandvic (tahmini, kalori makrolardan turetildi)",
+    "default_portion_g": 100,
+    "serving_unit": "gram",
+    "serving_quantity": 100,
+    "portion_units": [],
+    "estimate_sources": [
+      "https://www.besinanaliz.com/foods/sandvic-belirtilmemis"
+    ],
+    "macro_delta_percent": 0.0,
+    "calories_per_100g": 394.3,
+    "protein_per_100g": 12.8,
+    "carbs_per_100g": 33.8,
+    "fat_per_100g": 23.1,
+    "fiber_per_100g": 0.0
+  },
+  "sehriye_corbasi": {
+    "evidence_status": "ESTIMATED",
+    "source_item_id": "estimate:sehriye_corbasi",
+    "locale": "tr-TR",
+    "display_name_tr": "Sehriye corbasi (tahmini)",
+    "default_portion_g": 100,
+    "serving_unit": "gram",
+    "serving_quantity": 100,
+    "portion_units": [],
+    "estimate_sources": [
+      "https://www.fitekran.com/besin-degeri/sehriye-corbasi/"
+    ],
+    "macro_delta_percent": 0.55,
+    "calories_per_100g": 91,
+    "protein_per_100g": 2.0,
+    "carbs_per_100g": 15.0,
+    "fat_per_100g": 2.5,
+    "fiber_per_100g": 1.9
+  },
+  "spaghetti_bolognese": {
+    "evidence_status": "ESTIMATED",
+    "source_item_id": "estimate:spaghetti_bolognese",
+    "locale": "tr-TR",
+    "display_name_tr": "Bolonez spagetti (tahmini)",
+    "default_portion_g": 100,
+    "serving_unit": "gram",
+    "serving_quantity": 100,
+    "portion_units": [],
+    "estimate_sources": [
+      "https://www.fitekran.com/besin-degeri/spagetti-bolognez/"
+    ],
+    "macro_delta_percent": 0.75,
+    "calories_per_100g": 151,
+    "protein_per_100g": 7.9,
+    "carbs_per_100g": 10.44,
+    "fat_per_100g": 8.5,
+    "fiber_per_100g": 1.1
+  },
+  "spaghetti_carbonara": {
+    "evidence_status": "ESTIMATED",
+    "source_item_id": "estimate:spaghetti_carbonara",
+    "locale": "tr-TR",
+    "display_name_tr": "Karbonara spagetti (tahmini)",
+    "default_portion_g": 100,
+    "serving_unit": "gram",
+    "serving_quantity": 100,
+    "portion_units": [],
+    "estimate_sources": [
+      "https://foods.fatsecret.com/calories-nutrition/generic/pasta-with-carbonara-sauce"
+    ],
+    "macro_delta_percent": 4.27,
+    "calories_per_100g": 144.9,
+    "protein_per_100g": 6.1,
+    "carbs_per_100g": 19.51,
+    "fat_per_100g": 4.03,
+    "fiber_per_100g": 0.0
+  },
+  "su_boregi": {
+    "evidence_status": "ESTIMATED",
+    "source_item_id": "estimate:su_boregi",
+    "locale": "tr-TR",
+    "display_name_tr": "Su boregi (tahmini)",
+    "default_portion_g": 100,
+    "serving_unit": "gram",
+    "serving_quantity": 100,
+    "portion_units": [],
+    "estimate_sources": [
+      "https://www.fitekran.com/besin-degeri/su-boregi/"
+    ],
+    "macro_delta_percent": 0.47,
+    "calories_per_100g": 229,
+    "protein_per_100g": 7.2,
+    "carbs_per_100g": 25.03,
+    "fat_per_100g": 11.0,
+    "fiber_per_100g": 1.5
+  },
+  "sucuklu_yumurta": {
+    "evidence_status": "ESTIMATED",
+    "source_item_id": "estimate:sucuklu_yumurta",
+    "locale": "tr-TR",
+    "display_name_tr": "Sucuklu yumurta (tahmini)",
+    "default_portion_g": 100,
+    "serving_unit": "gram",
+    "serving_quantity": 100,
+    "portion_units": [],
+    "estimate_sources": [
+      "https://www.fitekran.com/besin-degeri/sucuklu-yumurta/"
+    ],
+    "macro_delta_percent": 0.42,
+    "calories_per_100g": 242,
+    "protein_per_100g": 13.5,
+    "carbs_per_100g": 3.38,
+    "fat_per_100g": 19.5,
+    "fiber_per_100g": 0.5
+  },
+  "sulu_bamya_yemegi": {
+    "evidence_status": "ESTIMATED",
+    "source_item_id": "estimate:sulu_bamya_yemegi",
+    "locale": "tr-TR",
+    "display_name_tr": "Bamya yemegi (tahmini)",
+    "default_portion_g": 100,
+    "serving_unit": "gram",
+    "serving_quantity": 100,
+    "portion_units": [],
+    "estimate_sources": [
+      "https://www.fitekran.com/besin-degeri/etli-bamya/"
+    ],
+    "macro_delta_percent": 4.77,
+    "calories_per_100g": 52,
+    "protein_per_100g": 5.3,
+    "carbs_per_100g": 2.58,
+    "fat_per_100g": 2.0,
+    "fiber_per_100g": 2.9
+  },
+  "sulu_barbunya_yemegi": {
+    "evidence_status": "ESTIMATED",
+    "source_item_id": "estimate:sulu_barbunya_yemegi",
+    "locale": "tr-TR",
+    "display_name_tr": "Barbunya yemegi (tahmini)",
+    "default_portion_g": 100,
+    "serving_unit": "gram",
+    "serving_quantity": 100,
+    "portion_units": [],
+    "estimate_sources": [
+      "https://www.fitekran.com/besin-degeri/zeytinyagli-barbunya/"
+    ],
+    "macro_delta_percent": 1.65,
+    "calories_per_100g": 155,
+    "protein_per_100g": 9.3,
+    "carbs_per_100g": 25.14,
+    "fat_per_100g": 2.2,
+    "fiber_per_100g": 9.8
+  },
+  "sulu_bezelye_yemegi": {
+    "evidence_status": "ESTIMATED",
+    "source_item_id": "estimate:sulu_bezelye_yemegi",
+    "locale": "tr-TR",
+    "display_name_tr": "Bezelye yemegi (tahmini)",
+    "default_portion_g": 100,
+    "serving_unit": "gram",
+    "serving_quantity": 100,
+    "portion_units": [],
+    "estimate_sources": [
+      "https://www.fitekran.com/besin-degeri/zeytinyagli-bezelye/"
+    ],
+    "macro_delta_percent": 1.13,
+    "calories_per_100g": 55,
+    "protein_per_100g": 1.9,
+    "carbs_per_100g": 7.42,
+    "fat_per_100g": 1.9,
+    "fiber_per_100g": 1.7
+  },
+  "sulu_mercimek_yemegi": {
+    "evidence_status": "ESTIMATED",
+    "source_item_id": "estimate:sulu_mercimek_yemegi",
+    "locale": "tr-TR",
+    "display_name_tr": "Mercimek yemegi (tahmini, kalori makrolardan turetildi)",
+    "default_portion_g": 100,
+    "serving_unit": "gram",
+    "serving_quantity": 100,
+    "portion_units": [],
+    "estimate_sources": [
+      "https://www.fitekran.com/besin-degeri/mercimek-yemegi/"
+    ],
+    "macro_delta_percent": 0.06,
+    "calories_per_100g": 63.2,
+    "protein_per_100g": 3.9,
+    "carbs_per_100g": 7.41,
+    "fat_per_100g": 2.0,
+    "fiber_per_100g": 4.4
+  },
+  "sulu_nohut_yemegi": {
+    "evidence_status": "ESTIMATED",
+    "source_item_id": "estimate:sulu_nohut_yemegi",
+    "locale": "tr-TR",
+    "display_name_tr": "Nohut yemegi (tahmini)",
+    "default_portion_g": 100,
+    "serving_unit": "gram",
+    "serving_quantity": 100,
+    "portion_units": [],
+    "estimate_sources": [
+      "https://www.haberturk.com/kac-kalori/nohut-yemegi-etli-besin-degeri"
+    ],
+    "macro_delta_percent": 0.05,
+    "calories_per_100g": 285.26,
+    "protein_per_100g": 23.2,
+    "carbs_per_100g": 11.41,
+    "fat_per_100g": 16.33,
+    "fiber_per_100g": 0.0
+  },
+  "sulu_patates_yemegi": {
+    "evidence_status": "ESTIMATED",
+    "source_item_id": "estimate:sulu_patates_yemegi",
+    "locale": "tr-TR",
+    "display_name_tr": "Patates yemegi (tahmini)",
+    "default_portion_g": 100,
+    "serving_unit": "gram",
+    "serving_quantity": 100,
+    "portion_units": [],
+    "estimate_sources": [
+      "https://ye-mek.net/kalori/firinda-zeytinyagli-patates"
+    ],
+    "macro_delta_percent": 1.83,
+    "calories_per_100g": 87,
+    "protein_per_100g": 2.02,
+    "carbs_per_100g": 14.63,
+    "fat_per_100g": 2.09,
+    "fiber_per_100g": 2.28
+  },
+  "tantuni": {
+    "evidence_status": "ESTIMATED",
+    "source_item_id": "estimate:tantuni",
+    "locale": "tr-TR",
+    "display_name_tr": "Tantuni (tahmini, kalori makrolardan turetildi)",
+    "default_portion_g": 100,
+    "serving_unit": "gram",
+    "serving_quantity": 100,
+    "portion_units": [],
+    "estimate_sources": [
+      "https://www.fitekran.com/besin-degeri/tantuni/"
+    ],
+    "macro_delta_percent": 0.01,
+    "calories_per_100g": 311.6,
+    "protein_per_100g": 19.3,
+    "carbs_per_100g": 8.42,
+    "fat_per_100g": 22.3,
+    "fiber_per_100g": 3.1
+  },
+  "tarhana_corbasi": {
+    "evidence_status": "ESTIMATED",
+    "source_item_id": "estimate:tarhana_corbasi",
+    "locale": "tr-TR",
+    "display_name_tr": "Tarhana corbasi (tahmini)",
+    "default_portion_g": 100,
+    "serving_unit": "gram",
+    "serving_quantity": 100,
+    "portion_units": [],
+    "estimate_sources": [
+      "https://www.fitekran.com/besin-degeri/tarhana-corbasi/"
+    ],
+    "macro_delta_percent": 1.9,
+    "calories_per_100g": 60,
+    "protein_per_100g": 2.3,
+    "carbs_per_100g": 4.99,
+    "fat_per_100g": 3.3,
+    "fiber_per_100g": 0.6
+  },
+  "tas_kebabi": {
+    "evidence_status": "ESTIMATED",
+    "source_item_id": "estimate:tas_kebabi",
+    "locale": "tr-TR",
+    "display_name_tr": "Tas kebabi (tahmini)",
+    "default_portion_g": 100,
+    "serving_unit": "gram",
+    "serving_quantity": 100,
+    "portion_units": [],
+    "estimate_sources": [
+      "https://www.fitekran.com/besin-degeri/tas-kebabi/"
+    ],
+    "macro_delta_percent": 1.8,
+    "calories_per_100g": 61,
+    "protein_per_100g": 5.0,
+    "carbs_per_100g": 7.05,
+    "fat_per_100g": 1.3,
+    "fiber_per_100g": 1.2
+  },
+  "tavuk_sote": {
+    "evidence_status": "ESTIMATED",
+    "source_item_id": "estimate:tavuk_sote",
+    "locale": "tr-TR",
+    "display_name_tr": "Tavuk sote (tahmini)",
+    "default_portion_g": 100,
+    "serving_unit": "gram",
+    "serving_quantity": 100,
+    "portion_units": [],
+    "estimate_sources": [
+      "https://www.fitekran.com/besin-degeri/tavuk-sote/"
+    ],
+    "macro_delta_percent": 2.4,
+    "calories_per_100g": 169,
+    "protein_per_100g": 16.7,
+    "carbs_per_100g": 4.51,
+    "fat_per_100g": 8.9,
+    "fiber_per_100g": 2.4
+  },
+  "tulumba_tatlisi": {
+    "evidence_status": "ESTIMATED",
+    "source_item_id": "estimate:tulumba_tatlisi",
+    "locale": "tr-TR",
+    "display_name_tr": "Tulumba tatlisi (tahmini)",
+    "default_portion_g": 100,
+    "serving_unit": "gram",
+    "serving_quantity": 100,
+    "portion_units": [],
+    "estimate_sources": [
+      "https://www.fitekran.com/besin-degeri/tulumba-tatlisi/"
+    ],
+    "macro_delta_percent": 6.79,
+    "calories_per_100g": 282,
+    "protein_per_100g": 2.8,
+    "carbs_per_100g": 46.04,
+    "fat_per_100g": 7.5,
+    "fiber_per_100g": 0.6
+  },
+  "yas_pasta": {
+    "evidence_status": "ESTIMATED",
+    "source_item_id": "estimate:yas_pasta",
+    "locale": "tr-TR",
+    "display_name_tr": "Yas pasta (tahmini)",
+    "default_portion_g": 100,
+    "serving_unit": "gram",
+    "serving_quantity": 100,
+    "portion_units": [],
+    "estimate_sources": [
+      "https://www.fitekran.com/besin-degeri/yas-pasta/"
+    ],
+    "macro_delta_percent": 7.34,
+    "calories_per_100g": 250,
+    "protein_per_100g": 4.1,
+    "carbs_per_100g": 44.59,
+    "fat_per_100g": 4.1,
+    "fiber_per_100g": 0.9
+  },
+  "yayla_corbasi": {
+    "evidence_status": "ESTIMATED",
+    "source_item_id": "estimate:yayla_corbasi",
+    "locale": "tr-TR",
+    "display_name_tr": "Yayla corbasi (tahmini)",
+    "default_portion_g": 100,
+    "serving_unit": "gram",
+    "serving_quantity": 100,
+    "portion_units": [],
+    "estimate_sources": [
+      "https://www.fitekran.com/besin-degeri/yayla-corbasi/"
+    ],
+    "macro_delta_percent": 1.53,
+    "calories_per_100g": 47,
+    "protein_per_100g": 1.5,
+    "carbs_per_100g": 6.47,
+    "fat_per_100g": 1.6,
+    "fiber_per_100g": 0.1
+  },
+  "yogurtlu_makarna": {
+    "evidence_status": "ESTIMATED",
+    "source_item_id": "estimate:yogurtlu_makarna",
+    "locale": "tr-TR",
+    "display_name_tr": "Yogurtlu makarna (tahmini)",
+    "default_portion_g": 100,
+    "serving_unit": "gram",
+    "serving_quantity": 100,
+    "portion_units": [],
+    "estimate_sources": [
+      "https://www.fitekran.com/besin-degeri/yogurtlu-makarna/"
+    ],
+    "macro_delta_percent": 2.72,
+    "calories_per_100g": 162,
+    "protein_per_100g": 5.3,
+    "carbs_per_100g": 21.5,
+    "fat_per_100g": 5.6,
+    "fiber_per_100g": 2.2
+  },
+  "zeytinyagli_fasulye": {
+    "evidence_status": "ESTIMATED",
+    "source_item_id": "estimate:zeytinyagli_fasulye",
+    "locale": "tr-TR",
+    "display_name_tr": "Zeytinyagli fasulye (tahmini)",
+    "default_portion_g": 100,
+    "serving_unit": "gram",
+    "serving_quantity": 100,
+    "portion_units": [],
+    "estimate_sources": [
+      "https://www.haberturk.com/kac-kalori/zeytinyagli-taze-fasulye-besin-degeri"
+    ],
+    "macro_delta_percent": 6.51,
+    "calories_per_100g": 73.46,
+    "protein_per_100g": 2.68,
+    "carbs_per_100g": 10.08,
+    "fat_per_100g": 1.96,
+    "fiber_per_100g": 1.71
   }
 }

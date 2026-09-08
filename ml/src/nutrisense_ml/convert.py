@@ -63,7 +63,42 @@ def convert(run_dir: Path, data_root: Path, output_dir: Path, formats: list[str]
     if not equivalence_rows:
         raise ValueError("TFLite equivalence needs real validation samples")
     output_dir.mkdir(parents=True, exist_ok=True)
+    # Model karışık hassasiyetle eğitildiğinde katmanlar float16 politikası
+    # taşır ve TFLite dönüştürücü bu grafiği reddeder. Dönüşüm her zaman
+    # float32 politikası altında yapılır; ağırlıklar aynıdır, yalnız hesap
+    # tipi sabitlenir.
+    # Dönüşüm CPU'da yapılır. TFLite yorumlayıcısı da CPU'da koştuğu için
+    # denklik karşılaştırması ancak böyle biçim farkını ölçer; GPU'da koşan
+    # Keras'la kıyaslamak donanım farkını ölçer (0,0015'e karşı 0,000002).
+    tf.config.set_visible_devices([], "GPU")
+    tf.keras.mixed_precision.set_global_policy("float32")
     model = tf.keras.models.load_model(model_path)
+
+    def _force_float32(node):
+        """Yapılandırmadaki float16 politikalarını özyinelemeli olarak temizler.
+
+        Politika iç içe alt modellerin katmanlarında da durduğu için tek tek
+        `model.layers` üzerinden gezmek yetmez.
+        """
+        if isinstance(node, dict):
+            if "dtype" in node:
+                dtype = node["dtype"]
+                if isinstance(dtype, str) and "float16" in dtype:
+                    node["dtype"] = "float32"
+                elif isinstance(dtype, dict):
+                    name = dtype.get("config", {}).get("name", "")
+                    if "float16" in str(name):
+                        node["dtype"] = "float32"
+            return {key: _force_float32(value) for key, value in node.items()}
+        if isinstance(node, list):
+            return [_force_float32(item) for item in node]
+        return node
+
+    config_dict = json.loads(json.dumps(model.get_config()))
+    if "float16" in json.dumps(config_dict):
+        weights = model.get_weights()
+        model = model.__class__.from_config(_force_float32(config_dict))
+        model.set_weights(weights)
     report = {
         "schema_version": 1, "status": "converted", "experiment_id": run_dir.name,
         "converted_at": utc_now(), "keras_sha256": sha256_file(model_path), "formats": {},
@@ -98,7 +133,12 @@ def convert(run_dir: Path, data_root: Path, output_dir: Path, formats: list[str]
         data = converter.convert()
         path = output_dir / f"nutrisense_{format_name}.tflite"
         path.write_bytes(data)
-        interpreter = tf.lite.Interpreter(model_path=str(path))
+        # Varsayılan XNNPACK delegesi kapatılır: INT8 grafiğinde hazırlanamıyor
+        # ve denklik ölçümü hızlandırıcının değil biçimin farkını görmeli.
+        interpreter = tf.lite.Interpreter(
+            model_path=str(path),
+            experimental_op_resolver_type=tf.lite.experimental.OpResolverType.BUILTIN_WITHOUT_DEFAULT_DELEGATES,
+        )
         interpreter.allocate_tensors()
         differences, matches, timings = [], 0, []
         keras_correct = 0

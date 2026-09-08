@@ -8,7 +8,6 @@ import 'package:nutrisense/features/history/screens/food_shortcuts_screen.dart';
 import 'package:nutrisense/shared/services/api_service.dart';
 import 'package:nutrisense/shared/services/accessibility_service.dart';
 import 'package:nutrisense/shared/services/voice_command_service.dart';
-import 'package:nutrisense/shared/models/auth_model.dart';
 
 class _Silent extends AccessibilityService {
   final messages = <String>[];

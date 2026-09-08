@@ -58,6 +58,7 @@ def _predict(model, rows, labels, config):
         False,
         int(config["seed"]),
         allow_unknown_labels=True,
+        decoder=config["image"].get("decoder", "pil"),
     )
     images = ds.map(lambda image, _: image)
     return model.predict(images, verbose=0)

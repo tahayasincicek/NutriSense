@@ -118,3 +118,7 @@ app.*.map.json
 
 # Doğrulanmış dağıtım modeli uygulamayla birlikte paketlenir.
 !/assets/models/*.tflite
+
+# Egitim ciktilarinin yerel yedekleri; eski model zaten git gecmisinde duruyor.
+/ml/runs_backup/
+/assets/models_backup/

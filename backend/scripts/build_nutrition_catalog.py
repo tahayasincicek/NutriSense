@@ -2190,6 +2190,636 @@ ESTIMATED = {
             "fiber_per_100g": 0.5,
         },
     },
+    "adana_kebap": {
+        "display_name_tr": "Adana kebap (tahmini)",
+        "sources": [
+            "https://www.fitekran.com/besin-degeri/adana-kebap/",
+            "https://com.com.tr/beslenme/kalori/adana-kebap",
+        ],
+        "portion_units": [{
+            "unit": "porsiyon", "grams_per_unit": 151,
+            "source_measure": "Kaynak porsiyon gramaji",
+        }],
+        "nutrients": {
+            "calories_per_100g": 254.5, "protein_per_100g": 15.45,
+            "carbs_per_100g": 1.03, "fat_per_100g": 20.7,
+            "fiber_per_100g": 0.6,
+        },
+    },
+    "anne_koftesi": {
+        "display_name_tr": "Ev koftesi (tahmini)",
+        "sources": [
+            "https://www.fitekran.com/besin-degeri/kofte/",
+        ],
+        "nutrients": {
+            "calories_per_100g": 168, "protein_per_100g": 13.1,
+            "carbs_per_100g": 4.92, "fat_per_100g": 10.5,
+            "fiber_per_100g": 0.8,
+        },
+    },
+    "ayran": {
+        "display_name_tr": "Ayran (tahmini)",
+        "sources": [
+            "https://www.fitekran.com/besin-degeri/bardak-ayran/",
+        ],
+        "portion_units": [{
+            "unit": "bardak", "grams_per_unit": 300,
+            "source_measure": "Kaynak porsiyon gramaji",
+        }],
+        "nutrients": {
+            "calories_per_100g": 38, "protein_per_100g": 2.0,
+            "carbs_per_100g": 2.8, "fat_per_100g": 2.1,
+            "fiber_per_100g": 0.0,
+        },
+    },
+    "beyaz_lahana_sarmasi": {
+        "display_name_tr": "Beyaz lahana sarmasi (tahmini)",
+        "sources": [
+            "https://www.haberturk.com/kac-kalori/etli-lahana-sarma-besin-degeri",
+        ],
+        "nutrients": {
+            "calories_per_100g": 122.22, "protein_per_100g": 8.95,
+            "carbs_per_100g": 8.8, "fat_per_100g": 5.4,
+            "fiber_per_100g": 2.8,
+        },
+    },
+    "borek": {
+        "display_name_tr": "Borek (tahmini, kiymali ve peynirli borek ortalamasi)",
+        "sources": [
+            "https://www.fitekran.com/besin-degeri/kiymali-borek/",
+            "https://www.fitekran.com/besin-degeri/peynirli-borek/",
+        ],
+        "nutrients": {
+            "calories_per_100g": 253.5, "protein_per_100g": 9.65,
+            "carbs_per_100g": 31.14, "fat_per_100g": 9.75,
+            "fiber_per_100g": 1.85,
+        },
+    },
+    "cacik": {
+        "display_name_tr": "Cacik (tahmini)",
+        "sources": [
+            "https://www.fitekran.com/besin-degeri/cacik/",
+        ],
+        "nutrients": {
+            "calories_per_100g": 41, "protein_per_100g": 2.0,
+            "carbs_per_100g": 3.15, "fat_per_100g": 2.1,
+            "fiber_per_100g": 0.2,
+        },
+    },
+    "cheesecake": {
+        "display_name_tr": "Cheesecake (tahmini)",
+        "sources": [
+            "https://yemek.com/cheesecake-kac-kalori/",
+        ],
+        "nutrients": {
+            "calories_per_100g": 270, "protein_per_100g": 5.0,
+            "carbs_per_100g": 27.0, "fat_per_100g": 15.0,
+            "fiber_per_100g": 0.0,
+        },
+    },
+    "cipura": {
+        "display_name_tr": "Cipura (tahmini)",
+        "sources": [
+            "https://www.fitekran.com/besin-degeri/cipura/",
+        ],
+        "nutrients": {
+            "calories_per_100g": 96, "protein_per_100g": 19.6,
+            "carbs_per_100g": 0.0, "fat_per_100g": 1.9,
+            "fiber_per_100g": 0.0,
+        },
+    },
+    "club_sandwich": {
+        "display_name_tr": "Kulup sandvic (tahmini, kalori makrolardan turetildi)",
+        "sources": [
+            "https://www.besinanaliz.com/foods/sandvic-belirtilmemis",
+        ],
+        "nutrients": {
+            "calories_per_100g": 394.3, "protein_per_100g": 12.8,
+            "carbs_per_100g": 33.8, "fat_per_100g": 23.1,
+            "fiber_per_100g": 0.0,
+        },
+    },
+    "coban_salatasi": {
+        "display_name_tr": "Coban salatasi (tahmini)",
+        "sources": [
+            "https://www.fitekran.com/besin-degeri/coban-salata/",
+        ],
+        "nutrients": {
+            "calories_per_100g": 52, "protein_per_100g": 1.4,
+            "carbs_per_100g": 7.55, "fat_per_100g": 1.7,
+            "fiber_per_100g": 2.2,
+        },
+    },
+    "doner": {
+        "display_name_tr": "Doner (tahmini)",
+        "sources": [
+            "https://www.fitekran.com/besin-degeri/hazir-et-doner/",
+        ],
+        "portion_units": [{
+            "unit": "adet", "grams_per_unit": 200,
+            "source_measure": "Kaynak porsiyon gramaji",
+        }],
+        "nutrients": {
+            "calories_per_100g": 239, "protein_per_100g": 12.0,
+            "carbs_per_100g": 22.5, "fat_per_100g": 11.3,
+            "fiber_per_100g": 1.0,
+        },
+    },
+    "et_sote": {
+        "display_name_tr": "Et sote (tahmini)",
+        "sources": [
+            "https://www.fitekran.com/besin-degeri/et-sote/",
+        ],
+        "nutrients": {
+            "calories_per_100g": 107, "protein_per_100g": 7.6,
+            "carbs_per_100g": 3.15, "fat_per_100g": 7.0,
+            "fiber_per_100g": 0.9,
+        },
+    },
+    "hamsi": {
+        "display_name_tr": "Hamsi (tahmini)",
+        "sources": [
+            "https://www.fitekran.com/besin-degeri/hamsi/",
+        ],
+        "nutrients": {
+            "calories_per_100g": 115, "protein_per_100g": 17.0,
+            "carbs_per_100g": 0.0, "fat_per_100g": 5.0,
+            "fiber_per_100g": 0.0,
+        },
+    },
+    "hot_dog": {
+        "display_name_tr": "Sosisli sandvic (tahmini)",
+        "sources": [
+            "https://www.fitekran.com/besin-degeri/sosisli-sandvic/",
+        ],
+        "nutrients": {
+            "calories_per_100g": 253, "protein_per_100g": 8.3,
+            "carbs_per_100g": 28.0, "fat_per_100g": 11.9,
+            "fiber_per_100g": 2.3,
+        },
+    },
+    "iskender": {
+        "display_name_tr": "Iskender (tahmini)",
+        "sources": [
+            "https://www.fitekran.com/besin-degeri/iskender-kebap/",
+        ],
+        "nutrients": {
+            "calories_per_100g": 151, "protein_per_100g": 9.7,
+            "carbs_per_100g": 15.54, "fat_per_100g": 5.4,
+            "fiber_per_100g": 1.3,
+        },
+    },
+    "izmir_kofte": {
+        "display_name_tr": "Izmir kofte (tahmini)",
+        "sources": [
+            "https://www.fitekran.com/besin-degeri/izmir-kofte/",
+        ],
+        "nutrients": {
+            "calories_per_100g": 98, "protein_per_100g": 6.9,
+            "carbs_per_100g": 3.22, "fat_per_100g": 6.3,
+            "fiber_per_100g": 0.7,
+        },
+    },
+    "kalburabasti": {
+        "display_name_tr": "Kalburabasti (tahmini)",
+        "sources": [
+            "https://www.fitekran.com/besin-degeri/cevizli-kalburabasti/",
+        ],
+        "nutrients": {
+            "calories_per_100g": 272, "protein_per_100g": 1.4,
+            "carbs_per_100g": 42.98, "fat_per_100g": 9.3,
+            "fiber_per_100g": 0.8,
+        },
+    },
+    "karniyarik": {
+        "display_name_tr": "Karniyarik (tahmini)",
+        "sources": [
+            "https://www.fitekran.com/besin-degeri/karniyarik/",
+        ],
+        "nutrients": {
+            "calories_per_100g": 55, "protein_per_100g": 3.2,
+            "carbs_per_100g": 2.53, "fat_per_100g": 3.5,
+            "fiber_per_100g": 1.8,
+        },
+    },
+    "kazandibi": {
+        "display_name_tr": "Kazandibi (tahmini)",
+        "sources": [
+            "https://www.fitekran.com/besin-degeri/kazandibi/",
+        ],
+        "nutrients": {
+            "calories_per_100g": 130, "protein_per_100g": 3.2,
+            "carbs_per_100g": 19.4, "fat_per_100g": 3.7,
+            "fiber_per_100g": 0.2,
+        },
+    },
+    "kebap": {
+        "display_name_tr": "Kebap (kuzu sis) (tahmini)",
+        "sources": [
+            "https://www.diyetkolik.com/kac-kalori/kuzu-sis-kebabi",
+        ],
+        "nutrients": {
+            "calories_per_100g": 167, "protein_per_100g": 16.52,
+            "carbs_per_100g": 3.82, "fat_per_100g": 9.72,
+            "fiber_per_100g": 0.81,
+        },
+    },
+    "kemal_pasa_tatlisi": {
+        "display_name_tr": "Kemalpasa tatlisi (tahmini, kalori makrolardan turetildi)",
+        "sources": [
+            "https://www.fitekran.com/besin-degeri/kemalpasa-tatlisi/",
+        ],
+        "nutrients": {
+            "calories_per_100g": 184.9, "protein_per_100g": 5.8,
+            "carbs_per_100g": 29.62, "fat_per_100g": 4.8,
+            "fiber_per_100g": 0.0,
+        },
+    },
+    "kiymali_borek": {
+        "display_name_tr": "Kiymali borek (tahmini)",
+        "sources": [
+            "https://www.fitekran.com/besin-degeri/kiymali-borek/",
+        ],
+        "nutrients": {
+            "calories_per_100g": 248, "protein_per_100g": 9.2,
+            "carbs_per_100g": 28.8, "fat_per_100g": 10.4,
+            "fiber_per_100g": 1.8,
+        },
+    },
+    "kiymali_pide": {
+        "display_name_tr": "Kiymali pide (tahmini)",
+        "sources": [
+            "https://www.fitekran.com/besin-degeri/kiymali-pide/",
+        ],
+        "nutrients": {
+            "calories_per_100g": 209, "protein_per_100g": 8.2,
+            "carbs_per_100g": 24.48, "fat_per_100g": 8.5,
+            "fiber_per_100g": 1.6,
+        },
+    },
+    "kokorec": {
+        "display_name_tr": "Kokorec (tahmini)",
+        "sources": [
+            "https://www.fitekran.com/besin-degeri/kokorec/",
+        ],
+        "nutrients": {
+            "calories_per_100g": 86, "protein_per_100g": 14.3,
+            "carbs_per_100g": 2.0, "fat_per_100g": 2.2,
+            "fiber_per_100g": 0.8,
+        },
+    },
+    "lokma": {
+        "display_name_tr": "Lokma (tahmini)",
+        "sources": [
+            "https://www.fitekran.com/besin-degeri/lokma-tatlisi/",
+        ],
+        "nutrients": {
+            "calories_per_100g": 518, "protein_per_100g": 2.4,
+            "carbs_per_100g": 50.12, "fat_per_100g": 32.1,
+            "fiber_per_100g": 0.7,
+        },
+    },
+    "menemen": {
+        "display_name_tr": "Menemen (tahmini)",
+        "sources": [
+            "https://www.fitekran.com/besin-degeri/menemen/",
+        ],
+        "nutrients": {
+            "calories_per_100g": 71, "protein_per_100g": 3.5,
+            "carbs_per_100g": 3.39, "fat_per_100g": 4.8,
+            "fiber_per_100g": 1.4,
+        },
+    },
+    "mercimek_koftesi": {
+        "display_name_tr": "Mercimek koftesi (tahmini)",
+        "sources": [
+            "https://www.fitekran.com/besin-degeri/mercimek-koftesi/",
+        ],
+        "nutrients": {
+            "calories_per_100g": 130, "protein_per_100g": 4.0,
+            "carbs_per_100g": 16.93, "fat_per_100g": 4.5,
+            "fiber_per_100g": 4.5,
+        },
+    },
+    "meyve_suyu": {
+        "display_name_tr": "Meyve suyu (tahmini, portakal suyu degerleri uzerinden)",
+        "sources": [
+            "https://www.fitekran.com/besin-degeri/portakal-suyu/",
+        ],
+        "nutrients": {
+            "calories_per_100g": 60, "protein_per_100g": 0.4,
+            "carbs_per_100g": 14.64, "fat_per_100g": 0.2,
+            "fiber_per_100g": 0.0,
+        },
+    },
+    "midye_dolma": {
+        "display_name_tr": "Midye dolma (tahmini)",
+        "sources": [
+            "https://www.fitekran.com/besin-degeri/midye-dolma/",
+        ],
+        "nutrients": {
+            "calories_per_100g": 87, "protein_per_100g": 5.4,
+            "carbs_per_100g": 10.28, "fat_per_100g": 2.4,
+            "fiber_per_100g": 0.4,
+        },
+    },
+    "midye_tava": {
+        "display_name_tr": "Midye tava (tahmini)",
+        "sources": [
+            "https://www.fitekran.com/besin-degeri/midye-tava/",
+        ],
+        "nutrients": {
+            "calories_per_100g": 198, "protein_per_100g": 9.3,
+            "carbs_per_100g": 17.78, "fat_per_100g": 9.7,
+            "fiber_per_100g": 2.6,
+        },
+    },
+    "mumbar_dolmasi": {
+        "display_name_tr": "Mumbar dolmasi (tahmini)",
+        "sources": [
+            "https://www.haberturk.com/kac-kalori/mumbar-dolmasi-besin-degeri",
+        ],
+        "nutrients": {
+            "calories_per_100g": 229.93, "protein_per_100g": 5.61,
+            "carbs_per_100g": 29.75, "fat_per_100g": 9.44,
+            "fiber_per_100g": 0.0,
+        },
+    },
+    "patates_salatasi": {
+        "display_name_tr": "Patates salatasi (tahmini)",
+        "sources": [
+            "https://www.fitekran.com/besin-degeri/patates-salatasi/",
+        ],
+        "nutrients": {
+            "calories_per_100g": 71, "protein_per_100g": 1.3,
+            "carbs_per_100g": 11.64, "fat_per_100g": 1.8,
+            "fiber_per_100g": 2.0,
+        },
+    },
+    "patlican_kebabi": {
+        "display_name_tr": "Patlican kebabi (tahmini)",
+        "sources": [
+            "https://www.fitekran.com/besin-degeri/patlican-kebabi/",
+        ],
+        "nutrients": {
+            "calories_per_100g": 102, "protein_per_100g": 9.1,
+            "carbs_per_100g": 4.78, "fat_per_100g": 4.5,
+            "fiber_per_100g": 1.9,
+        },
+    },
+    "sahlep": {
+        "display_name_tr": "Salep (tahmini)",
+        "sources": [
+            "https://www.haberturk.com/kac-kalori/salep-besin-degeri",
+        ],
+        "nutrients": {
+            "calories_per_100g": 94, "protein_per_100g": 2.8,
+            "carbs_per_100g": 13.9, "fat_per_100g": 3.0,
+            "fiber_per_100g": 0.2,
+        },
+    },
+    "salcali_makarna": {
+        "display_name_tr": "Salcali makarna (tahmini)",
+        "sources": [
+            "https://www.fitekran.com/besin-degeri/salcali-makarna/",
+        ],
+        "nutrients": {
+            "calories_per_100g": 120, "protein_per_100g": 3.5,
+            "carbs_per_100g": 24.82, "fat_per_100g": 0.9,
+            "fiber_per_100g": 1.0,
+        },
+    },
+    "sandvic": {
+        "display_name_tr": "Sandvic (tahmini, kalori makrolardan turetildi)",
+        "sources": [
+            "https://www.besinanaliz.com/foods/sandvic-belirtilmemis",
+        ],
+        "nutrients": {
+            "calories_per_100g": 394.3, "protein_per_100g": 12.8,
+            "carbs_per_100g": 33.8, "fat_per_100g": 23.1,
+            "fiber_per_100g": 0.0,
+        },
+    },
+    "sehriye_corbasi": {
+        "display_name_tr": "Sehriye corbasi (tahmini)",
+        "sources": [
+            "https://www.fitekran.com/besin-degeri/sehriye-corbasi/",
+        ],
+        "nutrients": {
+            "calories_per_100g": 91, "protein_per_100g": 2.0,
+            "carbs_per_100g": 15.0, "fat_per_100g": 2.5,
+            "fiber_per_100g": 1.9,
+        },
+    },
+    "spaghetti_bolognese": {
+        "display_name_tr": "Bolonez spagetti (tahmini)",
+        "sources": [
+            "https://www.fitekran.com/besin-degeri/spagetti-bolognez/",
+        ],
+        "nutrients": {
+            "calories_per_100g": 151, "protein_per_100g": 7.9,
+            "carbs_per_100g": 10.44, "fat_per_100g": 8.5,
+            "fiber_per_100g": 1.1,
+        },
+    },
+    "spaghetti_carbonara": {
+        "display_name_tr": "Karbonara spagetti (tahmini)",
+        "sources": [
+            "https://foods.fatsecret.com/calories-nutrition/generic/pasta-with-carbonara-sauce",
+        ],
+        "nutrients": {
+            "calories_per_100g": 144.9, "protein_per_100g": 6.1,
+            "carbs_per_100g": 19.51, "fat_per_100g": 4.03,
+            "fiber_per_100g": 0.0,
+        },
+    },
+    "su_boregi": {
+        "display_name_tr": "Su boregi (tahmini)",
+        "sources": [
+            "https://www.fitekran.com/besin-degeri/su-boregi/",
+        ],
+        "nutrients": {
+            "calories_per_100g": 229, "protein_per_100g": 7.2,
+            "carbs_per_100g": 25.03, "fat_per_100g": 11.0,
+            "fiber_per_100g": 1.5,
+        },
+    },
+    "sucuklu_yumurta": {
+        "display_name_tr": "Sucuklu yumurta (tahmini)",
+        "sources": [
+            "https://www.fitekran.com/besin-degeri/sucuklu-yumurta/",
+        ],
+        "nutrients": {
+            "calories_per_100g": 242, "protein_per_100g": 13.5,
+            "carbs_per_100g": 3.38, "fat_per_100g": 19.5,
+            "fiber_per_100g": 0.5,
+        },
+    },
+    "sulu_bamya_yemegi": {
+        "display_name_tr": "Bamya yemegi (tahmini)",
+        "sources": [
+            "https://www.fitekran.com/besin-degeri/etli-bamya/",
+        ],
+        "nutrients": {
+            "calories_per_100g": 52, "protein_per_100g": 5.3,
+            "carbs_per_100g": 2.58, "fat_per_100g": 2.0,
+            "fiber_per_100g": 2.9,
+        },
+    },
+    "sulu_barbunya_yemegi": {
+        "display_name_tr": "Barbunya yemegi (tahmini)",
+        "sources": [
+            "https://www.fitekran.com/besin-degeri/zeytinyagli-barbunya/",
+        ],
+        "nutrients": {
+            "calories_per_100g": 155, "protein_per_100g": 9.3,
+            "carbs_per_100g": 25.14, "fat_per_100g": 2.2,
+            "fiber_per_100g": 9.8,
+        },
+    },
+    "sulu_bezelye_yemegi": {
+        "display_name_tr": "Bezelye yemegi (tahmini)",
+        "sources": [
+            "https://www.fitekran.com/besin-degeri/zeytinyagli-bezelye/",
+        ],
+        "nutrients": {
+            "calories_per_100g": 55, "protein_per_100g": 1.9,
+            "carbs_per_100g": 7.42, "fat_per_100g": 1.9,
+            "fiber_per_100g": 1.7,
+        },
+    },
+    "sulu_mercimek_yemegi": {
+        "display_name_tr": "Mercimek yemegi (tahmini, kalori makrolardan turetildi)",
+        "sources": [
+            "https://www.fitekran.com/besin-degeri/mercimek-yemegi/",
+        ],
+        "nutrients": {
+            "calories_per_100g": 63.2, "protein_per_100g": 3.9,
+            "carbs_per_100g": 7.41, "fat_per_100g": 2.0,
+            "fiber_per_100g": 4.4,
+        },
+    },
+    "sulu_nohut_yemegi": {
+        "display_name_tr": "Nohut yemegi (tahmini)",
+        "sources": [
+            "https://www.haberturk.com/kac-kalori/nohut-yemegi-etli-besin-degeri",
+        ],
+        "nutrients": {
+            "calories_per_100g": 285.26, "protein_per_100g": 23.2,
+            "carbs_per_100g": 11.41, "fat_per_100g": 16.33,
+            "fiber_per_100g": 0.0,
+        },
+    },
+    "sulu_patates_yemegi": {
+        "display_name_tr": "Patates yemegi (tahmini)",
+        "sources": [
+            "https://ye-mek.net/kalori/firinda-zeytinyagli-patates",
+        ],
+        "nutrients": {
+            "calories_per_100g": 87, "protein_per_100g": 2.02,
+            "carbs_per_100g": 14.63, "fat_per_100g": 2.09,
+            "fiber_per_100g": 2.28,
+        },
+    },
+    "tantuni": {
+        "display_name_tr": "Tantuni (tahmini, kalori makrolardan turetildi)",
+        "sources": [
+            "https://www.fitekran.com/besin-degeri/tantuni/",
+        ],
+        "nutrients": {
+            "calories_per_100g": 311.6, "protein_per_100g": 19.3,
+            "carbs_per_100g": 8.42, "fat_per_100g": 22.3,
+            "fiber_per_100g": 3.1,
+        },
+    },
+    "tarhana_corbasi": {
+        "display_name_tr": "Tarhana corbasi (tahmini)",
+        "sources": [
+            "https://www.fitekran.com/besin-degeri/tarhana-corbasi/",
+        ],
+        "nutrients": {
+            "calories_per_100g": 60, "protein_per_100g": 2.3,
+            "carbs_per_100g": 4.99, "fat_per_100g": 3.3,
+            "fiber_per_100g": 0.6,
+        },
+    },
+    "tas_kebabi": {
+        "display_name_tr": "Tas kebabi (tahmini)",
+        "sources": [
+            "https://www.fitekran.com/besin-degeri/tas-kebabi/",
+        ],
+        "nutrients": {
+            "calories_per_100g": 61, "protein_per_100g": 5.0,
+            "carbs_per_100g": 7.05, "fat_per_100g": 1.3,
+            "fiber_per_100g": 1.2,
+        },
+    },
+    "tavuk_sote": {
+        "display_name_tr": "Tavuk sote (tahmini)",
+        "sources": [
+            "https://www.fitekran.com/besin-degeri/tavuk-sote/",
+        ],
+        "nutrients": {
+            "calories_per_100g": 169, "protein_per_100g": 16.7,
+            "carbs_per_100g": 4.51, "fat_per_100g": 8.9,
+            "fiber_per_100g": 2.4,
+        },
+    },
+    "tulumba_tatlisi": {
+        "display_name_tr": "Tulumba tatlisi (tahmini)",
+        "sources": [
+            "https://www.fitekran.com/besin-degeri/tulumba-tatlisi/",
+        ],
+        "nutrients": {
+            "calories_per_100g": 282, "protein_per_100g": 2.8,
+            "carbs_per_100g": 46.04, "fat_per_100g": 7.5,
+            "fiber_per_100g": 0.6,
+        },
+    },
+    "yas_pasta": {
+        "display_name_tr": "Yas pasta (tahmini)",
+        "sources": [
+            "https://www.fitekran.com/besin-degeri/yas-pasta/",
+        ],
+        "nutrients": {
+            "calories_per_100g": 250, "protein_per_100g": 4.1,
+            "carbs_per_100g": 44.59, "fat_per_100g": 4.1,
+            "fiber_per_100g": 0.9,
+        },
+    },
+    "yayla_corbasi": {
+        "display_name_tr": "Yayla corbasi (tahmini)",
+        "sources": [
+            "https://www.fitekran.com/besin-degeri/yayla-corbasi/",
+        ],
+        "nutrients": {
+            "calories_per_100g": 47, "protein_per_100g": 1.5,
+            "carbs_per_100g": 6.47, "fat_per_100g": 1.6,
+            "fiber_per_100g": 0.1,
+        },
+    },
+    "yogurtlu_makarna": {
+        "display_name_tr": "Yogurtlu makarna (tahmini)",
+        "sources": [
+            "https://www.fitekran.com/besin-degeri/yogurtlu-makarna/",
+        ],
+        "nutrients": {
+            "calories_per_100g": 162, "protein_per_100g": 5.3,
+            "carbs_per_100g": 21.5, "fat_per_100g": 5.6,
+            "fiber_per_100g": 2.2,
+        },
+    },
+    "zeytinyagli_fasulye": {
+        "display_name_tr": "Zeytinyagli fasulye (tahmini)",
+        "sources": [
+            "https://www.haberturk.com/kac-kalori/zeytinyagli-taze-fasulye-besin-degeri",
+        ],
+        "nutrients": {
+            "calories_per_100g": 73.46, "protein_per_100g": 2.68,
+            "carbs_per_100g": 10.08, "fat_per_100g": 1.96,
+            "fiber_per_100g": 1.71,
+        },
+    },
 }
 
 

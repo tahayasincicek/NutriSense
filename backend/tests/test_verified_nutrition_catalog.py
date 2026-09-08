@@ -103,7 +103,9 @@ async def test_search_filters_unverified_records_and_normalizes_turkish(catalog_
     ]
 
 
-@pytest.mark.parametrize("name", ["menemen", "kokoreç", "bilinmeyen yemek"])
+# Menemen ve kokoreç 130 sınıflık kapsama girince katalog kaydı aldılar;
+# bu test için hâlâ karşılığı olmayan yemekler kullanılıyor.
+@pytest.mark.parametrize("name", ["keşkek", "höşmerim", "bilinmeyen yemek"])
 def test_no_silent_substitution_for_unsupported_food(catalog_service, name):
     """Katalogda karşılığı olmayan yemek, benzeriyle doldurulmaz."""
     assert catalog_service._query_local_db(name, None)["available"] is False
@@ -237,7 +239,7 @@ def test_real_catalog_search_portion_confirm_preserves_source(client, catalog_se
 
         # Menemen kataloğa hiç girmedi; desteklenmeyen yol bununla sınanır,
         # mantının artık tahmini bir kaydı var.
-        unsupported = client.get("/api/v1/food/search", params={"query": "menemen"})
+        unsupported = client.get("/api/v1/food/search", params={"query": "keşkek"})
         assert unsupported.status_code == 404
         with SessionLocal() as db:
             assert db.query(FoodLog).filter_by(user_id=user_id).count() == 1
