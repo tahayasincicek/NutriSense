@@ -137,6 +137,25 @@ cihaza kurulum: **`docs/ios_devir_notu.md`**.
 > iOS'ta flavor şeması tanımlı değildir; Android komutlarındaki `--flavor dev`
 > iOS'ta kullanılmaz.
 
+## Hesap oluşturma
+
+Depoda hiçbir kullanıcı hesabı, parola veya veritabanı dökümü bulunmaz.
+Klonlayan herkes boş bir veritabanıyla başlar ve kendi hesabını oluşturur:
+
+Uygulamayı açın → **Hesap Aç** → ad, e-posta ve parola girin. Doğrulama
+e-postaları gerçek bir adrese gitmez; geliştirme ortamında Mailpit'te birikir:
+http://localhost:8025
+
+Diyetisyen tarafını denemek isterseniz, yalnız `dev`/`test` ortamında
+çalışan sanal bir diyetisyen kaydı oluşturulabilir:
+
+```bash
+docker compose -f backend/docker-compose.yml exec backend python scripts/seed_synthetic.py
+```
+
+Bu kayıt açıkça sentetiktir, parolası yoktur ve giriş için kullanılamaz;
+yalnızca hasta–diyetisyen eşleşme akışını denemeye yarar.
+
 ## Kamerayı denemek
 
 Emülatörde ve simülatörde gerçek kamera yoktur. Besin tanımayı denemek için:

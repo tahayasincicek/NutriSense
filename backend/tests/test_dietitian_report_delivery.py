@@ -387,7 +387,7 @@ async def test_local_mailpit_accepts_app_recipient_without_allowlist():
     )
     service = NotificationService(settings_override=settings, email_transport=capture)
     result = await service.send_channel(
-        channel="email", destination="dietitian@gmail.com",
+        channel="email", destination="dietitian@example.com",
         report_data={
             "report_type": "daily", "from_date": TODAY.isoformat(),
             "to_date": TODAY.isoformat(), "record_count": 1,
@@ -401,7 +401,7 @@ async def test_local_mailpit_accepts_app_recipient_without_allowlist():
         },
     )
     assert result["provider_status"] == "accepted"
-    assert captured["to"] == "dietitian@gmail.com"
+    assert captured["to"] == "dietitian@example.com"
 
 
 @pytest.mark.parametrize("channels", [["email", "sms"], ["sms"]])
