@@ -61,7 +61,7 @@ class ActivityTrackerScreen extends ConsumerWidget {
     return Semantics(
       container: true,
       label:
-          'Adım Takibi. Hedef: ${state.stepGoal} adım. Atılan adım: ${state.steps}. Yüzde ${(state.stepProgress * 100).toInt()} tamamlandı.',
+          'Adım Takibi. Hedef: ${state.stepGoal} adım. Atılan adım: ${state.steps}. Yüzde ${(state.stepProgress * 100).toInt()} tamamlandı. ${state.stepTrackingDescription}.',
       child: ExcludeSemantics(
         child: Container(
           padding: const EdgeInsets.all(24),
@@ -114,6 +114,16 @@ class ActivityTrackerScreen extends ConsumerWidget {
                 'Hedef: ${state.stepGoal} adım',
                 style: theme.textTheme.bodySmall
                     ?.copyWith(fontWeight: FontWeight.w600),
+              ),
+              const SizedBox(height: 6),
+              Text(
+                state.stepTrackingDescription,
+                textAlign: TextAlign.center,
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: state.stepTrackingStatus == StepTrackingStatus.active
+                      ? theme.colorScheme.primary
+                      : theme.colorScheme.onSurfaceVariant,
+                ),
               ),
             ],
           ),

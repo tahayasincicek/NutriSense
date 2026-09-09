@@ -1,7 +1,9 @@
 import 'dart:convert';
+import 'dart:async';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:nutrisense/features/water_tracker/state/water_provider.dart';
+import 'package:nutrisense/features/water_tracker/services/step_counter_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
@@ -104,4 +106,52 @@ void main() {
     expect(notifier.state.isLoaded, isTrue);
     expect(notifier.state.consumedWater, 0);
   });
+
+  test('gerçek sensör toplamındaki fark günlük adıma eklenir', () async {
+    final sensor = _FakeStepCounter();
+    final notifier = ActivityNotifier(null, sensor);
+    await Future<void>.delayed(Duration.zero);
+
+    sensor.controller.add(1200);
+    await Future<void>.delayed(Duration.zero);
+    expect(notifier.state.steps, 0);
+    expect(notifier.state.stepTrackingStatus, StepTrackingStatus.active);
+
+    sensor.controller.add(1243);
+    await Future<void>.delayed(Duration.zero);
+    expect(notifier.state.steps, 43);
+    expect(notifier.state.sensorRawSteps, 1243);
+
+    notifier.dispose();
+    await sensor.controller.close();
+  });
+
+  test('hareket izni reddedildiğinde sensör dinlenmez', () async {
+    final sensor = _FakeStepCounter(permissionGranted: false);
+    final notifier = ActivityNotifier(null, sensor);
+    await Future<void>.delayed(Duration.zero);
+
+    expect(notifier.state.stepTrackingStatus, StepTrackingStatus.denied);
+    expect(sensor.listenCount, 0);
+
+    notifier.dispose();
+    await sensor.controller.close();
+  });
+}
+
+class _FakeStepCounter implements StepCounterSource {
+  _FakeStepCounter({this.permissionGranted = true});
+
+  final bool permissionGranted;
+  final controller = StreamController<int>.broadcast();
+  int listenCount = 0;
+
+  @override
+  Future<bool> requestPermission() async => permissionGranted;
+
+  @override
+  Stream<int> get stepCountStream {
+    listenCount++;
+    return controller.stream;
+  }
 }

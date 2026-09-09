@@ -60,6 +60,7 @@ def main() -> None:
         # guvenligi formu da guncellenmistir; yalniz kullanicinin sectigi tek
         # fotograf okunur, kutuphane taranmaz.
         "NSPhotoLibraryUsageDescription",
+        "NSMotionUsageDescription",
     )
     for key in privacy_keys:
         value = production.get(key)
@@ -125,6 +126,7 @@ def main() -> None:
         "PERMISSION_CAMERA=1",
         "PERMISSION_MICROPHONE=1",
         "PERMISSION_SPEECH_RECOGNIZER=1",
+        "PERMISSION_SENSORS=1",
         "PERMISSION_PHOTOS=0",
         "PERMISSION_LOCATION=0",
         "PERMISSION_NOTIFICATIONS=0",
@@ -143,6 +145,7 @@ def main() -> None:
         "flutter_tts",
         "permission_handler_apple",
         "speech_to_text",
+        "pedometer",
     }
     missing_plugins = sorted(required_plugins - ios_plugins)
     if missing_plugins:

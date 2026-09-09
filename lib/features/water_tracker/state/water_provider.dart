@@ -13,9 +13,18 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../shared/services/api_service.dart';
+import '../services/step_counter_service.dart';
 
 const _kStateKey = 'activity_state_v1';
 const _kDayKey = 'activity_state_day';
+
+enum StepTrackingStatus {
+  idle,
+  requestingPermission,
+  active,
+  denied,
+  unavailable
+}
 
 class BadgeModel {
   const BadgeModel({
@@ -71,6 +80,8 @@ class ActivityState {
     this.waterGoal = 2500,
     this.steps = 0,
     this.stepGoal = 10000,
+    this.sensorRawSteps,
+    this.stepTrackingStatus = StepTrackingStatus.idle,
     this.currentWeight,
     this.weightHistory = const [],
     this.currentMood,
@@ -84,6 +95,8 @@ class ActivityState {
   final int waterGoal;
   final int steps;
   final int stepGoal;
+  final int? sensorRawSteps;
+  final StepTrackingStatus stepTrackingStatus;
 
   /// Kullanıcı girene kadar boştur; uydurma bir başlangıç değeri gösterilmez.
   final double? currentWeight;
@@ -104,6 +117,15 @@ class ActivityState {
       sleepGoal <= 0 ? 0 : (sleepHours / sleepGoal).clamp(0.0, 1.0);
 
   bool get hasWeight => currentWeight != null;
+
+  String get stepTrackingDescription => switch (stepTrackingStatus) {
+        StepTrackingStatus.idle => 'Adım sensörü bekleniyor',
+        StepTrackingStatus.requestingPermission => 'Hareket izni bekleniyor',
+        StepTrackingStatus.active => 'Telefonun adım sensörüyle güncelleniyor',
+        StepTrackingStatus.denied => 'Hareket izni verilmedi',
+        StepTrackingStatus.unavailable =>
+          'Bu cihazda adım sensörü kullanılamıyor',
+      };
 
   /// Rozetler gerçek ilerlemeden türetilir; hepsi baştan açık değildir.
   List<BadgeModel> get badges => [
@@ -138,6 +160,8 @@ class ActivityState {
     int? waterGoal,
     int? steps,
     int? stepGoal,
+    int? sensorRawSteps,
+    StepTrackingStatus? stepTrackingStatus,
     double? currentWeight,
     List<double>? weightHistory,
     String? currentMood,
@@ -151,6 +175,8 @@ class ActivityState {
       waterGoal: waterGoal ?? this.waterGoal,
       steps: steps ?? this.steps,
       stepGoal: stepGoal ?? this.stepGoal,
+      sensorRawSteps: sensorRawSteps ?? this.sensorRawSteps,
+      stepTrackingStatus: stepTrackingStatus ?? this.stepTrackingStatus,
       currentWeight: currentWeight ?? this.currentWeight,
       weightHistory: weightHistory ?? this.weightHistory,
       currentMood: currentMood ?? this.currentMood,
@@ -166,6 +192,7 @@ class ActivityState {
         'waterGoal': waterGoal,
         'steps': steps,
         'stepGoal': stepGoal,
+        'sensorRawSteps': sensorRawSteps,
         'currentWeight': currentWeight,
         'weightHistory': weightHistory,
         'currentMood': currentMood,
@@ -179,6 +206,7 @@ class ActivityState {
         waterGoal: json['waterGoal'] as int? ?? 2500,
         steps: json['steps'] as int? ?? 0,
         stepGoal: json['stepGoal'] as int? ?? 10000,
+        sensorRawSteps: json['sensorRawSteps'] as int?,
         currentWeight: (json['currentWeight'] as num?)?.toDouble(),
         weightHistory: (json['weightHistory'] as List<dynamic>? ?? const [])
             .whereType<num>()
@@ -196,13 +224,22 @@ class ActivityState {
 }
 
 class ActivityNotifier extends StateNotifier<ActivityState> {
-  ActivityNotifier(this._api) : super(const ActivityState()) {
-    _restore();
+  ActivityNotifier(this._api, [this._stepCounter])
+      : super(const ActivityState()) {
+    _initialize();
   }
 
   /// Sunucu erişilemezse ölçümler yalnız cihazda tutulur; kullanıcı veri
   /// girişini kaybetmez.
   final ApiService? _api;
+  final StepCounterSource? _stepCounter;
+  StreamSubscription<int>? _stepSubscription;
+  String _trackingDay = _today();
+
+  Future<void> _initialize() async {
+    await _restore();
+    await _startStepTracking();
+  }
 
   static String _today() {
     final now = DateTime.now();
@@ -220,6 +257,7 @@ class ActivityNotifier extends StateNotifier<ActivityState> {
       final raw = prefs.getString(_kStateKey);
       if (raw == null) {
         state = state.copyWith(isLoaded: true);
+        await _pullFromServer();
         return;
       }
       var restored = ActivityState.fromJson(
@@ -233,6 +271,8 @@ class ActivityNotifier extends StateNotifier<ActivityState> {
           waterGoal: restored.waterGoal,
           steps: 0,
           stepGoal: restored.stepGoal,
+          sensorRawSteps: null,
+          stepTrackingStatus: StepTrackingStatus.idle,
           currentWeight: restored.currentWeight,
           weightHistory: restored.weightHistory,
           currentMood: null,
@@ -270,7 +310,7 @@ class ActivityNotifier extends StateNotifier<ActivityState> {
       final data = daily.data!;
       next = next.copyWith(
         consumedWater: data['water_ml'] as int? ?? next.consumedWater,
-        steps: data['steps'] as int? ?? next.steps,
+        steps: _largerStepCount(data['steps'] as int?, next.steps),
         sleepHours:
             (data['sleep_hours'] as num?)?.toDouble() ?? next.sleepHours,
         currentMood: data['mood'] as String?,
@@ -288,6 +328,88 @@ class ActivityNotifier extends StateNotifier<ActivityState> {
     }
     state = next.copyWith(isLoaded: true);
     unawaited(_persist());
+  }
+
+  static int _largerStepCount(int? serverSteps, int localSteps) =>
+      serverSteps == null || serverSteps < localSteps
+          ? localSteps
+          : serverSteps;
+
+  Future<void> _startStepTracking() async {
+    final source = _stepCounter;
+    if (source == null || !mounted) return;
+    state = state.copyWith(
+      stepTrackingStatus: StepTrackingStatus.requestingPermission,
+    );
+    try {
+      if (!await source.requestPermission()) {
+        if (mounted) {
+          state = state.copyWith(stepTrackingStatus: StepTrackingStatus.denied);
+        }
+        return;
+      }
+      if (!mounted) return;
+      state = state.copyWith(stepTrackingStatus: StepTrackingStatus.active);
+      _stepSubscription = source.stepCountStream.listen(
+        _onSensorStepCount,
+        onError: (_) {
+          if (mounted) {
+            state = state.copyWith(
+              stepTrackingStatus: StepTrackingStatus.unavailable,
+            );
+          }
+        },
+      );
+    } catch (_) {
+      if (mounted) {
+        state = state.copyWith(
+          stepTrackingStatus: StepTrackingStatus.unavailable,
+        );
+      }
+    }
+  }
+
+  void _onSensorStepCount(int rawSteps) {
+    if (!mounted || rawSteps < 0) return;
+    final today = _today();
+    if (_trackingDay != today) {
+      _trackingDay = today;
+      state = ActivityState(
+        waterGoal: state.waterGoal,
+        steps: 0,
+        stepGoal: state.stepGoal,
+        sensorRawSteps: rawSteps,
+        stepTrackingStatus: StepTrackingStatus.active,
+        currentWeight: state.currentWeight,
+        weightHistory: state.weightHistory,
+        sleepGoal: state.sleepGoal,
+        medications: state.medications
+            .map((item) => item.copyWith(isTaken: false))
+            .toList(growable: false),
+        isLoaded: true,
+      );
+      unawaited(_persist());
+      return;
+    }
+
+    final previousRaw = state.sensorRawSteps;
+    if (previousRaw == null || rawSteps < previousRaw) {
+      state = state.copyWith(
+        sensorRawSteps: rawSteps,
+        stepTrackingStatus: StepTrackingStatus.active,
+      );
+      unawaited(_persist());
+      return;
+    }
+    final delta = rawSteps - previousRaw;
+    if (delta == 0) return;
+    state = state.copyWith(
+      steps: (state.steps + delta).clamp(0, 500000),
+      sensorRawSteps: rawSteps,
+      stepTrackingStatus: StepTrackingStatus.active,
+    );
+    unawaited(_persist());
+    unawaited(_api?.updateTodayHealthMetrics(steps: state.steps));
   }
 
   Future<void> _persist() async {
@@ -371,7 +493,21 @@ class ActivityNotifier extends StateNotifier<ActivityState> {
     );
     _persist();
   }
+
+  @override
+  void dispose() {
+    unawaited(_stepSubscription?.cancel());
+    super.dispose();
+  }
 }
 
+final stepCounterSourceProvider = Provider<StepCounterSource>(
+  (ref) => const DeviceStepCounterSource(),
+);
+
 final activityProvider = StateNotifierProvider<ActivityNotifier, ActivityState>(
-    (ref) => ActivityNotifier(ref.read(apiServiceProvider)));
+  (ref) => ActivityNotifier(
+    ref.read(apiServiceProvider),
+    ref.read(stepCounterSourceProvider),
+  ),
+);

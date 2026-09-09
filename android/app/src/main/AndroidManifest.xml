@@ -5,11 +5,14 @@
     <uses-permission android:name="android.permission.CAMERA"/>
     <!-- speech_to_text requests this permission before voice recognition starts. -->
     <uses-permission android:name="android.permission.RECORD_AUDIO"/>
+    <!-- Android 10+ adım sensörü erişimi; kullanıcıdan çalışma anında istenir. -->
+    <uses-permission android:name="android.permission.ACTIVITY_RECOGNITION"/>
 
     <!-- Kamera veya mikrofonu olmayan cihazlar Play tarafından dışlanmaz;
          manuel/dokunmatik alternatifler kullanılabilir. -->
     <uses-feature android:name="android.hardware.camera" android:required="false"/>
     <uses-feature android:name="android.hardware.microphone" android:required="false"/>
+    <uses-feature android:name="android.hardware.sensor.stepcounter" android:required="false"/>
 
     <!-- POST_NOTIFICATIONS is intentionally absent. The app currently exposes
          e-mail/SMS preferences, not Android local/push notifications, and has

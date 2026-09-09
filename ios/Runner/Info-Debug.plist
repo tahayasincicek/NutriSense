@@ -39,6 +39,8 @@
 	<string>NutriSense Dev, yalnız geliştiricinin seçtiği yerel test sunucusuna bağlanmak için yerel ağı kullanır. Mağaza sürümü bu izni istemez.</string>
 	<key>NSMicrophoneUsageDescription</key>
 	<string>NutriSense, yalnız sesli komutu başlattığınızda söylediğiniz komutları algılamak için mikrofona erişir. İzin vermezseniz dokunmatik ve klavye ile devam edebilirsiniz.</string>
+	<key>NSMotionUsageDescription</key>
+	<string>NutriSense, günlük adım sayınızı göstermek için cihazın hareket ve adım verisini okur.</string>
 	<key>NSSpeechRecognitionUsageDescription</key>
 	<string>NutriSense, sesli komutları Türkçe metne dönüştürmek için Apple konuşma tanımayı kullanır. İzin vermezseniz dokunmatik ve klavye ile devam edebilirsiniz.</string>
 	<key>UIApplicationSceneManifest</key>
