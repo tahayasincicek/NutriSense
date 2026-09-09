@@ -19,16 +19,21 @@ TÜBİTAK 2209-A kapsamında Kocaeli Üniversitesi'nde geliştirilmektedir.
 
 | Ana ekran | Cihaz üstü tanıma | Besin arama |
 |:--:|:--:|:--:|
-| <img src="docs/images/01-ana-ekran.png" width="240" alt="Ana ekran: hızlı tarama kartı, adım ve su sayaçları, günlük kalori hedefi"> | <img src="docs/images/02-tarama-sonucu.png" width="240" alt="Tarama sonucu: cihaz üstü model yemeği tanıdı, onay bekliyor"> | <img src="docs/images/03-besin-arama.png" width="240" alt="Manuel besin girişi: katalogda arama ve 100 gram kalori değeri"> |
+| <img src="docs/images/01-ana-ekran.png" width="230" alt="Ana ekran: hızlı tarama kartı, adım ve su sayaçları, günlük kalori hedefi"> | <img src="docs/images/02-tarama-sonucu.png" width="230" alt="Tarama sonucu: cihaz üstü model yemeği tanıdı ve kullanıcı onayı bekliyor"> | <img src="docs/images/03-besin-arama.png" width="230" alt="Manuel besin girişi: katalogda arama ve 100 gram kalori değeri"> |
 | Kayıt kullanıcı onayından sonra oluşur | Model emin değilse tahmin kaydedilmez | 556 kayıtlık kaynaklı katalog |
 
-| Porsiyon seçimi | Beslenme günlüğü | Erişilebilirlik |
+| Porsiyon seçimi | Beslenme günlüğü | Sağlık takibi |
 |:--:|:--:|:--:|
-| <img src="docs/images/04-porsiyon-secimi.png" width="240" alt="Porsiyon seçimi: gram veya kase birimi ve kaydırıcı"> | <img src="docs/images/05-beslenme-gunlugu.png" width="240" alt="Beslenme günlüğü: kayıt listesi, kaynak etiketi ve günlük toplam"> | <img src="docs/images/06-erisilebilirlik-ayarlari.png" width="240" alt="Ayarlar: karanlık mod, konuşma hızı, cihaz üstü model anahtarı"> |
-| Gram, adet, dilim, kase, ml, litre | Her kaydın kaynağı görünür | Konuşma hızı ve cihaz üstü model |
+| <img src="docs/images/04-porsiyon-secimi.png" width="230" alt="Porsiyon seçimi: gram veya kase birimi ve miktar kaydırıcısı"> | <img src="docs/images/05-beslenme-gunlugu.png" width="230" alt="Beslenme günlüğü: kayıt listesi, kaynak etiketi ve günlük toplam kalori"> | <img src="docs/images/06-saglik-takibi.png" width="230" alt="Sağlık ve aktivite: adım, ruh hâli, uyku, su ve ilaç takibi"> |
+| Gram, adet, dilim, kase, ml, litre | Her kaydın kaynağı görünür | Adım, uyku, su, ruh hâli |
+
+| Keşfet | Diyetisyen bağlantısı | Rapor gönderme |
+|:--:|:--:|:--:|
+| <img src="docs/images/07-kesfet.png" width="230" alt="Keşfet: haftanın tarifi ve kahvaltılık, tatlı, çorba gibi kategoriler"> | <img src="docs/images/08-diyetisyen.png" width="230" alt="Diyetisyen paneli: aktif bağlantı, haftalık rapor gönderme ve otomatik paylaşım anahtarı"> | <img src="docs/images/09-rapor-gonderme.png" width="230" alt="Rapor gönderme: dönem ve kanal seçimi, maskelenmiş iletişim bilgisi"> |
+| Tarif önerileri ve kategoriler | Karşılıklı onaylı eşleşme | İletişim bilgisi maskelenir |
 
 > Görüntüler Android emülatöründen alınmıştır. Emülatörde gerçek kamera
-> olmadığı için tarama ekranındaki görüntü sanal sahnedir; tanıma, galeriden
+> olmadığı için tarama ekranındaki arka plan sanal sahnedir; tanıma, galeriden
 > seçilen gerçek bir yemek fotoğrafıyla yapılmıştır.
 
 ## Başlamadan önce
