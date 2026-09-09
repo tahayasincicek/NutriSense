@@ -13,7 +13,23 @@ TÜBİTAK 2209-A kapsamında Kocaeli Üniversitesi'nde geliştirilmektedir.
 - Sesli komutlarla işlem yapma ve besin bilgilerini dinleme.
 - Sık tüketilen besinleri tekrar ekleme ve son işlemi geri alma.
 - Diyetisyenle eşleşme, rapor paylaşma ve yanıtları görüntüleme.
-- Su, adım, kilo, uyku ve ruh hâli kaydı.
+- Telefonun hareket sensöründen otomatik adım sayımı; su, kilo, uyku ve ruh hâli kaydı.
+
+## Ekran görüntüleri
+
+| Ana ekran | Cihaz üstü tanıma | Besin arama |
+|:--:|:--:|:--:|
+| <img src="docs/images/01-ana-ekran.png" width="240" alt="Ana ekran: hızlı tarama kartı, adım ve su sayaçları, günlük kalori hedefi"> | <img src="docs/images/02-tarama-sonucu.png" width="240" alt="Tarama sonucu: cihaz üstü model yemeği tanıdı, onay bekliyor"> | <img src="docs/images/03-besin-arama.png" width="240" alt="Manuel besin girişi: katalogda arama ve 100 gram kalori değeri"> |
+| Kayıt kullanıcı onayından sonra oluşur | Model emin değilse tahmin kaydedilmez | 556 kayıtlık kaynaklı katalog |
+
+| Porsiyon seçimi | Beslenme günlüğü | Erişilebilirlik |
+|:--:|:--:|:--:|
+| <img src="docs/images/04-porsiyon-secimi.png" width="240" alt="Porsiyon seçimi: gram veya kase birimi ve kaydırıcı"> | <img src="docs/images/05-beslenme-gunlugu.png" width="240" alt="Beslenme günlüğü: kayıt listesi, kaynak etiketi ve günlük toplam"> | <img src="docs/images/06-erisilebilirlik-ayarlari.png" width="240" alt="Ayarlar: karanlık mod, konuşma hızı, cihaz üstü model anahtarı"> |
+| Gram, adet, dilim, kase, ml, litre | Her kaydın kaynağı görünür | Konuşma hızı ve cihaz üstü model |
+
+> Görüntüler Android emülatöründen alınmıştır. Emülatörde gerçek kamera
+> olmadığı için tarama ekranındaki görüntü sanal sahnedir; tanıma, galeriden
+> seçilen gerçek bir yemek fotoğrafıyla yapılmıştır.
 
 ## Başlamadan önce
 
