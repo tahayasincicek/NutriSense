@@ -84,10 +84,12 @@ class DietitianReportExportService {
     await file.writeAsString(buildCsv(detail),
         encoding: const SystemEncoding());
 
-    await Share.shareXFiles(
-      [XFile(file.path)],
-      subject: 'NutriSense beslenme raporu - ${detail.patientName}',
-      text: '${detail.patientName} beslenme raporu.',
+    await SharePlus.instance.share(
+      ShareParams(
+        files: [XFile(file.path)],
+        subject: 'NutriSense beslenme raporu - ${detail.patientName}',
+        text: '${detail.patientName} beslenme raporu.',
+      ),
     );
   }
 }

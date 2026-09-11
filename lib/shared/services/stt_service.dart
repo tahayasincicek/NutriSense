@@ -151,12 +151,14 @@ class SttService {
 
     await _stt.listen(
       onResult: _handleResult,
-      localeId: requestedLocale,
-      listenFor: listenFor,
-      pauseFor: const Duration(seconds: 3), // 3 saniye sessizlikte dur
-      listenMode: ListenMode.confirmation,
-      cancelOnError: false,
-      partialResults: true,
+      listenOptions: SpeechListenOptions(
+        localeId: requestedLocale,
+        listenFor: listenFor,
+        pauseFor: const Duration(seconds: 3), // 3 saniye sessizlikte dur
+        listenMode: ListenMode.confirmation,
+        cancelOnError: false,
+        partialResults: true,
+      ),
     );
   }
 

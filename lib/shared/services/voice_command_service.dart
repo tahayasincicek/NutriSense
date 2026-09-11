@@ -249,12 +249,14 @@ class VoiceCommandService {
 
     await _speech.listen(
       onResult: _onResult,
-      listenFor: _listenTimeout,
-      pauseFor: const Duration(seconds: 3),
-      localeId: _turkishLocaleId,
-      listenMode: stt.ListenMode.confirmation,
-      cancelOnError: false,
-      partialResults: true,
+      listenOptions: stt.SpeechListenOptions(
+        listenFor: _listenTimeout,
+        pauseFor: const Duration(seconds: 3),
+        localeId: _turkishLocaleId,
+        listenMode: stt.ListenMode.confirmation,
+        cancelOnError: false,
+        partialResults: true,
+      ),
     );
   }
 

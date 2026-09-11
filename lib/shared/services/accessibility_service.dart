@@ -316,8 +316,10 @@ class AccessibilityService with WidgetsBindingObserver {
   /// girmediği için üst üste konuşma olmaz.
   Future<void> announceToScreenReader(String text) async {
     if (text.isEmpty) return;
+    final view = WidgetsBinding.instance.platformDispatcher.implicitView;
+    if (view == null) return;
     try {
-      await SemanticsService.announce(text, TextDirection.ltr);
+      await SemanticsService.sendAnnouncement(view, text, TextDirection.ltr);
     } catch (_) {
       // Duyuru kanalı yoksa sessiz kalınır; uygulamanın akışı bozulmamalı.
     }

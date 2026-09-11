@@ -24,7 +24,7 @@ extension ContextExtensions on BuildContext {
 
   // ── Erişilebilirlik ──
   bool get isBoldText => MediaQuery.boldTextOf(this);
-  double get textScaleFactor => MediaQuery.textScaleFactorOf(this);
+  double get textScaleFactor => MediaQuery.textScalerOf(this).scale(1);
   bool get isReduceMotion => MediaQuery.disableAnimationsOf(this);
   bool get isHighContrast => MediaQuery.highContrastOf(this);
 

@@ -53,10 +53,10 @@ void main() {
 
     void visit(SemanticsNode node, String path) {
       final data = node.getSemanticsData();
-      final tappable = data.hasAction(SemanticsAction.tap) ||
-          data.hasFlag(SemanticsFlag.isButton);
+      final tappable =
+          data.hasAction(SemanticsAction.tap) || data.flagsCollection.isButton;
       // Metin alanları adını ipucu/etiket yerine değerinden alabilir.
-      final isField = data.hasFlag(SemanticsFlag.isTextField);
+      final isField = data.flagsCollection.isTextField;
       final named = data.label.trim().isNotEmpty ||
           data.tooltip.trim().isNotEmpty ||
           (isField && data.value.trim().isNotEmpty);
@@ -83,7 +83,8 @@ void main() {
     await tester.pumpAndSettle();
 
     final offenders = unnamedTappables(
-      tester.binding.pipelineOwner.semanticsOwner!.rootSemanticsNode!,
+      tester
+          .binding.renderViews.single.owner!.semanticsOwner!.rootSemanticsNode!,
     );
 
     expect(

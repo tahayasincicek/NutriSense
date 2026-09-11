@@ -64,10 +64,12 @@ class StatsExportService {
     final file = File('${dir.path}/$fileName');
     await file.writeAsString(csvContent, encoding: const SystemEncoding());
 
-    await Share.shareXFiles(
-      [XFile(file.path)],
-      subject: 'NutriSense Beslenme Raporu - $fileName',
-      text: 'NutriSense beslenme raporum.',
+    await SharePlus.instance.share(
+      ShareParams(
+        files: [XFile(file.path)],
+        subject: 'NutriSense Beslenme Raporu - $fileName',
+        text: 'NutriSense beslenme raporum.',
+      ),
     );
   }
 
