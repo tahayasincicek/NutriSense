@@ -370,6 +370,22 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           ],
 
           const SizedBox(height: 24),
+          _buildSectionTitle('Yasal'),
+          _buildSettingCard([
+            _buildActionTile(
+              key: const Key('settings_open_licenses'),
+              title: 'Lisanslar ve Veri Kaynakları',
+              icon: Icons.gavel_rounded,
+              color: AppTheme.primaryColor,
+              onTap: () => showLicensePage(
+                context: context,
+                applicationName: 'NutriSense',
+                applicationVersion: '1.0.0',
+              ),
+            ),
+          ]),
+
+          const SizedBox(height: 24),
           _buildSectionTitle('Hesap Yönetimi'),
           _buildSettingCard([
             _buildActionTile(
