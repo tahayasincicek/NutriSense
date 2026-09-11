@@ -2888,7 +2888,12 @@ def _has_consent(db: Session, user_id: str, consent_type: str) -> bool:
     Kayıt yoksa rıza yok sayılır; sessiz kabul edilmez.
     """
     record = _latest_consent(db, user_id, consent_type)
-    return bool(record and record.granted and record.revoked_at is None)
+    return bool(
+        record
+        and record.granted
+        and record.revoked_at is None
+        and record.policy_version == settings.privacy_notice_version
+    )
 
 
 def _consent_state(db: Session, user_id: str) -> ProductConsentState:
@@ -2896,7 +2901,12 @@ def _consent_state(db: Session, user_id: str) -> ProductConsentState:
     flags = {}
     for consent_type in PRODUCT_CONSENT_TYPES:
         record = _latest_consent(db, user_id, consent_type)
-        granted = bool(record and record.granted and record.revoked_at is None)
+        granted = bool(
+            record
+            and record.granted
+            and record.revoked_at is None
+            and record.policy_version == settings.privacy_notice_version
+        )
         flags[consent_type] = granted
         if record is not None:
             items.append(ProductConsentItem(

@@ -28,6 +28,8 @@ mekanizması üniversite/hukuk birimi kararı olmadan kesinleştirilmemiştir.
 | Diyetisyen sözleşme kabulü | Gizlilik/veri işleme taahhüdünün ispatı | `dietitians.data_processing_agreement_version`, `data_processing_agreement_accepted_at` | Kayıtta zorunlu, sürümlü ve önceden işaretlenmemiş checkbox | Hesap ve sözleşme ispat politikasıyla birlikte saklanır |
 | Ürün rızası kaydı | Açık rızanın ve geri çekilmenin ispatı | `consent_records` (amaç + politika sürümü) | KVKK m.6 açık rıza ispat yükü | Geri çekme kaydı silmez, yeni kayıt yazar; hesap silmede cascade |
 | Aydınlatma teyidi | Kullanıcının güncel aydınlatma metnini gördüğünün ispatı | `consent_records` içinde ayrı `privacy_notice_acknowledgement` olayı | Açık rıza ve haklardan feragat değildir; metin sürümü ve UTC zamanıyla kaydedilir | Hesap ve ispat politikasıyla birlikte saklanır |
+
+Aydınlatma teyidi yalnız kaydın `policy_version` değeri sunucudaki güncel `PRIVACY_NOTICE_VERSION` ile aynıysa geçerlidir. Metin sürümü değiştiğinde eski teyit ana uygulama kapısını açmaz ve kullanıcı güncel metni görmeden devam edemez.
 | Survey/usability yanıtı | Etik onaylı HCI araştırması | Ayrı pseudonym alanı, araştırma tabloları | Etik kurul + araştırma hukuki sebebi | Onaylı DMP süresi; withdrawal koduyla silme |
 | Araştırma onam kanıtı | Onam/çekilme ispatı | Sonuçtan ayrı `research_consents` | Etik kurul kararı | Sonuçtan ayrı; çekilmede minimal audit dışında silme |
 | Audit olayları/IP/hash | Güvenlik, rıza ve işlem kanıtı | `audit_events` | Meşru menfaat/kanuni yükümlülük analizi | Öneri 1 yıl; kurum kararı ve anonimleştirme gerekir |

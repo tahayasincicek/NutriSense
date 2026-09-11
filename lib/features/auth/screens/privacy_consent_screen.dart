@@ -238,7 +238,9 @@ class _NoticeCard extends StatelessWidget {
       'yapılandırılmışsa yurt dışındaki bir sağlayıcıya gönderilebilir; '
       'fotoğraf cihazda veya sunucuda saklanmaz.\n\n'
       'Beslenme raporunuz yalnız siz her gönderim için ayrıca onay '
-      'verdiğinizde, seçtiğiniz diyetisyene e-posta veya SMS ile iletilir.\n\n'
+      'verdiğinizde atanmış diyetisyenin güvenli uygulama içi panelinde '
+      'paylaşılır. E-posta veya SMS yalnız anonim danışan kodlu yeni rapor '
+      'bildirimi taşır; besin ve sağlık ayrıntılarını içermez.\n\n'
       'Verilerinizi görüntüleyebilir, düzeltebilir, dışa aktarabilir ve '
       'hesabınızı silerek tamamen kaldırabilirsiniz.';
 

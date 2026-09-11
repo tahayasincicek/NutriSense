@@ -83,6 +83,23 @@ def test_privacy_notice_acknowledgement_is_versioned_and_recorded(client):
         assert record.granted_at is not None
 
 
+def test_old_notice_acknowledgement_does_not_open_current_gate(client):
+    from app.models.database import ConsentRecord, SessionLocal
+
+    user = _register(client, "eski-aydinlatma@example.com")
+    with SessionLocal() as db:
+        db.add(ConsentRecord(
+            user_id=user["user_id"],
+            consent_type="privacy_notice_acknowledgement",
+            policy_version="OLD-NOTICE",
+            granted=True,
+        ))
+        db.commit()
+    state = client.get("/api/v1/consents", headers=_auth(user))
+    assert state.status_code == 200
+    assert state.json()["privacy_notice_acknowledgement"] is False
+
+
 def test_revocation_keeps_the_earlier_record_as_evidence(client):
     """Geri çekme kaydı silmez; ne zaman verilip alındığı kanıtlanabilmeli."""
     from app.models.database import ConsentRecord, SessionLocal

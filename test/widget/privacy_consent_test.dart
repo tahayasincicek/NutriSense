@@ -82,6 +82,18 @@ void main() {
     expect(find.textContaining('aydınlatma metnini okuyup'), findsOneWidget);
   });
 
+  testWidgets('zorunlu aydınlatma kapısı geri tuşuyla atlanamaz',
+      (tester) async {
+    final adapter = _ConsentAdapter();
+    await tester.pumpWidget(_app(adapter, requiredForEntry: true));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Kabul Etmeden Çıkış Yap'), findsOneWidget);
+    await tester.binding.handlePopRoute();
+    await tester.pumpAndSettle();
+    expect(find.text('Kişisel Verileriniz'), findsOneWidget);
+  });
+
   testWidgets('taslak uyarısı kullanıcıdan gizlenmez', (tester) async {
     final adapter = _ConsentAdapter();
     await tester.pumpWidget(_app(adapter));
@@ -91,7 +103,7 @@ void main() {
   });
 }
 
-Widget _app(_ConsentAdapter adapter) {
+Widget _app(_ConsentAdapter adapter, {bool requiredForEntry = false}) {
   final dio = Dio(BaseOptions(baseUrl: 'https://contract.test/api/v1'))
     ..httpClientAdapter = adapter;
   return ProviderScope(
@@ -101,7 +113,9 @@ Widget _app(_ConsentAdapter adapter) {
       ),
       accessibilityServiceProvider.overrideWithValue(_SilentAccessibility()),
     ],
-    child: const MaterialApp(home: PrivacyConsentScreen()),
+    child: MaterialApp(
+      home: PrivacyConsentScreen(requiredForEntry: requiredForEntry),
+    ),
   );
 }
 
