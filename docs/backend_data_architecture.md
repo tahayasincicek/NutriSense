@@ -2,7 +2,7 @@
 
 ## Güven sınırı ve kimlikler
 
-NutriSense beslenme geçmişi, tanıma çıktıları ve diyetisyen raporlarını hassas ürün verisi olarak ele alır. Ürün verisinin sahibi `users.id` ile belirlenir ve bütün ürün sorguları access token kullanıcısıyla sınırlandırılır. Araştırma verisi hesap UUID'si taşımaz; istemci tarafından üretilen rastgele `participant_pseudonym` kullanır. Bu pseudonym bir kimlik doğrulama anahtarı değildir ve hesap tablosuna bağlanmaz.
+NutriSense beslenme geçmişi, tanıma çıktıları ve diyetisyen raporlarını hassas ürün verisi olarak ele alır. Ürün verisinin sahibi `users.id` ile belirlenir ve bütün ürün sorguları access token kullanıcısıyla sınırlandırılır. Araştırma verisi hesap UUID'si taşımaz; istemci tarafından üretilen rastgele `participant_pseudonym` kullanır. Bu pseudonym bir kimlik doğrulama anahtarı değildir ve hesap tablosuna bağlanmaz. Yetkili araştırma exportlarında bu dahili pseudonym ile form/oturum UUID'leri de ayrı bir sunucu anahtarı kullanılarak HMAC-SHA-256 kodlarına dönüştürülür.
 
 Veritabanında bütün timestamp alanları UTC yazılır. `UTCDateTime` tipi offset'i UTC'ye dönüştürür ve veritabanından timezone-aware değer döndürür. Flutter gösterim katmanı UTC ISO-8601 değerini `Europe/Istanbul` yerel saatine dönüştürür; sunucu yerel saatle kayıt üretmez.
 
@@ -23,6 +23,8 @@ Aşağıdaki süreler teknik varsayılan politika önerisidir. Kurumun KVKK, eti
 | `notification_deliveries` | Rapor sahibi ve operasyon yetkilisi | Teslimat/audit ihtiyacı, öneri 1 yıl | Raporla cascade; provider message ID kişisel veri içermemeli |
 | `survey_versions` | Araştırma yöneticisi | Araştırma paketiyle kalıcı sürüm kaydı | Kullanılmış sürüm silinmez; pasifleştirilir |
 | `survey_submissions` | Pseudonymous katılımcı; araştırma rolü | Etik kurulun belirlediği süre, örneğin proje + 5 yıl | Pseudonym üzerinden geri çekme/silme; hesap silmeyle otomatik ilişkilendirilmez |
+
+Diyetisyen raporunun `payload_json` kopyası ad, hesap UUID'si, diyetisyen UUID'si ve eşleşme UUID'sini tekrar saklamaz. Rapor satırındaki yetkili ilişki foreign key'leri erişim kontrolü için korunur; e-posta ve SMS içeriğinde ilişkiye özel, kararlı `D-…` danışan kodu kullanılır. Böylece diyetisyen aynı danışanın raporlarını eşleştirebilir, dış bildirim sağlayıcısı ise kişinin adını veya hesap kimliğini almaz.
 | `usability_sessions` / `usability_tasks` | Pseudonymous katılımcı; araştırma rolü | Etik kurul kararı | Pseudonym üzerinden silme veya serbest metinleri anonimleştirme |
 | `refresh_tokens` | Hesap sahibi | Expiry + kısa güvenlik penceresi | Logout/rotation revoke; hesap silmede cascade |
 | `audit_events` | Güvenlik/denetim rolü | Öneri 1 yıl; mevzuata göre ayarlanır | Hesap silmede `user_id` kaldırılır; e-posta yerine geri döndürülemez hash kalır |

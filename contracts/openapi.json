@@ -282,6 +282,17 @@
       "DietitianCreate": {
         "description": "Diyetisyen hesabı ve profilini birlikte oluşturur.",
         "properties": {
+          "data_processing_agreement_accepted": {
+            "const": true,
+            "title": "Data Processing Agreement Accepted",
+            "type": "boolean"
+          },
+          "data_processing_agreement_version": {
+            "maxLength": 64,
+            "minLength": 1,
+            "title": "Data Processing Agreement Version",
+            "type": "string"
+          },
           "email": {
             "format": "email",
             "title": "Email",
@@ -322,7 +333,9 @@
         "required": [
           "email",
           "password",
-          "full_name"
+          "full_name",
+          "data_processing_agreement_accepted",
+          "data_processing_agreement_version"
         ],
         "title": "DietitianCreate",
         "type": "object"
@@ -2570,6 +2583,11 @@
           "policy_version": {
             "title": "Policy Version",
             "type": "string"
+          },
+          "privacy_notice_acknowledgement": {
+            "default": false,
+            "title": "Privacy Notice Acknowledgement",
+            "type": "boolean"
           }
         },
         "required": [
@@ -2584,6 +2602,7 @@
         "properties": {
           "consent_type": {
             "enum": [
+              "privacy_notice_acknowledgement",
               "health_data_processing",
               "image_cross_border_transfer"
             ],

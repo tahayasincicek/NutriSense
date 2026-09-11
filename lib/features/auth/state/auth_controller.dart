@@ -10,6 +10,7 @@ enum AuthStatus {
   unknown,
   loading,
   unauthenticated,
+  privacyNoticeRequired,
   authenticated,
   locked,
 }
@@ -41,6 +42,14 @@ class AuthController extends StateNotifier<AuthState> {
 
     final profile = await _api.getCurrentUser();
     if (profile.isSuccess && profile.data?.isActive == true) {
+      if (profile.data!.accountType != 'dietitian' &&
+          !await _hasPrivacyNoticeAcknowledgement()) {
+        state = AuthState(
+          AuthStatus.privacyNoticeRequired,
+          user: profile.data,
+        );
+        return;
+      }
       state = AuthState(AuthStatus.authenticated, user: profile.data);
       return;
     }
@@ -99,6 +108,8 @@ class AuthController extends StateNotifier<AuthState> {
     required String password,
     required String specialization,
     String? phone,
+    required bool dataProcessingAgreementAccepted,
+    required String dataProcessingAgreementVersion,
   }) async {
     final result = await _api.registerDietitian(
       email: email,
@@ -106,6 +117,8 @@ class AuthController extends StateNotifier<AuthState> {
       fullName: fullName,
       specialization: specialization,
       phone: phone,
+      dataProcessingAgreementAccepted: dataProcessingAgreementAccepted,
+      dataProcessingAgreementVersion: dataProcessingAgreementVersion,
     );
     if (!result.isSuccess) {
       state = const AuthState(AuthStatus.unauthenticated);
@@ -129,6 +142,14 @@ class AuthController extends StateNotifier<AuthState> {
       state = const AuthState(AuthStatus.unauthenticated);
       return 'Bu hesap bir diyetisyen hesabı değil.';
     }
+    if (profile.data!.accountType != 'dietitian' &&
+        !await _hasPrivacyNoticeAcknowledgement()) {
+      state = AuthState(
+        AuthStatus.privacyNoticeRequired,
+        user: profile.data,
+      );
+      return null;
+    }
 
     // Önce loading durumuna geçir — bu LoginScreen'deki TextFormField'ların
     // odağını kaybetmesini ve render objelerinin temizlenmesini sağlar.
@@ -141,6 +162,21 @@ class AuthController extends StateNotifier<AuthState> {
 
     state = AuthState(AuthStatus.authenticated, user: profile.data);
     return null;
+  }
+
+  Future<bool> _hasPrivacyNoticeAcknowledgement() async {
+    final result = await _api.getConsents();
+    return result.isSuccess &&
+        result.data?['privacy_notice_acknowledgement'] == true;
+  }
+
+  Future<bool> completePrivacyNoticeGate() async {
+    final user = state.user;
+    if (user == null || !await _hasPrivacyNoticeAcknowledgement()) {
+      return false;
+    }
+    state = AuthState(AuthStatus.authenticated, user: user);
+    return true;
   }
 
   Future<void> logout() async {

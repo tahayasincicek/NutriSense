@@ -3,7 +3,7 @@
 **Durum:** Uygulandı ve sentetik sandbox verisiyle doğrulandı  
 **Son içerik/yeniden deneme doğrulaması:** 7 Eylül 2026 (sentetik otomatik testler)
 
-**Kapsam:** Kullanıcının seçtiği ve onayladığı geçmiş kayıtlarının besin adı, gram miktarı, tarih-saat ve kalori bilgileriyle doğrulanmış diyetisyene e-posta ve/veya SMS üzerinden gönderilmesi
+**Kapsam:** Kullanıcının seçtiği ve onayladığı geçmiş kayıtlarının doğrulanmış diyetisyenin güvenli uygulama içi panelinde paylaşılması; e-posta ve/veya SMS üzerinden yalnız yeni rapor bildirimi gönderilmesi
 
 Bu özellik tıbbi tavsiye üretmez. Gönderim, yalnızca kullanıcının onayladığı beslenme günlüğünü paylaşır. Otomatik/periyodik paylaşım yoktur.
 
@@ -56,40 +56,15 @@ Gönderim sırasında bu bağlam yeniden hesaplanır. Kayıt, alıcı, kanal, ta
 
 ### E-posta
 
-E-posta yalnızca kullanıcı tarafından onaylanmış kayıtları içerir:
-
-- dönem ve kayıt sayısı;
-- toplam ve günlük ortalama kalori;
-- Türkçe besin adı, onaylı/tahmini porsiyon, kalori, zaman ve tanıma kaynağı;
-- kaynak açıklaması ve tahmini porsiyon sayısı;
-- kullanıcının isteğe bağlı notu;
-- “tıbbi tavsiye değildir” uyarısı.
-
-Mesaj `multipart/alternative` olarak hem UTF-8 plain text hem HTML üretir. HTML tablo başlığı ve sütun başlıkları içerir. Bu aşamada PDF ek üretilmez. Gelecekte PDF gerekiyorsa etiketli okuma sırası, dil metadatası, gerçek metin katmanı, tablo başlık ilişkileri, renk dışı anlam ve ekran okuyucu doğrulaması ayrıca kabul kapısıdır.
+Yeni `dietitian-report-v4` e-postası yalnız yeni rapor bildirimi ve ilişkiye özel `D-…` danışan kodu içerir. Dönem, kayıt sayısı, kalori, besin adı, saat, tanıma kaynağı ve kullanıcı notu e-posta gövdesine veya ekine yazılmaz. Diyetisyen ayrıntıları kimlik doğrulaması ve ilişki yetkilendirmesi uygulanan panelden açar. Mesaj erişilebilirlik için `multipart/alternative` UTF-8 düz metin ve HTML olarak üretilir.
 
 ### SMS
 
-Yeni `dietitian-report-v3` raporlarında SMS her onaylı kayıt için Türkçe besin
-adı, gram miktarı (tahminse işaretli), kalori ve saat dilimi içeren kayıt
-tarih-saatini taşır. Örneğin:
+Yeni `dietitian-report-v4` SMS'i yalnız yeni rapor bildirimi ve `D-…` danışan kodu içerir. Besin ve sağlık ayrıntıları operatör altyapısına verilmez.
 
-```text
-1. Elma; 150.5 g (tahmini); 78.25 kcal; 2026-09-07T12:30:00+03:00
-```
-
-Kullanıcı adı, telefon, görüntü, makrolar ve serbest not SMS gövdesine eklenmez.
-E-posta HTML ve düz metin sürümleri aynı dört temel alanı taşır; gram ve kalori
-küsuratları gereksiz yere tam sayıya yuvarlanmaz.
-
-Uzun içerik kayıp olmadan `NutriSense (1/N)` biçiminde numaralandırılmış
-mesajlara bölünür. Gövde başlık dahil en fazla 600 UTF-16 birimidir; Türkçe
-karakterler ve emojiler korunur. Bu, operatörün ücretlendirdiği SMS segment
-sayısıyla aynı değildir. [Twilio mesaj sınırları](https://www.twilio.com/docs/messaging/api/message-resource)
-gereği sağlayıcı her gövdeyi ayrıca segmentlere ayırabilir.
-
-Sunucu önizleme özeti mesaj sayısını ve SMS'te paylaşılacak alanları söyler.
-Mobil seçim ve açık onay metinleri ayrıntılı paylaşımı açıklar. Rıza sürümü
-`report-share-v3` oldu; eski önizleme özetiyle yeni içerik gönderilemez.
+Sunucu önizleme özeti e-posta/SMS'in yalnız bildirim ve anonim danışan kodu taşıdığını, sağlık ayrıntılarının panelde kalacağını söyler.
+Mobil seçim ve açık onay metinleri panel paylaşımı ile bildirim kanallarını ayrı açıklar. Rıza sürümü
+`report-share-v4-notification-only` oldu; eski önizleme özetiyle yeni içerik gönderilemez.
 Kaydedilmiş v2 raporlarının yeniden denemesi yalnız eski kısa özeti gönderir;
 önceki onayın kapsamı genişletilmez.
 
@@ -238,7 +213,7 @@ flutter test test\widget\dietitian_report_wizard_test.dart `
 flutter analyze --no-fatal-infos
 ```
 
-Testler no dietitian, doğrulanmamış kanal, açık rıza yokluğu, boş dönem, kısmi hata, backoff/retry, duplicate request, IDOR, yetkisiz erişim, audit kaydı, multipart e-posta, ayrıntılı SMS ve mobil erişilebilir onay kapısını kapsar.
+Testler no dietitian, doğrulanmamış kanal, açık rıza yokluğu, boş dönem, kısmi hata, backoff/retry, duplicate request, IDOR, yetkisiz erişim, audit kaydı, bildirim e-postası/SMS'i ve mobil erişilebilir onay kapısını kapsar.
 
 `test_detailed_sms.py` uzun Unicode mesajın kayıpsız bölünmesini, eski rızanın
 korunmasını ve belirsiz kabulün yeniden gönderilmemesini doğrular.

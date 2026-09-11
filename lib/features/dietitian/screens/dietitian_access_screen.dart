@@ -18,6 +18,7 @@ class DietitianAccessScreen extends ConsumerStatefulWidget {
 }
 
 class _DietitianAccessScreenState extends ConsumerState<DietitianAccessScreen> {
+  static const _agreementVersion = 'DIETITIAN-DPA-2026-01';
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
   final _emailController = TextEditingController();
@@ -27,6 +28,7 @@ class _DietitianAccessScreenState extends ConsumerState<DietitianAccessScreen> {
   bool _registering = false;
   bool _loading = false;
   bool _obscurePassword = true;
+  bool _agreementAccepted = false;
 
   @override
   void dispose() {
@@ -231,6 +233,32 @@ class _DietitianAccessScreenState extends ConsumerState<DietitianAccessScreen> {
                                     ? 'Şifre en az 8 karakter olmalıdır'
                                     : null,
                               ),
+                              if (_registering) ...[
+                                const SizedBox(height: 16),
+                                CheckboxListTile(
+                                  key: const Key('dietitian_dpa_acceptance'),
+                                  value: _agreementAccepted,
+                                  onChanged: _loading
+                                      ? null
+                                      : (value) => setState(() =>
+                                          _agreementAccepted = value ?? false),
+                                  controlAffinity:
+                                      ListTileControlAffinity.leading,
+                                  contentPadding: EdgeInsets.zero,
+                                  title: const Text(
+                                    'Diyetisyen Gizlilik ve Veri İşleme '
+                                    'Sözleşmesi’ni okudum ve kabul ediyorum.',
+                                  ),
+                                  subtitle: TextButton(
+                                    key: const Key('dietitian_dpa_open'),
+                                    onPressed: _showAgreement,
+                                    child: const Align(
+                                      alignment: Alignment.centerLeft,
+                                      child: Text('Sözleşmeyi oku'),
+                                    ),
+                                  ),
+                                ),
+                              ],
                               const SizedBox(height: 24),
                               AccessibleButton(
                                 label: _registering
@@ -268,6 +296,14 @@ class _DietitianAccessScreenState extends ConsumerState<DietitianAccessScreen> {
 
   Future<void> _submit() async {
     if (_loading || !_formKey.currentState!.validate()) return;
+    if (_registering && !_agreementAccepted) {
+      const message =
+          'Hesap oluşturmak için veri işleme sözleşmesini okuyup kabul edin.';
+      ScaffoldMessenger.of(context)
+          .showSnackBar(const SnackBar(content: Text(message)));
+      AccessibilityUtils.announceError(message);
+      return;
+    }
     FocusScope.of(context).unfocus();
     setState(() => _loading = true);
     final controller = ref.read(authControllerProvider.notifier);
@@ -279,6 +315,8 @@ class _DietitianAccessScreenState extends ConsumerState<DietitianAccessScreen> {
           email: _emailController.text.trim(),
           password: _passwordController.text,
           specialization: _specializationController.text.trim(),
+          dataProcessingAgreementAccepted: _agreementAccepted,
+          dataProcessingAgreementVersion: _agreementVersion,
         );
       } else {
         error = await controller.loginDietitian(
@@ -305,5 +343,36 @@ class _DietitianAccessScreenState extends ConsumerState<DietitianAccessScreen> {
       // rotasını kapatıp alttaki diyetisyen panelini hemen göster.
       Navigator.of(context).pop();
     }
+  }
+
+  Future<void> _showAgreement() async {
+    await showDialog<void>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Diyetisyen Gizlilik ve Veri İşleme Sözleşmesi'),
+        content: const SingleChildScrollView(
+          child: Text(
+            'Sürüm: DIETITIAN-DPA-2026-01\n\n'
+            'Diyetisyen; yalnız kendisine atanmış danışanların verilerine, '
+            'beslenme hizmetinin yürütülmesi amacıyla ve gerektiği ölçüde '
+            'erişmeyi; verileri başka kişi veya amaçlarla paylaşmamayı; hesap '
+            'bilgilerini korumayı; yetkisiz erişim veya veri ihlali şüphesini '
+            'derhal NutriSense veri sorumlusuna bildirmeyi; ilişki sona '
+            'erdiğinde erişimi bırakmayı ve yürürlükteki gizlilik, meslek sırrı '
+            've kişisel veri kurallarına uymayı kabul eder.\n\n'
+            'Bu elektronik kabul, kabul edilen metin sürümü ve zamanıyla '
+            'kaydedilir. Veri sorumlusunun kimliği, iletişim adresi, saklama '
+            'süreleri ve tarafların ayrıntılı yükümlülükleri yayımlanan nihai '
+            'kurumsal sözleşmede ayrıca yer almalıdır.',
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Kapat'),
+          ),
+        ],
+      ),
+    );
   }
 }

@@ -1987,7 +1987,7 @@ async def send_to_dietitian(
         user_id=current_user.id,
         assignment_id=assignment.id,
         consent_type="dietitian_report_share",
-        policy_version="report-share-v3",
+        policy_version="report-share-v4-notification-only",
         granted=True,
         context_hash=digest,
         channels_json=payload["channels"],
@@ -2119,6 +2119,12 @@ async def register_dietitian(
     request: DietitianCreate,
     db: Session = Depends(get_db),
 ):
+    agreement_version = "DIETITIAN-DPA-2026-01"
+    if request.data_processing_agreement_version != agreement_version:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Diyetisyen veri işleme sözleşmesi güncellendi; metni yeniden inceleyin.",
+        )
     normalized_email = request.email.lower()
     existing_user = db.query(User).filter(
         func.lower(User.email) == normalized_email
@@ -2151,6 +2157,8 @@ async def register_dietitian(
         specialization=request.specialization,
         email_verified=locally_verified,
         phone_verified=bool(request.phone) and locally_verified,
+        data_processing_agreement_version=agreement_version,
+        data_processing_agreement_accepted_at=utc_now(),
     )
     try:
         db.add_all([user, profile])
@@ -2858,6 +2866,7 @@ async def add_weight_measurement(
 _CROSS_BORDER_VISION_MODES = frozenset({"google", "gemini"})
 
 PRODUCT_CONSENT_TYPES = (
+    "privacy_notice_acknowledgement",
     "health_data_processing",
     "image_cross_border_transfer",
 )
@@ -2899,6 +2908,9 @@ def _consent_state(db: Session, user_id: str) -> ProductConsentState:
     return ProductConsentState(
         policy_version=settings.privacy_notice_version,
         consents=items,
+        privacy_notice_acknowledgement=flags[
+            "privacy_notice_acknowledgement"
+        ],
         health_data_processing=flags["health_data_processing"],
         image_cross_border_transfer=flags["image_cross_border_transfer"],
     )

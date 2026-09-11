@@ -2,7 +2,7 @@
 
 ## 1. İlkeler ve veri akışı
 
-Veri minimizasyonu, amaçla sınırlılık, least privilege, sürümleme ve audit uygulanır. Hesap UUID'si araştırma kimliği değildir. Backend onam sırasında rastgele UUID pseudonym üretir; ad/e-posta/telefonla eşleme sonuç sisteminde tutulmaz.
+Veri minimizasyonu, amaçla sınırlılık, least privilege, sürümleme ve audit uygulanır. Hesap UUID'si araştırma kimliği değildir. Backend onam sırasında rastgele UUID pseudonym üretir; ad/e-posta/telefonla eşleme sonuç sisteminde tutulmaz. Dışa aktarım sırasında veritabanındaki katılımcı, form ve oturum UUID'leri ayrıca HMAC-SHA-256 ile kararlı takma kodlara çevrilir. Böylece aynı katılımcının satırları analizde eşleşir, fakat veritabanı kimlikleri araştırma paketine çıkmaz.
 
 Akış: erişilebilir onam → ayrı `research_consents` kaydı → görev/anket → mobil güvenli kasa geçici kuyruğu → TLS üzerinden backend → yetkili tidy export → sürümlü analiz alanı → kurulca onaylanan tarihte imha/anonymization.
 
@@ -24,8 +24,8 @@ Kesin saklama süreleri uydurulmaz. Veri sorumlusu, hukuki dayanak, amaç ve kur
 
 | Alan | Tip | Tanım / kural |
 |---|---|---|
-| session_id | UUID | İdempotent oturum kimliği |
-| participant_id | UUID | Rastgele pseudonym; hesap kimliği değil |
+| session_id | string | `U-` önekli, yalnız dışa aktarıma ait kararlı oturum kodu |
+| participant_id | string | `P-` önekli, anahtarlı ve kararlı export pseudonym'i; hesap kimliği değil |
 | schema_version | string | Usability şema sürümü |
 | protocol_version | string | Etik kurulca onaylanan protokol |
 | approval_reference | string | Sunucu yapılandırmasından; istemci belirleyemez |
@@ -50,8 +50,8 @@ Kesin saklama süreleri uydurulmaz. Veri sorumlusu, hukuki dayanak, amaç ve kur
 
 | Alan | Tip | Tanım |
 |---|---|---|
-| submission_id | UUID | İdempotent form kimliği |
-| participant_id | UUID | Araştırma pseudonym'i |
+| submission_id | string | `S-` önekli, yalnız dışa aktarıma ait kararlı form kodu |
+| participant_id | string | `P-` önekli, anahtarlı ve kararlı export pseudonym'i |
 | survey_version | string | `NS-SURVEY-1.0-DRAFT` kurul öncesi taslak |
 | question_id | string | Sürüm içindeki sabit madde kimliği |
 | answer | scalar/list/null | Madde tipine uygun yanıt |
@@ -72,7 +72,7 @@ Kesin saklama süreleri uydurulmaz. Veri sorumlusu, hukuki dayanak, amaç ve kur
 
 ## 6. Yetkilendirme ve güvenlik doğrulaması
 
-Secret değerleri repoya/rapora yazılmaz. Export token yalnız server secret store'dadır. Yetkili araştırmacı rolleri, kurum kimlik yönetimi ve veri erişim onayı **[kurum kararı]** ile belirlenir. Backup şifreleme, anahtar saklama, restore testi ve breach bildirim prosedürü saha öncesi doğrulanır; mevcut kod bunların gerçekleştiğini kanıtlamaz.
+Secret değerleri repoya/rapora yazılmaz. Export token ve `RESEARCH_PSEUDONYMIZATION_KEY` yalnız server secret store'dadır ve birbirinden farklı üretilir. Pseudonimleştirme anahtarı araştırma boyunca korunur; değiştirilirse eski ve yeni export kimlikleri eşleşmez. Yetkili araştırmacı rolleri, kurum kimlik yönetimi ve veri erişim onayı **[kurum kararı]** ile belirlenir. Backup şifreleme, anahtar saklama, restore testi ve breach bildirim prosedürü saha öncesi doğrulanır; mevcut kod bunların gerçekleştiğini kanıtlamaz.
 
 ## 7. Geri çekilme ve silme
 

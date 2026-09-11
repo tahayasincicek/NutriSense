@@ -418,6 +418,8 @@ class ApiService {
     required String fullName,
     required String specialization,
     String? phone,
+    required bool dataProcessingAgreementAccepted,
+    required String dataProcessingAgreementVersion,
     CancelToken? cancelToken,
   }) =>
       _safeCall(() async {
@@ -429,6 +431,9 @@ class ApiService {
             'full_name': fullName,
             'phone': phone,
             'specialization': specialization,
+            'data_processing_agreement_accepted':
+                dataProcessingAgreementAccepted,
+            'data_processing_agreement_version': dataProcessingAgreementVersion,
           },
           cancelToken: cancelToken,
           options: Options(extra: const {_skipAuthKey: true}),

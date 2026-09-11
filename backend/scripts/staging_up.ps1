@@ -34,6 +34,7 @@ if (-not (Test-Path -LiteralPath $runtimeEnvFile)) {
         "SECRET_KEY=$(New-RandomHex 32)",
         "JWT_SECRET_KEY=$(New-RandomHex 32)",
         "RESEARCH_EXPORT_TOKEN=$(New-RandomHex 32)",
+        "RESEARCH_PSEUDONYMIZATION_KEY=$(New-RandomHex 32)",
         "OPERATIONS_TOKEN=$(New-RandomHex 32)"
     )
     [System.IO.File]::WriteAllLines($runtimeEnvFile, $values)

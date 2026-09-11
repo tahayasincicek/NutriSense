@@ -1,6 +1,6 @@
 """Eşleşme iki taraflı onayla kurulur: hasta rızası + diyetisyen kabulü."""
 
-from app.models.database import DietitianAssignment, SessionLocal, User
+from app.models.database import Dietitian, DietitianAssignment, SessionLocal, User
 
 PASSWORD = "Guvenli123"
 
@@ -25,9 +25,42 @@ def _register_dietitian(client, email: str) -> dict:
         "password": PASSWORD,
         "full_name": "Sentetik Diyetisyen",
         "specialization": "Beslenme ve Diyet",
+        "data_processing_agreement_accepted": True,
+        "data_processing_agreement_version": "DIETITIAN-DPA-2026-01",
     })
     assert response.status_code in {200, 201}
     return response.json()
+
+
+def test_dietitian_registration_requires_and_records_current_agreement(client):
+    payload = {
+        "email": "sozlesme-diyetisyen@example.com",
+        "password": PASSWORD,
+        "full_name": "Sözleşme Diyetisyeni",
+        "specialization": "Beslenme ve Diyet",
+        "data_processing_agreement_version": "DIETITIAN-DPA-2026-01",
+    }
+    assert client.post(
+        "/api/v1/auth/register-dietitian", json=payload
+    ).status_code == 422
+    assert client.post(
+        "/api/v1/auth/register-dietitian",
+        json={
+            **payload,
+            "data_processing_agreement_accepted": True,
+            "data_processing_agreement_version": "OLD-VERSION",
+        },
+    ).status_code == 409
+
+    accepted = client.post(
+        "/api/v1/auth/register-dietitian",
+        json={**payload, "data_processing_agreement_accepted": True},
+    )
+    assert accepted.status_code == 201
+    with SessionLocal() as db:
+        profile = db.query(Dietitian).filter_by(email=payload["email"]).one()
+        assert profile.data_processing_agreement_version == "DIETITIAN-DPA-2026-01"
+        assert profile.data_processing_agreement_accepted_at is not None
 
 
 def _request_link(client, patient_headers, dietitian_email: str) -> str:

@@ -3,7 +3,7 @@
 from decimal import Decimal
 
 
-REPORT_SCHEMA_VERSION = "dietitian-report-v3"
+REPORT_SCHEMA_VERSION = "dietitian-report-v4"
 # Below Twilio's 1600-character limit, including supplementary Unicode units.
 SMS_BODY_LIMIT = 600
 
@@ -16,6 +16,12 @@ def report_number(value) -> str:
 
 
 def build_report_sms(report: dict) -> str:
+    if report.get("schema_version") == "dietitian-report-v4":
+        return (
+            f"NutriSense: {report.get('patient_code', 'Danışan')} için yeni bir "
+            "beslenme raporu hazır. Sağlık verilerini güvenli diyetisyen "
+            "panelinden görüntüleyin. Bu bilgi tıbbi tavsiye değildir."
+        )
     # A stored v2 report was authorized for summary-only SMS. Never expand it on retry.
     if report.get("schema_version") == "dietitian-report-v2":
         return (
@@ -29,6 +35,7 @@ def build_report_sms(report: dict) -> str:
         raise ValueError("Report records are incomplete")
     lines = [
         f"NutriSense: {report['from_date']} - {report['to_date']}",
+        f"Danışan kodu: {report.get('patient_code', 'Belirtilmedi')}",
         f"{len(records)} onaylı besin kaydı:",
     ]
     for index, record in enumerate(records, 1):

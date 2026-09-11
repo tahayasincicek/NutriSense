@@ -139,6 +139,8 @@ class Dietitian(Base):
     phone_verified = Column(Boolean, default=False, nullable=False)
     specialization = Column(String(255), default="Beslenme ve Diyet", nullable=False)
     is_active = Column(Boolean, default=True, nullable=False)
+    data_processing_agreement_version = Column(String(64), nullable=True)
+    data_processing_agreement_accepted_at = Column(UTCDateTime, nullable=True)
     created_at = Column(UTCDateTime, default=utc_now, nullable=False)
 
     patients = relationship("User", back_populates="dietitian")

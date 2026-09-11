@@ -294,6 +294,28 @@ def build_report_email(report: dict, settings: Settings) -> MIMEMultipart:
     report_label = {
         "daily": "Günlük", "weekly": "Haftalık", "monthly": "Aylık",
     }.get(report["report_type"], "Beslenme")
+    if report.get("schema_version") == "dietitian-report-v4":
+        patient_code = escape(report.get("patient_code", "Belirtilmedi"))
+        html = f"""<!doctype html><html lang="tr"><body><main>
+<h1>NutriSense — Yeni beslenme raporu</h1>
+<p><strong>Danışan kodu:</strong> {patient_code}</p>
+<p>Besin ve sağlık bilgilerini güvenli diyetisyen paneline giriş yaparak görüntüleyin.</p>
+<p>Bu e-posta sağlık verisi içermez ve tıbbi tavsiye değildir.</p>
+</main></body></html>"""
+        plain = (
+            "NutriSense — Yeni beslenme raporu\n"
+            f"Danışan kodu: {report.get('patient_code', 'Belirtilmedi')}\n"
+            "Besin ve sağlık bilgilerini güvenli diyetisyen paneline giriş "
+            "yaparak görüntüleyin.\nBu e-posta sağlık verisi içermez ve "
+            "tıbbi tavsiye değildir."
+        )
+        message = MIMEMultipart("alternative")
+        message["From"] = f"{settings.smtp_from_name} <{settings.smtp_from_email}>"
+        message["Subject"] = "NutriSense — Yeni beslenme raporu"
+        message["Message-ID"] = make_msgid(domain="nutrisense.invalid")
+        message.attach(MIMEText(plain, "plain", "utf-8"))
+        message.attach(MIMEText(html, "html", "utf-8"))
+        return message
     rows = "".join(
         "<tr>"
         f"<td>{escape(record['food_name_tr'])}</td>"
@@ -312,6 +334,7 @@ def build_report_email(report: dict, settings: Settings) -> MIMEMultipart:
     )
     html = f"""<!doctype html><html lang="tr"><body>
 <main><h1>NutriSense {report_label} Beslenme Raporu</h1>
+<p><strong>Danışan kodu:</strong> {escape(report.get('patient_code', 'Belirtilmedi'))}</p>
 <p><strong>Dönem:</strong> {report['from_date']} – {report['to_date']}</p>
 <p><strong>Onaylı kayıt:</strong> {report['record_count']} | <strong>Toplam:</strong>
 {report['total_calories']:.0f} kcal | <strong>Günlük ortalama:</strong>
@@ -333,6 +356,7 @@ beslenme verisinin güvenilirliği aynı ölçü değildir.</p>
     )
     plain = (
         f"NutriSense {report_label} Beslenme Raporu\n"
+        f"Danışan kodu: {report.get('patient_code', 'Belirtilmedi')}\n"
         f"Dönem: {report['from_date']} - {report['to_date']}\n"
         f"Onaylı kayıt: {report['record_count']}\n"
         f"Toplam: {report['total_calories']:.0f} kcal\n"

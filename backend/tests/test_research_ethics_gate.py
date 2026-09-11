@@ -15,6 +15,9 @@ from app.routers import survey_router
 def _approved_test_configuration(monkeypatch):
     monkeypatch.setattr(survey_router.settings, "research_mode", "approved")
     monkeypatch.setattr(
+        survey_router.settings, "research_pseudonymization_key", "p" * 40
+    )
+    monkeypatch.setattr(
         survey_router.settings, "research_protocol_version", "SYNTHETIC-TEST-PROTOCOL-V1"
     )
     monkeypatch.setattr(
@@ -115,6 +118,15 @@ def test_consent_idempotency_tidy_export_and_withdrawal(client, monkeypatch):
     assert usability_tidy.json()["rows"][0]["assistance_level"] == "prompt"
     assert usability_tidy.json()["rows"][0]["counterbalance_sequence"] == "AB"
     assert usability_tidy.json()["rows"][0]["condition"] == "nutrisense"
+    survey_row = survey_tidy.json()["rows"][0]
+    usability_row = usability_tidy.json()["rows"][0]
+    assert survey_row["participant_id"] == usability_row["participant_id"]
+    assert survey_row["participant_id"].startswith("P-")
+    assert survey_row["participant_id"] != participant_id
+    assert survey_row["submission_id"].startswith("S-")
+    assert usability_row["session_id"].startswith("U-")
+    assert participant_id not in survey_tidy.text
+    assert participant_id not in usability_tidy.text
 
     withdrawal = client.post(
         "/api/v1/research/withdraw",

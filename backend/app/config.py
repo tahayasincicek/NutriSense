@@ -15,6 +15,7 @@ _PLACEHOLDER_SECRETS = {
     "change-me",
     "change-me-in-production",
     "replace-with-a-long-random-value",
+    "development-only-research-pseudonym-key",
 }
 
 
@@ -98,6 +99,9 @@ class Settings(BaseSettings):
     trusted_hosts: str = "localhost,127.0.0.1,testserver"
     security_hsts_max_age_seconds: int = 31536000
     research_export_token: str = ""
+    # Ham araştırma UUID'lerini dışa aktarılan, kararlı takma kimliklere çevirir.
+    # Production/approved modda secret store'dan farklı ve güçlü bir değer gelmelidir.
+    research_pseudonymization_key: str = "development-only-research-pseudonym-key"
     # disabled: no collection; synthetic: fixtures only; approved: consented
     # participant collection is allowed after the external ethics gate is set.
     research_mode: str = "synthetic"
@@ -278,6 +282,18 @@ class Settings(BaseSettings):
                 raise RuntimeError("Production application secret dışarıdan sağlanmalıdır.")
             if _unsafe_secret(self.research_export_token):
                 raise RuntimeError("Production araştırma export anahtarı güvenli sağlanmalıdır.")
+            if _unsafe_secret(self.research_pseudonymization_key):
+                raise RuntimeError(
+                    "Production araştırma pseudonimleştirme anahtarı güvenli sağlanmalıdır."
+                )
+            if _unsafe_research_value(self.privacy_notice_version):
+                raise RuntimeError(
+                    "Production için hukukça onaylanmış PRIVACY_NOTICE_VERSION gereklidir."
+                )
+            if "TASLAK" in self.privacy_notice_version.strip().upper():
+                raise RuntimeError(
+                    "Production için hukukça onaylanmış PRIVACY_NOTICE_VERSION gereklidir."
+                )
             if public_url.scheme != "https" or not public_url.netloc:
                 raise RuntimeError("Production PUBLIC_BASE_URL mutlak HTTPS olmalıdır.")
             if public_url.username or public_url.password:
@@ -326,6 +342,11 @@ class Settings(BaseSettings):
                 "RESEARCH_MODE disabled, synthetic veya approved olmalıdır."
             )
         if self.research_mode == "approved":
+            if _unsafe_secret(self.research_pseudonymization_key):
+                raise RuntimeError(
+                    "Onaylı araştırma modu için güçlü "
+                    "RESEARCH_PSEUDONYMIZATION_KEY gereklidir."
+                )
             required = {
                 "RESEARCH_PROTOCOL_VERSION": self.research_protocol_version,
                 "RESEARCH_CONSENT_VERSION": self.research_consent_version,

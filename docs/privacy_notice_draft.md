@@ -22,11 +22,11 @@ Diyetisyen, kendisine ulaşan rapora tek bir cevap yazabilir. Cevap sağlık
 verisi bağlamında bir yazışmadır ve yalnız raporu gönderen danışana görünür.
 
 Nutritionix'e besin arama adı gönderilebilir. Kullanıcının her gönderimde
-onayladığı minimum rapor SMTP sağlayıcısı ve/veya Twilio üzerinden doğrulanmış
-diyetisyene iletilebilir. Yeni SMS raporları seçilen dönemin onaylı besin adı,
-gram miktarı, tarih-saat ve kalori bilgilerini içerir; uzun raporlar birden
-fazla mesaj halinde iletilebilir. Bu paylaşım gönderim öncesinde ayrıca
-açıklanır ve onaylanır. Bu sağlayıcılar için
+onayladığı raporun sağlık ayrıntıları yalnız doğrulanmış ve atanmış diyetisyenin
+uygulama içi panelinde gösterilir. SMTP sağlayıcısı ve/veya Twilio yalnız yeni
+rapor bildirimi, alıcı iletişim adresi ve ilişkiye özel `D-…` danışan kodunu
+işler; besin adı, gram, tarih-saat, kalori ve kullanıcı notu bu kanallara
+verilmez. Bu paylaşım gönderim öncesinde ayrıca açıklanır ve onaylanır. Bu sağlayıcılar için
 yurtdışı aktarım ve sözleşme değerlendirmesi yayın öncesi tamamlanmalıdır.
 
 ## Araştırma verisi

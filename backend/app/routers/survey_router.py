@@ -36,6 +36,19 @@ def _hash_withdrawal_code(value: str) -> str:
     return hashlib.sha256(value.encode("utf-8")).hexdigest()
 
 
+def _export_pseudonym(kind: str, value: str) -> str:
+    """Derive a stable export-only identifier without exposing database UUIDs."""
+    prefixes = {"participant": "P", "submission": "S", "session": "U"}
+    if kind not in prefixes:
+        raise ValueError("Desteklenmeyen araştırma kimliği türü.")
+    digest = hmac.new(
+        settings.research_pseudonymization_key.encode("utf-8"),
+        f"{kind}:{value}".encode("utf-8"),
+        hashlib.sha256,
+    ).hexdigest()
+    return f"{prefixes[kind]}-{digest[:24].upper()}"
+
+
 def _collection_context(data_origin: str, protocol_version: str = "") -> tuple[str, str]:
     """Return server-controlled protocol context or reject collection."""
     if data_origin == "synthetic":
@@ -464,8 +477,10 @@ async def export_survey_tidy(
     for submission in submissions:
         for answer in submission.answers_json:
             rows.append({
-                "submission_id": submission.id,
-                "participant_id": submission.participant_pseudonym,
+                "submission_id": _export_pseudonym("submission", submission.id),
+                "participant_id": _export_pseudonym(
+                    "participant", submission.participant_pseudonym
+                ),
                 "protocol_version": submission.protocol_version,
                 "approval_reference": submission.approval_reference,
                 "survey_version": versions.get(submission.survey_version_id),
@@ -583,8 +598,10 @@ async def export_usability_sessions(
         successful_tasks += sum(1 for task in tasks if task.is_success)
         rows.append(
             {
-                "id": session.id,
-                "participant_id": session.participant_pseudonym,
+                "id": _export_pseudonym("session", session.id),
+                "participant_id": _export_pseudonym(
+                    "participant", session.participant_pseudonym
+                ),
                 "counterbalance_sequence": session.counterbalance_sequence,
                 "session_date": session.session_date.isoformat(),
                 "general_note": session.general_note,
@@ -636,8 +653,10 @@ async def export_usability_tidy(
         tasks = db.query(UsabilityTask).filter(UsabilityTask.session_id == session.id).all()
         for task in tasks:
             rows.append({
-                "session_id": session.id,
-                "participant_id": session.participant_pseudonym,
+                "session_id": _export_pseudonym("session", session.id),
+                "participant_id": _export_pseudonym(
+                    "participant", session.participant_pseudonym
+                ),
                 "schema_version": session.schema_version,
                 "counterbalance_sequence": session.counterbalance_sequence,
                 "protocol_version": session.protocol_version,

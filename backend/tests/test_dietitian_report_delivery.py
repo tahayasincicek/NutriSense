@@ -191,6 +191,11 @@ def test_preview_partial_failure_duplicate_retry_history_and_kvkk_audit(
         assert report.status == "partial_failed"
         assert report.record_count == 1
         assert report.payload_json["records"][0]["food_name_tr"] == "Elma"
+        assert report.payload_json["patient_code"].startswith("D-")
+        for duplicated_identity in (
+            "user_id", "patient_name", "dietitian_id", "assignment_id"
+        ):
+            assert duplicated_identity not in report.payload_json
         deliveries = {
             item.channel: item for item in db.query(NotificationDelivery).filter(
                 NotificationDelivery.report_id == report_id,
@@ -320,6 +325,9 @@ async def test_mail_sandbox_and_sms_both_contain_approved_food_details():
         email_transport=capture_email,
     )
     payload = {
+        "schema_version": "dietitian-report-v4",
+        "patient_code": "D-4C3A2B1F0099",
+        "patient_name": "Bu ad dış kanala çıkmamalı",
         "report_type": "daily",
         "from_date": TODAY.isoformat(),
         "to_date": TODAY.isoformat(),
@@ -350,13 +358,20 @@ async def test_mail_sandbox_and_sms_both_contain_approved_food_details():
     assert message.get_content_type() == "multipart/alternative"
     plain = message.get_payload()[0].get_payload(decode=True).decode("utf-8")
     html = message.get_payload()[1].get_payload(decode=True).decode("utf-8")
-    assert "Elma" in plain and "tıbbi tavsiye değildir" in plain
-    assert "Elma" in html and "<table>" in html and "<caption>" in html
+    assert "tıbbi tavsiye değildir" in plain
+    assert "güvenli diyetisyen paneline" in html
+    assert "Elma" not in plain and "Elma" not in html
+    assert "D-4C3A2B1F0099" in plain and "D-4C3A2B1F0099" in html
+    assert "Bu ad dış kanala çıkmamalı" not in plain
+    assert "Bu ad dış kanala çıkmamalı" not in html
 
     sms = build_safe_sms(payload)
-    assert "Elma; 150 g (tahmini); 78 kcal; 2026-07-18T10:30:00+00:00" in sms
-    assert "150 g" in plain and "78 kcal" in plain
-    assert "2026-07-18T10:30:00+00:00" in plain
+    assert "D-4C3A2B1F0099" in sms
+    assert "Bu ad dış kanala çıkmamalı" not in sms
+    assert "güvenli diyetisyen panelinden" in sms
+    assert "Elma" not in sms and "78 kcal" not in sms
+    assert "150 g" not in plain
+    assert "2026-07-18T10:30:00+00:00" not in plain
 
     external_sandbox = NotificationService(settings_override=Settings(
         app_environment="test", notification_mode="sandbox",
@@ -405,14 +420,14 @@ async def test_local_mailpit_accepts_app_recipient_without_allowlist():
 
 
 @pytest.mark.parametrize("channels", [["email", "sms"], ["sms"]])
-def test_both_channels_send_all_details_and_sms_retry_survives_service_restart(client, monkeypatch, tmp_path, channels):
+def test_external_channels_send_notification_only(client, monkeypatch, tmp_path, channels):
     tokens = _register(client, "multipart-owner@example.com")
     _relationship(tokens["user_id"])
     for _ in range(12):
         _food_log(tokens["user_id"])
     _food_log(tokens["user_id"], confirmed=False)
     preview = _preview(client, tokens, channels).json()
-    assert "SMS içinde besin adı, gram miktarı, tarih-saat ve kalori" in preview["accessibility_summary"]
+    assert "besin ve sağlık bilgileri SMS'e yazılmayacak" in preview["accessibility_summary"]
     settings = Settings(
         notification_mode="sandbox", sms_provider_mode="local_outbox",
         notification_sandbox_email_allowlist="sandbox-dietitian@nutrisense.invalid",
@@ -429,14 +444,12 @@ def test_both_channels_send_all_details_and_sms_retry_survives_service_restart(c
     local = NotificationService(settings_override=settings)
     sms_attempts = []
 
-    def fail_second_part(body, destination):
+    def capture_sms(body, destination):
         sms_attempts.append(body)
-        if len(sms_attempts) == 2:
-            raise ChannelDeliveryError("SMS_TEMPORARY", retryable=True)
         return local._local_outbox_send(body, destination)
 
     monkeypatch.setattr(food_router, "notification_service", NotificationService(
-        settings_override=settings, email_transport=capture_email, sms_transport=fail_second_part,
+        settings_override=settings, email_transport=capture_email, sms_transport=capture_sms,
     ))
     request = {
         "user_id": tokens["user_id"], "report_type": "daily",
@@ -450,25 +463,13 @@ def test_both_channels_send_all_details_and_sms_retry_survives_service_restart(c
     assert emails == [] and sms_attempts == []
     first = client.post("/api/v1/send-to-dietitian", headers=headers, json=request)
     assert first.status_code == 200, first.text
-    assert first.json()["status"] == "partial_failed"
+    assert first.json()["status"] == "sent"
     report_id = first.json()["report_id"]
     with SessionLocal() as db:
         stored = db.query(DietitianReport).filter_by(id=report_id).one()
         payload = stored.payload_json
-        assert payload["_sms_delivery"]["parts"][0]["status"] == "sent"
-        assert payload["_sms_delivery"]["parts"][1]["status"] == "failed"
+        assert all(part["status"] == "sent" for part in payload["_sms_delivery"]["parts"])
         assert consent_context_hash(payload) == preview["consent_context_hash"]
-        delivery = db.query(NotificationDelivery).filter_by(report_id=report_id, channel="sms").one()
-        delivery.next_attempt_at = utc_now() - timedelta(seconds=1)
-        db.commit()
-    # New service instance has no in-memory progress: acknowledged parts must come from DB.
-    monkeypatch.setattr(food_router, "notification_service", NotificationService(
-        settings_override=settings, email_transport=capture_email,
-    ))
-    retry = client.post(f"/api/v1/dietitian-reports/{report_id}/retry", headers=_auth(tokens))
-    assert retry.status_code == 200, retry.text
-    assert retry.json()["sent_via_email"] is ("email" in channels)
-    assert retry.json()["sent_via_sms"] is True
     assert len(emails) == int("email" in channels)
     rows = [json.loads(line) for line in (tmp_path / "messages.jsonl").read_text(encoding="utf-8").splitlines()]
     assert [row["body"] for row in rows] == build_sms_parts(payload)
@@ -478,9 +479,9 @@ def test_both_channels_send_all_details_and_sms_retry_survives_service_restart(c
         bodies.extend(part.get_payload(decode=True).decode("utf-8") for part in emails[0].get_payload())
     for record in payload["records"]:
         for body in bodies:
-            assert record["food_name_tr"] in body
-            assert "150 g" in body and "78 kcal" in body
-            assert record["logged_at"] in body
+            assert record["food_name_tr"] not in body
+            assert record["logged_at"] not in body
+    assert all("78 kcal" not in body for body in bodies)
     assert payload["record_count"] == 12
     duplicate = client.post("/api/v1/send-to-dietitian", headers=headers, json=request)
     assert duplicate.json()["duplicate"] is True

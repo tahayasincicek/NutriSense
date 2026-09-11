@@ -180,15 +180,15 @@ class _SendReportWizardState extends ConsumerState<SendReportWizard> {
           onChanged: widget.assignment.phoneVerified
               ? (value) => _toggleChannel('sms', value ?? false)
               : null,
-          title: const Text('SMS — ayrıntılı besin kayıtları'),
+          title: const Text('SMS bildirimi'),
           subtitle: Text(widget.assignment.phoneVerified
               ? widget.assignment.phoneMasked ?? 'Maskeli telefon'
               : 'Telefon doğrulanmamış'),
         ),
         const Text(
-          'SMS içinde besin adları, gram miktarları, tarih-saat ve kaloriler '
-          'paylaşılır. Uzun raporlar numaralı mesajlara bölünür; '
-          'operatör ek SMS ücreti uygulayabilir.',
+          'E-posta ve SMS yalnız yeni rapor bildirimi ile anonim danışan '
+          'kodunu içerir. Besin ve sağlık bilgileri yalnız güvenli '
+          'diyetisyen panelinde görüntülenir.',
         ),
         const SizedBox(height: 16),
         TextField(
@@ -307,9 +307,9 @@ class _SendReportWizardState extends ConsumerState<SendReportWizard> {
               ? null
               : (value) => setState(() => _explicitConsent = value ?? false),
           title: const Text(
-            'Okunan dönem, kayıt sayısı, alıcı ve seçilen kanallarda besin adı, '
-            'miktar, tarih-saat ve kalori paylaşımını bu gönderim için '
-            'açıkça onaylıyorum.',
+            'Okunan dönem ve kayıtların atanmış diyetisyenimin güvenli '
+            'panelinde paylaşılmasını; e-posta ve SMS ile yalnız anonim '
+            'danışan kodlu bildirim gönderilmesini bu işlem için onaylıyorum.',
           ),
           controlAffinity: ListTileControlAffinity.leading,
         ),

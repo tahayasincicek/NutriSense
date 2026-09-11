@@ -57,13 +57,29 @@ void main() {
     await tester.pumpAndSettle();
 
     // Yalnız yurt dışı aktarımına izin verilir.
+    await tester.tap(find.byKey(const Key('privacy_notice_acknowledgement')));
+    await tester.pump();
     await tester.tap(find.byType(Switch).last);
     await tester.pump();
     await tester.tap(find.text('Tercihlerimi Kaydet'));
     await tester.pumpAndSettle();
 
+    expect(adapter.saved['privacy_notice_acknowledgement'], isTrue);
     expect(adapter.saved['health_data_processing'], isFalse);
     expect(adapter.saved['image_cross_border_transfer'], isTrue);
+  });
+
+  testWidgets('aydınlatma teyidi olmadan tercihler kaydedilmez',
+      (tester) async {
+    final adapter = _ConsentAdapter();
+    await tester.pumpWidget(_app(adapter));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Tercihlerimi Kaydet'));
+    await tester.pump();
+
+    expect(adapter.saved, isEmpty);
+    expect(find.textContaining('aydınlatma metnini okuyup'), findsOneWidget);
   });
 
   testWidgets('taslak uyarısı kullanıcıdan gizlenmez', (tester) async {

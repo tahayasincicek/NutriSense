@@ -8,11 +8,19 @@ from collections import defaultdict
 from datetime import date, timedelta
 from typing import Iterable
 
-from .report_messages import REPORT_SCHEMA_VERSION, build_sms_parts
+from .report_messages import REPORT_SCHEMA_VERSION
 
 
 class ReportDeliveryError(ValueError):
     """A user-correctable report preview or delivery error."""
+
+
+def care_recipient_code(user_id: str, assignment_id: str) -> str:
+    """Create a stable, non-reversible code scoped to one care relationship."""
+    digest = hashlib.sha256(
+        f"dietitian-care:{assignment_id}:{user_id}".encode("utf-8")
+    ).hexdigest()
+    return f"D-{digest[:12].upper()}"
 
 
 def mask_email(value: str) -> str:
@@ -119,11 +127,8 @@ def build_report_payload(
         })
     return {
         "schema_version": REPORT_SCHEMA_VERSION,
-        "user_id": str(user.id),
-        "patient_name": user.full_name,
-        "dietitian_id": str(dietitian.id),
+        "patient_code": care_recipient_code(str(user.id), str(assignment.id)),
         "dietitian_name": dietitian.full_name,
-        "assignment_id": str(assignment.id),
         "report_type": report_type,
         "from_date": from_date.isoformat(),
         "to_date": to_date.isoformat(),
@@ -145,10 +150,15 @@ def build_report_payload(
 
 
 def consent_context_hash(payload: dict) -> str:
+    identity_fields = (
+        ("patient_code",)
+        if payload.get("schema_version") == "dietitian-report-v4"
+        else ("user_id", "dietitian_id", "assignment_id")
+    )
     consent_fields = {
         key: payload[key]
         for key in (
-            "schema_version", "user_id", "dietitian_id", "assignment_id",
+            "schema_version", *identity_fields,
             "report_type", "from_date", "to_date", "record_count",
             "channels", "recipients", "records", "message",
         )
@@ -170,14 +180,19 @@ def accessibility_summary(payload: dict) -> str:
         else " Tüm porsiyonlar kullanıcı tarafından kesinleştirilmiştir."
     )
     sms_note = (
-        f" SMS içinde besin adı, gram miktarı, tarih-saat ve kalori paylaşılacak. "
-        f"{len(build_sms_parts(payload))} SMS mesajı hazırlanacak; "
-        "operatör bunları ücretlendirilen ek parçalara bölebilir."
+        " SMS yalnız yeni rapor bildirimi ve danışan kodunu içerecek; "
+        "besin ve sağlık bilgileri SMS'e yazılmayacak."
         if "sms" in payload["channels"] else ""
+    )
+    email_note = (
+        " E-posta yalnız yeni rapor bildirimi ve danışan kodunu içerecek; "
+        "besin ve sağlık bilgileri e-postaya yazılmayacak."
+        if "email" in payload["channels"] else ""
     )
     return (
         f"{payload['from_date']} ile {payload['to_date']} arasındaki "
         f"{payload['record_count']} onaylı kayıt, {payload['dietitian_name']} adlı "
         f"diyetisyene {', '.join(channel_labels)} kanallarıyla gönderilecek."
-        f"{estimate_note}{sms_note} Bu rapor tıbbi tavsiye değildir."
+        f"{estimate_note}{email_note}{sms_note} Ayrıntılar yalnız giriş yapılmış "
+        "diyetisyen panelinde açılabilir. Bu rapor tıbbi tavsiye değildir."
     )

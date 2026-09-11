@@ -25,7 +25,9 @@ mekanizması üniversite/hukuk birimi kararı olmadan kesinleştirilmemiştir.
 | Su, adım, uyku, ruh hâli | Kullanıcının kendi sağlık takibi | Adım toplamı telefonun hareket sensöründen okunur; diğer değerlerle birlikte `health_metrics` tablosunda kullanıcı + gün başına tek satır tutulur | Sağlık verisi; KVKK m.6 özel nitelikli. Hareket izni ve açık rıza gerekir | Güncel sensör sayacı cihazda saklanır; hesap silmede sunucu kaydı cascade ile silinir ve dışa aktarıma dahildir |
 | Kilo ölçümü | Kullanıcının kendi sağlık takibi | `weight_measurements` (zaman serisi) | Sağlık verisi; KVKK m.6 özel nitelikli. Açık rıza gerekir | Hesap silmede cascade; dışa aktarıma dahil |
 | Diyetisyen cevabı | Danışanın raporuna yanıt | `dietitian_reports.dietitian_reply` | Sağlık verisi üzerinden yazışma; ayrı rıza ve aydınlatma değerlendirmesi gerekir | Rapor kaydıyla; kurum retention kararı bekliyor |
+| Diyetisyen sözleşme kabulü | Gizlilik/veri işleme taahhüdünün ispatı | `dietitians.data_processing_agreement_version`, `data_processing_agreement_accepted_at` | Kayıtta zorunlu, sürümlü ve önceden işaretlenmemiş checkbox | Hesap ve sözleşme ispat politikasıyla birlikte saklanır |
 | Ürün rızası kaydı | Açık rızanın ve geri çekilmenin ispatı | `consent_records` (amaç + politika sürümü) | KVKK m.6 açık rıza ispat yükü | Geri çekme kaydı silmez, yeni kayıt yazar; hesap silmede cascade |
+| Aydınlatma teyidi | Kullanıcının güncel aydınlatma metnini gördüğünün ispatı | `consent_records` içinde ayrı `privacy_notice_acknowledgement` olayı | Açık rıza ve haklardan feragat değildir; metin sürümü ve UTC zamanıyla kaydedilir | Hesap ve ispat politikasıyla birlikte saklanır |
 | Survey/usability yanıtı | Etik onaylı HCI araştırması | Ayrı pseudonym alanı, araştırma tabloları | Etik kurul + araştırma hukuki sebebi | Onaylı DMP süresi; withdrawal koduyla silme |
 | Araştırma onam kanıtı | Onam/çekilme ispatı | Sonuçtan ayrı `research_consents` | Etik kurul kararı | Sonuçtan ayrı; çekilmede minimal audit dışında silme |
 | Audit olayları/IP/hash | Güvenlik, rıza ve işlem kanıtı | `audit_events` | Meşru menfaat/kanuni yükümlülük analizi | Öneri 1 yıl; kurum kararı ve anonimleştirme gerekir |
@@ -40,7 +42,7 @@ mekanizması üniversite/hukuk birimi kararı olmadan kesinleştirilmemiştir.
 | Google Gemini (AI Studio) | Sanitize edilmiş görüntü byte'ları | Token, parola, kullanıcı UUID'si, günlük geçmişi | `VISION_PROVIDER_MODE=gemini` ile devreye girer. Vision ile aynı yurtdışı aktarım kararını gerektirir; çok modlu model şartları ayrıca incelenmelidir |
 | Nutritionix | Normalize besin arama adı | Görüntü, hesap kimliği, iletişim | API şartları/attribution ve aktarım değerlendirmesi gerekir |
 | SMTP sağlayıcısı | Onaylı dönem raporu ve alıcı e-posta | Parola/token; onaysız kayıt | Production secret store, TLS ve sağlayıcı sözleşmesi gerekir |
-| Twilio | Kullanıcının onayladığı besin adı, gram miktarı, tarih-saat, kalori ve alıcı telefon | Görüntü, parola/token, onaysız kayıt, serbest not | Her gönderimde v3 ayrıntılı paylaşım onayı; sandbox allowlist; production aktarım/hukuk kararı gerekir |
+| Twilio | Yalnız `D-…` danışan kodlu yeni rapor bildirimi ve alıcı telefon | Besin adı, miktar, tarih-saat, kalori, görüntü, parola/token ve serbest not | Sağlık ayrıntıları yalnız yetkili uygulama içi panelde; production sağlayıcı/aktarım kararı yine gerekir |
 | Firebase Crashlytics | Hiçbir veri | Tüm veriler | Yapılandırılmamış ve kod kapısı nedeniyle devre dışı |
 
 Sağlayıcıların ülke/alt işleyen/retention bilgileri teknik depodan
@@ -68,7 +70,7 @@ sözleşme ve aktarım mekanizması kaydedilmelidir.
 2. Besin kaydı yalnız kullanıcı onayından sonra oluşur.
 3. Diyetisyen raporu yalnız onaylanmış kayıtlardan ve her gönderimde yeni açık
    onayla hazırlanır; alıcı önizlemede maskelenir.
-4. Yeni SMS raporları seçilen dönemin onaylı besin adı, gram, tarih-saat ve kalori kayıtlarını içerir; uzun raporlar numaralı mesajlara bölünür. Eski v2 raporları yeniden denenirken yalnız eski özet korunur.
+4. Yeni v4 e-posta/SMS iletileri yalnız yeni rapor bildirimi ve `D-…` danışan kodu içerir. Besin adı, miktar, tarih-saat, kalori ve kullanıcı notu yalnız atanmış diyetisyenin giriş yaptığı uygulama içi panelde gösterilir.
 5. Araştırma pseudonym'i hesap UUID'si değildir; onam sonucu verisinden ayrıdır.
 6. Gerçek araştırma modu gerçek protocol/consent/approval alanları olmadan
    açılmaz; geliştirme sentetik fixture kullanır.

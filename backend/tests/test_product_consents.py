@@ -35,6 +35,7 @@ def test_consents_start_empty(client):
     body = response.json()
     assert body["health_data_processing"] is False
     assert body["image_cross_border_transfer"] is False
+    assert body["privacy_notice_acknowledgement"] is False
     assert body["consents"] == []
 
 
@@ -57,6 +58,29 @@ def test_consent_can_be_granted_and_revoked(client):
     })
     assert revoked.status_code == 200, revoked.text
     assert revoked.json()["image_cross_border_transfer"] is False
+
+
+def test_privacy_notice_acknowledgement_is_versioned_and_recorded(client):
+    from app.models.database import ConsentRecord, SessionLocal
+
+    user = _register(client, "aydinlatma-kanit@example.com")
+    response = client.put(
+        "/api/v1/consents",
+        headers=_auth(user),
+        json={
+            "consent_type": "privacy_notice_acknowledgement",
+            "granted": True,
+        },
+    )
+    assert response.status_code == 200
+    assert response.json()["privacy_notice_acknowledgement"] is True
+    with SessionLocal() as db:
+        record = db.query(ConsentRecord).filter_by(
+            user_id=user["user_id"],
+            consent_type="privacy_notice_acknowledgement",
+        ).one()
+        assert record.policy_version
+        assert record.granted_at is not None
 
 
 def test_revocation_keeps_the_earlier_record_as_evidence(client):

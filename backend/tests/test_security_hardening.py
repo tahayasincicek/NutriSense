@@ -33,10 +33,12 @@ def _valid_production_settings(**overrides) -> Settings:
         "jwt_secret_key": "j" * 40,
         "secret_key": "a" * 40,
         "research_export_token": "r" * 40,
+        "research_pseudonymization_key": "p" * 40,
         "trusted_hosts": "api.nutrisense.example",
         "cors_origins": "https://app.nutrisense.example",
         "cors_allow_credentials": False,
         "research_mode": "disabled",
+        "privacy_notice_version": "KVKK-NOTICE-APPROVED-2026-01",
         "notification_mode": "disabled",
     }
     values.update(overrides)
@@ -56,6 +58,20 @@ def test_production_requires_https_closed_docs_and_explicit_allowlists():
         _valid_production_settings(trusted_hosts="*").validate_security()
     with pytest.raises(RuntimeError, match="CORS"):
         _valid_production_settings(cors_origins="*").validate_security()
+
+
+def test_production_requires_separate_research_pseudonymization_key():
+    with pytest.raises(RuntimeError, match="pseudonimleştirme"):
+        _valid_production_settings(
+            research_pseudonymization_key="development-only-research-pseudonym-key"
+        ).validate_security()
+
+
+def test_production_rejects_unpublished_privacy_notice():
+    with pytest.raises(RuntimeError, match="PRIVACY_NOTICE_VERSION"):
+        _valid_production_settings(
+            privacy_notice_version="taslak-yayinlanmadi"
+        ).validate_security()
 
 
 def test_jwt_has_bound_issuer_audience_time_type_and_unique_identifier():

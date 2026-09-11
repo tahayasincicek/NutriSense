@@ -520,6 +520,8 @@ class DietitianCreate(BaseModel):
     full_name: str = Field(..., min_length=2, max_length=255)
     phone: Optional[str] = Field(default=None, pattern=r"^\+?[1-9][0-9]{7,14}$")
     specialization: str = Field(default="Beslenme ve Diyet", min_length=2, max_length=255)
+    data_processing_agreement_accepted: Literal[True]
+    data_processing_agreement_version: str = Field(min_length=1, max_length=64)
 
     @field_validator("password")
     @classmethod
@@ -649,6 +651,7 @@ class ProductConsentUpdate(BaseModel):
     açık rızanın belirli bir konuya ilişkin olmasını arar.
     """
     consent_type: Literal[
+        "privacy_notice_acknowledgement",
         "health_data_processing",
         "image_cross_border_transfer",
     ]
@@ -667,6 +670,7 @@ class ProductConsentState(BaseModel):
     consents: list[ProductConsentItem]
 
     # İstemcinin akışı kurabilmesi için özet bayraklar.
+    privacy_notice_acknowledgement: bool = False
     health_data_processing: bool = False
     image_cross_border_transfer: bool = False
 

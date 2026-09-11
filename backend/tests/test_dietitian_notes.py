@@ -19,6 +19,8 @@ def _linked_pair(client, slug: str) -> tuple[dict, dict, str]:
         "password": PASSWORD,
         "full_name": "Sentetik Diyetisyen",
         "specialization": "Beslenme ve Diyet",
+        "data_processing_agreement_accepted": True,
+        "data_processing_agreement_version": "DIETITIAN-DPA-2026-01",
     }).json()
     patient_headers = _auth(patient)
     dietitian_headers = _auth(dietitian)
@@ -94,6 +96,8 @@ def test_notes_are_closed_to_unassigned_dietitian(client):
         "password": PASSWORD,
         "full_name": "Yabancı Diyetisyen",
         "specialization": "Beslenme ve Diyet",
+        "data_processing_agreement_accepted": True,
+        "data_processing_agreement_version": "DIETITIAN-DPA-2026-01",
     }).json()
     base = f"/api/v1/dietitian/patients/{user_id}/notes"
 

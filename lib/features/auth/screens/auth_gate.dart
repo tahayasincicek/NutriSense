@@ -7,6 +7,7 @@ import '../state/auth_controller.dart';
 import '../../onboarding/screens/onboarding_screen.dart';
 import '../../dietitian/screens/dietitian_dashboard_screen.dart';
 import 'login_screen.dart';
+import 'privacy_consent_screen.dart';
 
 class AuthGate extends ConsumerWidget {
   const AuthGate({super.key});
@@ -46,6 +47,9 @@ class AuthGate extends ConsumerWidget {
         currentWidget = auth.user?.accountType == 'dietitian'
             ? const DietitianDashboardScreen()
             : const _OnboardingGate();
+        break;
+      case AuthStatus.privacyNoticeRequired:
+        currentWidget = const PrivacyConsentScreen(requiredForEntry: true);
         break;
       case AuthStatus.unauthenticated:
         currentWidget = const LoginScreen();

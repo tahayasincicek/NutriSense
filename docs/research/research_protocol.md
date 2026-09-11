@@ -110,12 +110,13 @@ Onam sonuç verisinden ayrı tabloda tutulur. Varsayılan erişilebilir alternat
 
 ## 10. Etik onay kapısı
 
-Gerçek veri toplamadan önce backend ve mobil yapılandırmada şu dört alan doğrulanır:
+Gerçek veri toplamadan önce backend ve mobil yapılandırmada şu beş alan doğrulanır:
 
 - `RESEARCH_MODE=approved`
 - gerçek `RESEARCH_PROTOCOL_VERSION`
 - gerçek `RESEARCH_CONSENT_VERSION`
 - gerçek `RESEARCH_APPROVAL_REFERENCE`
+- secret store'dan sağlanan güçlü `RESEARCH_PSEUDONYMIZATION_KEY`
 
 Boş, TODO, placeholder veya örnek değer kapıyı açmaz. Onay öncesi yalnız `synthetic` kaynaklı fixture kabul edilir; sentetik kayıtlar araştırma istatistiğine dahil edilmez.
 
