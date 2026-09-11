@@ -483,6 +483,9 @@ class UserCreate(BaseModel):
     full_name: str = Field(..., min_length=2, max_length=255)
     phone: Optional[str] = None
     daily_calorie_target: float = Field(default=2000.0, ge=500, le=10000)
+    # Yaş sınırı ve veli onayı akışı hukuken belirlenene kadar hizmet
+    # yetişkinlere açıktır; beyan verilmeden hesap açılmaz.
+    adult_confirmed: Literal[True]
 
     @field_validator("password")
     @classmethod

@@ -89,11 +89,13 @@ class AuthController extends StateNotifier<AuthState> {
     required String fullName,
     required String email,
     required String password,
+    required bool adultConfirmed,
   }) async {
     final result = await _api.register(
       email: email,
       password: password,
       fullName: fullName,
+      adultConfirmed: adultConfirmed,
     );
     if (!result.isSuccess) {
       state = const AuthState(AuthStatus.unauthenticated);

@@ -16,6 +16,7 @@ def _register(client, email: str) -> dict:
         "email": email,
         "password": PASSWORD,
         "full_name": "Sentetik Kullanıcı",
+        "adult_confirmed": True,
     })
     assert response.status_code == 201, response.text
     return response.json()

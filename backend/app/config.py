@@ -110,6 +110,18 @@ class Settings(BaseSettings):
     # Ürün tarafı aydınlatma metni sürümü. Rıza kayıtları bu sürümle
     # damgalanır; metin değişince yeni rıza istenebilmesi için gereklidir.
     privacy_notice_version: str = "taslak-yayinlanmadi"
+    # KVKK aydınlatmasında adı geçen veri sorumlusu ve ilgili kişi başvuru
+    # kanalı. Kurum kararı olmadan production başlatılmaz.
+    data_controller_name: str = ""
+    data_controller_contact_email: str = ""
+    data_controller_postal_address: str = ""
+    # Yurt dışına veri gönderebilen sağlayıcılar etkinse KVKK m.9 aktarım
+    # değerlendirmesinin ve imzalı standart sözleşme bildiriminin kayıt no'su.
+    cross_border_transfer_reference: str = ""
+    # Ücretsiz Gemini katmanı gönderilen içeriği ürün geliştirmede
+    # kullanabilir; sağlık bağlamındaki fotoğraf yalnız faturalandırmalı
+    # projede gönderilebilir.
+    gemini_paid_tier_confirmed: bool = False
     research_approval_reference: str = ""
     research_audio_consent_approved: bool = False
     migration_check_enabled: bool = True
@@ -333,6 +345,32 @@ class Settings(BaseSettings):
                 raise RuntimeError("Production sandbox bildirim modunda başlatılamaz.")
             if self.research_mode == "synthetic":
                 raise RuntimeError("Production araştırma modu synthetic olamaz.")
+            controller = {
+                "DATA_CONTROLLER_NAME": self.data_controller_name,
+                "DATA_CONTROLLER_CONTACT_EMAIL": self.data_controller_contact_email,
+            }
+            missing = [
+                name for name, value in controller.items()
+                if _unsafe_research_value(value)
+            ]
+            if missing or "@" not in self.data_controller_contact_email:
+                raise RuntimeError(
+                    "Production için veri sorumlusu ve ilgili kişi başvuru "
+                    f"kanalı gerekli: {', '.join(missing) or 'DATA_CONTROLLER_CONTACT_EMAIL'}"
+                )
+            if self.cross_border_providers and _unsafe_research_value(
+                self.cross_border_transfer_reference
+            ):
+                raise RuntimeError(
+                    "Yurt dışına veri gönderebilen sağlayıcı etkin "
+                    f"({', '.join(self.cross_border_providers)}); KVKK m.9 "
+                    "değerlendirmesi için CROSS_BORDER_TRANSFER_REFERENCE gereklidir."
+                )
+            if self.vision_provider_mode == "gemini" and not self.gemini_paid_tier_confirmed:
+                raise RuntimeError(
+                    "Production'da Gemini yalnız faturalandırmalı katmanda "
+                    "kullanılabilir; GEMINI_PAID_TIER_CONFIRMED=true gereklidir."
+                )
 
         if environment == "test":
             self.validate_test_database_safety()
@@ -374,6 +412,24 @@ class Settings(BaseSettings):
                 digest.update(chunk)
         if digest.hexdigest() != expected:
             raise RuntimeError("ML artefakt checksum doğrulaması başarısız.")
+
+    @property
+    def cross_border_providers(self) -> list[str]:
+        """Etkin olduğunda veriyi Türkiye dışına çıkarabilecek sağlayıcılar.
+
+        SMTP sağlayıcısının ülkesi yapılandırmadan anlaşılamaz; yurt içi olsa
+        bile değerlendirmenin kaydı aynı referansla belgelenir.
+        """
+        providers = []
+        if self.vision_provider_mode in {"google", "gemini"}:
+            providers.append(self.vision_provider_mode)
+        if self.nutrition_provider_mode in {"nutritionix", "hybrid"}:
+            providers.append("nutritionix")
+        if self.sms_provider_mode == "twilio":
+            providers.append("twilio")
+        if self.notification_mode == "production":
+            providers.append("smtp")
+        return providers
 
     @property
     def public_capabilities(self) -> dict[str, object]:

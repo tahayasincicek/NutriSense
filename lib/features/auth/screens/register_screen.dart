@@ -20,6 +20,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   final _password = TextEditingController();
   final _confirmation = TextEditingController();
   bool _loading = false;
+  bool _adultConfirmed = false;
 
   static bool _isValidPassword(String value) =>
       value.length >= 8 &&
@@ -158,7 +159,36 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                                 : 'Şifreler eşleşmiyor',
                           ),
                         ),
-                        const SizedBox(height: 32),
+                        const SizedBox(height: 16),
+                        // Yaş sınırı ve veli onayı hukuken belirlenene kadar
+                        // hizmet yalnız yetişkinlere açılır.
+                        // Satır, adı ve işaret durumu olan tek bir onay
+                        // kutusu olarak duyurulur. İç kutucuğun semantiği
+                        // kapatılır; yoksa ekran okuyucu onu adsız bir düğme
+                        // olarak ayrıca okur.
+                        Semantics(
+                          container: true,
+                          checked: _adultConfirmed,
+                          enabled: !_loading,
+                          label: '18 yaşından büyüğüm. '
+                              'NutriSense yalnız yetişkin kullanıcılar içindir.',
+                          onTap: _loading ? null : _toggleAdultConfirmed,
+                          child: ExcludeSemantics(
+                            child: CheckboxListTile(
+                              key: const Key('register_adult_confirmation'),
+                              value: _adultConfirmed,
+                              onChanged: _loading
+                                  ? null
+                                  : (_) => _toggleAdultConfirmed(),
+                              controlAffinity: ListTileControlAffinity.leading,
+                              contentPadding: EdgeInsets.zero,
+                              title: const Text('18 yaşından büyüğüm'),
+                              subtitle: const Text(
+                                  'NutriSense yalnız yetişkin kullanıcılar içindir.'),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 16),
                         AccessibleButton(
                           label: 'Hesap Oluştur',
                           semanticLabel:
@@ -179,13 +209,24 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     );
   }
 
+  void _toggleAdultConfirmed() =>
+      setState(() => _adultConfirmed = !_adultConfirmed);
+
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
+    if (!_adultConfirmed) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+        content: Text(
+            'Hesap oluşturmak için 18 yaşından büyük olduğunuzu onaylayın.'),
+      ));
+      return;
+    }
     setState(() => _loading = true);
     final error = await ref.read(authControllerProvider.notifier).register(
           fullName: _name.text.trim(),
           email: _email.text.trim(),
           password: _password.text,
+          adultConfirmed: _adultConfirmed,
         );
     if (!mounted) return;
     setState(() => _loading = false);

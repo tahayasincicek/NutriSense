@@ -27,6 +27,7 @@ def register(client, email: str) -> dict:
             "email": email,
             "password": PASSWORD,
             "full_name": "Test Kullanıcısı",
+            "adult_confirmed": True,
         },
     )
     assert response.status_code == 201, response.text
@@ -44,6 +45,7 @@ def test_password_policy_is_shared_across_register_and_reset(client):
             "email": "weak@example.com",
             "password": "abcdefgh",
             "full_name": "Weak User",
+            "adult_confirmed": True,
         },
     )
     assert weak.status_code == 422

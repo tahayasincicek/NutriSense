@@ -32,6 +32,7 @@ from .models.database import engine
 from .operations.metrics import runtime_metrics
 from .security.logging import configure_secure_logging
 from .routers.food_router import router as food_router
+from .routers.legal_router import router as legal_router
 from .routers.survey_router import router as survey_router
 
 settings = get_settings()
@@ -272,6 +273,7 @@ async def server_error_handler(request: Request, exc):
 
 app.include_router(food_router)
 app.include_router(survey_router)
+app.include_router(legal_router)
 
 
 def database_readiness() -> dict:

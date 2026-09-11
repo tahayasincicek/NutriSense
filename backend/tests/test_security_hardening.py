@@ -40,6 +40,8 @@ def _valid_production_settings(**overrides) -> Settings:
         "research_mode": "disabled",
         "privacy_notice_version": "KVKK-NOTICE-APPROVED-2026-01",
         "notification_mode": "disabled",
+        "data_controller_name": "NutriSense Proje Ekibi",
+        "data_controller_contact_email": "kvkk@nutrisense.org.tr",
     }
     values.update(overrides)
     return Settings(**values)
@@ -172,6 +174,7 @@ def test_self_service_correction_and_export_are_owned_and_audited(client):
                 "email": email,
                 "password": "SyntheticPassword123",
                 "full_name": "Sentetik Kullanıcı",
+                "adult_confirmed": True,
             },
         )
         assert response.status_code == 201
