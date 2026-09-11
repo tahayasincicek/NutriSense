@@ -78,7 +78,7 @@ class _NutritionStatsScreenState extends ConsumerState<NutritionStatsScreen> {
         borderRadius: BorderRadius.circular(AppTheme.cardRadius),
         boxShadow: [
           BoxShadow(
-              color: theme.colorScheme.secondary.withOpacity(0.3),
+              color: theme.colorScheme.secondary.withValues(alpha: 0.3),
               blurRadius: 15,
               offset: const Offset(0, 8))
         ],
@@ -92,7 +92,7 @@ class _NutritionStatsScreenState extends ConsumerState<NutritionStatsScreen> {
               const SizedBox(width: 8),
               Text('GÜNÜN TAVSİYESİ',
                   style: theme.textTheme.labelLarge?.copyWith(
-                      color: Colors.white.withOpacity(0.9),
+                      color: Colors.white.withValues(alpha: 0.9),
                       letterSpacing: 1.2)),
             ],
           ),
@@ -145,7 +145,8 @@ class _NutritionStatsScreenState extends ConsumerState<NutritionStatsScreen> {
         decoration: BoxDecoration(
           color: theme.colorScheme.surface,
           borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: theme.colorScheme.outline.withOpacity(0.2)),
+          border: Border.all(
+              color: theme.colorScheme.outline.withValues(alpha: 0.2)),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -198,7 +199,8 @@ class _NutritionStatsScreenState extends ConsumerState<NutritionStatsScreen> {
         decoration: BoxDecoration(
           color: theme.colorScheme.surface,
           borderRadius: BorderRadius.circular(AppTheme.cardRadius),
-          border: Border.all(color: theme.colorScheme.outline.withOpacity(0.2)),
+          border: Border.all(
+              color: theme.colorScheme.outline.withValues(alpha: 0.2)),
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -254,7 +256,8 @@ class _NutritionStatsScreenState extends ConsumerState<NutritionStatsScreen> {
       decoration: BoxDecoration(
         color: theme.colorScheme.surface,
         borderRadius: BorderRadius.circular(AppTheme.cardRadius),
-        border: Border.all(color: theme.colorScheme.outline.withOpacity(0.2)),
+        border:
+            Border.all(color: theme.colorScheme.outline.withValues(alpha: 0.2)),
       ),
       child: Semantics(
         container: true,

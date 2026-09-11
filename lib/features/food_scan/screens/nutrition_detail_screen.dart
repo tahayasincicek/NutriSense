@@ -177,7 +177,7 @@ class _NutritionDetailScreenState extends ConsumerState<NutritionDetailScreen> {
                         gradient: LinearGradient(
                           colors: [
                             theme.colorScheme.primary,
-                            theme.colorScheme.primary.withOpacity(0.7),
+                            theme.colorScheme.primary.withValues(alpha: 0.7),
                           ],
                           begin: Alignment.topLeft,
                           end: Alignment.bottomRight,
@@ -213,7 +213,7 @@ class _NutritionDetailScreenState extends ConsumerState<NutritionDetailScreen> {
                             horizontal: 12, vertical: 4),
                         decoration: BoxDecoration(
                           color: _confidenceColor(widget.confidence)
-                              .withOpacity(0.15),
+                              .withValues(alpha: 0.15),
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: Text(
@@ -259,7 +259,7 @@ class _NutritionDetailScreenState extends ConsumerState<NutritionDetailScreen> {
                         'kcal',
                         style: theme.textTheme.titleMedium?.copyWith(
                           color: theme.colorScheme.onPrimaryContainer
-                              .withOpacity(0.7),
+                              .withValues(alpha: 0.7),
                         ),
                       ),
                     ],
@@ -390,7 +390,7 @@ class _NutrientBar extends StatelessWidget {
             child: LinearProgressIndicator(
               value: progress,
               minHeight: 8,
-              backgroundColor: color.withOpacity(0.15),
+              backgroundColor: color.withValues(alpha: 0.15),
               valueColor: AlwaysStoppedAnimation(color),
             ),
           ),

@@ -224,7 +224,8 @@ class _FoodScanScreenState extends ConsumerState<FoodScanScreen> {
       decoration: BoxDecoration(
         color: theme.colorScheme.surface,
         borderRadius: BorderRadius.circular(AppTheme.cardRadius),
-        border: Border.all(color: theme.colorScheme.outline.withOpacity(0.3)),
+        border:
+            Border.all(color: theme.colorScheme.outline.withValues(alpha: 0.3)),
       ),
       child: Column(
         children: [
@@ -260,7 +261,7 @@ class _FoodScanScreenState extends ConsumerState<FoodScanScreen> {
             child: LinearProgressIndicator(
               value: goal.progress.clamp(0.0, 1.0),
               minHeight: 12,
-              backgroundColor: theme.colorScheme.primary.withOpacity(0.1),
+              backgroundColor: theme.colorScheme.primary.withValues(alpha: 0.1),
               valueColor: AlwaysStoppedAnimation(theme.colorScheme.primary),
             ),
           ),
@@ -280,14 +281,15 @@ class _FoodScanScreenState extends ConsumerState<FoodScanScreen> {
       decoration: BoxDecoration(
         color: theme.colorScheme.surface,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: theme.colorScheme.outline.withOpacity(0.2)),
+        border:
+            Border.all(color: theme.colorScheme.outline.withValues(alpha: 0.2)),
       ),
       child: Row(
         children: [
           Container(
             padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(
-                color: color.withOpacity(0.1), shape: BoxShape.circle),
+                color: color.withValues(alpha: 0.1), shape: BoxShape.circle),
             child: Icon(icon, color: color, size: 24),
           ),
           const SizedBox(width: 16),
@@ -372,7 +374,8 @@ class _DashboardMiniCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: theme.colorScheme.surface,
         borderRadius: BorderRadius.circular(AppTheme.cardRadius),
-        border: Border.all(color: theme.colorScheme.outline.withOpacity(0.2)),
+        border:
+            Border.all(color: theme.colorScheme.outline.withValues(alpha: 0.2)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -389,7 +392,7 @@ class _DashboardMiniCard extends StatelessWidget {
             child: LinearProgressIndicator(
                 value: progress.clamp(0.0, 1.0),
                 minHeight: 4,
-                backgroundColor: color.withOpacity(0.1),
+                backgroundColor: color.withValues(alpha: 0.1),
                 valueColor: AlwaysStoppedAnimation(color)),
           ),
         ],
@@ -429,7 +432,7 @@ class _ScanHero extends StatelessWidget {
             ),
             boxShadow: [
               BoxShadow(
-                  color: AppTheme.primaryColor.withOpacity(0.3),
+                  color: AppTheme.primaryColor.withValues(alpha: 0.3),
                   blurRadius: 20,
                   offset: const Offset(0, 10))
             ],
@@ -440,7 +443,7 @@ class _ScanHero extends StatelessWidget {
                   right: -10,
                   bottom: -10,
                   child: Icon(Icons.camera_alt_rounded,
-                      size: 140, color: Colors.white.withOpacity(0.15))),
+                      size: 140, color: Colors.white.withValues(alpha: 0.15))),
               Padding(
                 padding: const EdgeInsets.all(24),
                 child: Column(
@@ -452,7 +455,7 @@ class _ScanHero extends StatelessWidget {
                       padding: const EdgeInsets.symmetric(
                           horizontal: 10, vertical: 4),
                       decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.2),
+                          color: Colors.white.withValues(alpha: 0.2),
                           borderRadius: BorderRadius.circular(8)),
                       child: const Text('HIZLI TARAMA',
                           style: TextStyle(
@@ -466,7 +469,7 @@ class _ScanHero extends StatelessWidget {
                             color: Colors.white, fontWeight: FontWeight.w900)),
                     Text('Kamerayı yemeğine tut ve sonucu dinle.',
                         style: TextStyle(
-                            color: Colors.white.withOpacity(0.8),
+                            color: Colors.white.withValues(alpha: 0.8),
                             fontSize: 13)),
                   ],
                 ),

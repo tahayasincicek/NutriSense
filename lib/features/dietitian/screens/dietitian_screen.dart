@@ -158,9 +158,10 @@ class _DietitianScreenState extends ConsumerState<DietitianScreen> {
           margin: const EdgeInsets.only(bottom: 16),
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
-            color: AppTheme.errorColor.withOpacity(0.1),
+            color: AppTheme.errorColor.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: AppTheme.errorColor.withOpacity(0.3)),
+            border:
+                Border.all(color: AppTheme.errorColor.withValues(alpha: 0.3)),
           ),
           child:
               Text(message, style: const TextStyle(color: AppTheme.errorColor)),
@@ -177,7 +178,8 @@ class _DietitianScreenState extends ConsumerState<DietitianScreen> {
       decoration: BoxDecoration(
         color: theme.colorScheme.surface,
         borderRadius: BorderRadius.circular(AppTheme.cardRadius),
-        border: Border.all(color: theme.colorScheme.outline.withOpacity(0.2)),
+        border:
+            Border.all(color: theme.colorScheme.outline.withValues(alpha: 0.2)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -195,7 +197,7 @@ class _DietitianScreenState extends ConsumerState<DietitianScreen> {
                 ),
                 boxShadow: [
                   BoxShadow(
-                    color: AppTheme.primaryColor.withOpacity(0.3),
+                    color: AppTheme.primaryColor.withValues(alpha: 0.3),
                     blurRadius: 16,
                     offset: const Offset(0, 6),
                   ),
@@ -278,8 +280,8 @@ class _DietitianScreenState extends ConsumerState<DietitianScreen> {
         // kartlarla aynı nötr kenarlık kullanılır.
         border: Border.all(
             color: isApproved
-                ? AppTheme.primaryColor.withOpacity(0.3)
-                : theme.colorScheme.outline.withOpacity(0.2)),
+                ? AppTheme.primaryColor.withValues(alpha: 0.3)
+                : theme.colorScheme.outline.withValues(alpha: 0.2)),
       ),
       child: Column(
         children: [
@@ -293,7 +295,8 @@ class _DietitianScreenState extends ConsumerState<DietitianScreen> {
               children: [
                 CircleAvatar(
                   radius: 35,
-                  backgroundColor: theme.colorScheme.primary.withOpacity(0.1),
+                  backgroundColor:
+                      theme.colorScheme.primary.withValues(alpha: 0.1),
                   child: Text(assignment.dietitianName[0],
                       style: TextStyle(
                           fontSize: 24,
@@ -310,8 +313,8 @@ class _DietitianScreenState extends ConsumerState<DietitianScreen> {
                       const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
                   decoration: BoxDecoration(
                     color: isApproved
-                        ? theme.colorScheme.primary.withOpacity(0.1)
-                        : Colors.amber.withOpacity(0.1),
+                        ? theme.colorScheme.primary.withValues(alpha: 0.1)
+                        : Colors.amber.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: Text(

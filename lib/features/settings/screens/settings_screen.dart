@@ -391,7 +391,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             child: Text(
               'NutriSense v1.0.0',
               style: theme.textTheme.bodySmall?.copyWith(
-                  color: theme.colorScheme.onSurfaceVariant.withOpacity(0.5)),
+                  color: theme.colorScheme.onSurfaceVariant
+                      .withValues(alpha: 0.5)),
             ),
           ),
         ],
@@ -404,7 +405,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: theme.colorScheme.primary.withOpacity(0.1),
+        color: theme.colorScheme.primary.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(AppTheme.cardRadius),
       ),
       child: Semantics(
@@ -447,7 +448,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       decoration: BoxDecoration(
         color: theme.colorScheme.surface,
         borderRadius: BorderRadius.circular(AppTheme.cardRadius),
-        border: Border.all(color: theme.colorScheme.outline.withOpacity(0.3)),
+        border:
+            Border.all(color: theme.colorScheme.outline.withValues(alpha: 0.3)),
       ),
       child: Column(children: children),
     );

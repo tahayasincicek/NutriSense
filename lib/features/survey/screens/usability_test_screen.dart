@@ -331,7 +331,7 @@ class _UsabilityTestScreenState extends ConsumerState<UsabilityTestScreen> {
                     height: 32,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      color: statusColors[task.status]?.withOpacity(0.15),
+                      color: statusColors[task.status]?.withValues(alpha: 0.15),
                     ),
                     child: Center(
                       child: Text(
@@ -365,7 +365,7 @@ class _UsabilityTestScreenState extends ConsumerState<UsabilityTestScreen> {
                     padding:
                         const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                     decoration: BoxDecoration(
-                      color: statusColors[task.status]?.withOpacity(0.15),
+                      color: statusColors[task.status]?.withValues(alpha: 0.15),
                       borderRadius: BorderRadius.circular(AppTheme.cardRadius),
                     ),
                     child: Text(

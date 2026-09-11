@@ -99,7 +99,7 @@ class DiscoverScreen extends StatelessWidget {
                     padding:
                         const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.25),
+                      color: Colors.white.withValues(alpha: 0.25),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: const Text('HAFTANIN TARİFİ',
@@ -196,8 +196,8 @@ class DiscoverScreen extends StatelessWidget {
           child: Container(
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(20),
-              border:
-                  Border.all(color: theme.colorScheme.outline.withOpacity(0.2)),
+              border: Border.all(
+                  color: theme.colorScheme.outline.withValues(alpha: 0.2)),
             ),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,

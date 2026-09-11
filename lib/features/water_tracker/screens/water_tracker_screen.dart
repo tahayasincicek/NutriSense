@@ -68,11 +68,11 @@ class ActivityTrackerScreen extends ConsumerWidget {
           decoration: BoxDecoration(
             color: theme.colorScheme.surface,
             borderRadius: BorderRadius.circular(AppTheme.cardRadius),
-            border:
-                Border.all(color: theme.colorScheme.outline.withOpacity(0.2)),
+            border: Border.all(
+                color: theme.colorScheme.outline.withValues(alpha: 0.2)),
             boxShadow: [
               BoxShadow(
-                color: AppTheme.secondaryColor.withOpacity(0.05),
+                color: AppTheme.secondaryColor.withValues(alpha: 0.05),
                 blurRadius: 20,
                 offset: const Offset(0, 8),
               ),
@@ -104,7 +104,8 @@ class ActivityTrackerScreen extends ConsumerWidget {
                 child: LinearProgressIndicator(
                   value: state.stepProgress.clamp(0.0, 1.0),
                   minHeight: 12,
-                  backgroundColor: AppTheme.secondaryColor.withOpacity(0.1),
+                  backgroundColor:
+                      AppTheme.secondaryColor.withValues(alpha: 0.1),
                   valueColor:
                       const AlwaysStoppedAnimation(AppTheme.secondaryColor),
                 ),
@@ -153,8 +154,8 @@ class ActivityTrackerScreen extends ConsumerWidget {
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(AppTheme.cardRadius),
-              border:
-                  Border.all(color: theme.colorScheme.outline.withOpacity(0.2)),
+              border: Border.all(
+                  color: theme.colorScheme.outline.withValues(alpha: 0.2)),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -189,7 +190,7 @@ class ActivityTrackerScreen extends ConsumerWidget {
                   child: LinearProgressIndicator(
                     value: state.sleepProgress.clamp(0.0, 1.0),
                     minHeight: 4,
-                    backgroundColor: Colors.indigo.withOpacity(0.1),
+                    backgroundColor: Colors.indigo.withValues(alpha: 0.1),
                     valueColor: const AlwaysStoppedAnimation(Colors.indigo),
                   ),
                 ),
@@ -222,8 +223,8 @@ class ActivityTrackerScreen extends ConsumerWidget {
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(AppTheme.cardRadius),
-              border:
-                  Border.all(color: theme.colorScheme.outline.withOpacity(0.2)),
+              border: Border.all(
+                  color: theme.colorScheme.outline.withValues(alpha: 0.2)),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -258,7 +259,8 @@ class ActivityTrackerScreen extends ConsumerWidget {
                   child: LinearProgressIndicator(
                     value: state.waterProgress.clamp(0.0, 1.0),
                     minHeight: 4,
-                    backgroundColor: AppTheme.primaryColor.withOpacity(0.1),
+                    backgroundColor:
+                        AppTheme.primaryColor.withValues(alpha: 0.1),
                     valueColor:
                         const AlwaysStoppedAnimation(AppTheme.primaryColor),
                   ),
@@ -297,7 +299,8 @@ class ActivityTrackerScreen extends ConsumerWidget {
       decoration: BoxDecoration(
         color: theme.colorScheme.surface,
         borderRadius: BorderRadius.circular(AppTheme.cardRadius),
-        border: Border.all(color: theme.colorScheme.outline.withOpacity(0.2)),
+        border:
+            Border.all(color: theme.colorScheme.outline.withValues(alpha: 0.2)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -339,7 +342,7 @@ class ActivityTrackerScreen extends ConsumerWidget {
                       padding: const EdgeInsets.all(12),
                       decoration: BoxDecoration(
                         color: isSelected
-                            ? theme.colorScheme.primary.withOpacity(0.1)
+                            ? theme.colorScheme.primary.withValues(alpha: 0.1)
                             : Colors.transparent,
                         shape: BoxShape.circle,
                         border: Border.all(
@@ -367,7 +370,8 @@ class ActivityTrackerScreen extends ConsumerWidget {
       decoration: BoxDecoration(
         color: theme.colorScheme.surface,
         borderRadius: BorderRadius.circular(AppTheme.cardRadius),
-        border: Border.all(color: theme.colorScheme.outline.withOpacity(0.2)),
+        border:
+            Border.all(color: theme.colorScheme.outline.withValues(alpha: 0.2)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -468,7 +472,8 @@ class ActivityTrackerScreen extends ConsumerWidget {
       decoration: BoxDecoration(
         color: theme.colorScheme.surface,
         borderRadius: BorderRadius.circular(AppTheme.cardRadius),
-        border: Border.all(color: theme.colorScheme.outline.withOpacity(0.2)),
+        border:
+            Border.all(color: theme.colorScheme.outline.withValues(alpha: 0.2)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -520,7 +525,7 @@ class ActivityTrackerScreen extends ConsumerWidget {
                   width: 30,
                   height: 30,
                   decoration: BoxDecoration(
-                    color: AppTheme.primaryColor.withOpacity(0.1),
+                    color: AppTheme.primaryColor.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Center(
@@ -555,16 +560,16 @@ class ActivityTrackerScreen extends ConsumerWidget {
                 decoration: BoxDecoration(
                   color: badge.isUnlocked
                       ? Colors.white
-                      : Colors.grey.withOpacity(0.05),
+                      : Colors.grey.withValues(alpha: 0.05),
                   borderRadius: BorderRadius.circular(20),
                   border: Border.all(
                       color: badge.isUnlocked
-                          ? AppTheme.primaryColor.withOpacity(0.3)
+                          ? AppTheme.primaryColor.withValues(alpha: 0.3)
                           : Colors.transparent),
                   boxShadow: badge.isUnlocked
                       ? [
                           BoxShadow(
-                              color: Colors.black.withOpacity(0.05),
+                              color: Colors.black.withValues(alpha: 0.05),
                               blurRadius: 10)
                         ]
                       : null,

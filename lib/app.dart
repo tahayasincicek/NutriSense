@@ -443,7 +443,8 @@ class _AppShellState extends ConsumerState<AppShell>
             left: -100,
             child: CircleAvatar(
                 radius: 200,
-                backgroundColor: theme.colorScheme.primary.withOpacity(0.05)),
+                backgroundColor:
+                    theme.colorScheme.primary.withValues(alpha: 0.05)),
           ),
 
           IndexedStack(
@@ -534,7 +535,7 @@ class _AppShellState extends ConsumerState<AppShell>
           decoration: BoxDecoration(
             boxShadow: [
               BoxShadow(
-                  color: Colors.black.withOpacity(0.05),
+                  color: Colors.black.withValues(alpha: 0.05),
                   blurRadius: 20,
                   offset: const Offset(0, -5))
             ],

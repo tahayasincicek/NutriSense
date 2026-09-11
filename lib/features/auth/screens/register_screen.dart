@@ -41,7 +41,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
             left: -50,
             child: CircleAvatar(
                 radius: 120,
-                backgroundColor: AppTheme.primaryColor.withOpacity(0.08)),
+                backgroundColor: AppTheme.primaryColor.withValues(alpha: 0.08)),
           ),
 
           SafeArea(
@@ -58,7 +58,8 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                     style: IconButton.styleFrom(
                       backgroundColor: theme.colorScheme.surface,
                       side: BorderSide(
-                          color: theme.colorScheme.outline.withOpacity(0.2)),
+                          color:
+                              theme.colorScheme.outline.withValues(alpha: 0.2)),
                     ),
                   ),
                   const SizedBox(height: 32),

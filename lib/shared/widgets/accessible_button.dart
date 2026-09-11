@@ -160,7 +160,7 @@ class AccessibleButton extends StatelessWidget {
             boxShadow: [
               BoxShadow(
                 color: (backgroundColor ?? theme.colorScheme.primary)
-                    .withOpacity(0.3),
+                    .withValues(alpha: 0.3),
                 blurRadius: 12,
                 offset: const Offset(0, 4),
               ),
@@ -193,17 +193,17 @@ class AccessibleButton extends StatelessWidget {
       case AccessibleButtonType.outlined:
         return Container(
           decoration: BoxDecoration(
-            color: theme.colorScheme.surface.withOpacity(0.3),
+            color: theme.colorScheme.surface.withValues(alpha: 0.3),
             borderRadius: BorderRadius.circular(AppTheme.buttonRadius),
             border: Border.all(
-              color: foregroundColor?.withOpacity(0.5) ??
-                  theme.colorScheme.primary.withOpacity(0.5),
+              color: foregroundColor?.withValues(alpha: 0.5) ??
+                  theme.colorScheme.primary.withValues(alpha: 0.5),
               width: 1.5,
             ),
             boxShadow: [
               BoxShadow(
                 color: (foregroundColor ?? theme.colorScheme.primary)
-                    .withOpacity(0.08),
+                    .withValues(alpha: 0.08),
                 blurRadius: 10,
                 offset: const Offset(0, 2),
               ),

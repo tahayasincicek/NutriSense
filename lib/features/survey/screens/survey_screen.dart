@@ -242,7 +242,7 @@ class _SurveyScreenState extends ConsumerState<SurveyScreen> {
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
               decoration: BoxDecoration(
                 color: isSelected
-                    ? AppTheme.primaryColor.withOpacity(0.12)
+                    ? AppTheme.primaryColor.withValues(alpha: 0.12)
                     : theme.colorScheme.surfaceContainer,
                 borderRadius: BorderRadius.circular(AppTheme.cardRadius),
                 border: Border.all(
@@ -329,7 +329,7 @@ class _SurveyScreenState extends ConsumerState<SurveyScreen> {
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
               decoration: BoxDecoration(
                 color: isSelected
-                    ? AppTheme.primaryColor.withOpacity(0.12)
+                    ? AppTheme.primaryColor.withValues(alpha: 0.12)
                     : Theme.of(context).colorScheme.surfaceContainer,
                 borderRadius: BorderRadius.circular(AppTheme.cardRadius),
                 border: Border.all(
@@ -409,7 +409,8 @@ class _SurveyScreenState extends ConsumerState<SurveyScreen> {
                 padding: const EdgeInsets.symmetric(vertical: 20),
                 decoration: BoxDecoration(
                   color: isSelected
-                      ? (colors[opt] ?? AppTheme.primaryColor).withOpacity(0.15)
+                      ? (colors[opt] ?? AppTheme.primaryColor)
+                          .withValues(alpha: 0.15)
                       : Theme.of(context).colorScheme.surfaceContainer,
                   borderRadius: BorderRadius.circular(AppTheme.cardRadius),
                   border: Border.all(

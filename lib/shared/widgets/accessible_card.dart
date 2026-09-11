@@ -71,15 +71,16 @@ class AccessibleCard extends StatelessWidget {
       onLongPress: onLongPress,
       child: Container(
         decoration: BoxDecoration(
-          color: backgroundColor ?? theme.colorScheme.surface.withOpacity(0.55),
+          color: backgroundColor ??
+              theme.colorScheme.surface.withValues(alpha: 0.55),
           borderRadius: BorderRadius.circular(AppTheme.cardRadius),
           border: Border.all(
-            color: Colors.white.withOpacity(0.3),
+            color: Colors.white.withValues(alpha: 0.3),
             width: 1,
           ),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.04),
+              color: Colors.black.withValues(alpha: 0.04),
               blurRadius: 16,
               offset: const Offset(0, 4),
             ),

@@ -469,7 +469,7 @@ class _AccessibilitySettingsScreenState
           overlayShape: const RoundSliderOverlayShape(overlayRadius: 24),
           trackHeight: 6,
           activeTrackColor: AppTheme.primaryColor,
-          inactiveTrackColor: AppTheme.primaryColor.withOpacity(0.2),
+          inactiveTrackColor: AppTheme.primaryColor.withValues(alpha: 0.2),
           thumbColor: AppTheme.primaryColor,
           valueIndicatorTextStyle: const TextStyle(
             color: Colors.white,
