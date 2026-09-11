@@ -20,9 +20,9 @@
 
 ## Authors
 
-[Yazar 1]¹, [Yazar 2]¹, [Danışman]¹
+Taha Yasin Çiçek¹, Furkan Öztürk¹, Hakan Gündüz¹
 
-¹ [Üniversite], [Bölüm], [Şehir], Türkiye
+¹ Kocaeli Üniversitesi, Yazılım Mühendisliği Bölümü, Kocaeli, Türkiye
 
 ---
 

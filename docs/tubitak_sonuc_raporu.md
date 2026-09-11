@@ -17,10 +17,10 @@
 **Görme Engelli Bireyler İçin Yapay Zeka Destekli Besin Tanıma ve Kalori Takip Mobil Uygulaması: NutriSense**
 
 **Proje No:** [Proje numarası eklenecek]
-**Danışman:** [Danışman adı eklenecek]
-**Proje Yürütücüsü:** [Ad Soyad]
-**Üniversite:** [Üniversite adı]
-**Bölüm:** [Bölüm adı]
+**Danışman:** Doç. Dr. Hakan GÜNDÜZ
+**Başvuru Sahipleri:** Taha Yasin ÇİÇEK, Furkan ÖZTÜRK
+**Üniversite:** Kocaeli Üniversitesi
+**Bölüm:** Yazılım Mühendisliği
 
 ---
 
