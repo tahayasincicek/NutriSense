@@ -12,7 +12,8 @@ onaylanan besin adı, porsiyon, kalori/makro ve zamanı; kullanıcı seçerse
 diyetisyen iletişimi ve gönderim kayıtlarını işler. Besin fotoğrafı ya kameradan çekilir ya da kullanıcının galerisinden tek tek seçtiği dosyadan alınır; uygulama fotoğraf kütüphanesini taramaz, yalnız seçilen dosyayı okur. Kamera görüntüsü analiz
 için geçici işlenir ve yapılandırılmışsa Google Vision veya Google Gemini'ye
 gönderilebilir; varsayılan akış görüntüyü dosya, veritabanı veya logda
-saklamaz.
+saklamaz. Production'da Gemini yalnız faturalandırmalı projeyle ve yurt dışı
+aktarım değerlendirmesinin kayıt numarası tanımlıyken açılabilir.
 
 Kullanıcı isterse su, adım, uyku, ruh hâli ve kilo ölçümlerini de kaydeder.
 Bunlar sağlık verisidir ve hesaba bağlı olarak saklanır; hesap silindiğinde
@@ -28,6 +29,23 @@ rapor bildirimi, alıcı iletişim adresi ve ilişkiye özel `D-…` danışan k
 işler; besin adı, gram, tarih-saat, kalori ve kullanıcı notu bu kanallara
 verilmez. Bu paylaşım gönderim öncesinde ayrıca açıklanır ve onaylanır. Bu sağlayıcılar için
 yurtdışı aktarım ve sözleşme değerlendirmesi yayın öncesi tamamlanmalıdır.
+
+## Sesli komut ve konuşma tanıma
+
+Sesli komutlar cihazın işletim sistemindeki konuşma tanıma servisiyle
+(Android'de Google, iOS'ta Apple) yazıya çevrilir. NutriSense sesi dosyaya,
+veritabanına veya loga yazmaz. Uygulama cihaz içi tanımayı zorunlu kılmadığı
+için ses, işletim sistemi sağlayıcısının sunucularında işlenebilir; bu servis
+`docs/yurt_disi_aktarim_matrisi.md` içinde ayrı satırdır. Sesli komut
+kullanmadan dokunmatik ekran ve klavyeyle devam edilebilir.
+
+Uygulama besin ve sağlık bilgilerini sesli okuyabilir; çevredekiler bu
+bilgileri duyabilir. Kalabalık ortamda kulaklık önerilir.
+
+## Yaş sınırı
+
+Hizmet yetişkinlere yöneliktir. Kayıtta 18 yaşından büyük olunduğu beyan
+edilir ve beyanın zamanı hesapla birlikte saklanır.
 
 ## Araştırma verisi
 
@@ -55,7 +73,9 @@ silmez, yeni kayıt yazar.
 
 Kullanıcı profilini görebilir/düzeltebilir, ürün verisini dışa aktarabilir,
 besin kayıtlarını düzeltebilir/silebilir ve hesabını doğrulama adımıyla
-silebilir. Diyetisyen ilişkisi iptal edilebilir. Daha önce e-posta/SMS
+silebilir. Uygulamaya erişemeyen kullanıcı için hesap silme yolu `/hesap-silme`,
+KVKK m.11 başvuru yolu `/kvkk-basvuru` adresinde herkese açık yayımlanır.
+Diyetisyen ilişkisi iptal edilebilir. Daha önce e-posta/SMS
 sağlayıcısına gönderilmiş kopyalar ile backup kopyalarının silinme süresi
 kurumsal prosedürde açıklanmalıdır.
 
@@ -72,10 +92,14 @@ edilebilir yapmaz; düşük güvenli sonuç kullanıcı onayı olmadan kaydedilm
 
 ## Doldurulması gereken kurum alanları
 
-- Veri sorumlusu ve temsilci/iletişim: `[KURUM KARARI]`
+- Veri sorumlusu ve temsilci/iletişim: `[KURUM KARARI]` — `DATA_CONTROLLER_NAME`
+  ve `DATA_CONTROLLER_CONTACT_EMAIL` ayarlarına yazılır; boşken production
+  başlamaz.
 - Amaç bazlı hukuki sebep: `[HUKUK İNCELEMESİ]`
 - Saklama ve backup imha takvimi: `[KURUM KARARI]`
-- Dış alıcılar, ülkeler ve aktarım mekanizması: `[HUKUK İNCELEMESİ]`
+- Dış alıcılar, ülkeler ve aktarım mekanizması: `[HUKUK İNCELEMESİ]` — satırlar
+  `docs/yurt_disi_aktarim_matrisi.md` içindedir; aktarım dosyasının kayıt
+  numarası `CROSS_BORDER_TRANSFER_REFERENCE` ayarına yazılır.
 - İlgili kişi başvuru yöntemi ve kimlik doğrulama: `[KURUM KARARI]`
 - Şikâyet/denetim ve olay iletişim kanalı: `[KURUM KARARI]`
 - Sağlık verisi işlemenin hukuki sebebi: `[HUKUK İNCELEMESİ]` — açık rıza

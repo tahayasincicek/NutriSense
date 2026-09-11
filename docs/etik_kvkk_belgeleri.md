@@ -13,6 +13,16 @@ Bu dosya bir etik kurul kararı, hukuk görüşü veya tamamlanmış saha çalı
 - [Anket araç kaydı](research/survey_instrument_register.md)
 - [Hazırlık ve karar durumu](research/readiness_and_decisions.md)
 
+## KVKK ve yayın belgeleri
+
+- [Hukuki uyum durumu](hukuki_uyum_durumu.md) — kodla kapatılan ve kurum kararı bekleyen maddeler
+- [Aydınlatma metni taslağı](privacy_notice_draft.md)
+- [Kullanım koşulları taslağı](kullanim_kosullari_taslak.md)
+- [Yurt dışı aktarım matrisi](yurt_disi_aktarim_matrisi.md)
+- [Kişisel veri ihlali müdahale prosedürü](veri_ihlali_mudahale_proseduru.md)
+- [Diyetisyen veri işleme sözleşmesi](dietitian_data_processing_agreement.md)
+- [Veri işleme envanteri](data_processing_inventory.md)
+
 ## Düzeltilen çelişkiler
 
 Eski metindeki “ses kaydı yapılmaz” ve “sesli onam kaydedilebilir” ifadeleri tek prosedüre bağlandı: kullanılabilirlik oturumu kaydedilmez; varsayılan sözlü yöntem tanıklı ve ses kayıtsızdır. Yalnız etik kurulun açıkça onayladığı onam ses kaydı, ayrı depo/retention/erişim prosedürü ve teknik feature gate ile kullanılabilir.
