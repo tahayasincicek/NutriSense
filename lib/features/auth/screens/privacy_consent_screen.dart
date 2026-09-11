@@ -197,30 +197,30 @@ class _PrivacyConsentScreenState extends ConsumerState<PrivacyConsentScreen> {
                         setState(() => _imageTransfer = value),
                   ),
                   const SizedBox(height: 28),
-                AccessibleButton(
-                  label: 'Tercihlerimi Kaydet',
+                  AccessibleButton(
+                    label: 'Tercihlerimi Kaydet',
                     semanticLabel: 'Seçtiğiniz izinleri kaydeder',
                     icon: Icons.check_rounded,
                     isLoading: _saving,
-                  onPressed: _save,
-                ),
-                if (widget.requiredForEntry) ...[
-                  const SizedBox(height: 12),
-                  AccessibleButton(
-                    key: const Key('privacy_decline_logout'),
-                    label: 'Kabul Etmeden Çıkış Yap',
-                    semanticLabel:
-                        'Aydınlatma teyidi vermeden güvenli biçimde çıkış yapar',
-                    icon: Icons.logout_rounded,
-                    type: AccessibleButtonType.outlined,
-                    onPressed: _saving
-                        ? null
-                        : () => ref
-                            .read(authControllerProvider.notifier)
-                            .logout(),
+                    onPressed: _save,
                   ),
+                  if (widget.requiredForEntry) ...[
+                    const SizedBox(height: 12),
+                    AccessibleButton(
+                      key: const Key('privacy_decline_logout'),
+                      label: 'Kabul Etmeden Çıkış Yap',
+                      semanticLabel:
+                          'Aydınlatma teyidi vermeden güvenli biçimde çıkış yapar',
+                      icon: Icons.logout_rounded,
+                      type: AccessibleButtonType.outlined,
+                      onPressed: _saving
+                          ? null
+                          : () => ref
+                              .read(authControllerProvider.notifier)
+                              .logout(),
+                    ),
+                  ],
                 ],
-              ],
               ),
       ),
     );
