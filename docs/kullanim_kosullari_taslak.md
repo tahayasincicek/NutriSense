@@ -41,7 +41,8 @@ seçtiği diyetisyene rapor gönderir.
 
 ## 5. Hesap
 
-- Hizmet 18 yaşından büyük kullanıcılara yöneliktir. Kayıtta bu beyan alınır.
+- Uygulamada yaş sınırı yoktur. 18 yaşından küçük kullanıcıların kişisel
+  verilerinin işlenmesinde veli onayı: `[HUKUK İNCELEMESİ]`
 - Hesap bilgilerinin doğru olmasından ve parolanın gizli tutulmasından
   kullanıcı sorumludur.
 - Kullanıcı hesabını uygulamada Ayarlar → Hesap Yönetimi → Hesabı Sil yoluyla

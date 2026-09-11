@@ -14,7 +14,6 @@ def _register_patient(client, email: str) -> dict:
         "email": email,
         "password": PASSWORD,
         "full_name": "Sentetik Hasta",
-        "adult_confirmed": True,
     })
     assert response.status_code == 201
     return response.json()

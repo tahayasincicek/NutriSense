@@ -42,11 +42,6 @@ kullanmadan dokunmatik ekran ve klavyeyle devam edilebilir.
 Uygulama besin ve sağlık bilgilerini sesli okuyabilir; çevredekiler bu
 bilgileri duyabilir. Kalabalık ortamda kulaklık önerilir.
 
-## Yaş sınırı
-
-Hizmet yetişkinlere yöneliktir. Kayıtta 18 yaşından büyük olunduğu beyan
-edilir ve beyanın zamanı hesapla birlikte saklanır.
-
 ## Araştırma verisi
 
 Araştırma modu ürün hesabından ayrı rastgele pseudonym kullanır. Gerçek onam,
@@ -102,6 +97,8 @@ edilebilir yapmaz; düşük güvenli sonuç kullanıcı onayı olmadan kaydedilm
   numarası `CROSS_BORDER_TRANSFER_REFERENCE` ayarına yazılır.
 - İlgili kişi başvuru yöntemi ve kimlik doğrulama: `[KURUM KARARI]`
 - Şikâyet/denetim ve olay iletişim kanalı: `[KURUM KARARI]`
+- 18 yaşından küçük kullanıcılar için veli onayı gerekip gerekmediği:
+  `[HUKUK İNCELEMESİ]` — uygulamada yaş sınırı yoktur.
 - Sağlık verisi işlemenin hukuki sebebi: `[HUKUK İNCELEMESİ]` — açık rıza
   hizmetin şartına bağlanamaz; çekirdek besin takibi için dayanak belirlenmeli.
 - Yayımlanan metnin sürümü `PRIVACY_NOTICE_VERSION` ayarına yazılmalıdır;

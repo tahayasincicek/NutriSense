@@ -174,7 +174,6 @@ def test_self_service_correction_and_export_are_owned_and_audited(client):
                 "email": email,
                 "password": "SyntheticPassword123",
                 "full_name": "Sentetik Kullanıcı",
-                "adult_confirmed": True,
             },
         )
         assert response.status_code == 201

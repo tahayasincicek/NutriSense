@@ -3523,11 +3523,6 @@
       "UserCreate": {
         "description": "Kullanıcı kayıt.",
         "properties": {
-          "adult_confirmed": {
-            "const": true,
-            "title": "Adult Confirmed",
-            "type": "boolean"
-          },
           "daily_calorie_target": {
             "default": 2000.0,
             "maximum": 10000.0,
@@ -3567,8 +3562,7 @@
         "required": [
           "email",
           "password",
-          "full_name",
-          "adult_confirmed"
+          "full_name"
         ],
         "title": "UserCreate",
         "type": "object"

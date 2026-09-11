@@ -13,7 +13,6 @@ def _linked_pair(client, slug: str) -> tuple[dict, dict, str]:
         "email": f"{slug}-hasta@example.com",
         "password": PASSWORD,
         "full_name": "Sentetik Hasta",
-        "adult_confirmed": True,
     }).json()
     dietitian = client.post("/api/v1/auth/register-dietitian", json={
         "email": f"{slug}-diyetisyen@example.com",

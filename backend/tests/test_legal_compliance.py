@@ -1,11 +1,9 @@
-"""Hukuki yayın kapıları, yetişkin beyanı ve uygulama dışı KVKK sayfaları."""
+"""Hukuki yayın kapıları ve uygulama dışı KVKK sayfaları."""
 
 import pytest
 
 from app.config import Settings, get_settings
-from app.models.database import SessionLocal, User
 
-PASSWORD = "SyntheticPassword123"
 TRANSFER_REFERENCE = "KVKK-AKTARIM-2026-01"
 
 
@@ -89,35 +87,6 @@ def test_production_gemini_requires_paid_tier():
     with pytest.raises(RuntimeError, match="GEMINI_PAID_TIER_CONFIRMED"):
         _production(**gemini).validate_security()
     _production(**gemini, gemini_paid_tier_confirmed=True).validate_security()
-
-
-def _register(client, **extra):
-    return client.post("/api/v1/auth/register", json={
-        "email": "yetiskin@example.com",
-        "password": PASSWORD,
-        "full_name": "Sentetik Kullanıcı",
-        **extra,
-    })
-
-
-def test_registration_requires_adult_confirmation(client):
-    assert _register(client).status_code == 422
-    assert _register(client, adult_confirmed=False).status_code == 422
-    db = SessionLocal()
-    try:
-        assert db.query(User).count() == 0
-    finally:
-        db.close()
-
-
-def test_registration_records_adult_confirmation_time(client):
-    assert _register(client, adult_confirmed=True).status_code == 201
-    db = SessionLocal()
-    try:
-        user = db.query(User).filter(User.email == "yetiskin@example.com").one()
-        assert user.adult_confirmed_at is not None
-    finally:
-        db.close()
 
 
 @pytest.mark.parametrize("path", ["/hesap-silme", "/account-deletion"])

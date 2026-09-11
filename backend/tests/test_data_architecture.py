@@ -84,7 +84,7 @@ def _traceable_test_nutrition():
 def _register(client, email: str) -> dict:
     response = client.post(
         "/api/v1/auth/register",
-        json={"email": email, "password": PASSWORD, "full_name": "Synthetic Test User", "adult_confirmed": True},
+        json={"email": email, "password": PASSWORD, "full_name": "Synthetic Test User"},
     )
     assert response.status_code == 201
     return response.json()

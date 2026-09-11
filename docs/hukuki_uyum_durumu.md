@@ -14,7 +14,6 @@ bir hukukçu verir.
 | Aydınlatma ile açık rızanın ayrı düzenlenmesi (KVKK 2026/347 ilke kararı) | Aydınlatma teyidi ayrı kayıttır. Rızalar amaç bazlı ayrı anahtarlarla verilir, kapalı başlar. Güncel aydınlatma teyit edilmeden ana uygulama açılmaz. | `lib/features/auth/screens/privacy_consent_screen.dart`, `lib/features/auth/screens/auth_gate.dart`, `backend/tests/test_product_consents.py` |
 | Diyetisyenle rol ve gizlilik sözleşmesi | Diyetisyen hesabı, sürüm damgalı veri işleme sözleşmesi kabul edilmeden açılmaz. | `docs/dietitian_data_processing_agreement.md`, `backend/tests/test_dietitian_mutual_consent.py` |
 | Araştırma verisinde ürün kimliğinin ayrılması | Araştırma dışa aktarımı anahtarlı takma kimlik kullanır. Production ve onaylı araştırma modunda ayrı, güçlü `RESEARCH_PSEUDONYMIZATION_KEY` zorunludur. | `backend/app/config.py`, `backend/tests/test_research_ethics_gate.py` |
-| Çocuk kullanıcılar | Yaş sınırı hukuken belirlenene kadar hizmet yetişkinlere açıktır. Kayıt, 18 yaş beyanı olmadan sunucuya gönderilmez ve sunucuda kabul edilmez. Beyan zamanı `users.adult_confirmed_at` alanında saklanır. | `lib/features/auth/screens/register_screen.dart`, `backend/app/models/schemas.py`, `backend/tests/test_legal_compliance.py` |
 | Veri sorumlusu kimliği ve başvuru kanalı | `DATA_CONTROLLER_NAME` ve geçerli `DATA_CONTROLLER_CONTACT_EMAIL` olmadan production başlamaz. | `backend/app/config.py`, `backend/tests/test_legal_compliance.py` |
 | Yurt dışına aktarım (KVKK m.9) | Gemini/Google Vision, Nutritionix, Twilio veya production SMTP etkinse `CROSS_BORDER_TRANSFER_REFERENCE` olmadan production başlamaz. | aynı dosyalar; `docs/yurt_disi_aktarim_matrisi.md` |
 | Ücretsiz Gemini katmanına sağlık bağlamlı fotoğraf | Production'da Gemini, `GEMINI_PAID_TIER_CONFIRMED=true` olmadan açılamaz. | aynı dosyalar |
@@ -54,6 +53,9 @@ bir hukukçu verir.
    herkese açık, PDF olmayan bir adreste yayımlanması.
 8. Production altyapısında veritabanı ve yedek şifrelemesi, yedek imhası ve
    bağımsız sızma testi kanıtları.
+9. Çocuk kullanıcılar: uygulamada yaş sınırı yoktur, çocuklar da kayıt
+   olabilir. 18 yaşından küçük kullanıcıların sağlık verisi için veli onayı
+   gerekip gerekmediği ve nasıl alınacağı hukukçuya danışılmalıdır.
 
 ## Açık teknik işler
 

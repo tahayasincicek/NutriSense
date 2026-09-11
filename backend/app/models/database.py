@@ -123,8 +123,6 @@ class User(Base):
     tts_speed = Column(Float, default=0.5, nullable=False)
     high_contrast = Column(Boolean, default=True, nullable=False)
     dietitian_id = Column(UUIDString, ForeignKey("dietitians.id", ondelete="SET NULL"), nullable=True)
-    # Hizmet yetişkinlerle sınırlıdır; kayıtta alınan beyanın zamanı.
-    adult_confirmed_at = Column(UTCDateTime, nullable=True)
 
     food_logs = relationship("FoodLog", back_populates="user", cascade="all, delete-orphan")
     dietitian = relationship("Dietitian", back_populates="patients")

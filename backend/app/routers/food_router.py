@@ -2197,7 +2197,6 @@ async def register(request: UserCreate, db: Session = Depends(get_db)):
         full_name=request.full_name,
         phone=request.phone,
         daily_calorie_target=request.daily_calorie_target,
-        adult_confirmed_at=utc_now(),
     )
     db.add(user)
     db.commit()
