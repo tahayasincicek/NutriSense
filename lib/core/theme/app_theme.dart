@@ -93,7 +93,8 @@ class AppTheme {
         bodyLarge: TextStyle(color: onSurface, fontSize: 16),
         bodyMedium: TextStyle(color: onSurface, fontSize: 14),
         bodySmall: TextStyle(color: muted, fontSize: 12),
-        labelLarge: TextStyle(fontWeight: FontWeight.w600, letterSpacing: 0.2),
+        labelLarge:
+            const TextStyle(fontWeight: FontWeight.w600, letterSpacing: 0.2),
       ),
     );
 

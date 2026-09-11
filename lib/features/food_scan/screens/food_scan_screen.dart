@@ -322,11 +322,11 @@ class _FoodScanScreenState extends ConsumerState<FoodScanScreen> {
         color: AppTheme.darkSurface,
         borderRadius: BorderRadius.circular(AppTheme.cardRadius),
       ),
-      child: Row(
+      child: const Row(
         children: [
-          const Icon(Icons.mic_rounded, color: Colors.white, size: 30),
-          const SizedBox(width: 16),
-          const Expanded(
+          Icon(Icons.mic_rounded, color: Colors.white, size: 30),
+          SizedBox(width: 16),
+          Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [

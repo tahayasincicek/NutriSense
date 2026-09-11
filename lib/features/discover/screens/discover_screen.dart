@@ -79,7 +79,7 @@ class DiscoverScreen extends StatelessWidget {
             constraints: const BoxConstraints(minHeight: 220),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(AppTheme.cardRadius),
-              gradient: LinearGradient(
+              gradient: const LinearGradient(
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
                 colors: [

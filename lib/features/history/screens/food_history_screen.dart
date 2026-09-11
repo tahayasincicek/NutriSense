@@ -533,7 +533,7 @@ class _HistoryEditDialogState extends State<_HistoryEditDialog> {
                 keyboardType: const TextInputType.numberWithOptions(),
                 decoration: InputDecoration(
                   labelText: 'Porsiyon ($_unit)',
-                  helperText: '0 ile ${_limitLabel} $_unit arasında olmalıdır.',
+                  helperText: '0 ile $_limitLabel $_unit arasında olmalıdır.',
                 ),
               ),
             ),

@@ -1,5 +1,3 @@
-import 'dart:ui' show FontFeature;
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -466,7 +464,7 @@ class _DietitianDashboardScreenState
           const SizedBox(height: 32),
           if (dashboard.patients.isNotEmpty) ...[
             const SizedBox(height: 32),
-            _SectionHeading(
+            const _SectionHeading(
               title: 'Bugün kime odaklanmalı?',
               subtitle: 'Hedeften sapma ve sessizlik sırasına göre',
             ),
@@ -1150,7 +1148,7 @@ class _ReceivedReportCard extends StatelessWidget {
                           ),
                         ),
                         if (report.isPartial)
-                          Icon(
+                          const Icon(
                             Icons.warning_amber_rounded,
                             color: AppTheme.warningColor,
                             semanticLabel: 'Kısmi teslimat',
@@ -2390,7 +2388,7 @@ class _PatientNoteCardState extends ConsumerState<_PatientNoteCard> {
 
   /// Not başlığındaki tarih; gün ve saat yeterli, yıl aynı yılsa yazılmaz.
   String _noteDate(DateTime at) {
-    final two = (int n) => n.toString().padLeft(2, '0');
+    String two(int n) => n.toString().padLeft(2, '0');
     final sameYear = at.year == DateTime.now().year;
     final date = sameYear
         ? '${two(at.day)}.${two(at.month)}'

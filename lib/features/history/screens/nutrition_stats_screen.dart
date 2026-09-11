@@ -122,7 +122,7 @@ class _NutritionStatsScreenState extends ConsumerState<NutritionStatsScreen> {
         _buildStatTile(
             theme,
             'Ortalama',
-            '${history.averageDailyCalories.toStringAsFixed(0)}',
+            history.averageDailyCalories.toStringAsFixed(0),
             'kcal',
             Icons.speed_rounded,
             AppTheme.primaryColor),
