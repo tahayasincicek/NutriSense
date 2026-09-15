@@ -15,15 +15,14 @@ from app.models.database import (
 )
 from app.routers import food_router
 from app.routers.survey_router import SurveySubmissionSchema
+from auth_helpers import register_user
 
 
 PASSWORD = "Guvenli123"
 
 
 def register(client, email: str) -> dict:
-    response = client.post(
-        "/api/v1/auth/register",
-        json={
+    response = register_user(client, {
             "email": email,
             "password": PASSWORD,
             "full_name": "Test Kullanıcısı",

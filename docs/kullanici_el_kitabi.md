@@ -27,9 +27,11 @@ Uygulama sizden şu izinleri isteyecek:
 
 ### Adım 4: Hesap Oluşturun
 - Adınızı ve e-posta adresinizi girin
-- Bir şifre belirleyin
-- "Kayıt Ol" butonuna basın
-- Uygulama sizi ana sayfaya yönlendirecek
+- Bir şifre belirleyin ve kullanım koşullarını onaylayın
+- "Hesap Oluştur" butonuna basın
+- E-postanıza gelen 8 haneli doğrulama kodunu yazın ya da mikrofon düğmesiyle söyleyin
+- "Hesabı Oluştur" butonuna basın; kod gelmediyse "Kodu Yeniden Gönder"i kullanın
+- Uygulama sizi önce izin ekranına, ardından ana sayfaya yönlendirecek
 
 ---
 

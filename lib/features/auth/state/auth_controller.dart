@@ -85,6 +85,8 @@ class AuthController extends StateNotifier<AuthState> {
     return _loadAuthenticatedProfile(requiredAccountType: 'dietitian');
   }
 
+  /// Kaydı başlatır. Başarılıysa `null` döner; hesap e-postaya gelen kod
+  /// [confirmRegistration] ile doğrulanınca açılır.
   Future<String?> register({
     required String fullName,
     required String email,
@@ -97,7 +99,19 @@ class AuthController extends StateNotifier<AuthState> {
     );
     if (!result.isSuccess) {
       state = const AuthState(AuthStatus.unauthenticated);
-      return result.errorMessage ?? 'Hesap oluşturulamadı.';
+      return result.errorMessage ?? 'Kayıt başlatılamadı.';
+    }
+    return null;
+  }
+
+  /// E-postaya gelen kodla hesabı açar ve oturumu başlatır.
+  Future<String?> confirmRegistration({
+    required String email,
+    required String code,
+  }) async {
+    final result = await _api.confirmRegistration(email: email, code: code);
+    if (!result.isSuccess) {
+      return result.errorMessage ?? 'Kod doğrulanamadı.';
     }
     return _loadAuthenticatedProfile();
   }

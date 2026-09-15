@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/app_theme.dart';
-import '../../../core/utils/accessibility_utils.dart';
 import '../../../shared/widgets/accessible_button.dart';
 import '../../../shared/widgets/auth_mode_switch.dart';
 import '../state/auth_controller.dart';
 import 'privacy_consent_screen.dart';
+import 'registration_verification_screen.dart';
 
 class RegisterScreen extends ConsumerStatefulWidget {
   const RegisterScreen({super.key});
@@ -251,24 +251,37 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     );
   }
 
+  Future<String?> _startRegistration() =>
+      ref.read(authControllerProvider.notifier).register(
+            fullName: _name.text.trim(),
+            email: _email.text.trim(),
+            password: _password.text,
+          );
+
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
     setState(() => _loading = true);
-    final error = await ref.read(authControllerProvider.notifier).register(
-          fullName: _name.text.trim(),
-          email: _email.text.trim(),
-          password: _password.text,
-        );
+    final error = await _startRegistration();
     if (!mounted) return;
     setState(() => _loading = false);
-    if (error == null) {
-      AccessibilityUtils.announceSuccess('Kayıt başarılı');
-      // AuthGate, ayrı aydınlatma teyidi ve izinler kaydedilene kadar
-      // ana uygulamayı açmaz.
-      Navigator.of(context).pop();
-    } else {
+    if (error != null) {
       ScaffoldMessenger.of(context)
           .showSnackBar(SnackBar(content: Text(error)));
+      return;
     }
+
+    // Hesap, e-postaya gelen kod doğrulanınca açılır.
+    final verified = await Navigator.of(context).push<bool>(
+      MaterialPageRoute(
+        builder: (_) => RegistrationVerificationScreen(
+          email: _email.text.trim(),
+          onResend: _startRegistration,
+        ),
+      ),
+    );
+    if (!mounted || verified != true) return;
+    // AuthGate, ayrı aydınlatma teyidi ve izinler kaydedilene kadar ana
+    // uygulamayı açmaz.
+    Navigator.of(context).pop();
   }
 }

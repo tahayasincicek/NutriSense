@@ -386,7 +386,11 @@ class ApiService {
     }
   }
 
-  Future<ApiResult<AuthTokenResult>> register({
+  /// Kaydı başlatır; sunucu e-postaya sekiz haneli doğrulama kodu gönderir.
+  ///
+  /// Yanıt, adres kayıtlı olsa da olmasa da aynı mesajdır. Hesap ancak
+  /// [confirmRegistration] ile açılır.
+  Future<ApiResult<String>> register({
     required String email,
     required String password,
     required String fullName,
@@ -404,6 +408,23 @@ class ApiService {
             'phone': phone,
             'daily_calorie_target': dailyCalorieTarget,
           },
+          cancelToken: cancelToken,
+          options: Options(extra: const {_skipAuthKey: true}),
+        );
+        return response.data?['message'] as String? ??
+            'Doğrulama kodu e-posta adresinize gönderildi.';
+      });
+
+  /// E-postaya gelen kodla kaydı tamamlar ve oturumu açar.
+  Future<ApiResult<AuthTokenResult>> confirmRegistration({
+    required String email,
+    required String code,
+    CancelToken? cancelToken,
+  }) =>
+      _safeCall(() async {
+        final response = await _dio.post<Map<String, dynamic>>(
+          '/auth/register/confirm',
+          data: {'email': email.trim().toLowerCase(), 'code': code.trim()},
           cancelToken: cancelToken,
           options: Options(extra: const {_skipAuthKey: true}),
         );

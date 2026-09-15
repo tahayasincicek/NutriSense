@@ -36,7 +36,8 @@ from ..models.database import (
     AuthAuditLog, ConsentRecord, Dietitian, DietitianAssignment,
     DietitianNote, DietitianReport, FoodLog, NotificationDelivery,
     NutritionSource,
-    HealthMetric, PasswordResetToken, RecognitionAttempt, RefreshToken,
+    HealthMetric, PasswordResetToken, PendingRegistration, RecognitionAttempt,
+    RefreshToken,
     User, WeightMeasurement, get_db, istanbul_date, utc_now,
 )
 from ..models.schemas import (
@@ -62,6 +63,7 @@ from ..models.schemas import (
     WeightMeasurementCreate, WeightMeasurementItem, WeightHistoryResponse,
     DietitianPatientHistoryResponse, DietitianPatientLogItem,
     PasswordResetRequest, PasswordResetConfirm, PasswordResetResponse,
+    RegistrationConfirm, RegistrationPendingResponse,
     DietitianAssignmentResponse, LogoutRequest, RefreshTokenRequest,
     UserCreate, UserLogin, UserProfileUpdate, UserResponse, TokenResponse,
     ErrorResponse,
@@ -94,6 +96,7 @@ from ..services.gemini_vision_service import GeminiVisionService
 from ..services.nutritionix_service import NutritionixService
 from ..services.notification_service import (
     ChannelDeliveryError, NotificationService, build_password_reset_email,
+    build_registration_code_email, build_registration_exists_email,
 )
 from ..config import get_settings
 
@@ -155,6 +158,7 @@ LOGIN_WINDOW_SECONDS = 15 * 60
 LOGIN_MAX_FAILURES = 5
 _login_failures: dict[str, list[datetime]] = defaultdict(list)
 _analysis_requests: dict[str, list[datetime]] = defaultdict(list)
+_registration_requests: dict[str, list[datetime]] = defaultdict(list)
 
 
 def _audit_email_hash(email: str) -> str:
@@ -2189,31 +2193,130 @@ async def register_dietitian(
     return TokenResponse(**issue_token_pair(db, user))
 
 
+_REGISTRATION_CODE_TTL = timedelta(minutes=30)
+_REGISTRATION_MAX_ATTEMPTS = 5
+_REGISTRATION_WINDOW_SECONDS = 15 * 60
+_REGISTRATION_MAX_REQUESTS = 5
+# Yanıt her durumda aynıdır: kayıt ekranı bir adresin kayıtlı olup olmadığını
+# ele vermez. Hesabın zaten var olduğu yalnız adresin sahibine e-postayla
+# bildirilir.
+_REGISTRATION_GENERIC_MESSAGE = (
+    "Doğrulama kodu e-posta adresinize gönderildi. Kodu girerek hesabınızı "
+    "oluşturun. Gelen kutunuzda yoksa istenmeyen klasörüne bakın."
+)
+
+
 @router.post(
     "/auth/register",
+    response_model=RegistrationPendingResponse,
+    status_code=status.HTTP_202_ACCEPTED,
+    summary="Yeni kullanıcı kaydını başlat",
+)
+async def register(
+    request: UserCreate,
+    http_request: Request,
+    db: Session = Depends(get_db),
+):
+    """E-postaya doğrulama kodu gönderir; hesap kod doğrulanınca açılır."""
+    normalized_email = request.email.lower()
+    key, _ = _login_key(http_request, normalized_email)
+    now = utc_now()
+    cutoff = now - timedelta(seconds=_REGISTRATION_WINDOW_SECONDS)
+    _registration_requests[key] = [
+        value for value in _registration_requests[key] if value > cutoff
+    ]
+    if len(_registration_requests[key]) >= _REGISTRATION_MAX_REQUESTS:
+        raise HTTPException(
+            status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+            detail="Çok fazla kayıt denemesi yapıldı. Lütfen daha sonra tekrar deneyin.",
+        )
+    _registration_requests[key].append(now)
+
+    # Parola özeti iki durumda da hesaplanır; yanıt süresi hesabın varlığını
+    # ele vermez.
+    hashed_password = hash_password(request.password)
+    current_settings = get_settings()
+    existing = db.query(User).filter(func.lower(User.email) == normalized_email).first()
+    if existing is not None:
+        message = build_registration_exists_email(
+            destination=normalized_email, settings=current_settings,
+        )
+    else:
+        code = f"{secrets.randbelow(10**8):08d}"
+        db.query(PendingRegistration).filter(
+            PendingRegistration.email == normalized_email
+        ).delete(synchronize_session=False)
+        db.add(PendingRegistration(
+            email=normalized_email,
+            hashed_password=hashed_password,
+            full_name=request.full_name,
+            phone=request.phone,
+            daily_calorie_target=request.daily_calorie_target,
+            code_hash=_hash_reset_token(code),
+            expires_at=now + _REGISTRATION_CODE_TTL,
+        ))
+        db.commit()
+        message = build_registration_code_email(
+            code=code, destination=normalized_email, settings=current_settings,
+        )
+
+    try:
+        await notification_service.send_email_message(message, normalized_email)
+    except ChannelDeliveryError:
+        # Gönderim hatası yanıtı değiştirmez; aksi hâlde hesap varlığı sızardı.
+        logger.warning("Kayıt doğrulama e-postası gönderilemedi.")
+    return RegistrationPendingResponse(message=_REGISTRATION_GENERIC_MESSAGE)
+
+
+@router.post(
+    "/auth/register/confirm",
     response_model=TokenResponse,
     status_code=status.HTTP_201_CREATED,
-    summary="Yeni kullanıcı kaydı",
+    summary="Kayıt kodunu doğrula ve hesabı aç",
 )
-async def register(request: UserCreate, db: Session = Depends(get_db)):
-    """Yeni hesap oluşturur ve JWT token döner."""
+async def confirm_registration(
+    request: RegistrationConfirm,
+    db: Session = Depends(get_db),
+):
+    """Doğru kodla hesabı açar ve JWT token döner."""
+    invalid = HTTPException(
+        status_code=status.HTTP_400_BAD_REQUEST,
+        detail="Kod geçersiz veya süresi dolmuş. Yeni bir kod isteyin.",
+    )
     normalized_email = request.email.lower()
-    existing = db.query(User).filter(func.lower(User.email) == normalized_email).first()
-    if existing:
-        raise HTTPException(
-            status_code=status.HTTP_409_CONFLICT,
-            detail="Bu e-posta adresi zaten kayıtlı. Giriş yapmayı deneyin.",
-        )
+    pending = db.query(PendingRegistration).filter(
+        PendingRegistration.email == normalized_email
+    ).first()
+    if pending is None:
+        raise invalid
+    expires_at = pending.expires_at.replace(
+        tzinfo=pending.expires_at.tzinfo or timezone.utc
+    )
+    if expires_at < utc_now() or pending.attempt_count >= _REGISTRATION_MAX_ATTEMPTS:
+        db.delete(pending)
+        db.commit()
+        raise invalid
+    if not hmac.compare_digest(pending.code_hash, _hash_reset_token(request.code)):
+        pending.attempt_count += 1
+        if pending.attempt_count >= _REGISTRATION_MAX_ATTEMPTS:
+            db.delete(pending)
+        db.commit()
+        raise invalid
+    if db.query(User).filter(func.lower(User.email) == normalized_email).first():
+        db.delete(pending)
+        db.commit()
+        raise invalid
 
     user = User(
         id=str(uuid.uuid4()),
         email=normalized_email,
-        hashed_password=hash_password(request.password),
-        full_name=request.full_name,
-        phone=request.phone,
-        daily_calorie_target=request.daily_calorie_target,
+        hashed_password=pending.hashed_password,
+        full_name=pending.full_name,
+        phone=pending.phone,
+        daily_calorie_target=pending.daily_calorie_target,
     )
     db.add(user)
+    db.delete(pending)
     db.commit()
     db.refresh(user)
 

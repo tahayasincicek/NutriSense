@@ -25,6 +25,7 @@ from app.services.notification_service import (
 )
 from app.domain.report_delivery import consent_context_hash
 from app.domain.report_messages import build_sms_parts
+from auth_helpers import register_user
 
 
 PASSWORD = "Guvenli123"
@@ -32,7 +33,7 @@ TODAY = date.today()
 
 
 def _register(client, email: str) -> dict:
-    response = client.post("/api/v1/auth/register", json={
+    response = register_user(client, {
         "email": email,
         "password": PASSWORD,
         "full_name": "Sandbox Kullanıcı",

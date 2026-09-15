@@ -16,6 +16,7 @@ from app.config import Settings
 from app.middleware.auth import create_access_token, decode_token, settings as auth_settings
 from app.models.database import AuthAuditLog, SessionLocal
 from app.security.logging import SensitiveDataFilter, redact_text
+from auth_helpers import register_user
 
 
 def _valid_production_settings(**overrides) -> Settings:
@@ -168,9 +169,7 @@ def test_secret_scanner_distinguishes_placeholder_from_literal_secret():
 
 def test_self_service_correction_and_export_are_owned_and_audited(client):
     def register(email: str) -> dict:
-        response = client.post(
-            "/api/v1/auth/register",
-            json={
+        response = register_user(client, {
                 "email": email,
                 "password": "SyntheticPassword123",
                 "full_name": "Sentetik Kullanıcı",

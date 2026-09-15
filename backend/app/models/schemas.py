@@ -805,6 +805,19 @@ class PasswordResetResponse(BaseModel):
     message: str
 
 
+class RegistrationPendingResponse(BaseModel):
+    """Kayıt isteğine her durumda aynı gövde döner; hesap varlığı sızdırılmaz."""
+
+    message: str
+
+
+class RegistrationConfirm(BaseModel):
+    """E-postaya gönderilen sekiz haneli kodla kaydı tamamlama."""
+
+    email: EmailStr
+    code: str = Field(..., pattern=r"^\d{8}$")
+
+
 class DietitianAssignmentRequest(BaseModel):
     dietitian_email: EmailStr
 

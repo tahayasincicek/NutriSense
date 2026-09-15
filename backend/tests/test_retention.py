@@ -8,6 +8,7 @@ from app.domain.retention import PURGE_EVENT, purge_expired_personal_data
 from app.models.database import (
     AuditEvent,
     PasswordResetToken,
+    PendingRegistration,
     RecognitionAttempt,
     RefreshToken,
     SessionLocal,
@@ -51,6 +52,12 @@ def test_purge_removes_expired_records_and_keeps_recent_ones():
                                created_at=now - timedelta(days=30)),
             RecognitionAttempt(user_id=user.id, provider="tflite", status="succeeded",
                                created_at=recent),
+            PendingRegistration(email="bekleyen@example.invalid", hashed_password="x",
+                                full_name="Sentetik", code_hash="d" * 64,
+                                expires_at=now - timedelta(minutes=1)),
+            PendingRegistration(email="yeni@example.invalid", hashed_password="x",
+                                full_name="Sentetik", code_hash="e" * 64,
+                                expires_at=now + timedelta(minutes=20)),
         ])
         db.commit()
 
@@ -62,7 +69,9 @@ def test_purge_removes_expired_records_and_keeps_recent_ones():
             "refresh_tokens_deleted": 1,
             "password_reset_tokens_deleted": 1,
             "pending_recognitions_deleted": 1,
+            "pending_registrations_deleted": 1,
         }
+        assert db.query(PendingRegistration).one().email == "yeni@example.invalid"
         remaining_ips = sorted(
             event.ip_address or ""
             for event in db.query(AuditEvent).filter(AuditEvent.event == "login")

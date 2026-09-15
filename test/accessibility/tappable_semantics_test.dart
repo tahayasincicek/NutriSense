@@ -8,6 +8,7 @@ import 'package:nutrisense/features/auth/screens/login_screen.dart';
 import 'package:nutrisense/features/auth/screens/password_reset_screen.dart';
 import 'package:nutrisense/features/auth/screens/privacy_consent_screen.dart';
 import 'package:nutrisense/features/auth/screens/register_screen.dart';
+import 'package:nutrisense/features/auth/screens/registration_verification_screen.dart';
 import 'package:nutrisense/features/dietitian/screens/dietitian_access_screen.dart';
 import 'package:nutrisense/features/discover/screens/discover_screen.dart';
 import 'package:nutrisense/features/food_scan/screens/food_scan_screen.dart';
@@ -125,6 +126,17 @@ void main() {
   testWidgets('kayıt ekranındaki her dokunulabilir ögenin adı var',
       (tester) async {
     await expectAllTappablesNamed(tester, const RegisterScreen());
+  });
+
+  testWidgets('kayıt doğrulama ekranındaki her dokunulabilir ögenin adı var',
+      (tester) async {
+    await expectAllTappablesNamed(
+      tester,
+      RegistrationVerificationScreen(
+        email: 'sentetik@example.com',
+        onResend: () async => null,
+      ),
+    );
   });
 
   testWidgets('parola sıfırlama ekranındaki her dokunulabilir ögenin adı var',

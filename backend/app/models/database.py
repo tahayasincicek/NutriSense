@@ -555,5 +555,27 @@ class PasswordResetToken(Base):
     created_at = Column(UTCDateTime, default=utc_now, nullable=False)
 
 
+class PendingRegistration(Base):
+    """E-posta doğrulanana kadar bekleyen kayıt.
+
+    Hesap ancak e-postaya gönderilen kod doğrulanınca açılır; böylece kayıt
+    ekranı bir adresin sistemde olup olmadığını ele vermez. Kod ve parola
+    yalnız özet olarak saklanır; süresi dolan kayıt periyodik imhayla silinir.
+    """
+
+    __tablename__ = "pending_registrations"
+
+    id = Column(UUIDString, primary_key=True, default=lambda: str(uuid.uuid4()))
+    email = Column(String(255), unique=True, nullable=False, index=True)
+    hashed_password = Column(String(255), nullable=False)
+    full_name = Column(String(255), nullable=False)
+    phone = Column(String(20), nullable=True)
+    daily_calorie_target = Column(Float, default=2000.0, nullable=False)
+    code_hash = Column(String(64), nullable=False)
+    attempt_count = Column(Integer, default=0, nullable=False)
+    expires_at = Column(UTCDateTime, nullable=False, index=True)
+    created_at = Column(UTCDateTime, default=utc_now, nullable=False)
+
+
 # Compatibility alias for existing auth code and tests.
 AuthAuditLog = AuditEvent

@@ -1,5 +1,7 @@
 """Diyetisyen notları birikir: yeni kayıt öncekinin üzerine yazmaz."""
 
+from auth_helpers import register_user
+
 PASSWORD = "Guvenli123"
 
 
@@ -9,7 +11,7 @@ def _auth(tokens: dict) -> dict[str, str]:
 
 def _linked_pair(client, slug: str) -> tuple[dict, dict, str]:
     """Onaylı bir hasta-diyetisyen çifti kurar; not yazımı buna bağlı."""
-    patient = client.post("/api/v1/auth/register", json={
+    patient = register_user(client, {
         "email": f"{slug}-hasta@example.com",
         "password": PASSWORD,
         "full_name": "Sentetik Hasta",

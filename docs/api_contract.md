@@ -68,7 +68,8 @@ OpenAPI snapshot değişikliği; backend testi, mobil fixture testi ve migration
 
 | Method | Path | Auth | Request | Response |
 |---|---|---|---|---|
-| POST | `/auth/register` | Hayır | JSON `UserCreate` | `TokenResponse` |
+| POST | `/auth/register` | Hayır | JSON `UserCreate` | 202 `RegistrationPendingResponse`; e-postaya kod gider, hesap açılmaz. Yanıt adres kayıtlı olsa da aynıdır. |
+| POST | `/auth/register/confirm` | Hayır | JSON `RegistrationConfirm` | 201 `TokenResponse` |
 | POST | `/auth/login` | Hayır | JSON `UserLogin` | `TokenResponse` |
 | POST | `/auth/refresh` | Hayır; refresh token gövdede | JSON `RefreshTokenRequest` | Rotated `TokenResponse` |
 | POST | `/auth/logout` | Hayır; refresh token gövdede | JSON `LogoutRequest` | 204 |

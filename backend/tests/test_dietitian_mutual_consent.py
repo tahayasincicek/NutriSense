@@ -1,6 +1,7 @@
 """Eşleşme iki taraflı onayla kurulur: hasta rızası + diyetisyen kabulü."""
 
 from app.models.database import Dietitian, DietitianAssignment, SessionLocal, User
+from auth_helpers import register_user
 
 PASSWORD = "Guvenli123"
 
@@ -10,7 +11,7 @@ def _auth(tokens: dict) -> dict[str, str]:
 
 
 def _register_patient(client, email: str) -> dict:
-    response = client.post("/api/v1/auth/register", json={
+    response = register_user(client, {
         "email": email,
         "password": PASSWORD,
         "full_name": "Sentetik Hasta",

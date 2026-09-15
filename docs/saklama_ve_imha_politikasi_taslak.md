@@ -10,6 +10,7 @@ teknik mekanizmalar uygulanmıştır; süreler ayarlardan değiştirilebilir.
 | Su, adım, uyku, ruh hâli ve kilo ölçümleri | Hesap açık olduğu sürece | Silme | Hesap silmede birlikte |
 | İlaç ve takviye listesi | Yalnız cihazda; kullanıcı silene veya uygulama kaldırılana kadar | Silme | Cihazın şifreli deposu; sunucuya gönderilmez |
 | Diyetisyen raporları, diyetisyen notları, rıza kayıtları | Hesap açık olduğu sürece `[KURUM KARARI]` | Silme | Hesap silmede birlikte |
+| Doğrulanmamış kayıt başvuruları (e-posta, ad, parola özeti, kod özeti) | 30 dakika | Silme | Periyodik imha |
 | Karara bağlanmamış tanıma denemeleri | 7 gün | Silme | Periyodik imha |
 | Süresi dolmuş veya iptal edilmiş oturum anahtarları | Süre dolduktan sonra 7 gün | Silme | Periyodik imha |
 | Kullanılmış veya süresi dolmuş parola sıfırlama kodları | 7 gün | Silme | Periyodik imha |

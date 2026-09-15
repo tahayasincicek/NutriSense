@@ -20,6 +20,7 @@ bir hukukçu verir.
 | Uygulama dışında hesap silme yolu (Google Play) ve KVKK m.11 başvurusu | Herkese açık `/hesap-silme` (`/account-deletion`) ve `/kvkk-basvuru` sayfaları. Form içermez, veri toplamaz; veri sorumlusu iletişimini ayarlardan gösterir. | `backend/app/routers/legal_router.py`, `backend/tests/test_legal_compliance.py` |
 | Fotoğrafın konum ve cihaz bilgisi | Sunucu görüntüyü EXIF'siz yeniden kodlar; dosya, veritabanı veya loga yazmaz. | `backend/app/routers/food_router.py` |
 | Veri kaynaklarına atıf | Modelin eğitim verileri ve kalori kaynakları uygulamada Ayarlar → Lisanslar ve Veri Kaynakları ekranında listelenir. | `lib/main.dart`, `ml/LICENSES.md` |
+| Kayıt ekranında hesap varlığının sızması | Hesap e-postaya gönderilen kodla açılır. Kayıt isteği her durumda aynı yanıtı verir ve parola özeti iki durumda da hesaplanır; adres zaten kayıtlıysa bilgi yalnız adresin sahibine e-postayla gider. Kod beş yanlış denemede iptal olur, kayıt isteği 15 dakikada beşle sınırlıdır. | `backend/app/routers/food_router.py`, `backend/tests/test_registration_verification.py`, `lib/features/auth/screens/registration_verification_screen.dart` |
 | Saklama ve imha | Süresi dolan oturum anahtarları, parola sıfırlama kodları ve karara bağlanmamış tanıma denemeleri silinir; güvenlik kayıtlarında IP 90 günde boşaltılır, kayıt 365 günde silinir. Her çalıştırma kişisel veri içermeyen bir imha kaydı yazar. Süreler kurum onayı bekler. | `backend/app/domain/retention.py`, `backend/scripts/purge_expired_data.py`, `docs/saklama_ve_imha_politikasi_taslak.md` |
 | Güvenlik kayıtlarında e-posta | E-posta, uygulama sırrıyla anahtarlı özet (HMAC-SHA256) olarak tutulur; düz özet gibi bilinen adres listeleriyle geri eşleştirilemez. | `backend/app/routers/food_router.py` |
 | Cihazdaki sağlık verisi | Su, adım, uyku, ruh hâli, kilo ve ilaç listesi şifreli depoda tutulur. Paylaşılan CSV ve JSON dosyaları paylaşımdan sonra silinir; fotoğrafın EXIF bilgisi telefondan çıkmadan temizlenir. | `lib/features/water_tracker/state/water_provider.dart`, `lib/shared/utils/temporary_share_file.dart`, `lib/features/food_scan/services/image_preprocessing.dart` |
@@ -62,6 +63,9 @@ bir hukukçu verir.
 
 ## Açık teknik işler
 
+- Diyetisyen kaydı: e-posta kayıtlıysa 409 döner. Diyetisyen hesabı hasta
+  sağlık verisi taşımayan mesleki bir hesaptır; istenirse aynı doğrulama
+  akışına geçirilebilir.
 - Sesli okumada hassas bilgi uyarısı: sağlık bilgisinin hoparlörden
   duyulabileceğine dair ilk kullanım uyarısı ve kulaklık önerisi yok.
 - İşletim sistemi konuşma tanıma servisi: cihaz içi tanıma zorunlu

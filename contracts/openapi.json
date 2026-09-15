@@ -2636,6 +2636,41 @@
         "title": "RefreshTokenRequest",
         "type": "object"
       },
+      "RegistrationConfirm": {
+        "description": "E-postaya gönderilen sekiz haneli kodla kaydı tamamlama.",
+        "properties": {
+          "code": {
+            "pattern": "^\\d{8}$",
+            "title": "Code",
+            "type": "string"
+          },
+          "email": {
+            "format": "email",
+            "title": "Email",
+            "type": "string"
+          }
+        },
+        "required": [
+          "email",
+          "code"
+        ],
+        "title": "RegistrationConfirm",
+        "type": "object"
+      },
+      "RegistrationPendingResponse": {
+        "description": "Kayıt isteğine her durumda aynı gövde döner; hesap varlığı sızdırılmaz.",
+        "properties": {
+          "message": {
+            "title": "Message",
+            "type": "string"
+          }
+        },
+        "required": [
+          "message"
+        ],
+        "title": "RegistrationPendingResponse",
+        "type": "object"
+      },
       "RepeatMealRequest": {
         "properties": {
           "confirmed": {
@@ -4142,7 +4177,7 @@
     },
     "/api/v1/auth/register": {
       "post": {
-        "description": "Yeni hesap oluşturur ve JWT token döner.",
+        "description": "E-postaya doğrulama kodu gönderir; hesap kod doğrulanınca açılır.",
         "operationId": "register_api_v1_auth_register_post",
         "requestBody": {
           "content": {
@@ -4155,11 +4190,11 @@
           "required": true
         },
         "responses": {
-          "201": {
+          "202": {
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/TokenResponse"
+                  "$ref": "#/components/schemas/RegistrationPendingResponse"
                 }
               }
             },
@@ -4176,7 +4211,7 @@
             "description": "Validation Error"
           }
         },
-        "summary": "Yeni kullanıcı kaydı",
+        "summary": "Yeni kullanıcı kaydını başlat",
         "tags": [
           "NutriSense API"
         ]
@@ -4218,6 +4253,48 @@
           }
         },
         "summary": "Diyetisyen hesabı oluştur",
+        "tags": [
+          "NutriSense API"
+        ]
+      }
+    },
+    "/api/v1/auth/register/confirm": {
+      "post": {
+        "description": "Doğru kodla hesabı açar ve JWT token döner.",
+        "operationId": "confirm_registration_api_v1_auth_register_confirm_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegistrationConfirm"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TokenResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Kayıt kodunu doğrula ve hesabı aç",
         "tags": [
           "NutriSense API"
         ]

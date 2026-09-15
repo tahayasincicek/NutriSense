@@ -37,6 +37,7 @@ from app.routers.survey_router import (
     SurveySubmissionSchema,
     submit_survey,
 )
+from auth_helpers import register_user
 
 BACKEND_DIR = Path(__file__).parents[1]
 PASSWORD = "Guvenli123"
@@ -82,9 +83,7 @@ def _traceable_test_nutrition():
 
 
 def _register(client, email: str) -> dict:
-    response = client.post(
-        "/api/v1/auth/register",
-        json={"email": email, "password": PASSWORD, "full_name": "Synthetic Test User"},
+    response = register_user(client, {"email": email, "password": PASSWORD, "full_name": "Synthetic Test User"},
     )
     assert response.status_code == 201
     return response.json()

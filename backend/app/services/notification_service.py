@@ -354,3 +354,48 @@ def build_password_reset_email(
     )
     message.attach(MIMEText(body, "plain", "utf-8"))
     return message
+
+
+def _transactional_message(subject: str, destination: str, settings: Settings) -> MIMEMultipart:
+    message = MIMEMultipart("alternative")
+    message["Subject"] = subject
+    message["From"] = f"{settings.smtp_from_name} <{settings.smtp_from_email}>"
+    message["To"] = destination
+    message["Message-ID"] = make_msgid()
+    return message
+
+
+def build_registration_code_email(
+    *,
+    code: str,
+    destination: str,
+    settings: Settings,
+) -> MIMEMultipart:
+    """Kayıt doğrulama kodunu taşıyan e-posta; sade düz metin, ekran okuyucu dostu."""
+    message = _transactional_message("NutriSense kayıt doğrulama kodu", destination, settings)
+    body = (
+        "NutriSense hesabınızı oluşturmak için e-posta adresinizi doğrulayın.\n\n"
+        f"Doğrulama kodunuz: {code}\n\n"
+        "Bu kod 30 dakika boyunca geçerlidir.\n"
+        "Bu kaydı siz başlatmadıysanız bu iletiyi yok sayabilirsiniz; "
+        "hesap açılmaz.\n"
+    )
+    message.attach(MIMEText(body, "plain", "utf-8"))
+    return message
+
+
+def build_registration_exists_email(*, destination: str, settings: Settings) -> MIMEMultipart:
+    """Kayıtlı bir adresle yeniden kayıt denendiğinde gönderilen bilgi e-postası.
+
+    Kayıt ekranı hesabın varlığını söylemez; bilgi yalnız adresin sahibine gider.
+    """
+    message = _transactional_message("NutriSense hesabınız zaten var", destination, settings)
+    body = (
+        "Bu e-posta adresiyle NutriSense'te yeni hesap oluşturma isteği aldık.\n\n"
+        "Bu adresle zaten bir hesabınız var. Giriş yapabilir ya da "
+        "\"Parolamı unuttum\" ile parolanızı sıfırlayabilirsiniz.\n\n"
+        "Bu isteği siz yapmadıysanız bu iletiyi yok sayabilirsiniz; "
+        "hesabınızda değişiklik yapılmadı.\n"
+    )
+    message.attach(MIMEText(body, "plain", "utf-8"))
+    return message

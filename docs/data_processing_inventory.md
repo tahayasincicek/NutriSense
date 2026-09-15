@@ -14,6 +14,7 @@ mekanizması üniversite/hukuk birimi kararı olmadan kesinleştirilmemiştir.
 |---|---|---|---|---|
 | E-posta, ad, opsiyonel telefon, tercihler | Hesap ve erişilebilir kullanıcı deneyimi | `users` | Sözleşme/kanuni sebep kurumca seçilmeli | Hesap aktifken önerisi; `/users/me` silme ile kaldırılır |
 | Parola hash'i | Kimlik doğrulama | Argon2/bcrypt hash; DB | Kurum kararı | Düz parola saklanmaz; hesap silmeyle gider |
+| Bekleyen kayıt (e-posta, ad, parola özeti, kod özeti) | E-posta sahipliğini doğrulama; kayıt ekranının hesap varlığını ele vermemesi | `pending_registrations` | Kullanıcının hesap açma talebi | En fazla 30 dakika; kod doğrulanınca hesaba dönüşür, süresi dolunca periyodik imhayla silinir |
 | Access/refresh token | Oturum | Access mobil secure storage; refresh hash DB | Güvenlik zorunluluğu | Expiry/rotation/logout; hesap silmede cascade |
 | Besin adı, porsiyon, kalori, makro, zaman | Günlük ve onaylı rapor | `food_logs`, nutrition provenance | Beslenme verisi hassas kabul edilerek kurum kararı | Kullanıcı silene/hesabı kapatana kadar önerisi; yedek süresi bekliyor |
 | Tanıma sonucu/güven | Güvenli onay ve kalite | `recognition_attempts`; ham görüntü yok | Hizmet ve araştırma ayrımı kararı | Günlükle uyumlu; hesap silmede cascade |

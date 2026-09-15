@@ -32,6 +32,13 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     APP_VERSION=${BUILD_VERSION} \
     BUILD_REVISION=${BUILD_REVISION}
 
+# Temel imaj özetle (digest) sabitlenir; sonradan yayımlanan Debian güvenlik
+# düzeltmeleri imaj oluşturulurken uygulanır. Oluşan imajın kimliği release
+# manifest'inde kayıtlıdır.
+RUN apt-get update \
+    && apt-get upgrade -y --no-install-recommends \
+    && rm -rf /var/lib/apt/lists/*
+
 RUN addgroup --system --gid 10001 nutrisense \
     && adduser --system --uid 10001 --ingroup nutrisense \
       --disabled-password --no-create-home nutrisense

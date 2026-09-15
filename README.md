@@ -115,7 +115,7 @@ Birden fazla cihaz bağlıysa `flutter devices` ile cihaz kimliğini bulun ve ç
 
 ## 4. İlk denemenizi yapın
 
-1. Uygulamada **Hesap Aç** bölümünden kendi hesabınızı oluşturun. Yeni kurulum boş veritabanıyla başlar.
+1. Uygulamada **Hesap Aç** bölümünden kendi hesabınızı oluşturun. Hesap, e-postanıza gelen 8 haneli kodla açılır. Yerel kurulumda e-posta gerçek adrese gitmez; kodu [Mailpit](http://localhost:8025) üzerinden görürsünüz. Yeni kurulum boş veritabanıyla başlar.
 2. **Ayarlar → Cihaz Üstü Model** seçeneğini açın.
 3. Tarama ekranında **Galeriden fotoğraf seç** ile bir yemek fotoğrafı seçin. Gerçek telefonda kamerayı da kullanabilirsiniz.
 4. Tanınan besini ve porsiyonu kontrol edip onaylayın.

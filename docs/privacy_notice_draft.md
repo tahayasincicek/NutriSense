@@ -35,6 +35,14 @@ işler; besin adı, gram, tarih-saat, kalori ve kullanıcı notu bu kanallara
 verilmez. Bu paylaşım gönderim öncesinde ayrıca açıklanır ve onaylanır. Bu sağlayıcılar için
 yurtdışı aktarım ve sözleşme değerlendirmesi yayın öncesi tamamlanmalıdır.
 
+## Hesap açma
+
+Kayıt, e-posta adresine gönderilen sekiz haneli kodla tamamlanır. Kod
+doğrulanana kadar ad, e-posta, parola özeti ve kodun özeti en fazla 30 dakika
+bekleyen kayıt olarak tutulur; süre dolunca silinir. Kayıt ekranı bir adresin
+kayıtlı olup olmadığını göstermez: adres zaten kayıtlıysa bu bilgi yalnız
+adresin sahibine e-postayla bildirilir.
+
 ## Sesli komut ve konuşma tanıma
 
 Sesli komutlar cihazın işletim sistemindeki konuşma tanıma servisiyle
