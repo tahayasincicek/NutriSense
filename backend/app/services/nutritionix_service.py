@@ -5,6 +5,7 @@ from __future__ import annotations
 import json
 import logging
 import os
+import re
 from dataclasses import replace
 from datetime import datetime, timezone
 from decimal import Decimal
@@ -55,6 +56,28 @@ def _resolve_local_db_path() -> Path:
 LOCAL_DB_PATH = _resolve_local_db_path()
 NUTRITIONIX_LICENSE = "Nutritionix API Terms of Service"
 NUTRITIONIX_ATTRIBUTION = "Nutrition data provided by Nutritionix"
+
+PROVIDER_QUERY_MAX_LENGTH = 80
+_URL_RE = re.compile(r"(?i)\b(?:https?://|www\.)\S+")
+_EMAIL_RE = re.compile(r"\S+@\S+")
+_PHONE_RE = re.compile(r"\+?\d[\d\s().-]{5,}\d")
+_DISALLOWED_QUERY_CHARS = re.compile(r"[^0-9A-Za-zÇĞİÖŞÜçğıöşüÂâÎîÛû .,'-]")
+
+
+def anonymized_provider_query(text: str) -> str | None:
+    """Yurt dışındaki besin sağlayıcısına gidecek arama metnini kimliksizleştirir.
+
+    Kullanıcının serbest yazdığı metinde bağlantı, e-posta veya telefon
+    numarası olabilir; bunlar silinir, izin verilmeyen karakterler atılır ve
+    metin kısaltılır. İsteğe kullanıcı kimliği veya hesap bilgisi hiçbir zaman
+    eklenmez. Anlamlı besin metni kalmazsa sağlayıcıya istek gönderilmez.
+    """
+    cleaned = _URL_RE.sub(" ", text)
+    cleaned = _EMAIL_RE.sub(" ", cleaned)
+    cleaned = _PHONE_RE.sub(" ", cleaned)
+    cleaned = _DISALLOWED_QUERY_CHARS.sub(" ", cleaned)
+    cleaned = " ".join(cleaned.split())[:PROVIDER_QUERY_MAX_LENGTH].strip()
+    return cleaned if any(character.isalpha() for character in cleaned) else None
 
 
 class NutritionixService:
@@ -165,9 +188,21 @@ class NutritionixService:
     ) -> dict:
         if portion_grams is not None:
             validate_portion_grams(portion_grams)
-        if self._available:
+        local_result = None
+        if self._local_verified:
+            # Önce yurt içindeki doğrulanmış katalog denenir; bulunan besin için
+            # yurt dışındaki sağlayıcıya hiç istek gönderilmez.
+            local_result = self._query_local_db(
+                food_name, portion_grams, input_locale=input_locale
+            )
+            if local_result.get("available"):
+                return local_result
+        provider_query = (
+            anonymized_provider_query(food_name) if self._available else None
+        )
+        if provider_query:
             try:
-                result = await self._query_api(food_name)
+                result = await self._query_api(provider_query)
                 if result:
                     runtime_metrics.provider_outcome("nutritionix", "success")
                     return self._format_result(
@@ -178,6 +213,8 @@ class NutritionixService:
                     "nutritionix", "temporary_failure"
                 )
                 logger.warning("Nutritionix sonucu kullanılamadı: %s", type(exc).__name__)
+        if local_result is not None:
+            return local_result
         return self._query_local_db(food_name, portion_grams, input_locale=input_locale)
 
     async def _query_api(self, food_name: str) -> Optional[dict]:

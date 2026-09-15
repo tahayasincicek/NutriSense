@@ -154,6 +154,7 @@ IMAGE_FORMAT_TO_MIME = {
     "PNG": "image/png",
     "WEBP": "image/webp",
 }
+PROVIDER_IMAGE_MAX_SIDE = 1024
 LOGIN_WINDOW_SECONDS = 15 * 60
 LOGIN_MAX_FAILURES = 5
 _login_failures: dict[str, list[datetime]] = defaultdict(list)
@@ -243,7 +244,10 @@ async def _sanitized_image_base64(upload: UploadFile) -> str:
                 decoded.verify()
             with Image.open(io.BytesIO(raw)) as decoded:
                 image = ImageOps.exif_transpose(decoded).convert("RGB")
-            image.thumbnail((2048, 2048))
+            # Sağlayıcıya yalnız tanıma için yeterli çözünürlük gider; arka
+            # planda kalan kişi, belge veya ekran ayrıntısı azalır. EXIF, konum
+            # ve renk profili yeni JPEG'e kopyalanmaz.
+            image.thumbnail((PROVIDER_IMAGE_MAX_SIDE, PROVIDER_IMAGE_MAX_SIDE))
             sanitized = io.BytesIO()
             image.save(sanitized, format="JPEG", quality=90, optimize=True)
     except HTTPException:

@@ -188,9 +188,11 @@ class _PrivacyConsentScreenState extends ConsumerState<PrivacyConsentScreen> {
                     title: 'Fotoğrafımın analiz için yurt dışına gönderilmesi',
                     description:
                         'Besin tanıma, fotoğrafı yurt dışındaki bir yapay zekâ '
-                        'sağlayıcısına gönderir. İzin vermezseniz fotoğraf '
-                        'gönderilmez; besinleri elle girerek uygulamayı '
-                        'kullanmaya devam edebilirsiniz.',
+                        'sağlayıcısına gönderir. Fotoğraf gönderilmeden önce '
+                        'küçültülür, konum ve cihaz bilgileri silinir; adınız, '
+                        'e-postanız veya hesap kimliğiniz eklenmez. İzin '
+                        'vermezseniz fotoğraf gönderilmez; besinleri elle '
+                        'girerek uygulamayı kullanmaya devam edebilirsiniz.',
                     value: _imageTransfer,
                     enabled: !_saving,
                     onChanged: (value) =>
@@ -236,8 +238,10 @@ class PrivacyNoticeCard extends StatelessWidget {
       'Kilo, uyku, su ve ruh hâli gibi takip verileri de hesabınıza bağlı '
       'olarak saklanır.\n\n'
       'Besin tanıma sırasında fotoğraf geçici olarak işlenir ve '
-      'yapılandırılmışsa yurt dışındaki bir sağlayıcıya gönderilebilir; '
-      'fotoğraf cihazda veya sunucuda saklanmaz.\n\n'
+      'yapılandırılmışsa yurt dışındaki bir sağlayıcıya gönderilebilir. '
+      'Gönderilmeden önce küçültülür, konum ve cihaz bilgileri silinir ve '
+      'kimliğinizle ilişkilendirilmez. Fotoğraf cihazda veya sunucuda '
+      'saklanmaz.\n\n'
       'Beslenme raporunuz yalnız siz her gönderim için ayrıca onay '
       'verdiğinizde atanmış diyetisyenin güvenli uygulama içi panelinde '
       'paylaşılır. E-posta veya SMS yalnız anonim danışan kodlu yeni rapor '
