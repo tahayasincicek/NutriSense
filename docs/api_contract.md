@@ -107,7 +107,7 @@ Diyetisyen e-posta/SMS raporları `dietitian-report-v4` şemasında ilişkiye ö
   - Maksimum: 5 MB
   - Backend gerçek görüntü decode kontrolü yapar.
   - Görüntü RGB JPEG olarak yeniden kodlanır; EXIF/metadatası aktarılmaz.
-  - En büyük kenar 2048 piksele indirilir.
+  - En büyük kenar 1024 piksele indirilir; sağlayıcıya yalnız tanıma için yeterli çözünürlük gider.
 - `meal_type`: `kahvalti | ogle | aksam | atistirmalik`
 - `capture_id`: zorunlu UUID; aynı fiziksel çekimin tekrar gönderilmesini idempotent yapar.
 - `user_id` gövdede gönderilmez; access token'dan alınır.

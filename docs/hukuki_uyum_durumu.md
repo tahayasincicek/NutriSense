@@ -19,6 +19,9 @@ bir hukukçu verir.
 | Ücretsiz Gemini katmanına sağlık bağlamlı fotoğraf | Production'da Gemini, `GEMINI_PAID_TIER_CONFIRMED=true` olmadan açılamaz. | aynı dosyalar |
 | Uygulama dışında hesap silme yolu (Google Play) ve KVKK m.11 başvurusu | Herkese açık `/hesap-silme` (`/account-deletion`) ve `/kvkk-basvuru` sayfaları. Form içermez, veri toplamaz; veri sorumlusu iletişimini ayarlardan gösterir. | `backend/app/routers/legal_router.py`, `backend/tests/test_legal_compliance.py` |
 | Fotoğrafın konum ve cihaz bilgisi | Sunucu görüntüyü EXIF'siz yeniden kodlar; dosya, veritabanı veya loga yazmaz. | `backend/app/routers/food_router.py` |
+| Yurt dışına giden verinin kimliksizleştirilmesi | Sağlayıcı istekleri sunucudan çıkar; kullanıcı kimliği, IP, ad veya e-posta eklenmez. Fotoğraf en uzun kenarı 1024 piksele küçültülür. Besin araması önce yurt içi katalogda yapılır; yurt dışına yalnız bağlantı, e-posta ve telefonu silinmiş, 80 karakterle sınırlı metin gider. | `backend/app/routers/food_router.py`, `backend/app/services/nutritionix_service.py`, `backend/tests/test_provider_anonymization.py`, `docs/yurt_disi_aktarim_matrisi.md` |
+| Ses ve metin okumanın cihazda kalması | Android'de önce cihaz üstü konuşma tanıma istenir; dil paketi yoksa sesli komut bozulmasın diye standart tanımaya dönülür. Metin okumada yerel Türkçe ses seçilir. | `lib/shared/services/on_device_voice_policy.dart`, `test/unit/on_device_voice_policy_test.dart` |
+| Açılışta Google'a yazı tipi isteği | Plus Jakarta Sans uygulamaya gömüldü; çalışırken indirme kapalı, kullanıcının IP adresi Google'a gitmez. | `assets/google_fonts/`, `lib/main.dart` |
 | Veri kaynaklarına atıf | Modelin eğitim verileri ve kalori kaynakları uygulamada Ayarlar → Lisanslar ve Veri Kaynakları ekranında listelenir. | `lib/main.dart`, `ml/LICENSES.md` |
 | Kayıt ekranında hesap varlığının sızması | Hesap e-postaya gönderilen kodla açılır. Kayıt isteği her durumda aynı yanıtı verir ve parola özeti iki durumda da hesaplanır; adres zaten kayıtlıysa bilgi yalnız adresin sahibine e-postayla gider. Kod beş yanlış denemede iptal olur, kayıt isteği 15 dakikada beşle sınırlıdır. | `backend/app/routers/food_router.py`, `backend/tests/test_registration_verification.py`, `lib/features/auth/screens/registration_verification_screen.dart` |
 | Saklama ve imha | Süresi dolan oturum anahtarları, parola sıfırlama kodları ve karara bağlanmamış tanıma denemeleri silinir; güvenlik kayıtlarında IP 90 günde boşaltılır, kayıt 365 günde silinir. Her çalıştırma kişisel veri içermeyen bir imha kaydı yazar. Süreler kurum onayı bekler. | `backend/app/domain/retention.py`, `backend/scripts/purge_expired_data.py`, `docs/saklama_ve_imha_politikasi_taslak.md` |
@@ -68,9 +71,10 @@ bir hukukçu verir.
   akışına geçirilebilir.
 - Sesli okumada hassas bilgi uyarısı: sağlık bilgisinin hoparlörden
   duyulabileceğine dair ilk kullanım uyarısı ve kulaklık önerisi yok.
-- İşletim sistemi konuşma tanıma servisi: cihaz içi tanıma zorunlu
-  kılınmıyor. Bu nedenle servis aydınlatmada ve aktarım matrisinde dış alıcı
-  olarak açıklanır.
+- İşletim sistemi konuşma tanıma servisi: Android'de cihaz üstü tanıma
+  öncelikli, ama Türkçe dil paketi olmayan telefonlarda ve iOS'ta ses platform
+  sunucusunda işlenebilir. Bu nedenle servis aydınlatmada ve aktarım
+  matrisinde dış alıcı olarak açıklanır.
 
 ## Production için zorunlu ayarlar
 

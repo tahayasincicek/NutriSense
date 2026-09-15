@@ -15,6 +15,11 @@ gönderilebilir; varsayılan akış görüntüyü dosya, veritabanı veya logda
 saklamaz. Production'da Gemini yalnız faturalandırmalı projeyle ve yurt dışı
 aktarım değerlendirmesinin kayıt numarası tanımlıyken açılabilir.
 
+Yurt dışına giden fotoğraf kimliksizleştirilir: konum ve cihaz bilgisi (EXIF)
+telefonda ve sunucuda silinir, sunucu fotoğrafı en uzun kenarı 1024 piksel
+olacak şekilde küçültür. İstek sunucudan çıktığı için sağlayıcı kullanıcının IP
+adresini görmez; isteğe ad, e-posta, hesap kimliği veya cihaz bilgisi eklenmez.
+
 Kullanıcı isterse su, adım, uyku, ruh hâli ve kilo ölçümlerini de kaydeder.
 Bunlar sağlık verisidir ve hesaba bağlı olarak saklanır; hesap silindiğinde
 birlikte silinir, veri dışa aktarımına dahildir. Bu ölçümlerin cihazdaki
@@ -27,7 +32,10 @@ tutulur ve sunucuya gönderilmez; uygulama kaldırıldığında cihazdan silinir
 Diyetisyen, kendisine ulaşan rapora tek bir cevap yazabilir. Cevap sağlık
 verisi bağlamında bir yazışmadır ve yalnız raporu gönderen danışana görünür.
 
-Nutritionix'e besin arama adı gönderilebilir. Kullanıcının her gönderimde
+Besin araması önce yurt içindeki doğrulanmış katalogda yapılır; bulunan besin
+için Nutritionix'e istek gitmez. Katalogda olmayan besinde Nutritionix'e yalnız
+kimliksizleştirilmiş arama metni gönderilir: metindeki bağlantı, e-posta ve
+telefon numarası silinir, metin 80 karakterle sınırlanır. Kullanıcının her gönderimde
 onayladığı raporun sağlık ayrıntıları yalnız doğrulanmış ve atanmış diyetisyenin
 uygulama içi panelinde gösterilir. SMTP sağlayıcısı ve/veya Twilio yalnız yeni
 rapor bildirimi, alıcı iletişim adresi ve ilişkiye özel `D-…` danışan kodunu
@@ -47,13 +55,19 @@ adresin sahibine e-postayla bildirilir.
 
 Sesli komutlar cihazın işletim sistemindeki konuşma tanıma servisiyle
 (Android'de Google, iOS'ta Apple) yazıya çevrilir. NutriSense sesi dosyaya,
-veritabanına veya loga yazmaz. Uygulama cihaz içi tanımayı zorunlu kılmadığı
-için ses, işletim sistemi sağlayıcısının sunucularında işlenebilir; bu servis
+veritabanına veya loga yazmaz. Android'de önce cihaz üstü tanıma istenir ve ses
+telefondan çıkmaz. Telefonda Türkçe dil paketi yoksa sesli komut bozulmasın
+diye standart tanımaya dönülür; bu durumda ve iOS'ta ses işletim sistemi
+sağlayıcısının sunucularında işlenebilir. Bu servis
 `docs/yurt_disi_aktarim_matrisi.md` içinde ayrı satırdır. Sesli komut
 kullanmadan dokunmatik ekran ve klavyeyle devam edilebilir.
 
 Uygulama besin ve sağlık bilgilerini sesli okuyabilir; çevredekiler bu
-bilgileri duyabilir. Kalabalık ortamda kulaklık önerilir.
+bilgileri duyabilir. Kalabalık ortamda kulaklık önerilir. Android'de cihazda
+kurulu yerel Türkçe ses seçilir; okunan metin Google'ın ağ seslerine gönderilmez.
+
+Uygulamanın yazı tipi uygulamayla birlikte gelir; açılışta Google'dan yazı
+tipi indirilmez ve kullanıcının IP adresi bu amaçla paylaşılmaz.
 
 ## Araştırma verisi
 
