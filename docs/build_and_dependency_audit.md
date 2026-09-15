@@ -6,7 +6,7 @@
 > belgedir.
 
 **Denetim tarihi:** 17 Temmuz 2026  
-**Denetlenen proje:** `C:\Users\TAHA\Desktop\2209\nutrisense`  
+**Denetlenen proje:** `<proje-kökü>`  
 **Amaç:** Yeni özellik eklemeden, mevcut Flutter istemcisini temiz bir ortamda çözümlenebilir, analiz edilebilir, temel düzeyde test edilebilir ve Android debug APK üretebilir hale getirmek.
 
 ## Sonuç özeti
@@ -26,7 +26,7 @@
 
 Denetimde sistem PATH'ine güvenmek yerine projeyle birlikte bulunan şu Flutter çalıştırıcısı kullanıldı:
 
-`C:\Users\TAHA\Desktop\2209\flutter_sdk\flutter\bin\flutter.bat`
+`<flutter-sdk>\bin\flutter.bat`
 
 - Flutter: **3.22.0 stable**
 - Dart: **3.4.0**
@@ -34,7 +34,7 @@ Denetimde sistem PATH'ine güvenmek yerine projeyle birlikte bulunan şu Flutter
 - Java: **21**
 - Kurulu ve proje tarafından sabitlenen NDK: **28.2.13676358**
 - `flutter doctor -v`: Android toolchain kullanılabilir. Android cihaz bağlı değil; yalnızca Windows/web hedefleri görüldü.
-- Ortam sorunu: PATH, kullanılan bundled SDK yerine `C:\Users\TAHA\dev\flutter` konumunu işaret ediyor. Tekrar üretimde aşağıdaki mutlak Flutter yolu kullanılmalı veya PATH bilinçli biçimde düzeltilmeli.
+- Ortam sorunu: PATH, kullanılan bundled SDK yerine `<kullanıcının Flutter SDK'sı>` konumunu işaret ediyor. Tekrar üretimde aşağıdaki mutlak Flutter yolu kullanılmalı veya PATH bilinçli biçimde düzeltilmeli.
 
 ## Başlangıç durumu ve kontrollü teşhis
 
@@ -198,8 +198,8 @@ Davranışsal/yapılandırma değişikliği yapılan ana dosyalar:
 PowerShell, proje kökünde:
 
 ```powershell
-$nutriFlutter = 'C:\Users\TAHA\Desktop\2209\flutter_sdk\flutter\bin\flutter.bat'
-$nutriDart = 'C:\Users\TAHA\Desktop\2209\flutter_sdk\flutter\bin\cache\dart-sdk\bin\dart.exe'
+$nutriFlutter = '<flutter-sdk>\bin\flutter.bat'
+$nutriDart = '<flutter-sdk>\bin\cache\dart-sdk\bin\dart.exe'
 
 & $nutriFlutter doctor -v
 & $nutriFlutter --version

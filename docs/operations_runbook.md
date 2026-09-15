@@ -106,6 +106,7 @@ Eşikler gerçek trafik baz çizgisiyle yeniden kalibre edilir.
 
 Günlük: readiness, error rate, provider outcomes, queue age, auth anomaly.
 Haftalık: dependency/security bulguları, disk büyümesi, restore tatbikat
-takvimi, retention işleri. Her release: OpenAPI drift, image/SBOM checksum,
+takvimi, saklama-imha işi (`python scripts/purge_expired_data.py`; günlük
+çalıştırılır, çıktıdaki sayılar kontrol edilir). Her release: OpenAPI drift, image/SBOM checksum,
 migration ve rollback digest doğrulaması.
 

@@ -17,7 +17,12 @@ aktarım değerlendirmesinin kayıt numarası tanımlıyken açılabilir.
 
 Kullanıcı isterse su, adım, uyku, ruh hâli ve kilo ölçümlerini de kaydeder.
 Bunlar sağlık verisidir ve hesaba bağlı olarak saklanır; hesap silindiğinde
-birlikte silinir, veri dışa aktarımına dahildir.
+birlikte silinir, veri dışa aktarımına dahildir. Bu ölçümlerin cihazdaki
+kopyası şifreli depoda tutulur.
+
+Kullanıcının eklediği ilaç ve takviye listesi ile bunların o gün alınıp
+alınmadığı da sağlık verisidir. Bu liste yalnız cihazda, şifreli depoda
+tutulur ve sunucuya gönderilmez; uygulama kaldırıldığında cihazdan silinir.
 
 Diyetisyen, kendisine ulaşan rapora tek bir cevap yazabilir. Cevap sağlık
 verisi bağlamında bir yazışmadır ve yalnız raporu gönderen danışana görünür.
@@ -91,7 +96,8 @@ edilebilir yapmaz; düşük güvenli sonuç kullanıcı onayı olmadan kaydedilm
   ve `DATA_CONTROLLER_CONTACT_EMAIL` ayarlarına yazılır; boşken production
   başlamaz.
 - Amaç bazlı hukuki sebep: `[HUKUK İNCELEMESİ]`
-- Saklama ve backup imha takvimi: `[KURUM KARARI]`
+- Saklama ve backup imha takvimi: `[KURUM KARARI]` — taslak süreler ve
+  uygulanan periyodik imha `docs/saklama_ve_imha_politikasi_taslak.md` içindedir.
 - Dış alıcılar, ülkeler ve aktarım mekanizması: `[HUKUK İNCELEMESİ]` — satırlar
   `docs/yurt_disi_aktarim_matrisi.md` içindedir; aktarım dosyasının kayıt
   numarası `CROSS_BORDER_TRANSFER_REFERENCE` ayarına yazılır.

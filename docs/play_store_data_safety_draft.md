@@ -16,7 +16,7 @@ doğrulanmalıdır.
 | Beslenme günlüğü | Geçmiş ve kullanıcı onaylı rapor | Backend veritabanında kullanıcı UUID'sine bağlı | Düzeltme/silme ve rapor onayı |
 | Galeri fotoğrafı (kullanıcının seçtiği) | Besin adayını analiz etme | Varsayılan kalıcı saklama yok; kamera görüntüsüyle aynı yolu izler | Seçim yapılmazsa özellik kullanılmaz; kamera veya manuel giriş açık |
 | Kamera görüntüsü | Besin adayını analiz etme | Varsayılan kalıcı saklama yok; yapılandırmaya göre işlem sağlayıcısına aktarılabilir | İzin reddi ve manuel giriş |
-| Sağlık ve fitness verisi | Kullanıcının kendi takibi | Su, adım, uyku, ruh hâli ve kilo ölçümleri hesaba bağlı olarak sunucuda | Amaç bazlı açık rıza; dışa aktarma ve hesap silmede tamamen silinir |
+| Sağlık ve fitness verisi | Kullanıcının kendi takibi | Su, adım, uyku, ruh hâli ve kilo ölçümleri hesaba bağlı olarak sunucuda; ilaç ve takviye listesi yalnız cihazda, şifreli depoda | Amaç bazlı açık rıza; dışa aktarma ve hesap silmede tamamen silinir |
 | Diyetisyen iletişimi | Kullanıcı onaylı rapor gönderimi | Doğrulanmış alıcı ve kanal durumları sunucuda | Atama/iptal ve her gönderimde açık onay |
 | Araştırma yanıtı | Etik onaylı HCI araştırması | Ürün hesabından ayrı pseudonym; etik kapı olmadan gerçek veri yok | Onam geri çekme koduyla silme |
 | Tanılama verisi | Hata teşhisi | Production crash/analytics sağlayıcısı şu anda doğrulanmış değil | Sağlayıcı eklenirse form yeniden değerlendirilir |

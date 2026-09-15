@@ -26,7 +26,7 @@
         0.0,
         0
       ],
-      "path": "/home/taha/ml/artifacts/20260908T060321Z-b000d69c58/nutrisense_float16.tflite",
+      "path": "~/ml/artifacts/20260908T060321Z-b000d69c58/nutrisense_float16.tflite",
       "sha256": "270ae6ff459e942324df66387b1df1f6bf4c3e50a5e0811ef76e292c756a7d72",
       "tolerance": 0.05,
       "validation_subset_accuracy_delta": 0.0,
@@ -57,7 +57,7 @@
         0.0,
         0
       ],
-      "path": "/home/taha/ml/artifacts/20260908T060321Z-b000d69c58/nutrisense_float32.tflite",
+      "path": "~/ml/artifacts/20260908T060321Z-b000d69c58/nutrisense_float32.tflite",
       "sha256": "b287dc687bbcecc1edc50be482d6f87b1e87ab2d691c386d23fe49523e8d4ca6",
       "tolerance": 0.0001,
       "validation_subset_accuracy_delta": 0.0,

@@ -1,6 +1,6 @@
 {
   "config_sha256": "64d49f8e930212a43a6ede28d9c4b3fb13ac3fcffe577e383a824da8e8e363eb",
-  "data_root_at_training": "/home/taha/ml/raw224",
+  "data_root_at_training": "~/ml/raw224",
   "dataset_version": "1ea7e7ab1c469cabacfe2510bcd770200c3f218a55a9c4a4c5bc820efec23eb7",
   "experiment_id": "20260908T060321Z-b000d69c58",
   "numpy": "2.0.2",

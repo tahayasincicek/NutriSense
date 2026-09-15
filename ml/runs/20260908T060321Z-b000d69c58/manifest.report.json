@@ -1,6 +1,6 @@
 {
   "created_at": "2026-09-08T05:41:32.100397Z",
-  "data_root_hint": "/home/taha/ml/raw224",
+  "data_root_hint": "~/ml/raw224",
   "dataset_version": "1ea7e7ab1c469cabacfe2510bcd770200c3f218a55a9c4a4c5bc820efec23eb7",
   "distribution": [
     {
@@ -2357,7 +2357,7 @@
     }
   ],
   "exact_or_near_duplicates": 12471,
-  "manifest": "/home/taha/ml/manifest_tr130.csv",
+  "manifest": "~/ml/manifest_tr130.csv",
   "ood_check": {
     "ready": true,
     "samples": 11921,

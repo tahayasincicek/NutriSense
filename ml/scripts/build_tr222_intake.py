@@ -6,9 +6,10 @@ import io
 import json
 import os
 
-RAW = r"C:\Users\TAHA\Desktop\2209\nutrisense\ml\data\raw"
-CONFIG = r"C:\Users\TAHA\Desktop\2209\nutrisense\ml\configs\tr222_v1.json"
-OUT = r"C:\Users\TAHA\Desktop\2209\nutrisense\ml\data\intake_tr222.csv"
+ML_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+RAW = os.path.join(ML_DIR, "data", "raw")
+CONFIG = os.path.join(ML_DIR, "configs", "tr222_v1.json")
+OUT = os.path.join(ML_DIR, "data", "intake_tr222.csv")
 
 config = json.load(io.open(CONFIG, encoding="utf-8"))
 allowed = {c["id"] for c in config["classes"]} | {config["ood"]["label"]}

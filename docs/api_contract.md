@@ -244,7 +244,7 @@ CameraScreen
 ## 11. Test komutları
 
 ```powershell
-$flutter = 'C:\Users\TAHA\Desktop\2209\flutter_sdk\flutter\bin\flutter.bat'
+$flutter = '<flutter-sdk>\bin\flutter.bat'
 & $flutter test test\contract --reporter expanded
 & $flutter analyze --no-fatal-infos
 

@@ -126,3 +126,6 @@ app.*.map.json
 # Yerel tasarim/calisma dosyalari; depoya girmez.
 /tmp/
 /android/.kotlin/
+
+# Kişisel ve hukuki çalışma belgeleri repoya girmez
+reports/

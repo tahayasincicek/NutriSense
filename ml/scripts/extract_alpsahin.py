@@ -10,8 +10,9 @@ import re
 
 import pyarrow.parquet as pq
 
-D = r"C:\Users\TAHA\Desktop\2209\nutrisense\ml\data\downloads\alpsahin"
-RAW = r"C:\Users\TAHA\Desktop\2209\nutrisense\ml\data\raw"
+ML_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+D = os.path.join(ML_DIR, "data", "downloads", "alpsahin")
+RAW = os.path.join(ML_DIR, "data", "raw")
 
 # Elimizdeki klasorle birebir ayni yemek olanlar.
 MERGE = {

@@ -5,7 +5,7 @@
 ## Günlük kullanım
 
 ```powershell
-cd C:\Users\TAHA\Desktop\2209\nutrisense\backend
+cd <proje-kökü>\backend
 .\venv\Scripts\alembic.exe current
 .\venv\Scripts\alembic.exe upgrade head
 .\venv\Scripts\alembic.exe check

@@ -25,7 +25,7 @@ Bu turda ayrı bir `__ood__` negatif sınıfı **yoktur**. Kapsam dışı fotoğ
 Python 3.11 kullanın. GPU zorunlu değildir; CPU deneyi daha yavaştır. CUDA/cuDNN sürümleri, GPU modeli ve işletim sistemi `provenance.json` yanında ayrıca kaydedilmelidir.
 
 ```powershell
-cd C:\Users\TAHA\Desktop\2209\nutrisense\ml
+cd <proje-kökü>\ml
 py -3.11 -m venv .venv
 .\.venv\Scripts\python -m pip install --upgrade pip
 .\.venv\Scripts\python -m pip install -r requirements.lock

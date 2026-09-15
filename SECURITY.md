@@ -56,7 +56,7 @@ bir desteklenen sürüm olarak ilan edilmemiştir.
 Windows PowerShell:
 
 ```powershell
-cd C:\Users\TAHA\Desktop\2209\nutrisense
+cd <proje-kökü>
 python scripts/security/secret_scan.py --history
 cd backend
 .\venv\Scripts\python.exe scripts\security_smoke.py

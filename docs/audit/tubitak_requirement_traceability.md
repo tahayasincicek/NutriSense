@@ -11,8 +11,8 @@
 > kanıtıdır.
 
 **Denetim tarihi:** 17 Temmuz 2026  
-**Kaynak:** `C:\Users\TAHA\Desktop\2209\Tübitak-2209-a_rapor 1 (1).pdf` (10 sayfa; görsel ve metinsel olarak bütünüyle incelendi)  
-**Denetlenen ürün:** `C:\Users\TAHA\Desktop\2209\nutrisense`  
+**Kaynak:** `TÜBİTAK 2209-A başvuru formu (PDF, repoda yok)` (10 sayfa; görsel ve metinsel olarak bütünüyle incelendi)  
+**Denetlenen ürün:** `<proje-kökü>`  
 **Kapsam dışı:** Aynı çalışma dizinindeki `NutriSense_New`; bu denetim promptu ana uygulamayı açıkça `nutrisense` olarak tanımladığı için kanıtlar iki proje arasında karıştırılmadı.
 
 ## Değerlendirme kuralı

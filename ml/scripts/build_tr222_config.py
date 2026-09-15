@@ -5,9 +5,10 @@ import io
 import json
 import os
 
-RAW = r"C:\Users\TAHA\Desktop\2209\nutrisense\ml\data\raw"
-OUT = r"C:\Users\TAHA\Desktop\2209\nutrisense\ml\configs\tr222_v1.json"
-BASE = r"C:\Users\TAHA\Desktop\2209\nutrisense\ml\configs\tr29_v1.json"
+ML_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+RAW = os.path.join(ML_DIR, "data", "raw")
+OUT = os.path.join(ML_DIR, "configs", "tr222_v1.json")
+BASE = os.path.join(ML_DIR, "configs", "tr29_v1.json")
 DROP = {"__ood__", "kraker"}  # kraker'da 28 gorsel var, egitime yetmez
 
 TR = {

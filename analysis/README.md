@@ -11,7 +11,7 @@ Depoda yetkili gerçek usability/survey tidy export'u yoktur. Analiz hattı haz�
 Windows PowerShell:
 
 ```powershell
-cd C:\Users\TAHA\Desktop\2209\nutrisense
+cd <proje-kökü>
 py -3.13 -m venv analysis\.venv
 .\analysis\.venv\Scripts\python.exe -m pip install --requirement analysis\requirements.lock
 ```

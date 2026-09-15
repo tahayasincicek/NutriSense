@@ -93,7 +93,7 @@ Diyetisyen: P0-07 → P1-04 → P1-05 → P1-06
 
 Bir sonraki prompt kod değiştirecekse başlamadan önce kullanıcı/ekip şu seçimleri ve sınırları açıkça vermelidir:
 
-1. **Proje kökü:** Yalnız `C:\Users\TAHA\Desktop\2209\nutrisense` mi, yoksa `NutriSense_New` ana dal mı? İki proje kanıtı karıştırılmamalı.
+1. **Proje kökü:** Yalnız `<proje-kökü>` mi, yoksa `NutriSense_New` ana dal mı? İki proje kanıtı karıştırılmamalı.
 2. **Öncelik:** İlk uygulama turu yalnız P0 ürün güvenliği/çalıştırılabilirlik maddelerini kapsamalı; araştırma sonucu uydurmamalı.
 3. **API kararı:** Nihai backend sözleşmesi olarak mevcut FastAPI `/api/v1` yolu onaylanmalı veya alternatif açıkça seçilmeli.
 4. **Platform kararı:** hazırlanan iOS kaynakları için gerçek bundle ID/Apple Team, Mac/Xcode ve iPhone doğrulaması sağlanacak mı; sağlanmayacaksa TÜBİTAK kapsam değişikliği mi istenecek?
