@@ -79,7 +79,8 @@ class _UsabilityTestScreenState extends ConsumerState<UsabilityTestScreen> {
   // ═══════════════════════════════════════════════════════════════════════════
 
   Widget _buildSetupScreen(ThemeData theme) {
-    return Padding(
+    // Büyük yazı boyutunda içerik ekrana sığmayabilir; ekran kaydırılır.
+    return SingleChildScrollView(
       padding: const EdgeInsets.all(24),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -146,7 +147,7 @@ class _UsabilityTestScreenState extends ConsumerState<UsabilityTestScreen> {
             ),
           ),
 
-          const Spacer(),
+          const SizedBox(height: 32),
 
           // Başlat butonu
           SizedBox(

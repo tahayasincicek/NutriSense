@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'core/config/app_config.dart';
 import 'core/theme/app_theme.dart';
 import 'core/theme/theme_controller.dart';
@@ -20,6 +21,9 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   AppConfig.validate();
   LicenseRegistry.addLicense(_dataSourceLicenses);
+  // Yazı tipi uygulamayla gelir. Çalışırken Google sunucusundan indirilmez;
+  // böylece kullanıcının IP adresi uygulama açılışında dışarı gönderilmez.
+  GoogleFonts.config.allowRuntimeFetching = false;
 
   // Sistem çubuğunu modern temaya uyumlu hale getir
   SystemChrome.setSystemUIOverlayStyle(
@@ -73,6 +77,13 @@ Stream<LicenseEntry> _dataSourceLicenses() async* {
     'Katalogda tahmini olarak işaretlenen kayıtlar, kamuya açık Türkçe '
     'besin tablolarındaki değerlerden hesaplanmıştır. Değerler tahmindir; '
     'tıbbi tavsiye değildir.',
+  );
+  yield const LicenseEntryWithLineBreaks(
+    ['Plus Jakarta Sans yazı tipi'],
+    'Copyright 2020 The Plus Jakarta Sans Project Authors '
+    '(https://github.com/tokotype/PlusJakartaSans).\n\n'
+    'SIL Open Font License, Version 1.1 ile lisanslanmıştır: '
+    'https://openfontlicense.org',
   );
 }
 

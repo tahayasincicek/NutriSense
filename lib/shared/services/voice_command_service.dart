@@ -22,6 +22,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:speech_to_text/speech_to_text.dart' as stt;
+import 'on_device_voice_policy.dart';
 import 'speech_locale_policy.dart';
 import 'package:speech_to_text/speech_recognition_result.dart';
 import 'package:speech_to_text/speech_recognition_error.dart';
@@ -146,6 +147,9 @@ class VoiceCommandService {
   static const _restartDelay = Duration(seconds: 2);
   static const _minConfidence = 0.4; // Fuzzy match eşiği
   bool _continuousMode = false;
+  // Önce cihaz üstü tanıma denenir; ses cihazdan çıkmaz. Dil paketi yoksa
+  // bir kez standart tanımaya dönülür.
+  bool _preferOnDevice = preferOnDeviceSpeechByDefault();
 
   VoiceCommandService({required AccessibilityService accessibility})
       : _accessibility = accessibility;
@@ -247,6 +251,10 @@ class VoiceCommandService {
     _setListeningState(ListeningState.listening);
     await _accessibility.lightHaptic();
 
+    await _listen();
+  }
+
+  Future<void> _listen() async {
     await _speech.listen(
       onResult: _onResult,
       listenOptions: stt.SpeechListenOptions(
@@ -256,6 +264,7 @@ class VoiceCommandService {
         listenMode: stt.ListenMode.confirmation,
         cancelOnError: false,
         partialResults: true,
+        onDevice: _preferOnDevice,
       ),
     );
   }
@@ -476,6 +485,14 @@ class VoiceCommandService {
   }
 
   void _onError(SpeechRecognitionError error) {
+    if (shouldRetryWithoutOnDevice(
+      error.errorMsg,
+      preferOnDevice: _preferOnDevice,
+    )) {
+      _preferOnDevice = false;
+      unawaited(_listen());
+      return;
+    }
     _accessibility.finishSpeechInput();
     if (error.permanent) {
       // Sebebi izne bağlamadan önce izni gerçekten kontrol et: izin verilmişken

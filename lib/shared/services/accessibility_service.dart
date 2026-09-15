@@ -23,6 +23,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'on_device_voice_policy.dart';
+
 // ═══════════════════════════════════════════════════════════════════════════════
 // ÖNCELİK SEVİYELERİ
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -128,6 +130,21 @@ class AccessibilityService with WidgetsBindingObserver {
   // ─────────────────────────────────────────────────────────────────────────
 
   /// Servisi başlatır: TTS motoru + tercihleri yükler.
+  /// Okunan besin ve sağlık metni cihazdan çıkmasın diye cihazda kurulu yerel
+  /// Türkçe sesi seçer. Yerel ses yoksa varsayılan ses kullanılmaya devam
+  /// eder; metin okuma bozulmaz.
+  Future<void> _preferOfflineTurkishVoice() async {
+    try {
+      if (await _tts.isLanguageInstalled('tr-TR') != true) return;
+      final voices = await _tts.getVoices;
+      if (voices is! List) return;
+      final voice = selectOfflineTurkishVoice(voices);
+      if (voice != null) await _tts.setVoice(voice);
+    } catch (_) {
+      // Ses listesi alınamazsa varsayılan sesle devam edilir.
+    }
+  }
+
   Future<void> initialize() async {
     if (_isInitialized) return;
 
@@ -146,6 +163,9 @@ class AccessibilityService with WidgetsBindingObserver {
       if (languageAvailable == true) {
         await _tts.setLanguage('tr-TR');
         _setTtsFailure(null);
+        if (defaultTargetPlatform == TargetPlatform.android) {
+          await _preferOfflineTurkishVoice();
+        }
       } else {
         _setTtsFailure('Türkçe metin okuma sesi bu cihazda bulunamadı.');
       }

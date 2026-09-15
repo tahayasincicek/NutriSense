@@ -84,3 +84,5 @@ flutter:
     - assets/models/nutrisense_food.tflite
     - assets/models/labels.txt
     - assets/models/model_manifest.json
+    # Plus Jakarta Sans uygulamayla gelir; google_fonts çalışırken indirmez.
+    - assets/google_fonts/

@@ -6,12 +6,15 @@
 // Mikrofon dinleme, metin dönüşümü ve güven skoru yönetimi.
 // =============================================================================
 
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:speech_to_text/speech_recognition_error.dart';
 import 'package:speech_to_text/speech_recognition_result.dart';
 import 'package:speech_to_text/speech_to_text.dart';
+import 'on_device_voice_policy.dart';
 import 'speech_locale_policy.dart';
 
 /// STT dinleme durumu
@@ -51,6 +54,11 @@ class SttService {
   bool _isInitialized = false;
   String? _turkishLocaleId;
   String? _initializationError;
+  // Önce cihaz üstü tanıma denenir; ses cihazdan çıkmaz. Dil paketi yoksa
+  // bir kez standart tanımaya dönülür.
+  bool _preferOnDevice = preferOnDeviceSpeechByDefault();
+  String? _activeLocale;
+  Duration _activeListenFor = const Duration(seconds: 30);
 
   SttState get state => _state;
   bool get isListening => _state == SttState.listening;
@@ -149,15 +157,22 @@ class SttService {
     _state = SttState.listening;
     _onListeningStarted?.call();
 
+    _activeLocale = requestedLocale;
+    _activeListenFor = listenFor;
+    await _listen();
+  }
+
+  Future<void> _listen() async {
     await _stt.listen(
       onResult: _handleResult,
       listenOptions: SpeechListenOptions(
-        localeId: requestedLocale,
-        listenFor: listenFor,
+        localeId: _activeLocale,
+        listenFor: _activeListenFor,
         pauseFor: const Duration(seconds: 3), // 3 saniye sessizlikte dur
         listenMode: ListenMode.confirmation,
         cancelOnError: false,
         partialResults: true,
+        onDevice: _preferOnDevice,
       ),
     );
   }
@@ -222,6 +237,14 @@ class SttService {
   }
 
   void _handleError(SpeechRecognitionError error) {
+    if (shouldRetryWithoutOnDevice(
+      error.errorMsg,
+      preferOnDevice: _preferOnDevice,
+    )) {
+      _preferOnDevice = false;
+      unawaited(_listen());
+      return;
+    }
     _state = SttState.error;
     final message = _errorToTurkish(error.errorMsg);
     _onError?.call(message);
