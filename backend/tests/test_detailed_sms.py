@@ -3,13 +3,14 @@ from copy import deepcopy
 import pytest
 
 from app.config import Settings
+from app.domain import report_messages
 from app.domain.report_messages import build_report_sms, build_sms_parts, SMS_BODY_LIMIT
 from app.services.notification_service import ChannelDeliveryError, NotificationService
 
 
-def report(count=1):
+def report(count=1, schema_version="dietitian-report-v3"):
     return {
-        "schema_version": "dietitian-report-v3",
+        "schema_version": schema_version,
         "from_date": "2026-09-01", "to_date": "2026-09-07", "record_count": count,
         "records": [{
             "food_name_tr": f"Öğün {i} Çiğ köfte 🥗",
@@ -26,36 +27,49 @@ def service(transport):
     ), sms_transport=transport)
 
 
-def test_long_unicode_report_is_complete_and_every_body_fits():
-    payload = report(120)
-    # Long individual names must also split without losing Unicode characters.
-    payload["records"][0]["food_name_tr"] = "Çığ🥗" * 400
+@pytest.fixture
+def long_sms(monkeypatch):
+    """Çok parçalı gönderim altyapısını, raporun taşıdığı uzun bir gövdeyle sınar.
+
+    Gerçek rapor SMS'i artık kısa bir bildirimdir; parçalama, ilerleme kaydı ve
+    yeniden deneme kuralları yine de korunmalıdır.
+    """
+    monkeypatch.setattr(report_messages, "build_report_sms", lambda payload: payload["body"])
+
+
+def long_body(lines=20):
+    return "\n".join(f"{i}. satır uzun bir SMS gövdesi Çığ🥗 {'x' * 60}" for i in range(lines))
+
+
+@pytest.mark.parametrize(
+    "schema_version",
+    ["dietitian-report-v2", "dietitian-report-v3", "dietitian-report-v4"],
+)
+def test_no_schema_version_puts_health_details_into_sms(schema_version):
+    payload = report(3, schema_version)
+    sms = build_report_sms(payload)
+    assert "Çiğ köfte" not in sms
+    assert "kcal" not in sms
+    assert "125.5" not in sms
+    assert "2026-09-07T12:35:01" not in sms
+    assert "güvenli diyetisyen panelinden" in sms
+    assert build_sms_parts(payload) == [sms]
+
+
+def test_long_unicode_body_is_complete_and_every_part_fits(long_sms):
+    payload = {**report(), "body": long_body(120) + "\n" + "Çığ🥗" * 400}
     parts = build_sms_parts(payload)
     assert len(parts) > 1
     restored = "".join(part.split("\n", 1)[1] for part in parts)
-    assert restored == build_report_sms(payload)
+    assert restored == payload["body"]
     for index, part in enumerate(parts, 1):
         assert part.startswith(f"NutriSense ({index}/{len(parts)})\n")
         assert len(part.encode("utf-16-le")) // 2 <= SMS_BODY_LIMIT
 
 
-def test_legacy_consent_does_not_expand_to_details_on_retry():
-    payload = report()
-    payload["schema_version"] = "dietitian-report-v2"
-    assert "kcal" not in build_report_sms(payload)
-    assert "Çiğ köfte" not in build_report_sms(payload)
-
-
-def test_incomplete_records_cannot_produce_a_successful_summary():
-    payload = report()
-    payload["record_count"] = 2
-    with pytest.raises(ValueError):
-        build_sms_parts(payload)
-
-
 @pytest.mark.asyncio
-async def test_retry_resumes_after_acknowledged_part_and_keeps_all_ids():
-    payload = report(20)
+async def test_retry_resumes_after_acknowledged_part_and_keeps_all_ids(long_sms):
+    payload = {**report(), "body": long_body()}
     calls = []
     state = {}
     fail = True
@@ -105,16 +119,17 @@ async def test_timeout_is_not_blindly_retried():
 
 
 @pytest.mark.asyncio
-async def test_multipart_requires_durable_checkpoint_before_any_send():
+async def test_multipart_requires_durable_checkpoint_before_any_send(long_sms):
     calls = []
     sender = service(lambda body, destination: calls.append(body))
     with pytest.raises(ChannelDeliveryError, match="SMS_CHECKPOINT_REQUIRED"):
-        await sender.send_channel(channel="sms", destination="+15005550006", report_data=report(20))
+        await sender.send_channel(channel="sms", destination="+15005550006",
+                                  report_data={**report(), "body": long_body()})
     assert calls == []
 
 
 @pytest.mark.asyncio
-async def test_content_change_cannot_reuse_previous_progress():
+async def test_content_change_cannot_reuse_previous_progress(long_sms):
     state = {}
     calls = []
 
@@ -123,10 +138,10 @@ async def test_content_change_cannot_reuse_previous_progress():
         return {"provider_message_id": "SM-one", "provider_status": "accepted"}
 
     sender = service(transport)
-    payload = report()
+    payload = {**report(), "body": "İlk bildirim"}
     await sender.send_channel(channel="sms", destination="+15005550006", report_data=payload,
                               sms_checkpoint=lambda value: state.update(value))
-    payload["records"][0]["total_calories"] = 500
+    payload["body"] = "Değişmiş bildirim"
     with pytest.raises(ChannelDeliveryError, match="SMS_CONTENT_CHANGED"):
         await sender.send_channel(channel="sms", destination="+15005550006", report_data=payload,
                                   sms_progress=state, sms_checkpoint=lambda value: state.update(value))

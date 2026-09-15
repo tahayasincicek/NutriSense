@@ -70,8 +70,8 @@ async def test_sms_reaches_the_outbox_with_a_message_id(tmp_path):
 
 
 @pytest.mark.asyncio
-async def test_sms_body_contains_the_approved_food_details(tmp_path):
-    """Her onaylı kaydın adı, gramı, kalorisi ve zaman dilimi korunur."""
+async def test_sms_body_contains_no_health_details(tmp_path):
+    """SMS yalnız bildirimdir; besin, gram, kalori, saat ve ad dışarı çıkmaz."""
     settings = _settings(tmp_path)
     service = NotificationService(settings_override=settings)
 
@@ -83,7 +83,9 @@ async def test_sms_body_contains_the_approved_food_details(tmp_path):
     body = json.loads(
         (tmp_path / "sms_outbox.jsonl").read_text(encoding="utf-8").strip()
     )["body"]
-    assert "Mercimek Çorbası; 150.5 g (tahmini); 78.25 kcal; 2026-08-24T12:30:00+03:00" in body
+    assert "güvenli diyetisyen panelinden" in body
+    for detail in ("Mercimek", "150.5", "kcal", "2026-08-24T12:30", "Sentetik Hasta"):
+        assert detail not in body
 
 
 @pytest.mark.asyncio
@@ -99,7 +101,7 @@ async def test_recipient_outside_the_allowlist_is_rejected(tmp_path):
     with pytest.raises(ChannelDeliveryError) as excinfo:
         await service.send_channel(
             channel="sms",
-            destination="+905551112233",
+            destination="+905000000001",
             report_data=_report(),
         )
     assert excinfo.value.args[0] == "RECIPIENT_NOT_ALLOWLISTED"
@@ -113,7 +115,7 @@ async def test_local_sms_sink_accepts_verified_app_recipient_without_allowlist(t
     )
     service = NotificationService(settings_override=settings)
     result = await service.send_channel(
-        channel="sms", destination="+905551112233", report_data=_report(),
+        channel="sms", destination="+905000000001", report_data=_report(),
     )
     assert result["provider_status"] == "queued_local_outbox"
 

@@ -12,6 +12,7 @@
 import asyncio
 import base64
 import hashlib
+import hmac
 import io
 import json
 import logging
@@ -156,8 +157,21 @@ _login_failures: dict[str, list[datetime]] = defaultdict(list)
 _analysis_requests: dict[str, list[datetime]] = defaultdict(list)
 
 
+def _audit_email_hash(email: str) -> str:
+    """Güvenlik kaydı için anahtarlı e-posta özeti.
+
+    Düz SHA-256 bilinen e-posta listeleriyle geri eşleştirilebilir. Uygulama
+    sırrıyla alınan HMAC'te veritabanı tek başına sızsa da adres çıkarılamaz.
+    """
+    return hmac.new(
+        settings.secret_key.encode("utf-8"),
+        email.strip().lower().encode("utf-8"),
+        hashlib.sha256,
+    ).hexdigest()
+
+
 def _login_key(request: Request, email: str) -> tuple[str, str]:
-    email_hash = hashlib.sha256(email.lower().encode("utf-8")).hexdigest()
+    email_hash = _audit_email_hash(email)
     ip = request.client.host if request.client else "unknown"
     return f"{ip}:{email_hash}", email_hash
 
@@ -977,7 +991,8 @@ async def search_food(
     try:
         nutrition = await nutrition_service.get_nutrition(query, input_locale="tr-TR")
     except Exception as e:
-        logger.error(f"Search error: {e}")
+        # Arama metni sağlık bağlamı taşıyabilir; loga yalnız hata türü yazılır.
+        logger.error("Besin araması başarısız exception_type=%s", type(e).__name__)
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Besin bulunamadı."
@@ -3278,7 +3293,7 @@ async def delete_account(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Hesap silme bilgileri doğrulanamadı.",
         )
-    email_hash = hashlib.sha256(current_user.email.lower().encode("utf-8")).hexdigest()
+    email_hash = _audit_email_hash(current_user.email)
     user_id = current_user.id
     db.query(RefreshToken).filter(RefreshToken.user_id == user_id).delete()
     db.query(DietitianAssignment).filter(

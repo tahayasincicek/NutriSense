@@ -9,7 +9,8 @@ from ..models.database import ConsentRecord, DietitianReport, NotificationDelive
 from .report_delivery import build_report_payload, consent_context_hash, verified_recipients
 
 PURPOSE = "automatic_food_share_local"
-POLICY = "automatic-local-v1"
+# v2: bildirimler sağlık verisi içermez; rıza bu açıklamayla yeniden alınır.
+POLICY = "automatic-local-v2"
 
 
 def local_delivery_only(settings):

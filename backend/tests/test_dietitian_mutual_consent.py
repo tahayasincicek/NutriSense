@@ -559,7 +559,7 @@ def test_dietitian_can_update_own_profile(client):
     updated = client.patch(
         "/api/v1/dietitian/profile",
         headers=_auth(dietitian),
-        json={"specialization": "Sporcu Beslenmesi", "phone": "+905551112233"},
+        json={"specialization": "Sporcu Beslenmesi", "phone": "+905000000001"},
     )
     assert updated.status_code == 200, updated.text
     assert updated.json()["specialization"] == "Sporcu Beslenmesi"
@@ -572,7 +572,7 @@ def test_dietitian_can_update_own_profile(client):
         profile = db.query(Dietitian).filter(
             Dietitian.email == "profil-diyetisyen@example.com"
         ).first()
-        assert profile.phone == "+905551112233"
+        assert profile.phone == "+905000000001"
         assert profile.phone_verified is False
     finally:
         db.close()

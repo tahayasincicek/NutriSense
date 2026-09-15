@@ -43,7 +43,7 @@ services:
       # değerler SMTP el sıkışmasını bozuyordu.
       SMTP_USER: ""
       SMTP_PASSWORD: ""
-      SMTP_FROM_EMAIL: no-reply@nutrisense.dev
+      SMTP_FROM_EMAIL: no-reply@nutrisense.invalid
       NOTIFICATION_MODE: sandbox
       CALORIE_DB_PATH: /app/app/data/verified_nutrition.json
       # Sağlayıcı anahtarı .env dosyasından gelir. Anahtar yoksa mod

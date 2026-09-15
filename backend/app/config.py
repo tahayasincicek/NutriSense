@@ -134,6 +134,11 @@ class Settings(BaseSettings):
     max_analysis_image_pixels: int = 20_000_000
     vision_timeout_seconds: float = 15.0
     analysis_rate_limit_per_minute: int = 20
+    # Saklama süreleri (gün). Kurumun saklama ve imha politikası onaylanana
+    # kadar varsayılanlardır; imha scripts/purge_expired_data.py ile çalışır.
+    audit_ip_retention_days: int = 90
+    audit_event_retention_days: int = 365
+    stale_record_retention_days: int = 7
 
     model_config = SettingsConfigDict(
         env_file=".env",
@@ -204,6 +209,16 @@ class Settings(BaseSettings):
             raise RuntimeError("Access token süresi 1-60 dakika arasında olmalıdır.")
         if not 1 <= self.jwt_refresh_token_expire_days <= 30:
             raise RuntimeError("Refresh token süresi 1-30 gün arasında olmalıdır.")
+        if not (
+            1 <= self.audit_ip_retention_days
+            <= self.audit_event_retention_days <= 3650
+        ):
+            raise RuntimeError(
+                "Saklama süreleri 1 <= AUDIT_IP_RETENTION_DAYS <= "
+                "AUDIT_EVENT_RETENTION_DAYS <= 3650 olmalıdır."
+            )
+        if not 1 <= self.stale_record_retention_days <= 90:
+            raise RuntimeError("STALE_RECORD_RETENTION_DAYS 1-90 gün olmalıdır.")
         if self.sms_provider_mode not in {"disabled", "twilio", "local_outbox"}:
             raise RuntimeError(
                 "SMS_PROVIDER_MODE disabled, twilio veya local_outbox olmalıdır."

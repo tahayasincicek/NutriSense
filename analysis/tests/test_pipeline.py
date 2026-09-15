@@ -110,7 +110,7 @@ def test_open_text_pii_is_redacted(tmp_path: Path):
     usability, survey = write_fixture(tmp_path / "fixture", participant_count=2)
     payload = json.loads(survey.read_text(encoding="utf-8"))
     open_row = next(row for row in payload["rows"] if row["question_id"] == "q6")
-    open_row["answer"] = "Bana test@example.com veya +90 555 111 22 33 üzerinden ulaşın"
+    open_row["answer"] = "Bana test@example.com veya +90 500 000 00 01 üzerinden ulaşın"
     survey.write_text(json.dumps(payload, ensure_ascii=False), encoding="utf-8")
 
     output = run_pipeline(

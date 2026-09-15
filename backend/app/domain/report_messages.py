@@ -16,39 +16,17 @@ def report_number(value) -> str:
 
 
 def build_report_sms(report: dict) -> str:
-    if report.get("schema_version") == "dietitian-report-v4":
-        return (
-            f"NutriSense: {report.get('patient_code', 'Danışan')} için yeni bir "
-            "beslenme raporu hazır. Sağlık verilerini güvenli diyetisyen "
-            "panelinden görüntüleyin. Bu bilgi tıbbi tavsiye değildir."
-        )
-    # A stored v2 report was authorized for summary-only SMS. Never expand it on retry.
-    if report.get("schema_version") == "dietitian-report-v2":
-        return (
-            f"NutriSense: {report['from_date']} - {report['to_date']} dönemine ait "
-            f"{report['record_count']} onaylı kayıt için paylaşım özeti hazırlandı. "
-            "Ayrıntılı beslenme günlüğü SMS içinde paylaşılmadı. "
-            "Bu bilgi tıbbi tavsiye değildir."
-        )
-    records = report["records"]
-    if not records or len(records) != report["record_count"]:
-        raise ValueError("Report records are incomplete")
-    lines = [
-        f"NutriSense: {report['from_date']} - {report['to_date']}",
-        f"Danışan kodu: {report.get('patient_code', 'Belirtilmedi')}",
-        f"{len(records)} onaylı besin kaydı:",
-    ]
-    for index, record in enumerate(records, 1):
-        name = " ".join(record["food_name_tr"].split())
-        if not name or not record["logged_at"]:
-            raise ValueError("Report food name/time missing")
-        estimate = " (tahmini)" if record["portion_is_estimate"] else ""
-        lines.append(
-            f"{index}. {name}; {report_number(record['portion_grams'])} g{estimate}; "
-            f"{report_number(record['total_calories'])} kcal; {record['logged_at']}"
-        )
-    lines.append("Bu bilgi tıbbi tavsiye değildir.")
-    return "\n".join(lines)
+    """Rapor bildirimi; hiçbir şema sürümünde sağlık verisi SMS'e yazılmaz.
+
+    Eski biçimde (v2/v3) kaydedilmiş bir rapor yeniden denendiğinde de yalnız
+    bildirim gider. Besin, gram, saat ve kalori diyetisyen panelinde kalır.
+    """
+    patient = report.get("patient_code") or "Danışan"
+    return (
+        f"NutriSense: {patient} için yeni bir beslenme raporu hazır. "
+        "Sağlık verilerini güvenli diyetisyen panelinden görüntüleyin. "
+        "Bu bilgi tıbbi tavsiye değildir."
+    )
 
 
 def build_sms_parts(report: dict) -> list[str]:

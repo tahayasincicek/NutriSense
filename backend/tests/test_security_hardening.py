@@ -119,14 +119,14 @@ def test_security_headers_host_allowlist_and_request_id_sanitization(client):
 
 def test_log_redaction_removes_contact_token_password_and_image_payload():
     synthetic = (
-        "email=person@example.invalid phone=+905551112233 "
+        "email=person@example.invalid phone=+905000000001 "
         "password=not-a-real-password Bearer abc.def.ghi "
         "data:image/jpeg;base64," + ("A" * 160)
     )
     redacted = redact_text(synthetic)
     for forbidden in (
         "person@example.invalid",
-        "+905551112233",
+        "+905000000001",
         "not-a-real-password",
         "abc.def.ghi",
         "A" * 80,
