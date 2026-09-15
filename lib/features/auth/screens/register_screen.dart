@@ -5,6 +5,7 @@ import '../../../core/utils/accessibility_utils.dart';
 import '../../../shared/widgets/accessible_button.dart';
 import '../../../shared/widgets/auth_mode_switch.dart';
 import '../state/auth_controller.dart';
+import 'privacy_consent_screen.dart';
 
 class RegisterScreen extends ConsumerStatefulWidget {
   const RegisterScreen({super.key});
@@ -20,6 +21,40 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   final _password = TextEditingController();
   final _confirmation = TextEditingController();
   bool _loading = false;
+  bool _termsAccepted = false;
+
+  void _showRegistrationInformation() {
+    showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      showDragHandle: true,
+      builder: (sheetContext) => SafeArea(
+        child: FractionallySizedBox(
+          heightFactor: 0.85,
+          child: ListView(
+            padding: const EdgeInsets.fromLTRB(20, 8, 20, 32),
+            children: [
+              Text('Kullanım Koşulları',
+                  style: Theme.of(sheetContext).textTheme.titleLarge),
+              const SizedBox(height: 12),
+              const Text(
+                'NutriSense besin ve kalori takibi için yardımcı bir uygulamadır. '
+                'Besin tanıma ve porsiyon değerleri tahmin içerebilir; kayıt '
+                'öncesinde sonucu kontrol edin. Uygulama tıbbi teşhis veya '
+                'kişiselleştirilmiş tedavi sunmaz. Hesabınızı ve giriş '
+                'bilgilerinizi koruyun. Diyetisyene rapor paylaşımı ayrıca '
+                'onayınıza bağlıdır. Verilerinizi Ayarlar bölümünden '
+                'görüntüleyebilir, dışa aktarabilir ve hesabınızı silebilirsiniz. '
+                'Bu kullanım koşulları yayın öncesi taslaktır.',
+              ),
+              const SizedBox(height: 24),
+              const PrivacyNoticeCard(),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
 
   static bool _isValidPassword(String value) =>
       value.length >= 8 &&
@@ -158,13 +193,50 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                                 : 'Şifreler eşleşmiyor',
                           ),
                         ),
-                        const SizedBox(height: 32),
+                        const SizedBox(height: 24),
+                        Align(
+                          alignment: Alignment.centerLeft,
+                          child: TextButton.icon(
+                            key: const Key('registration_information_link'),
+                            onPressed: _showRegistrationInformation,
+                            icon: const Icon(Icons.description_outlined),
+                            label: const Text(
+                              'Kullanım koşulları ve aydınlatma metnini oku',
+                            ),
+                          ),
+                        ),
+                        Semantics(
+                          label: 'Kullanım koşullarını kabul et',
+                          checked: _termsAccepted,
+                          child: ExcludeSemantics(
+                            child: CheckboxListTile(
+                              key: const Key('registration_terms_acceptance'),
+                              value: _termsAccepted,
+                              onChanged: _loading
+                                  ? null
+                                  : (value) => setState(
+                                        () => _termsAccepted = value ?? false,
+                                      ),
+                              controlAffinity: ListTileControlAffinity.leading,
+                              contentPadding: EdgeInsets.zero,
+                              title: const Text(
+                                'Kullanım koşullarını okudum ve kabul ediyorum.',
+                              ),
+                              subtitle: const Text(
+                                'Kişisel veri izinleri hesap oluşturulduktan '
+                                'sonra ayrı ayrı sorulur.',
+                              ),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 16),
                         AccessibleButton(
                           label: 'Hesap Oluştur',
                           semanticLabel:
-                              'Yeni hesabınızı oluşturmak için basın',
+                              'Kullanım koşullarını kabul ettiyseniz yeni '
+                              'hesabınızı oluşturmak için basın',
                           isLoading: _loading,
-                          onPressed: _submit,
+                          onPressed: _termsAccepted ? _submit : null,
                         ),
                         const SizedBox(height: 24),
                       ],
@@ -191,7 +263,8 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     setState(() => _loading = false);
     if (error == null) {
       AccessibilityUtils.announceSuccess('Kayıt başarılı');
-      // AuthGate, aydınlatma teyidi kaydedilene kadar ana uygulamayı açmaz.
+      // AuthGate, ayrı aydınlatma teyidi ve izinler kaydedilene kadar
+      // ana uygulamayı açmaz.
       Navigator.of(context).pop();
     } else {
       ScaffoldMessenger.of(context)

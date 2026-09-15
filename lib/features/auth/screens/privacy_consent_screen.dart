@@ -129,7 +129,7 @@ class _PrivacyConsentScreenState extends ConsumerState<PrivacyConsentScreen> {
             : ListView(
                 padding: const EdgeInsets.fromLTRB(20, 10, 20, 40),
                 children: [
-                  _NoticeCard(),
+                  const PrivacyNoticeCard(),
                   const SizedBox(height: 12),
                   Semantics(
                     label: 'Aydınlatma metnini okuduğumu onayla',
@@ -228,7 +228,8 @@ class _PrivacyConsentScreenState extends ConsumerState<PrivacyConsentScreen> {
 }
 
 /// Aydınlatma metni. Rıza anahtarlarından ayrı bir bloktur.
-class _NoticeCard extends StatelessWidget {
+class PrivacyNoticeCard extends StatelessWidget {
+  const PrivacyNoticeCard({super.key});
   static const _body =
       'NutriSense; hesabınız için e-posta, ad ve tercihlerinizi; hizmet için '
       'onayladığınız besin adı, porsiyon, kalori ve zaman bilgisini işler. '
