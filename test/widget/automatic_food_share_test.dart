@@ -101,8 +101,14 @@ void main() {
       await tester.pumpAndSettle();
       final scroll =
           tester.state<ScrollableState>(find.byType(Scrollable).first);
-      scroll.position.jumpTo(scroll.position.maxScrollExtent);
-      await tester.pumpAndSettle();
+      // Liste tembel kurulur; sona atlayınca yeni kartlar ölçülür ve toplam
+      // uzunluk büyür. Uzunluk sabitlenene kadar sona atlanır.
+      var extent = -1.0;
+      while (extent != scroll.position.maxScrollExtent) {
+        extent = scroll.position.maxScrollExtent;
+        scroll.position.jumpTo(extent);
+        await tester.pumpAndSettle();
+      }
       expect(find.byType(ReportHistoryCard), findsNWidgets(8));
       final lastCard = tester.getRect(find.byType(ReportHistoryCard).last);
       final navigation = tester.getRect(find.byKey(const Key('test_nav')));

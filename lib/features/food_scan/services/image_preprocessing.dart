@@ -139,6 +139,10 @@ PreprocessingResult _processInIsolate(_ProcessingParams params) {
     height: params.targetHeight,
     interpolation: img.Interpolation.linear,
   );
+  // Konum, cihaz modeli ve çekim zamanı gibi EXIF alanları tanıma için
+  // gerekmez. Paket kaynaktaki EXIF'i kopyaladığı için gönderilen JPEG'e
+  // yazılmadan önce boşaltılır.
+  resized.exif = img.ExifData();
   final bytes = Uint8List.fromList(
     img.encodeJpg(resized, quality: params.jpegQuality),
   );

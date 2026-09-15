@@ -387,9 +387,11 @@ class _DietitianScreenState extends ConsumerState<DietitianScreen> {
               key: const Key('automatic_food_share'),
               title: const Text('Onay sonrası otomatik paylaşım'),
               subtitle: const Text(
-                  'Yerel test: onayladığınız her besinin adı, miktarı, '
-                  'tarih-saati ve kalorisi e-posta ve SMS test kutularına aktarılır. '
-                  'Gerçek adrese veya telefona ulaşmaz; gönderim ücreti oluşmaz.'),
+                  'Yerel test: onayladığınız her besin için diyetisyenin '
+                  'e-posta ve SMS test kutularına yalnız "yeni rapor hazır" '
+                  'bildirimi ve danışan kodu gider. Besin ve kalori bilgileri '
+                  'yalnız diyetisyen panelinde görünür. Gerçek adrese veya '
+                  'telefona ulaşmaz.'),
               value: _automaticShare,
               onChanged: _busy || !_automaticLoaded ? null : _setAutomaticShare,
             ),

@@ -2,14 +2,16 @@
 // lib/features/water_tracker/state/water_provider.dart
 // NutriSense — Sağlık ve Aktivite Durumu
 //
-// Su, adım, uyku, ruh hâli, kilo ve takviye takibi. Veriler SharedPreferences
-// ile cihazda saklanır; günlük ölçümler tarih değişince sıfırlanır.
+// Su, adım, uyku, ruh hâli, kilo ve takviye takibi. Cihazdaki kopya Android
+// Keystore / iOS Keychain korumalı güvenli depoda saklanır; günlük ölçümler
+// tarih değişince sıfırlanır.
 // =============================================================================
 
 import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../shared/services/api_service.dart';
@@ -17,6 +19,39 @@ import '../services/step_counter_service.dart';
 
 const _kStateKey = 'activity_state_v1';
 const _kDayKey = 'activity_state_day';
+
+/// Sağlık ölçümlerinin cihazdaki deposu.
+abstract class ActivityStateStore {
+  Future<String?> read(String key);
+  Future<void> write(String key, String value);
+  Future<void> delete(String key);
+}
+
+/// Ölçümleri şifreli saklar. İlaç listesi, ruh hâli ve uyku gibi sağlık
+/// verileri düz metin tercih dosyasında veya şifresiz yedekte kalmamalıdır.
+class SecureActivityStateStore implements ActivityStateStore {
+  const SecureActivityStateStore(
+      [this._storage = const FlutterSecureStorage()]);
+
+  final FlutterSecureStorage _storage;
+
+  @override
+  Future<String?> read(String key) => _storage.read(key: key);
+
+  @override
+  Future<void> write(String key, String value) =>
+      _storage.write(key: key, value: value);
+
+  @override
+  Future<void> delete(String key) => _storage.delete(key: key);
+}
+
+class _StoredActivity {
+  const _StoredActivity(this.savedState, this.day);
+
+  final String? savedState;
+  final String? day;
+}
 
 enum StepTrackingStatus {
   idle,
@@ -224,8 +259,11 @@ class ActivityState {
 }
 
 class ActivityNotifier extends StateNotifier<ActivityState> {
-  ActivityNotifier(this._api, [this._stepCounter])
-      : super(const ActivityState()) {
+  ActivityNotifier(
+    this._api, [
+    this._stepCounter,
+    this._store = const SecureActivityStateStore(),
+  ]) : super(const ActivityState()) {
     _initialize();
   }
 
@@ -233,11 +271,13 @@ class ActivityNotifier extends StateNotifier<ActivityState> {
   /// girişini kaybetmez.
   final ApiService? _api;
   final StepCounterSource? _stepCounter;
+  final ActivityStateStore _store;
   StreamSubscription<int>? _stepSubscription;
   String _trackingDay = _today();
 
   Future<void> _initialize() async {
     await _restore();
+    if (!mounted) return;
     await _startStepTracking();
   }
 
@@ -253,8 +293,10 @@ class ActivityNotifier extends StateNotifier<ActivityState> {
   /// sıfırlanır; hedefler, kilo geçmişi ve takviye listesi korunur.
   Future<void> _restore() async {
     try {
-      final prefs = await SharedPreferences.getInstance();
-      final raw = prefs.getString(_kStateKey);
+      final stored = await _readStored();
+      // Şifreli depo okuması sürerken ekran kapanmış olabilir.
+      if (!mounted) return;
+      final raw = stored.savedState;
       if (raw == null) {
         state = state.copyWith(isLoaded: true);
         await _pullFromServer();
@@ -263,7 +305,7 @@ class ActivityNotifier extends StateNotifier<ActivityState> {
       var restored = ActivityState.fromJson(
         jsonDecode(raw) as Map<String, dynamic>,
       );
-      if (prefs.getString(_kDayKey) != _today()) {
+      if (stored.day != _today()) {
         // copyWith null'ı "değiştirme" saydığı için ruh hâlini temizlemek
         // adına durum açıkça kurulur.
         restored = ActivityState(
@@ -287,9 +329,32 @@ class ActivityNotifier extends StateNotifier<ActivityState> {
       state = restored;
     } catch (_) {
       // Bozuk kayıt kullanıcıyı kilitlememeli; varsayılanla devam edilir.
+      if (!mounted) return;
       state = state.copyWith(isLoaded: true);
     }
     await _pullFromServer();
+  }
+
+  /// Kayıtlı durumu güvenli depodan okur.
+  ///
+  /// Eski sürümler durumu SharedPreferences'a düz metin yazıyordu. Böyle bir
+  /// kayıt varsa bir kez güvenli depoya taşınır ve düz kopyası silinir.
+  Future<_StoredActivity> _readStored() async {
+    var savedState = await _store.read(_kStateKey);
+    var day = await _store.read(_kDayKey);
+    final prefs = await SharedPreferences.getInstance();
+    final legacyState = prefs.getString(_kStateKey);
+    if (legacyState != null) {
+      if (savedState == null) {
+        savedState = legacyState;
+        day = prefs.getString(_kDayKey);
+        await _store.write(_kStateKey, legacyState);
+        if (day != null) await _store.write(_kDayKey, day);
+      }
+      await prefs.remove(_kStateKey);
+      await prefs.remove(_kDayKey);
+    }
+    return _StoredActivity(savedState, day);
   }
 
   /// Hesaba bağlı ölçümleri sunucudan çeker.
@@ -414,9 +479,8 @@ class ActivityNotifier extends StateNotifier<ActivityState> {
 
   Future<void> _persist() async {
     try {
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setString(_kStateKey, jsonEncode(state.toJson()));
-      await prefs.setString(_kDayKey, _today());
+      await _store.write(_kStateKey, jsonEncode(state.toJson()));
+      await _store.write(_kDayKey, _today());
     } catch (_) {
       // Depolama hatası ölçüm girişini engellememelidir.
     }

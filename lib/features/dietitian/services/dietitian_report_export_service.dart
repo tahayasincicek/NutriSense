@@ -1,9 +1,7 @@
 import 'dart:io';
 
-import 'package:path_provider/path_provider.dart';
-import 'package:share_plus/share_plus.dart';
-
 import '../models/dietitian_dashboard_models.dart';
+import '../../../shared/utils/temporary_share_file.dart';
 
 /// Rapor içeriğini CSV olarak dışa aktarır.
 ///
@@ -77,19 +75,15 @@ class DietitianReportExportService {
 
   /// CSV dosyasını oluşturup paylaşım penceresini açar.
   static Future<void> share(DietitianReportDetail detail) async {
-    final directory = await getTemporaryDirectory();
     final fileName =
         'nutrisense_${_stamp(detail.fromDate)}_${_stamp(detail.toDate)}.csv';
-    final file = File('${directory.path}/$fileName');
-    await file.writeAsString(buildCsv(detail),
-        encoding: const SystemEncoding());
 
-    await SharePlus.instance.share(
-      ShareParams(
-        files: [XFile(file.path)],
-        subject: 'NutriSense beslenme raporu - ${detail.patientName}',
-        text: '${detail.patientName} beslenme raporu.',
-      ),
+    await shareTemporaryFile(
+      fileName: fileName,
+      contents: buildCsv(detail),
+      encoding: const SystemEncoding(),
+      subject: 'NutriSense beslenme raporu - ${detail.patientName}',
+      text: '${detail.patientName} beslenme raporu.',
     );
   }
 }

@@ -8,10 +8,8 @@
 
 import 'dart:io';
 
-import 'package:path_provider/path_provider.dart';
-import 'package:share_plus/share_plus.dart';
-
 import '../../../shared/models/food_analysis_model.dart';
+import '../../../shared/utils/temporary_share_file.dart';
 
 /// CSV dışa aktarma servisi
 class StatsExportService {
@@ -57,19 +55,16 @@ class StatsExportService {
   /// CSV dosyası oluştur ve paylaş
   static Future<void> shareCSV(FoodHistoryResult history) async {
     final csvContent = await exportToCSV(history);
-    final dir = await getTemporaryDirectory();
     final now = DateTime.now();
     final fileName =
         'nutrisense_rapor_${now.year}${now.month.toString().padLeft(2, '0')}${now.day.toString().padLeft(2, '0')}.csv';
-    final file = File('${dir.path}/$fileName');
-    await file.writeAsString(csvContent, encoding: const SystemEncoding());
 
-    await SharePlus.instance.share(
-      ShareParams(
-        files: [XFile(file.path)],
-        subject: 'NutriSense Beslenme Raporu - $fileName',
-        text: 'NutriSense beslenme raporum.',
-      ),
+    await shareTemporaryFile(
+      fileName: fileName,
+      contents: csvContent,
+      encoding: const SystemEncoding(),
+      subject: 'NutriSense Beslenme Raporu - $fileName',
+      text: 'NutriSense beslenme raporum.',
     );
   }
 

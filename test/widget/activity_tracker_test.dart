@@ -7,6 +7,8 @@ import 'package:nutrisense/core/theme/app_theme.dart';
 import 'package:nutrisense/features/water_tracker/screens/water_tracker_screen.dart';
 import 'package:nutrisense/features/water_tracker/state/water_provider.dart';
 
+import '../support/platform_channel_mocks.dart';
+
 Widget _app(ProviderContainer container, {double textScale = 1}) {
   return UncontrolledProviderScope(
     container: container,
@@ -38,6 +40,9 @@ void main() {
     // Varsayılan durum artık boş; testler ölçümleri kendisi kurar. Eskiden
     // sağlayıcıda gömülü olan uydurma değerlere dayanıyorlardı.
     SharedPreferences.setMockInitialValues({});
+    // Ölçümler şifreli depoda tutulur; testte kanal yanıt vermezse okuma
+    // ekran kapandıktan sonra biter.
+    mockSecureStorage();
     container = ProviderContainer();
     // Sağlayıcı yapıcıda kayıtlı durumu asenkron okur; tohumlama bunun
     // üzerine yazılmasın diye önce o iş bitirilir.

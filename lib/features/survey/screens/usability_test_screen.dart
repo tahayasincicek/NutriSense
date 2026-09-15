@@ -3,19 +3,17 @@
 // NutriSense — Kullanılabilirlik Testi Kayıt Ekranı
 //
 // Araştırmacılar için: görev zamanlama, başarı işaretleme, not girişi.
-// Oturumu JSON olarak dışa aktarma.
+// Oturumu geçici dosyayla paylaşma; cihazda kalıcı kopya bırakılmaz.
 // =============================================================================
 
-import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:path_provider/path_provider.dart';
-import 'package:share_plus/share_plus.dart';
 import 'package:uuid/uuid.dart';
 
 import '../../../core/theme/app_theme.dart';
 import '../models/survey_model.dart';
 import '../services/survey_service.dart';
+import '../../../shared/utils/temporary_share_file.dart';
 
 class UsabilityTestScreen extends ConsumerStatefulWidget {
   const UsabilityTestScreen({super.key});
@@ -63,15 +61,12 @@ class _UsabilityTestScreenState extends ConsumerState<UsabilityTestScreen> {
       appBar: AppBar(
         title: const Text('Kullanılabilirlik Testi'),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.file_download),
-            onPressed: _exportSession,
-            tooltip: 'JSON Dışa Aktar',
-          ),
+          // Sonuçlar cihazda kalıcı dosya olarak bırakılmaz; kaydetmek için
+          // paylaşım penceresindeki "Dosyalara kaydet" kullanılır.
           IconButton(
             icon: const Icon(Icons.share),
             onPressed: _shareSession,
-            tooltip: 'Paylaş',
+            tooltip: 'Sonuçları paylaş veya kaydet',
           ),
         ],
       ),
@@ -604,42 +599,18 @@ class _UsabilityTestScreenState extends ConsumerState<UsabilityTestScreen> {
     );
   }
 
-  Future<void> _exportSession() async {
-    _session.generalNote = _generalNoteController.text;
-    final json = await _surveyService.exportAllSessions();
-
-    try {
-      final dir = await getApplicationDocumentsDirectory();
-      final file = File(
-          '${dir.path}/usability_export_${DateTime.now().millisecondsSinceEpoch}.json');
-      await file.writeAsString(json);
-
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Dışa aktarıldı: ${file.path}')),
-      );
-    } catch (e) {
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Dışa aktarma hatası: $e')),
-      );
-    }
-  }
-
+  /// Oturumları geçici dosyaya yazıp paylaşır; paylaşım bitince dosya silinir.
+  /// Araştırma verisi uygulama klasöründe onam ve çekilme kontrolleri dışında
+  /// kalıcı kopya olarak bırakılmaz.
   Future<void> _shareSession() async {
     _session.generalNote = _generalNoteController.text;
     final json = await _surveyService.exportAllSessions();
 
     try {
-      final dir = await getApplicationDocumentsDirectory();
-      final file = File('${dir.path}/nutrisense_usability.json');
-      await file.writeAsString(json);
-
-      await SharePlus.instance.share(
-        ShareParams(
-          files: [XFile(file.path)],
-          subject: 'NutriSense Kullanılabilirlik Test Sonuçları',
-        ),
+      await shareTemporaryFile(
+        fileName: 'nutrisense_usability.json',
+        contents: json,
+        subject: 'NutriSense Kullanılabilirlik Test Sonuçları',
       );
     } catch (e) {
       if (!mounted) return;
