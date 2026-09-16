@@ -19,7 +19,7 @@ mekanizması üniversite/hukuk birimi kararı olmadan kesinleştirilmemiştir.
 | Besin adı, porsiyon, kalori, makro, zaman | Günlük ve onaylı rapor | `food_logs`, nutrition provenance | Beslenme verisi hassas kabul edilerek kurum kararı | Kullanıcı silene/hesabı kapatana kadar önerisi; yedek süresi bekliyor |
 | Tanıma sonucu/güven | Güvenli onay ve kalite | `recognition_attempts`; ham görüntü yok | Hizmet ve araştırma ayrımı kararı | Günlükle uyumlu; hesap silmede cascade |
 | Galeri fotoğrafı | Tek seferlik besin analizi; yalnız kullanıcının seçtiği tek dosya | Bellekte sanitize edilir; kamera görüntüsüyle aynı yolu izler | Kullanıcının her seferde açık seçimi; kütüphane taranmaz, dizin listelenmez | Varsayılan olarak dosya/DB/logda saklanmaz |
-| Kamera görüntüsü | Tek seferlik besin analizi | Bellekte sanitize edilir; Google Vision'a gönderilebilir | Açık aydınlatma ve yurtdışı aktarım kararı | Varsayılan olarak dosya/DB/logda saklanmaz |
+| Kamera görüntüsü | Tek seferlik besin analizi | Yalnız telefonda, uygulamadaki NutriSense modeliyle işlenir; sunucuya veya yurt dışına gönderilmez | Açık aydınlatma; yurt dışı aktarım için ayrı rıza anahtarı korunur | Telefonda, sunucuda, veritabanında veya logda saklanmaz |
 | Diyetisyen adı/iletişim/doğrulama | Kullanıcının seçtiği alıcı | `dietitians`, assignment | Diyetisyen doğrulama ve rol kararı | İlişki iptali/pasifleştirme; kesin süre bekliyor |
 | Onaylı rapor ve gönderim metadatası | Kullanıcı talebiyle paylaşım ve retry | DB; SMTP/Twilio | Her gönderimde ayrı onay; sağlayıcı sözleşmesi | Kurum retention ve provider silme süresi bekliyor |
 | Rapor alıcı adresi/telefonu | Teslimat | Provider'a açık; DB/audit'te maskeli snapshot | Veri aktarım değerlendirmesi | Provider politikasına bağlı; uygulama kaydı hesapla silinir |
@@ -42,8 +42,6 @@ Aydınlatma teyidi yalnız kaydın `policy_version` değeri sunucudaki güncel `
 
 | Alıcı | Gönderilen minimum veri | Gönderilmeyen veri | Durum/kapı |
 |---|---|---|---|
-| Google Vision | Sanitize edilmiş görüntü byte'ları | Token, parola, kullanıcı UUID'si, günlük geçmişi | Credentials yoksa fail-closed; aydınlatma/DPA/yurtdışı kararı gerekir |
-| Google Gemini (AI Studio) | Sanitize edilmiş görüntü byte'ları | Token, parola, kullanıcı UUID'si, günlük geçmişi | `VISION_PROVIDER_MODE=gemini` ile devreye girer. Vision ile aynı yurtdışı aktarım kararını gerektirir; çok modlu model şartları ayrıca incelenmelidir |
 | Nutritionix | Normalize besin arama adı | Görüntü, hesap kimliği, iletişim | API şartları/attribution ve aktarım değerlendirmesi gerekir |
 | SMTP sağlayıcısı | Onaylı dönem raporu ve alıcı e-posta | Parola/token; onaysız kayıt | Production secret store, TLS ve sağlayıcı sözleşmesi gerekir |
 | Twilio | Yalnız `D-…` danışan kodlu yeni rapor bildirimi ve alıcı telefon | Besin adı, miktar, tarih-saat, kalori, görüntü, parola/token ve serbest not | Sağlık ayrıntıları yalnız yetkili uygulama içi panelde; production sağlayıcı/aktarım kararı yine gerekir |

@@ -87,7 +87,7 @@ Proje, Çevik (Agile) yazılım geliştirme metodolojisi kullanılarak yürütü
 | Backend | Python FastAPI | 0.104 |
 | Veritabanı | MySQL + SQLAlchemy | 8.0 |
 | YZ Modeli | TensorFlow MobileNetV3 | 2.15 |
-| Besin Tanıma API | Google Cloud Vision | v1 |
+| Besin Tanıma | Cihaz üstü NutriSense modeli (MobileNetV3Large, TensorFlow Lite float16) | 130 sınıf |
 | Kalori Veritabanı | Nutritionix API | v2 |
 | TTS | flutter_tts (tr-TR) | 4.0 |
 | Sesli Komut | speech_to_text | 6.6 |
@@ -375,7 +375,7 @@ karşılayamadığı için dağıtılmamıştır.
 
 [7] M. Theodoridis, C. Agamanolis, and F. Muller, "Accessible nutrition: designing mobile food logging for visually impaired users," in Proc. ACM SIGACCESS Conf. Computers & Accessibility (ASSETS), 2022.
 
-[8] Google LLC, "Cloud Vision API Documentation," 2024. [Online]. Available: https://cloud.google.com/vision/docs
+[8] Google LLC, "LiteRT (TensorFlow Lite) Documentation," 2026. [Online]. Available: https://ai.google.dev/edge/litert
 
 [9] Nutritionix LLC, "Nutritionix API v2 Documentation," 2024. [Online]. Available: https://developer.nutritionix.com/
 

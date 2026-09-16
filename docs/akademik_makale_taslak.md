@@ -30,7 +30,7 @@ Taha Yasin Çiçek¹, Furkan Öztürk¹, Hakan Gündüz¹
 
 Visually impaired individuals face significant challenges in independently tracking their nutritional intake, as existing calorie-counting applications rely heavily on visual user interfaces. This paper presents NutriSense, a mobile application that leverages artificial intelligence and multimodal accessibility features to enable independent food recognition and nutritional tracking for visually impaired users.
 
-NutriSense employs a dual-model approach for food recognition: Google Cloud Vision API for cloud-based label detection and a custom-trained MobileNetV3 model (INT8 quantized) for on-device inference. The application integrates the Nutritionix API, providing access to a database of over 800,000 food items with detailed nutritional information. All user interactions are facilitated through Turkish text-to-speech (TTS) synthesis and voice command recognition, eliminating the need for visual screen interaction.
+NutriSense performs food recognition entirely on the device with a custom-trained MobileNetV3Large model deployed as a float16 TensorFlow Lite file; photos never leave the phone. Nutritional values come from a verified local catalogue of 556 foods, 488 of which are drawn from the USDA Food and Nutrient Database for Dietary Studies; the remaining 68 values are estimates. All user interactions are facilitated through Turkish text-to-speech (TTS) synthesis and voice command recognition, eliminating the need for visual screen interaction.
 
 The system architecture follows a feature-first Flutter framework for cross-platform deployment (Android/iOS) with a Python FastAPI backend. Accessibility compliance targets WCAG 2.1 AA guidelines, implementing semantic labeling, minimum touch targets (44×44dp), high-contrast mode, and priority-based TTS queuing.
 
@@ -44,7 +44,7 @@ We report the technical evaluation of the system. An on-device MobileNetV3Large 
 
 Görme engelli bireyler, mevcut kalori takip uygulamalarının görsel arayüze dayalı yapısı nedeniyle beslenme takibinde önemli güçlüklerle karşılaşmaktadır. Bu çalışma, yapay zeka ve çok modlu erişilebilirlik özelliklerini kullanarak görme engelli kullanıcıların bağımsız besin tanıma ve beslenme takibi yapmasını sağlayan NutriSense mobil uygulamasını sunmaktadır.
 
-NutriSense, besin tanıma için ikili model yaklaşımı kullanmaktadır: bulut tabanlı etiket tespiti için Google Cloud Vision API ve cihaz üzerinde çıkarım için özel eğitilmiş MobileNetV3 modeli (INT8 kuantize). Uygulama, 800.000'den fazla besin öğesi içeren Nutritionix API ile entegre edilmiştir. Tüm kullanıcı etkileşimleri Türkçe metin-ses sentezi (TTS) ve sesli komut tanıma aracılığıyla gerçekleştirilmektedir.
+NutriSense, besin tanımayı tamamen cihaz üzerinde, float16 TensorFlow Lite olarak dağıtılan ve özel eğitilmiş MobileNetV3Large modeliyle yapar; fotoğraflar telefondan çıkmaz. Besin değerleri, 488'i USDA Diyet Çalışmaları için Besin ve Besin Öğesi Veritabanı'ndan (FNDDS) alınan, 68'i tahmini olan 556 besinlik doğrulanmış yerel katalogdan gelir. Tüm kullanıcı etkileşimleri Türkçe metin-ses sentezi (TTS) ve sesli komut tanıma aracılığıyla gerçekleştirilmektedir.
 
 Sistem mimarisi, çapraz platform dağıtımı (Android/iOS) için feature-first Flutter çerçevesi ve Python FastAPI backend kullanmaktadır. Erişilebilirlik uyumluluğu WCAG 2.1 AA yönergelerini hedeflemektedir.
 
@@ -218,7 +218,7 @@ impaired participants is the next step.
 
 [8] W3C, "Web Content Accessibility Guidelines (WCAG) 2.1," World Wide Web Consortium, 2018. [Online]. Available: https://www.w3.org/TR/WCAG21/
 
-[9] Google LLC, "Cloud Vision API Documentation," 2024. [Online]. Available: https://cloud.google.com/vision/docs
+[9] Google LLC, "LiteRT (TensorFlow Lite) Documentation," 2026. [Online]. Available: https://ai.google.dev/edge/litert
 
 [10] Nutritionix LLC, "Nutritionix API v2 Documentation," 2024. [Online]. Available: https://developer.nutritionix.com/
 

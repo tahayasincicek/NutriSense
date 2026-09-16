@@ -4,9 +4,9 @@
 
 ## Ürün stratejisi
 
-Birincil yol, kimliği doğrulanmış kullanıcının görüntüyü kanonik FastAPI endpointine multipart olarak göndermesidir. Backend yapılandırmaya göre Google Vision veya Gemini kullanır. Credential yoksa servis 503 döner; sahte başarı veya demo besin üretilmez.
+Tanıma telefonda, uygulamayla gelen NutriSense modeliyle yapılır; fotoğraf sunucuya veya yurt dışına gönderilmez. Backend'deki `/analyze-food` ucu sağlayıcıdan bağımsız olarak durur; sunucuda görüntü tanıma sağlayıcısı yoktur ve bu durumda görüntüyü işlemeden 503 döner. Sahte başarı veya demo besin üretilmez.
 
-Cihaz üstü tanıma uygulanmıştır. Dağıtılan model, etiketler ve SHA-256 manifesti `assets/models/` altındadır. Ayarlardan doğrudan seçilebilir; bağlantı, zaman aşımı ve sunucu hatalarında da cihaz üstü modele geçilir. Galeriden seçilen fotoğraf aynı analiz akışını kullanır. Modelin tanıma sonucu kullanıcı onayı ister; besin değerleri ve kayıt işlemleri backend gerektirir. Güncel ölçümler için [model kartına](../ml/MODEL_CARD.md) bakın.
+Cihaz üstü tanıma uygulanmıştır. Dağıtılan model, etiketler ve SHA-256 manifesti `assets/models/` altındadır. Kameradan çekilen ve galeriden seçilen fotoğraf aynı cihaz üstü akışı kullanır. Modelin tanıma sonucu kullanıcı onayı ister; besin değerleri ve kayıt işlemleri backend gerektirir. Güncel ölçümler için [model kartına](../ml/MODEL_CARD.md) bakın.
 
 ## Kamera state machine
 

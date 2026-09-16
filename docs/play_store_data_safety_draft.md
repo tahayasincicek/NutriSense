@@ -26,14 +26,13 @@ doğrulanmalıdır.
 Yalnız production ortamında gerçekten yapılandırılıp sözleşme/hukuk incelemesi
 tamamlananlar beyan edilir:
 
-- Görüntü tanıma sağlayıcısı: gönderilen görüntü ve teknik istek metadatası.
-  Yapılandırmaya göre Google Vision veya Google Gemini kullanılabilir;
-  kullanıcı yurt dışı aktarımına izin vermezse görüntü hiç gönderilmez.
+- Görüntü tanıma sağlayıcısı: yok. Besin tanıma telefonda yapılır; fotoğraf
+  uygulamadan çıkmaz ve paylaşılan veri olarak beyan edilmez.
 - Besin verisi sağlayıcısı: normalize edilmiş besin sorgusu.
 - E-posta/SMS sağlayıcısı: minimum rapor içeriği ve doğrulanmış alıcı.
 - Barındırma/veritabanı sağlayıcısı: hesap, günlük ve audit verisi.
 
-Google Vision, Nutritionix, Twilio, SMTP veya Crashlytics adı yalnız gerçek
+Nutritionix, Twilio, SMTP veya Crashlytics adı yalnız gerçek
 production konfigürasyonu ve veri akışı doğrulanırsa Play Console'da seçilir.
 
 ## Güvenlik beyanı için teknik dayanak

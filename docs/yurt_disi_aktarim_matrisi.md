@@ -19,13 +19,13 @@ dosyasının kayıt numarası yazılır.
 Yurt dışına giden her istek, kişiyi tanıtan bilgiden arındırılır. Hiçbir
 özellik kapatılmaz; kimliksizleştirme sağlayıcıya gitmeden önce yapılır.
 
-- **Kimlik yok:** Görüntü tanıma ve besin arama istekleri sunucudan çıkar.
+- **Kimlik yok:** Besin arama istekleri sunucudan çıkar.
   Sağlayıcı kullanıcının IP adresini görmez; isteğe kullanıcı kimliği, ad,
   e-posta, hesap numarası veya cihaz bilgisi eklenmez.
-- **Fotoğraf:** Telefonda ve sunucuda EXIF (konum, cihaz modeli, çekim zamanı)
-  silinir. Sunucu fotoğrafı en uzun kenarı 1024 piksel olacak şekilde küçültür
-  ve renk profilini kopyalamadan yeniden kodlar; arka plandaki kişi, belge veya
-  ekran ayrıntısı azalır. Fotoğraf dosyaya, veritabanına veya loga yazılmaz.
+- **Fotoğraf:** Besin tanıma telefondaki NutriSense modeliyle yapılır;
+  fotoğraf telefondan çıkmaz. Gemini ve Google Vision kodu projeden
+  kaldırılmıştır. Fotoğraf aktarımı için ayrı rıza anahtarı, ileride
+  açılabilecek bir sağlayıcı için korunur.
 - **Besin araması:** Önce yurt içindeki doğrulanmış katalog aranır; bulunan
   besin için yurt dışına istek gitmez. Katalogda olmayan besinde metinden
   bağlantı, e-posta ve telefon numarası silinir, izin verilmeyen karakterler
@@ -42,7 +42,7 @@ Yurt dışına giden her istek, kişiyi tanıtan bilgiden arındırılır. Hiçb
   Google'a yazı tipi isteği göndermez, kullanıcının IP adresi paylaşılmaz.
 
 Anonimleştirme riski azaltır ama aktarım değerlendirmesinin yerine geçmez:
-fotoğraf içeriği ve diyetisyenin iletişim adresi hâlâ kişisel veri
+diyetisyenin iletişim adresi ve besin arama metni hâlâ kişisel veri
 olabilir. Bu yüzden rıza anahtarı, standart sözleşme ve
 `CROSS_BORDER_TRANSFER_REFERENCE` kapısı korunur.
 
@@ -50,8 +50,6 @@ olabilir. Bu yüzden rıza anahtarı, standart sözleşme ve
 
 | Sağlayıcı | Açan ayar | Gönderilen veri | Amaç | Ülke | Varsayılan | Güvence durumu |
 |---|---|---|---|---|---|---|
-| Google Gemini API | `VISION_PROVIDER_MODE=gemini` | Küçültülmüş, EXIF'i temizlenmiş besin fotoğrafı ve sabit istem metni; kullanıcı kimliği yok | Besin tanıma | ABD ve Google altyapısı | Kapalı | İmzalı standart sözleşme yok. Production'da ayrıca `GEMINI_PAID_TIER_CONFIRMED=true` zorunlu; ücretsiz katman içeriği ürün geliştirmede kullanabilir. |
-| Google Cloud Vision | `VISION_PROVIDER_MODE=google` | Küçültülmüş, EXIF'i temizlenmiş besin fotoğrafı; kullanıcı kimliği yok | Besin tanıma | Proje bölgesine bağlı | Kapalı | İmzalı standart sözleşme yok; DPA ve bölge seçimi yapılmadı. |
 | Nutritionix (Syndigo) | `NUTRITION_PROVIDER_MODE=nutritionix` veya `hybrid` | Kimliksizleştirilmiş besin arama metni; yerel katalogda bulunan besin için istek yok | Besin değeri arama | ABD | Kapalı; varsayılan yerel USDA kataloğu | İmzalı standart sözleşme yok; API lisansı ve atıf şartı ayrıca incelenmeli. |
 | Twilio | `SMS_PROVIDER_MODE=twilio` | Diyetisyen telefon numarası, içeriksiz rapor bildirimi, `D-…` danışan kodu | Rapor bildirimi | ABD (varsayılan bölge) | Kapalı | İmzalı standart sözleşme yok; Twilio DPA'sı KVKK standart sözleşmesinin yerine geçmez. |
 | SMTP e-posta sağlayıcısı | `NOTIFICATION_MODE=production` | Diyetisyen e-posta adresi, içeriksiz rapor bildirimi, `D-…` danışan kodu | Rapor bildirimi | Sağlayıcı seçilmedi | Kapalı; geliştirmede yerel Mailpit | Sağlayıcı ve ülke belirlenmedi. |

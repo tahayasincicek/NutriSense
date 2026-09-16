@@ -9,16 +9,12 @@ gizlilik politikası olarak sunulamaz.
 
 NutriSense; hesap için e-posta, ad, parola hash'i ve tercihleri; hizmet için
 onaylanan besin adı, porsiyon, kalori/makro ve zamanı; kullanıcı seçerse
-diyetisyen iletişimi ve gönderim kayıtlarını işler. Besin fotoğrafı ya kameradan çekilir ya da kullanıcının galerisinden tek tek seçtiği dosyadan alınır; uygulama fotoğraf kütüphanesini taramaz, yalnız seçilen dosyayı okur. Kamera görüntüsü analiz
-için geçici işlenir ve yapılandırılmışsa Google Vision veya Google Gemini'ye
-gönderilebilir; varsayılan akış görüntüyü dosya, veritabanı veya logda
-saklamaz. Production'da Gemini yalnız faturalandırmalı projeyle ve yurt dışı
-aktarım değerlendirmesinin kayıt numarası tanımlıyken açılabilir.
-
-Yurt dışına giden fotoğraf kimliksizleştirilir: konum ve cihaz bilgisi (EXIF)
-telefonda ve sunucuda silinir, sunucu fotoğrafı en uzun kenarı 1024 piksel
-olacak şekilde küçültür. İstek sunucudan çıktığı için sağlayıcı kullanıcının IP
-adresini görmez; isteğe ad, e-posta, hesap kimliği veya cihaz bilgisi eklenmez.
+diyetisyen iletişimi ve gönderim kayıtlarını işler. Besin fotoğrafı ya kameradan çekilir ya da kullanıcının galerisinden tek tek seçtiği dosyadan alınır; uygulama fotoğraf kütüphanesini taramaz, yalnız seçilen dosyayı okur. Kamera görüntüsü
+besin tanıma için yalnız telefonda, uygulamayla gelen NutriSense modeliyle
+işlenir; fotoğraf sunucuya veya yurt dışına gönderilmez, dosya, veritabanı
+veya logda saklanmaz. Fotoğrafın ileride yurt dışındaki bir sağlayıcıya
+gönderilebilmesi için ayrı açık rıza anahtarı korunur; böyle bir sağlayıcı
+bugün yoktur.
 
 Kullanıcı isterse su, adım, uyku, ruh hâli ve kilo ölçümlerini de kaydeder.
 Bunlar sağlık verisidir ve hesaba bağlı olarak saklanır; hesap silindiğinde

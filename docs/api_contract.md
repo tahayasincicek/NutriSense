@@ -55,7 +55,7 @@ OpenAPI snapshot değişikliği; backend testi, mobil fixture testi ve migration
 
 | Ekran/özellik | Provider | Tek istemci metodu | Backend |
 |---|---|---|---|
-| `CameraScreen` | `apiServiceProvider` | `analyzeFood()` → `decideFoodAnalysis()` | `POST /api/v1/analyze-food` → `POST /api/v1/food-analysis/{analysis_id}/decision` |
+| `CameraScreen` | Cihaz üstü `OfflineRecognizer` | Tanıma telefonda; onaydan sonra `createManualFoodLog()` | Fotoğraf gönderilmez; kayıt `POST /api/v1/food-log/manual` |
 | `FoodHistoryScreen` | `historyControllerProvider` → `HistoryRepository` → `apiServiceProvider` | `getFoodHistory()`, `updateFoodLog()`, `deleteFoodLog()`, `restoreFoodLog()` | Geçmiş ve kullanıcıya ait kayıt yaşam döngüsü |
 | `SendReportWizard` | `apiServiceProvider` | `previewDietitianReport()`, `sendToDietitian()`, `retryDietitianReport()` | Önizleme → rıza-bağlı gönderim → kanal retry |
 | `LoginScreen` | `apiServiceProvider` | `login()` | `POST /api/v1/auth/login` |
@@ -112,7 +112,7 @@ Diyetisyen e-posta/SMS raporları `dietitian-report-v4` şemasında ilişkiye ö
 - `capture_id`: zorunlu UUID; aynı fiziksel çekimin tekrar gönderilmesini idempotent yapar.
 - `user_id` gövdede gönderilmez; access token'dan alınır.
 
-Mobil ön işleme 224×224 JPEG byte üretir ve bu byte'ları multipart dosya olarak yollar. Cancellation, Dio `CancelToken` ile çağrıdan taşıma katmanına kadar iletilir.
+Mobil uygulama bu ucu kullanmaz: tanımayı telefonda yapar ve fotoğraf göndermez. Uç, ileride yurt içinde çalışacak bir sunucu modeli için sözleşme olarak korunur; sunucuda sağlayıcı yokken görüntüyü işlemeden 503 döner.
 
 ### Başarılı response
 
@@ -260,7 +260,6 @@ venv\Scripts\python.exe -m pytest tests -q
 
 Gerçek uçtan uca sağlayıcı testi için hâlâ şunlar gerekir:
 
-- Google Cloud Vision gerçek proje/credential ve sandbox çağrı kanıtı
 - Nutritionix app ID/API key veya doğrulanmış yerel besin veritabanı
 - Diyetisyen atanmış test kullanıcısı
 - SMTP sandbox ve/veya Twilio test credential'ları

@@ -33,7 +33,7 @@ flowchart LR
   U["Kullanıcı / katılımcı"] --> M["Flutter mobil cihaz"]
   M -->|"HTTPS + Bearer token"| A["FastAPI güven sınırı"]
   A --> D[("Ürün veritabanı")]
-  A -->|"Geçici, sanitize görüntü"| G["Google Vision"]
+  M -->|"Görüntü cihazda kalır"| O["Cihaz üstü model"]
   A -->|"Besin adı"| N["Nutritionix"]
   A -->|"Onaylı minimum rapor"| P["SMTP / Twilio"]
   R["Yetkili araştırmacı"] -->|"Ayrı export token + etik kapı"| A
@@ -48,7 +48,7 @@ Sınırlar:
 2. İnternet ve reverse proxy güvenilmez sınırdır; TLS burada kanıtlanmalıdır.
 3. API, sahiplik/rol kontrollerinin zorunlu karar noktasıdır.
 4. DB ve yedek işletimi kod deposu dışındaki altyapı sınırıdır.
-5. Google Vision, Nutritionix, SMTP ve Twilio ayrı veri alıcısı/işleyici
+5. Nutritionix, SMTP ve Twilio ayrı veri alıcısı/işleyici
    sınırlarıdır; sözleşme ve yurtdışı aktarım değerlendirmesi gerekir.
 6. Araştırma kimliği ürün hesabından ayrıdır; kod anahtarı oluşturulmaz.
 

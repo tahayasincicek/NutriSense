@@ -61,7 +61,7 @@ iOS kaynak kontrolleri Windows'ta çalıştırılabilir; Xcode derlemesi ve ger�
 - Uygulamada **Hesap Aç** ile kendi test hesabınızı oluşturun. Başka geliştiricinin yerel kullanıcıları veya veritabanı klonla gelmez.
 - Türkçe ses ve mikrofon/kamera izinlerini cihazda hazırlayın. Emülatör ses davranışı gerçek telefon testi yerine geçmez.
 - Ayarlar → **Cihaz Üstü Model** seçin; tarama ekranında galeriden yemek fotoğrafı seçin. Simülatöre fotoğrafı sürükleyip bırakabilirsiniz. Model sonucu kullanıcı onayı ister; kalori sorgulama ve kayıt için backend açık olmalı.
-- Varsayılan dış görüntü sağlayıcısı kapalıdır. Sunucu kullanılamıyorsa uygulama cihaz üstü modele geçer. Google/Gemini kullanımı için yalnız `backend/.env` içinde sağlayıcı ayarı ve anahtarı gerekir; mobil uygulamaya anahtar yazmayın.
+- Besin tanıma telefondaki NutriSense modeliyle yapılır; uygulama fotoğrafı sunucuya yüklemez. Sunucuda bulut görüntü sağlayıcısı yoktur; mobil uygulamaya hiçbir API anahtarı yazmayın.
 - E-posta Mailpit'e, SMS yerel test kutusuna gider; gerçek kişilere iletilmez. Normal kullanıcı hesabı diyetisyen yetkisi vermez. Diyetisyen hesabının oluşturulması/doğrulanması için [hesap yaşam döngüsü belgesini](auth_and_dietitian_lifecycle.md) izleyin. Kullanılacak test alıcısı için `backend/.env` içindeki sandbox izin listesini kendi test adresinize göre ayarlayın; Compose'u yeniden başlatın. Hasta/diyetisyen eşleşmesini iki tarafta onaylayın.
 - Yerel SMS kutusunu görmek: `docker compose -f backend/docker-compose.yml exec backend cat /tmp/sms_outbox.jsonl`. İlk SMS'ten önce dosyanın bulunmaması normaldir.
 

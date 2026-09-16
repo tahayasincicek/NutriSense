@@ -15,8 +15,8 @@ bir hukukçu verir.
 | Diyetisyenle rol ve gizlilik sözleşmesi | Diyetisyen hesabı, sürüm damgalı veri işleme sözleşmesi kabul edilmeden açılmaz. | `docs/dietitian_data_processing_agreement.md`, `backend/tests/test_dietitian_mutual_consent.py` |
 | Araştırma verisinde ürün kimliğinin ayrılması | Araştırma dışa aktarımı anahtarlı takma kimlik kullanır. Production ve onaylı araştırma modunda ayrı, güçlü `RESEARCH_PSEUDONYMIZATION_KEY` zorunludur. | `backend/app/config.py`, `backend/tests/test_research_ethics_gate.py` |
 | Veri sorumlusu kimliği ve başvuru kanalı | `DATA_CONTROLLER_NAME` ve geçerli `DATA_CONTROLLER_CONTACT_EMAIL` olmadan production başlamaz. | `backend/app/config.py`, `backend/tests/test_legal_compliance.py` |
-| Yurt dışına aktarım (KVKK m.9) | Gemini/Google Vision, Nutritionix, Twilio veya production SMTP etkinse `CROSS_BORDER_TRANSFER_REFERENCE` olmadan production başlamaz. | aynı dosyalar; `docs/yurt_disi_aktarim_matrisi.md` |
-| Ücretsiz Gemini katmanına sağlık bağlamlı fotoğraf | Production'da Gemini, `GEMINI_PAID_TIER_CONFIRMED=true` olmadan açılamaz. | aynı dosyalar |
+| Yurt dışına aktarım (KVKK m.9) | Nutritionix, Twilio veya production SMTP etkinse `CROSS_BORDER_TRANSFER_REFERENCE` olmadan production başlamaz. | aynı dosyalar; `docs/yurt_disi_aktarim_matrisi.md` |
+| Fotoğrafın yurt dışına çıkması | Besin tanıma yalnız telefondaki NutriSense modeliyle yapılır; uygulama fotoğrafı sunucuya yüklemez. Gemini ve Google Vision kodu ile paketleri kaldırıldı; sunucuda sağlayıcı yokken görüntü işlenmeden reddedilir. Fotoğraf aktarımı için ayrı rıza anahtarı korunur. | `lib/features/food_scan/screens/camera_screen.dart`, `backend/app/routers/food_router.py`, `backend/tests/test_product_consents.py` |
 | Uygulama dışında hesap silme yolu (Google Play) ve KVKK m.11 başvurusu | Herkese açık `/hesap-silme` (`/account-deletion`) ve `/kvkk-basvuru` sayfaları. Form içermez, veri toplamaz; veri sorumlusu iletişimini ayarlardan gösterir. | `backend/app/routers/legal_router.py`, `backend/tests/test_legal_compliance.py` |
 | Fotoğrafın konum ve cihaz bilgisi | Sunucu görüntüyü EXIF'siz yeniden kodlar; dosya, veritabanı veya loga yazmaz. | `backend/app/routers/food_router.py` |
 | Yurt dışına giden verinin kimliksizleştirilmesi | Sağlayıcı istekleri sunucudan çıkar; kullanıcı kimliği, IP, ad veya e-posta eklenmez. Fotoğraf en uzun kenarı 1024 piksele küçültülür. Besin araması önce yurt içi katalogda yapılır; yurt dışına yalnız bağlantı, e-posta ve telefonu silinmiş, 80 karakterle sınırlı metin gider. | `backend/app/routers/food_router.py`, `backend/app/services/nutritionix_service.py`, `backend/tests/test_provider_anonymization.py`, `docs/yurt_disi_aktarim_matrisi.md` |
@@ -84,5 +84,4 @@ DATA_CONTROLLER_NAME=<veri sorumlusu>
 DATA_CONTROLLER_CONTACT_EMAIL=<başvuru e-postası>
 DATA_CONTROLLER_POSTAL_ADDRESS=<posta veya KEP adresi, önerilir>
 CROSS_BORDER_TRANSFER_REFERENCE=<aktarım dosyası kayıt no; dış sağlayıcı açıksa>
-GEMINI_PAID_TIER_CONFIRMED=true   # yalnız faturalandırmalı Gemini projesi varsa
 ```
