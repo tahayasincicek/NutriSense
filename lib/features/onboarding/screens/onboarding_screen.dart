@@ -83,11 +83,15 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
       icon: Icons.mic_rounded,
       title: 'Sesli Kontrol',
       description: 'Uygulamayı tamamen sesli komutlarla kontrol edebilirsiniz. '
-          '"Tara", "Geçmiş", "Gönder", "Yardım" gibi komutları kullanın.',
+          '"Tara", "Geçmiş", "Gönder", "Yardım" gibi komutları kullanın. '
+          'Besin ve sağlık bilgileriniz sesli okunur; kalabalık ortamda '
+          'kulaklık kullanmanızı öneririz.',
       ttsText: 'Bu uygulamayı tamamen sesli komutlarla kontrol edebilirsiniz. '
           'Tara diyerek kamerayı açabilir, Geçmiş diyerek yemek kayıtlarınızı dinleyebilir, '
           'Gönder diyerek diyetisyeninize rapor gönderebilir, '
           'Yardım diyerek tüm komutları öğrenebilirsiniz. '
+          'Uygulama besin ve sağlık bilgilerinizi sesli okur; yanınızdakiler de '
+          'duyabilir. Kalabalık ortamda kulaklık kullanmanızı öneririz. '
           'Sonraki adıma geçmek için sonraki butonuna basın.',
     ),
     _OnboardingPage(

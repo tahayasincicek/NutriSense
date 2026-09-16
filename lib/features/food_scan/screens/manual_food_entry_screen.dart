@@ -134,6 +134,7 @@ class _ManualFoodEntryScreenState extends ConsumerState<ManualFoodEntryScreen> {
         displayName: analysis.foodNameTr,
         caloriesPer100g: analysis.caloriesPer100g,
         portionOptions: analysis.portionOptions,
+        sourceAttribution: analysis.provenance?.attribution,
       );
 
       setState(() {
@@ -481,6 +482,16 @@ class _ManualFoodEntryScreenState extends ConsumerState<ManualFoodEntryScreen> {
                           ),
                         ),
                       ),
+                      if (_selectedResult!.sourceAttribution != null) ...[
+                        const SizedBox(height: 8),
+                        Text(
+                          'Besin verisi kaynağı: '
+                          '${_selectedResult!.sourceAttribution}',
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: theme.colorScheme.onSurfaceVariant,
+                          ),
+                        ),
+                      ],
                       const SizedBox(height: 20),
                       // Besin birden çok birim kabul ediyorsa seçim sunulur;
                       // yalnız gram varsa satır hiç çizilmez.
@@ -596,6 +607,7 @@ class FoodSearchResult {
     this.fat = 0,
     this.fiber = 0,
     this.portionOptions = const [],
+    this.sourceAttribution,
   });
 
   /// Besinin gram dışında kabul ettiği birimler.
@@ -604,6 +616,9 @@ class FoodSearchResult {
   /// gerisini atıyordu; bu yüzden bir bardak ayran gram cinsinden tahmin
   /// edilmek zorundaydı.
   final List<PortionOption> portionOptions;
+
+  /// Besin verisinin kaynağı; lisans gereği seçilen besinle gösterilir.
+  final String? sourceAttribution;
 
   factory FoodSearchResult.fromJson(Map<String, dynamic> json) {
     return FoodSearchResult(
