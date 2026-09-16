@@ -433,7 +433,11 @@ class ApiService {
         return auth;
       });
 
-  Future<ApiResult<AuthTokenResult>> registerDietitian({
+  /// Diyetisyen kaydını başlatır; sunucu e-postaya doğrulama kodu gönderir.
+  ///
+  /// Yanıt adres kayıtlı olsa da aynıdır. Hesap [confirmRegistration] ile
+  /// açılır.
+  Future<ApiResult<String>> registerDietitian({
     required String email,
     required String password,
     required String fullName,
@@ -459,9 +463,8 @@ class ApiService {
           cancelToken: cancelToken,
           options: Options(extra: const {_skipAuthKey: true}),
         );
-        final auth = AuthTokenResult.fromJson(response.data ?? const {});
-        await _saveAuth(auth);
-        return auth;
+        return response.data?['message'] as String? ??
+            'Doğrulama kodu e-posta adresinize gönderildi.';
       });
 
   Future<ApiResult<AuthTokenResult>> login({

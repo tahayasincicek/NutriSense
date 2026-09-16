@@ -4219,6 +4219,7 @@
     },
     "/api/v1/auth/register-dietitian": {
       "post": {
+        "description": "Diyetisyen hesabı da e-postaya gelen kodla açılır.\n\nYanıt adres kayıtlı olsa da aynıdır; hesabın zaten var olduğu yalnız\nadresin sahibine e-postayla bildirilir.",
         "operationId": "register_dietitian_api_v1_auth_register_dietitian_post",
         "requestBody": {
           "content": {
@@ -4231,11 +4232,11 @@
           "required": true
         },
         "responses": {
-          "201": {
+          "202": {
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/TokenResponse"
+                  "$ref": "#/components/schemas/RegistrationPendingResponse"
                 }
               }
             },
@@ -4252,7 +4253,7 @@
             "description": "Validation Error"
           }
         },
-        "summary": "Diyetisyen hesabı oluştur",
+        "summary": "Diyetisyen kaydını başlat",
         "tags": [
           "NutriSense API"
         ]

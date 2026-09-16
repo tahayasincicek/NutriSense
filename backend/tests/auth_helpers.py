@@ -1,4 +1,4 @@
-"""Testlerde e-posta doğrulamalı kaydı tamamlayan yardımcı."""
+"""Testlerde e-posta doğrulamalı kaydı tamamlayan yardımcılar."""
 
 import re
 
@@ -6,10 +6,19 @@ from app.routers import food_router
 
 
 def register_user(client, payload: dict):
-    """Kaydı başlatır, e-postadaki kodu yakalar ve hesabı açar.
+    """Hasta kaydını başlatır, e-postadaki kodu yakalar ve hesabı açar.
 
     Kod onayının yanıtını (201 ve token çifti) döndürür.
     """
+    return _register_with_code(client, "/api/v1/auth/register", payload)
+
+
+def register_dietitian(client, payload: dict):
+    """Diyetisyen kaydını başlatır ve e-postadaki kodla hesabı açar."""
+    return _register_with_code(client, "/api/v1/auth/register-dietitian", payload)
+
+
+def _register_with_code(client, path: str, payload: dict):
     sent = []
     service = food_router.notification_service
     had_override = "send_email_message" in vars(service)
@@ -21,7 +30,7 @@ def register_user(client, payload: dict):
 
     service.send_email_message = capture
     try:
-        started = client.post("/api/v1/auth/register", json=payload)
+        started = client.post(path, json=payload)
     finally:
         if had_override:
             service.send_email_message = original

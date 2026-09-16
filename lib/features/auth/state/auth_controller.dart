@@ -116,6 +116,8 @@ class AuthController extends StateNotifier<AuthState> {
     return _loadAuthenticatedProfile();
   }
 
+  /// Diyetisyen kaydını başlatır. Başarılıysa `null` döner; hesap e-postaya
+  /// gelen kod [confirmRegistration] ile doğrulanınca açılır.
   Future<String?> registerDietitian({
     required String fullName,
     required String email,
@@ -136,9 +138,9 @@ class AuthController extends StateNotifier<AuthState> {
     );
     if (!result.isSuccess) {
       state = const AuthState(AuthStatus.unauthenticated);
-      return result.errorMessage ?? 'Diyetisyen hesabı oluşturulamadı.';
+      return result.errorMessage ?? 'Diyetisyen kaydı başlatılamadı.';
     }
-    return _loadAuthenticatedProfile(requiredAccountType: 'dietitian');
+    return null;
   }
 
   Future<String?> _loadAuthenticatedProfile(

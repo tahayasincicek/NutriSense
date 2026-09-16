@@ -1,7 +1,7 @@
 """Eşleşme iki taraflı onayla kurulur: hasta rızası + diyetisyen kabulü."""
 
 from app.models.database import Dietitian, DietitianAssignment, SessionLocal, User
-from auth_helpers import register_user
+from auth_helpers import register_dietitian, register_user
 
 PASSWORD = "Guvenli123"
 
@@ -21,7 +21,7 @@ def _register_patient(client, email: str) -> dict:
 
 
 def _register_dietitian(client, email: str) -> dict:
-    response = client.post("/api/v1/auth/register-dietitian", json={
+    response = register_dietitian(client, {
         "email": email,
         "password": PASSWORD,
         "full_name": "Sentetik Diyetisyen",
@@ -29,7 +29,7 @@ def _register_dietitian(client, email: str) -> dict:
         "data_processing_agreement_accepted": True,
         "data_processing_agreement_version": "DIETITIAN-DPA-2026-01",
     })
-    assert response.status_code in {200, 201}
+    assert response.status_code == 201, response.text
     return response.json()
 
 
@@ -53,11 +53,10 @@ def test_dietitian_registration_requires_and_records_current_agreement(client):
         },
     ).status_code == 409
 
-    accepted = client.post(
-        "/api/v1/auth/register-dietitian",
-        json={**payload, "data_processing_agreement_accepted": True},
+    accepted = register_dietitian(
+        client, {**payload, "data_processing_agreement_accepted": True},
     )
-    assert accepted.status_code == 201
+    assert accepted.status_code == 201, accepted.text
     with SessionLocal() as db:
         profile = db.query(Dietitian).filter_by(email=payload["email"]).one()
         assert profile.data_processing_agreement_version == "DIETITIAN-DPA-2026-01"

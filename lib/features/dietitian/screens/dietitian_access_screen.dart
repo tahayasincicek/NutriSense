@@ -8,6 +8,7 @@ import '../../../core/utils/accessibility_utils.dart';
 import '../../../shared/widgets/accessible_button.dart';
 import '../../../shared/widgets/auth_mode_switch.dart';
 import '../../auth/state/auth_controller.dart';
+import '../../auth/screens/registration_verification_screen.dart';
 
 class DietitianAccessScreen extends ConsumerStatefulWidget {
   const DietitianAccessScreen({super.key});
@@ -294,6 +295,18 @@ class _DietitianAccessScreenState extends ConsumerState<DietitianAccessScreen> {
     );
   }
 
+  /// Kaydı başlatır; sunucu e-postaya doğrulama kodu gönderir. Aynı bilgilerle
+  /// kodu yeniden istemek için de kullanılır.
+  Future<String?> _startDietitianRegistration() =>
+      ref.read(authControllerProvider.notifier).registerDietitian(
+            fullName: _nameController.text.trim(),
+            email: _emailController.text.trim(),
+            password: _passwordController.text,
+            specialization: _specializationController.text.trim(),
+            dataProcessingAgreementAccepted: _agreementAccepted,
+            dataProcessingAgreementVersion: _agreementVersion,
+          );
+
   Future<void> _submit() async {
     if (_loading || !_formKey.currentState!.validate()) return;
     if (_registering && !_agreementAccepted) {
@@ -310,14 +323,7 @@ class _DietitianAccessScreenState extends ConsumerState<DietitianAccessScreen> {
     String? error;
     try {
       if (_registering) {
-        error = await controller.registerDietitian(
-          fullName: _nameController.text.trim(),
-          email: _emailController.text.trim(),
-          password: _passwordController.text,
-          specialization: _specializationController.text.trim(),
-          dataProcessingAgreementAccepted: _agreementAccepted,
-          dataProcessingAgreementVersion: _agreementVersion,
-        );
+        error = await _startDietitianRegistration();
       } else {
         error = await controller.loginDietitian(
           email: _emailController.text.trim(),
@@ -336,13 +342,26 @@ class _DietitianAccessScreenState extends ConsumerState<DietitianAccessScreen> {
         SnackBar(content: Text(error)),
       );
       AccessibilityUtils.announceError(error);
-    } else {
-      AccessibilityUtils.announceSuccess('Diyetisyen paneli açıldı');
-      // Bu ekran giriş sayfasının üstüne push edildiği için AuthGate altta
-      // paneli hazırlasa bile görünür kalıyordu. Başarılı girişte portal
-      // rotasını kapatıp alttaki diyetisyen panelini hemen göster.
-      Navigator.of(context).pop();
+      return;
     }
+    if (_registering) {
+      // Hesap, e-postaya gelen kod doğrulanınca açılır; kayıt ekranı bir
+      // adresin sistemde olup olmadığını ele vermez.
+      final verified = await Navigator.of(context).push<bool>(
+        MaterialPageRoute(
+          builder: (_) => RegistrationVerificationScreen(
+            email: _emailController.text.trim(),
+            onResend: _startDietitianRegistration,
+          ),
+        ),
+      );
+      if (!mounted || verified != true) return;
+    }
+    AccessibilityUtils.announceSuccess('Diyetisyen paneli açıldı');
+    // Bu ekran giriş sayfasının üstüne push edildiği için AuthGate altta
+    // paneli hazırlasa bile görünür kalıyordu. Başarılı girişte portal
+    // rotasını kapatıp alttaki diyetisyen panelini hemen göster.
+    Navigator.of(context).pop();
   }
 
   Future<void> _showAgreement() async {

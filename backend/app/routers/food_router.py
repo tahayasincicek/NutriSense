@@ -2137,14 +2137,20 @@ def _dietitian_profile_for_user(db: Session, user: User) -> Dietitian:
 
 @router.post(
     "/auth/register-dietitian",
-    response_model=TokenResponse,
-    status_code=status.HTTP_201_CREATED,
-    summary="Diyetisyen hesabı oluştur",
+    response_model=RegistrationPendingResponse,
+    status_code=status.HTTP_202_ACCEPTED,
+    summary="Diyetisyen kaydını başlat",
 )
 async def register_dietitian(
     request: DietitianCreate,
+    http_request: Request,
     db: Session = Depends(get_db),
 ):
+    """Diyetisyen hesabı da e-postaya gelen kodla açılır.
+
+    Yanıt adres kayıtlı olsa da aynıdır; hesabın zaten var olduğu yalnız
+    adresin sahibine e-postayla bildirilir.
+    """
     agreement_version = "DIETITIAN-DPA-2026-01"
     if request.data_processing_agreement_version != agreement_version:
         raise HTTPException(
@@ -2152,6 +2158,12 @@ async def register_dietitian(
             detail="Diyetisyen veri işleme sözleşmesi güncellendi; metni yeniden inceleyin.",
         )
     normalized_email = request.email.lower()
+    now = _enforce_registration_rate_limit(http_request, normalized_email)
+
+    # Parola özeti iki durumda da hesaplanır; yanıt süresi hesabın varlığını
+    # ele vermez.
+    hashed_password = hash_password(request.password)
+    current_settings = get_settings()
     existing_user = db.query(User).filter(
         func.lower(User.email) == normalized_email
     ).first()
@@ -2159,45 +2171,32 @@ async def register_dietitian(
         func.lower(Dietitian.email) == normalized_email
     ).first()
     if existing_user or existing_profile:
-        raise HTTPException(
-            status_code=status.HTTP_409_CONFLICT,
-            detail="Bu e-posta adresi zaten kayıtlı. Giriş yapmayı deneyin.",
+        message = build_registration_exists_email(
+            destination=normalized_email, settings=current_settings,
+        )
+    else:
+        code = f"{secrets.randbelow(10**8):08d}"
+        db.query(PendingRegistration).filter(
+            PendingRegistration.email == normalized_email
+        ).delete(synchronize_session=False)
+        db.add(PendingRegistration(
+            email=normalized_email,
+            hashed_password=hashed_password,
+            full_name=request.full_name,
+            phone=request.phone,
+            code_hash=_hash_reset_token(code),
+            expires_at=now + _REGISTRATION_CODE_TTL,
+            account_type="dietitian",
+            specialization=request.specialization,
+            data_processing_agreement_version=agreement_version,
+        ))
+        db.commit()
+        message = build_registration_code_email(
+            code=code, destination=normalized_email, settings=current_settings,
         )
 
-    # Yerel geliştirmede doğrulama sağlayıcısı bulunmadığından hesap doğrudan
-    # etkinleşir. Staging/production ortamında gerçek doğrulama tamamlanmadan
-    # hastalar bu profili eşleştiremez.
-    locally_verified = settings.app_environment.lower() in {"local", "dev", "test"}
-    user = User(
-        id=str(uuid.uuid4()),
-        email=normalized_email,
-        hashed_password=hash_password(request.password),
-        full_name=request.full_name,
-        phone=request.phone,
-    )
-    profile = Dietitian(
-        id=str(uuid.uuid4()),
-        email=normalized_email,
-        full_name=request.full_name,
-        phone=request.phone,
-        specialization=request.specialization,
-        email_verified=locally_verified,
-        phone_verified=bool(request.phone) and locally_verified,
-        data_processing_agreement_version=agreement_version,
-        data_processing_agreement_accepted_at=utc_now(),
-    )
-    try:
-        db.add_all([user, profile])
-        db.commit()
-        db.refresh(user)
-    except Exception:
-        db.rollback()
-        logger.exception("Diyetisyen hesabı oluşturulamadı.")
-        raise HTTPException(
-            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail="Diyetisyen hesabı oluşturulamadı.",
-        )
-    return TokenResponse(**issue_token_pair(db, user))
+    await _send_registration_email(message, normalized_email)
+    return RegistrationPendingResponse(message=_REGISTRATION_GENERIC_MESSAGE)
 
 
 _REGISTRATION_CODE_TTL = timedelta(minutes=30)
@@ -2213,6 +2212,31 @@ _REGISTRATION_GENERIC_MESSAGE = (
 )
 
 
+def _enforce_registration_rate_limit(http_request: Request, normalized_email: str) -> datetime:
+    """Aynı IP ve adres için kayıt isteğini sınırlar; isteğin zamanını döner."""
+    key, _ = _login_key(http_request, normalized_email)
+    now = utc_now()
+    cutoff = now - timedelta(seconds=_REGISTRATION_WINDOW_SECONDS)
+    _registration_requests[key] = [
+        value for value in _registration_requests[key] if value > cutoff
+    ]
+    if len(_registration_requests[key]) >= _REGISTRATION_MAX_REQUESTS:
+        raise HTTPException(
+            status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+            detail="Çok fazla kayıt denemesi yapıldı. Lütfen daha sonra tekrar deneyin.",
+        )
+    _registration_requests[key].append(now)
+    return now
+
+
+async def _send_registration_email(message, destination: str) -> None:
+    try:
+        await notification_service.send_email_message(message, destination)
+    except ChannelDeliveryError:
+        # Gönderim hatası yanıtı değiştirmez; aksi hâlde hesap varlığı sızardı.
+        logger.warning("Kayıt doğrulama e-postası gönderilemedi.")
+
+
 @router.post(
     "/auth/register",
     response_model=RegistrationPendingResponse,
@@ -2226,18 +2250,7 @@ async def register(
 ):
     """E-postaya doğrulama kodu gönderir; hesap kod doğrulanınca açılır."""
     normalized_email = request.email.lower()
-    key, _ = _login_key(http_request, normalized_email)
-    now = utc_now()
-    cutoff = now - timedelta(seconds=_REGISTRATION_WINDOW_SECONDS)
-    _registration_requests[key] = [
-        value for value in _registration_requests[key] if value > cutoff
-    ]
-    if len(_registration_requests[key]) >= _REGISTRATION_MAX_REQUESTS:
-        raise HTTPException(
-            status_code=status.HTTP_429_TOO_MANY_REQUESTS,
-            detail="Çok fazla kayıt denemesi yapıldı. Lütfen daha sonra tekrar deneyin.",
-        )
-    _registration_requests[key].append(now)
+    now = _enforce_registration_rate_limit(http_request, normalized_email)
 
     # Parola özeti iki durumda da hesaplanır; yanıt süresi hesabın varlığını
     # ele vermez.
@@ -2267,11 +2280,7 @@ async def register(
             code=code, destination=normalized_email, settings=current_settings,
         )
 
-    try:
-        await notification_service.send_email_message(message, normalized_email)
-    except ChannelDeliveryError:
-        # Gönderim hatası yanıtı değiştirmez; aksi hâlde hesap varlığı sızardı.
-        logger.warning("Kayıt doğrulama e-postası gönderilemedi.")
+    await _send_registration_email(message, normalized_email)
     return RegistrationPendingResponse(message=_REGISTRATION_GENERIC_MESSAGE)
 
 
@@ -2309,7 +2318,13 @@ async def confirm_registration(
             db.delete(pending)
         db.commit()
         raise invalid
-    if db.query(User).filter(func.lower(User.email) == normalized_email).first():
+    is_dietitian = pending.account_type == "dietitian"
+    already_registered = db.query(User).filter(
+        func.lower(User.email) == normalized_email
+    ).first() or (is_dietitian and db.query(Dietitian).filter(
+        func.lower(Dietitian.email) == normalized_email
+    ).first())
+    if already_registered:
         db.delete(pending)
         db.commit()
         raise invalid
@@ -2322,7 +2337,23 @@ async def confirm_registration(
         phone=pending.phone,
         daily_calorie_target=pending.daily_calorie_target,
     )
-    db.add(user)
+    records = [user]
+    if is_dietitian:
+        # Kod adrese gittiği için e-posta sahipliği kanıtlanmıştır. Telefon
+        # doğrulaması yalnız yerel geliştirmede otomatik kabul edilir.
+        locally_verified = settings.app_environment.lower() in {"local", "dev", "test"}
+        records.append(Dietitian(
+            id=str(uuid.uuid4()),
+            email=normalized_email,
+            full_name=pending.full_name,
+            phone=pending.phone,
+            specialization=pending.specialization or "Beslenme ve Diyet",
+            email_verified=True,
+            phone_verified=bool(pending.phone) and locally_verified,
+            data_processing_agreement_version=pending.data_processing_agreement_version,
+            data_processing_agreement_accepted_at=pending.created_at,
+        ))
+    db.add_all(records)
     db.delete(pending)
     db.commit()
     db.refresh(user)

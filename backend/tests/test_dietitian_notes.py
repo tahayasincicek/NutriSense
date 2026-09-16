@@ -1,6 +1,6 @@
 """Diyetisyen notları birikir: yeni kayıt öncekinin üzerine yazmaz."""
 
-from auth_helpers import register_user
+from auth_helpers import register_dietitian, register_user
 
 PASSWORD = "Guvenli123"
 
@@ -16,7 +16,7 @@ def _linked_pair(client, slug: str) -> tuple[dict, dict, str]:
         "password": PASSWORD,
         "full_name": "Sentetik Hasta",
     }).json()
-    dietitian = client.post("/api/v1/auth/register-dietitian", json={
+    dietitian = register_dietitian(client, {
         "email": f"{slug}-diyetisyen@example.com",
         "password": PASSWORD,
         "full_name": "Sentetik Diyetisyen",
@@ -93,7 +93,7 @@ def test_note_can_be_deleted_without_touching_others(client):
 
 def test_notes_are_closed_to_unassigned_dietitian(client):
     _, _, user_id = _linked_pair(client, "yabanci-hedef")
-    stranger = client.post("/api/v1/auth/register-dietitian", json={
+    stranger = register_dietitian(client, {
         "email": "yabanci-diyetisyen@example.com",
         "password": PASSWORD,
         "full_name": "Yabancı Diyetisyen",

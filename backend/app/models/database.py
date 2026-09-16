@@ -571,6 +571,11 @@ class PendingRegistration(Base):
     full_name = Column(String(255), nullable=False)
     phone = Column(String(20), nullable=True)
     daily_calorie_target = Column(Float, default=2000.0, nullable=False)
+    # Diyetisyen kaydı da aynı kodlu doğrulamadan geçer; profil kod
+    # doğrulanınca oluşturulur.
+    account_type = Column(String(16), default="patient", nullable=False)
+    specialization = Column(String(255), nullable=True)
+    data_processing_agreement_version = Column(String(64), nullable=True)
     code_hash = Column(String(64), nullable=False)
     attempt_count = Column(Integer, default=0, nullable=False)
     expires_at = Column(UTCDateTime, nullable=False, index=True)
