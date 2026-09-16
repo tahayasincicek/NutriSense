@@ -23,11 +23,13 @@ bir hukukçu verir.
 | Ses ve metin okumanın cihazda kalması | Android'de önce cihaz üstü konuşma tanıma istenir; dil paketi yoksa sesli komut bozulmasın diye standart tanımaya dönülür. Metin okumada yerel Türkçe ses seçilir. | `lib/shared/services/on_device_voice_policy.dart`, `test/unit/on_device_voice_policy_test.dart` |
 | Açılışta Google'a yazı tipi isteği | Plus Jakarta Sans uygulamaya gömüldü; çalışırken indirme kapalı, kullanıcının IP adresi Google'a gitmez. | `assets/google_fonts/`, `lib/main.dart` |
 | Veri kaynaklarına atıf | Modelin eğitim verileri ve kalori kaynakları uygulamada Ayarlar → Lisanslar ve Veri Kaynakları ekranında listelenir. | `lib/main.dart`, `ml/LICENSES.md` |
-| Kayıt ekranında hesap varlığının sızması | Hesap e-postaya gönderilen kodla açılır. Kayıt isteği her durumda aynı yanıtı verir ve parola özeti iki durumda da hesaplanır; adres zaten kayıtlıysa bilgi yalnız adresin sahibine e-postayla gider. Kod beş yanlış denemede iptal olur, kayıt isteği 15 dakikada beşle sınırlıdır. | `backend/app/routers/food_router.py`, `backend/tests/test_registration_verification.py`, `lib/features/auth/screens/registration_verification_screen.dart` |
+| Kayıt ekranında hesap varlığının sızması | Hasta ve diyetisyen hesabı e-postaya gönderilen kodla açılır. Kayıt isteği her durumda aynı yanıtı verir ve parola özeti iki durumda da hesaplanır; adres zaten kayıtlıysa bilgi yalnız adresin sahibine e-postayla gider. Kod beş yanlış denemede iptal olur, kayıt isteği 15 dakikada beşle sınırlıdır. | `backend/app/routers/food_router.py`, `backend/tests/test_registration_verification.py`, `backend/tests/test_dietitian_registration_verification.py`, `lib/features/auth/screens/registration_verification_screen.dart` |
 | Saklama ve imha | Süresi dolan oturum anahtarları, parola sıfırlama kodları ve karara bağlanmamış tanıma denemeleri silinir; güvenlik kayıtlarında IP 90 günde boşaltılır, kayıt 365 günde silinir. Her çalıştırma kişisel veri içermeyen bir imha kaydı yazar. Süreler kurum onayı bekler. | `backend/app/domain/retention.py`, `backend/scripts/purge_expired_data.py`, `docs/saklama_ve_imha_politikasi_taslak.md` |
 | Güvenlik kayıtlarında e-posta | E-posta, uygulama sırrıyla anahtarlı özet (HMAC-SHA256) olarak tutulur; düz özet gibi bilinen adres listeleriyle geri eşleştirilemez. | `backend/app/routers/food_router.py` |
 | Cihazdaki sağlık verisi | Su, adım, uyku, ruh hâli, kilo ve ilaç listesi şifreli depoda tutulur. Paylaşılan CSV ve JSON dosyaları paylaşımdan sonra silinir; fotoğrafın EXIF bilgisi telefondan çıkmadan temizlenir. | `lib/features/water_tracker/state/water_provider.dart`, `lib/shared/utils/temporary_share_file.dart`, `lib/features/food_scan/services/image_preprocessing.dart` |
 | Tıbbi iddia sınırı | Tarama sonucu ve raporlarda tahmin olduğu, tıbbi teşhis veya tedavi olmadığı belirtilir. | `lib/features/food_scan/screens/camera_screen.dart`, `backend/app/domain/report_delivery.py` |
+| Sağlık bilgisinin sesli okunması | Tanıtım ekranı, besin ve sağlık bilgilerinin sesli okunduğunu ve yanındakilerin duyabileceğini söyler; kalabalık ortamda kulaklık önerir. | `lib/features/onboarding/screens/onboarding_screen.dart` |
+| Besin verisi kaynağına atıf | Manuel girişte seçilen besinin kartında verinin kaynağı gösterilir; Nutritionix gibi atıf isteyen lisanslı bir kaynak açılırsa atıf görünür olur. | `lib/features/food_scan/screens/manual_food_entry_screen.dart` |
 
 ## Taslağı hazır, onay bekleyen belgeler
 
@@ -66,11 +68,6 @@ bir hukukçu verir.
 
 ## Açık teknik işler
 
-- Diyetisyen kaydı: e-posta kayıtlıysa 409 döner. Diyetisyen hesabı hasta
-  sağlık verisi taşımayan mesleki bir hesaptır; istenirse aynı doğrulama
-  akışına geçirilebilir.
-- Sesli okumada hassas bilgi uyarısı: sağlık bilgisinin hoparlörden
-  duyulabileceğine dair ilk kullanım uyarısı ve kulaklık önerisi yok.
 - İşletim sistemi konuşma tanıma servisi: Android'de cihaz üstü tanıma
   öncelikli, ama Türkçe dil paketi olmayan telefonlarda ve iOS'ta ses platform
   sunucusunda işlenebilir. Bu nedenle servis aydınlatmada ve aktarım
