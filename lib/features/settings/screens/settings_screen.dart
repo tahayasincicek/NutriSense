@@ -12,7 +12,6 @@ import '../../onboarding/screens/onboarding_screen.dart';
 import '../../auth/screens/privacy_consent_screen.dart';
 import '../../../shared/services/api_service.dart';
 import '../../dietitian/screens/dietitian_dashboard_screen.dart';
-import '../../food_scan/state/on_device_model_preference.dart';
 import '../../survey/screens/survey_screen.dart';
 import '../../survey/screens/usability_test_screen.dart';
 import '../../../shared/widgets/accessible_number_dialog.dart';
@@ -291,28 +290,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           // kalori hedefi, tanıtım ve araştırma araçları diyetisyeni
           // ilgilendirmez.
           if (!isDietitian) ...[
-            const SizedBox(height: 24),
-            _buildSectionTitle('Besin Tanıma'),
-            _buildSettingCard([
-              _buildSwitchTile(
-                key: const Key('settings_on_device_model'),
-                title: 'Cihaz Üstü Model',
-                subtitle: 'İnternetsiz tanır; kaloriyi siz onaylarsınız',
-                icon: Icons.memory_rounded,
-                value: ref.watch(onDeviceModelProvider),
-                onChanged: (v) {
-                  ref.read(onDeviceModelProvider.notifier).setEnabled(v);
-                  _accessibility.speak(
-                    v
-                        ? 'Cihaz üstü model açıldı. Tarama internete gitmez, '
-                            'yalnız yemek adı önerilir.'
-                        : 'Cihaz üstü model kapatıldı. Tarama sunucuda yapılır.',
-                    priority: TtsPriority.high,
-                  );
-                },
-              ),
-            ]),
-
             const SizedBox(height: 24),
             _buildSectionTitle('Beslenme Hedefleri'),
             _buildSettingCard([

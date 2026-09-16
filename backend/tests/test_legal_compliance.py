@@ -26,7 +26,6 @@ def _production(**overrides) -> Settings:
         research_mode="disabled",
         notification_mode="disabled",
         sms_provider_mode="disabled",
-        vision_provider_mode="disabled",
         nutrition_provider_mode="verified_local",
         ml_artifact_enabled=False,
         data_controller_name="NutriSense Proje Ekibi",
@@ -76,17 +75,6 @@ def test_cross_border_provider_requires_transfer_reference(overrides):
     _production(
         **overrides, cross_border_transfer_reference=TRANSFER_REFERENCE
     ).validate_security()
-
-
-def test_production_gemini_requires_paid_tier():
-    gemini = {
-        "vision_provider_mode": "gemini",
-        "gemini_api_key": "synthetic-gemini-key",
-        "cross_border_transfer_reference": TRANSFER_REFERENCE,
-    }
-    with pytest.raises(RuntimeError, match="GEMINI_PAID_TIER_CONFIRMED"):
-        _production(**gemini).validate_security()
-    _production(**gemini, gemini_paid_tier_confirmed=True).validate_security()
 
 
 @pytest.mark.parametrize("path", ["/hesap-silme", "/account-deletion"])

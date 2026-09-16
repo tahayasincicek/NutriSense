@@ -67,11 +67,6 @@ class Settings(BaseSettings):
     jwt_access_token_expire_minutes: int = 60
     jwt_refresh_token_expire_days: int = 30
 
-    google_application_credentials: str = ""
-    google_cloud_project_id: str = ""
-    vision_provider_mode: str = "disabled"
-    gemini_api_key: str = ""
-    gemini_model: str = "gemini-2.5-flash"
     nutritionix_app_id: str = ""
     nutritionix_api_key: str = ""
     nutrition_provider_mode: str = "verified_local"
@@ -118,10 +113,6 @@ class Settings(BaseSettings):
     # Yurt dışına veri gönderebilen sağlayıcılar etkinse KVKK m.9 aktarım
     # değerlendirmesinin ve imzalı standart sözleşme bildiriminin kayıt no'su.
     cross_border_transfer_reference: str = ""
-    # Ücretsiz Gemini katmanı gönderilen içeriği ürün geliştirmede
-    # kullanabilir; sağlık bağlamındaki fotoğraf yalnız faturalandırmalı
-    # projede gönderilebilir.
-    gemini_paid_tier_confirmed: bool = False
     research_approval_reference: str = ""
     research_audio_consent_approved: bool = False
     migration_check_enabled: bool = True
@@ -245,26 +236,12 @@ class Settings(BaseSettings):
             )
         if self.notification_mode not in {"disabled", "sandbox", "production"}:
             raise RuntimeError("NOTIFICATION_MODE disabled, sandbox veya production olmalıdır.")
-        if self.vision_provider_mode not in {"disabled", "google", "gemini"}:
-            raise RuntimeError(
-                "VISION_PROVIDER_MODE disabled, google veya gemini olmalıdır."
-            )
         if self.nutrition_provider_mode not in {
             "disabled", "verified_local", "nutritionix", "hybrid"
         }:
             raise RuntimeError(
                 "NUTRITION_PROVIDER_MODE disabled, verified_local, nutritionix "
                 "veya hybrid olmalıdır."
-            )
-        if self.vision_provider_mode == "google" and not (
-            self.google_application_credentials and self.google_cloud_project_id
-        ):
-            raise RuntimeError(
-                "Google Vision etkinse credentials mount yolu ve project id gereklidir."
-            )
-        if self.vision_provider_mode == "gemini" and not self.gemini_api_key:
-            raise RuntimeError(
-                "Gemini etkinse GEMINI_API_KEY secret store'dan gelmelidir."
             )
         if self.nutrition_provider_mode in {"nutritionix", "hybrid"} and not (
             self.nutritionix_app_id and self.nutritionix_api_key
@@ -381,11 +358,6 @@ class Settings(BaseSettings):
                     f"({', '.join(self.cross_border_providers)}); KVKK m.9 "
                     "değerlendirmesi için CROSS_BORDER_TRANSFER_REFERENCE gereklidir."
                 )
-            if self.vision_provider_mode == "gemini" and not self.gemini_paid_tier_confirmed:
-                raise RuntimeError(
-                    "Production'da Gemini yalnız faturalandırmalı katmanda "
-                    "kullanılabilir; GEMINI_PAID_TIER_CONFIRMED=true gereklidir."
-                )
 
         if environment == "test":
             self.validate_test_database_safety()
@@ -436,8 +408,6 @@ class Settings(BaseSettings):
         bile değerlendirmenin kaydı aynı referansla belgelenir.
         """
         providers = []
-        if self.vision_provider_mode in {"google", "gemini"}:
-            providers.append(self.vision_provider_mode)
         if self.nutrition_provider_mode in {"nutritionix", "hybrid"}:
             providers.append("nutritionix")
         if self.sms_provider_mode == "twilio":
@@ -450,9 +420,10 @@ class Settings(BaseSettings):
     def public_capabilities(self) -> dict[str, object]:
         return {
             "environment": self.app_environment.lower(),
+            # Besin tanıma uygulamadaki cihaz modeliyle yapılır.
             "vision": {
-                "enabled": self.vision_provider_mode != "disabled",
-                "mode": self.vision_provider_mode,
+                "enabled": False,
+                "mode": "on_device",
             },
             "nutrition": {
                 "enabled": self.nutrition_provider_mode != "disabled",

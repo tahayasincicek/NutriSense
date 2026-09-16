@@ -15,7 +15,7 @@ from app.models.database import (
 from app.models.schemas import ErrorResponse, FoodAnalysisResponse
 from app.routers import food_router
 from app.middleware.auth import get_current_user
-from app.services.google_vision_service import FoodNotFoundError, VisionAPIError
+from app.services.vision_errors import FoodNotFoundError, VisionAPIError
 
 
 FIXTURES = Path(__file__).parents[2] / "contracts" / "fixtures"
@@ -135,7 +135,15 @@ def test_analyze_food_requires_authorization(client):
     assert response.json()["error"]["code"] in ("UNAUTHORIZED", "FORBIDDEN")
 
 
-def test_corrupt_image_has_standard_error_and_request_id(client):
+class _ValidationOnlyVision:
+    """Doğrulama sağlayıcıdan önce başarısız olmalı; sağlayıcı hiç çağrılmaz."""
+
+    async def analyze_image(self, _):
+        raise AssertionError("geçersiz görüntü sağlayıcıya ulaşmamalı")
+
+
+def test_corrupt_image_has_standard_error_and_request_id(client, monkeypatch):
+    monkeypatch.setattr(food_router, "vision_service", _ValidationOnlyVision())
     app.dependency_overrides[get_current_user] = lambda: SimpleNamespace(
         id="9e4e5356-b491-4575-a9dd-c5abbc777fe9"
     )
@@ -154,7 +162,8 @@ def test_corrupt_image_has_standard_error_and_request_id(client):
     assert response.headers["x-request-id"] == "contract-request-id"
 
 
-def test_mime_magic_mismatch_is_rejected(client):
+def test_mime_magic_mismatch_is_rejected(client, monkeypatch):
+    monkeypatch.setattr(food_router, "vision_service", _ValidationOnlyVision())
     app.dependency_overrides[get_current_user] = lambda: SimpleNamespace(
         id="9e4e5356-b491-4575-a9dd-c5abbc777fe9"
     )
@@ -173,6 +182,7 @@ def test_oversized_image_is_rejected_before_decode(client, monkeypatch):
     app.dependency_overrides[get_current_user] = lambda: SimpleNamespace(
         id="9e4e5356-b491-4575-a9dd-c5abbc777fe9"
     )
+    monkeypatch.setattr(food_router, "vision_service", _ValidationOnlyVision())
     monkeypatch.setattr(food_router.settings, "max_analysis_image_bytes", 32)
     response = client.post(
         "/api/v1/analyze-food",

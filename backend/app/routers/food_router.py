@@ -89,10 +89,7 @@ from ..middleware.auth import (
     get_current_user, hash_password, verify_password,
     issue_token_pair, revoke_refresh_token, rotate_refresh_token,
 )
-from ..services.google_vision_service import (
-    GoogleVisionService, VisionAPIError, FoodNotFoundError,
-)
-from ..services.gemini_vision_service import GeminiVisionService
+from ..services.vision_errors import FoodNotFoundError, VisionAPIError
 from ..services.nutritionix_service import NutritionixService
 from ..services.notification_service import (
     ChannelDeliveryError, NotificationService, build_password_reset_email,
@@ -107,23 +104,19 @@ router = APIRouter(prefix="/api/v1", tags=["NutriSense API"])
 
 
 # ── Servis singleton'ları ──
-def _build_vision_service():
-    """VISION_PROVIDER_MODE'a göre görüntü tanıma sağlayıcısını seçer."""
-    if settings.vision_provider_mode == "gemini":
-        return GeminiVisionService()
-    return GoogleVisionService()
+# Sunucuda görüntü tanıma sağlayıcısı yoktur: tanımayı uygulama telefondaki
+# NutriSense modeliyle yapar ve fotoğraf telefondan çıkmaz. Yurt içinde çalışan
+# bir sunucu modeli eklenirse buraya bağlanır; testler sahte sağlayıcı koyar.
+# Fotoğrafı yurt dışına aktaran bir sağlayıcı `cross_border = True` taşımalıdır;
+# bu durumda kullanıcının ayrı rızası olmadan görüntü işlenmez.
+vision_service = None
 
 
 def _vision_provider_name() -> str:
     """Analiz kaydına yazılacak sağlayıcı etiketi."""
-    return (
-        "gemini_vision"
-        if settings.vision_provider_mode == "gemini"
-        else "google_vision"
-    )
+    return getattr(vision_service, "provider_name", "server_model")
 
 
-vision_service = _build_vision_service()
 nutrition_service = NutritionixService()
 notification_service = NotificationService()
 
@@ -135,7 +128,7 @@ MEAL_TYPE_TR = {
     "atistirmalik": "Atıştırmalık",
 }
 
-# Besin adı Türkçe karşılıkları (Google Vision key → Türkçe)
+# Besin adı Türkçe karşılıkları (tanıma etiketi → Türkçe)
 FOOD_NAME_TR = {
     "elma": "Elma", "muz": "Muz", "portakal": "Portakal",
     "domates": "Domates", "salatalik": "Salatalık",
@@ -416,8 +409,9 @@ def _nutrition_from_analysis_payload(payload: dict) -> dict:
     summary="Görüntüden besin tanıma ve kalori hesaplama",
     description=(
         "Multipart görüntüyü MIME/boyut doğrulaması ve EXIF temizliği sonrası "
-        "yapılandırılan görüntü sağlayıcısı (Google Vision veya Gemini) ile analiz eder, "
-        "besin adını tanır ve Nutritionix'ten kalori bilgisini çeker. "
+        "sunucuya bağlı görüntü tanıma sağlayıcısıyla analiz eder ve kalori "
+        "bilgisini doğrulanmış katalogdan çeker. Sunucuda sağlayıcı yoksa "
+        "görüntü işlenmeden 503 döner; uygulama tanımayı telefonda yapar. "
         "Yemek günlüğü yalnız ayrı karar endpointinde kullanıcı onayıyla oluşur."
     ),
 )
@@ -451,10 +445,19 @@ async def analyze_food(
         return FoodAnalysisResponse.model_validate(existing.analysis_payload)
 
     _enforce_analysis_rate_limit(http_request, current_user.id)
+    if vision_service is None:
+        # Sunucuda tanıma sağlayıcısı yok; görüntü hiç işlenmez ve saklanmaz.
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail=(
+                "Sunucuda görüntü tanıma yok. Tanıma uygulamadaki cihaz "
+                "modeliyle yapılır; besini elle de girebilirsiniz."
+            ),
+        )
     # Görüntü yurtdışındaki bir sağlayıcıya gidiyorsa bu ayrı bir aktarımdır;
     # kullanıcı rıza vermediyse görüntü hiç işlenmez ve dışarı çıkmaz.
     # Kullanıcı manuel besin girişiyle uygulamayı kullanmaya devam edebilir.
-    if settings.vision_provider_mode in _CROSS_BORDER_VISION_MODES and not _has_consent(
+    if getattr(vision_service, "cross_border", False) and not _has_consent(
         db, current_user.id, "image_cross_border_transfer"
     ):
         raise HTTPException(
@@ -2983,9 +2986,6 @@ async def add_weight_measurement(
 # ═══════════════════════════════════════════════════════════════════════════════
 # ÜRÜN RIZALARI (AYDINLATMADAN AYRI, AMAÇ BAZLI)
 # ═══════════════════════════════════════════════════════════════════════════════
-
-# Görüntüyü yurt dışına aktaran sağlayıcılar; KVKK m.9 kapsamındadır.
-_CROSS_BORDER_VISION_MODES = frozenset({"google", "gemini"})
 
 PRODUCT_CONSENT_TYPES = (
     "privacy_notice_acknowledgement",

@@ -45,7 +45,7 @@ class RuntimeMetrics:
 
     def provider_outcome(self, provider: str, outcome: str) -> None:
         safe_provider = provider if provider in {
-            "google_vision", "nutritionix", "verified_local", "smtp", "twilio"
+            "nutritionix", "verified_local", "smtp", "twilio"
         } else "other"
         safe_outcome = outcome if outcome in {
             "success", "not_found", "disabled", "timeout", "rate_limited",

@@ -26,9 +26,7 @@ import '../services/image_preprocessing.dart';
 import '../services/offline_recognizer.dart';
 import '../services/recognition_policy.dart';
 import '../services/turkish_portion_parser.dart';
-import '../state/on_device_model_preference.dart';
 import '../widgets/accessible_portion_selector.dart';
-import 'nutrition_detail_screen.dart';
 
 final availableCamerasProvider = FutureProvider<List<CameraDescription>>((ref) {
   return availableCameras();
@@ -286,26 +284,10 @@ class _CameraScreenState extends ConsumerState<CameraScreen>
         );
         return;
       }
-      // Kullanıcı cihaz üstü modeli seçtiyse sunucuya hiç gidilmez; bu,
-      // modeli bağlantıyı kesmeden denemenin yoludur.
-      if (ref.read(onDeviceModelProvider)) {
-        notifier.setOfflineInference();
-        await _runOnDeviceModel(processed.processedBytes, generation);
-        return;
-      }
-
-      notifier.setUploading();
-      final response = await ref.read(apiServiceProvider).analyzeFood(
-            imageBytes: processed.processedBytes,
-            captureId: _captureId!,
-            cancelToken: _requestCancelToken,
-          );
-      if (!_isCurrent(generation)) return;
-      if (!response.isSuccess || response.data == null) {
-        await _handleOnlineFailure(response.failure, processed.processedBytes);
-        return;
-      }
-      await _presentAnalysis(response.data!);
+      // Fotoğraf telefondan çıkmaz: tanımayı telefondaki NutriSense modeli
+      // yapar. Kalori, kullanıcı onayından sonra doğrulanmış katalogdan gelir.
+      notifier.setOfflineInference();
+      await _runOnDeviceModel(processed.processedBytes, generation);
     } on CameraException {
       if (_isCurrent(generation)) {
         notifier.setError('Kamera görüntüyü çekemedi. Lütfen tekrar deneyin.');
@@ -335,28 +317,6 @@ class _CameraScreenState extends ConsumerState<CameraScreen>
   bool _isCurrent(int generation) =>
       !_disposed && mounted && generation == _generation;
 
-  Future<void> _handleOnlineFailure(
-    ApiFailure? failure,
-    Uint8List processedBytes,
-  ) async {
-    if (failure?.kind == ApiFailureKind.cancelled) return;
-    if (failure?.kind == ApiFailureKind.connection ||
-        failure?.kind == ApiFailureKind.timeout ||
-        failure?.kind == ApiFailureKind.server) {
-      ref.read(cameraStateProvider.notifier).setOfflineInference();
-      await _runOnDeviceModel(processedBytes, _generation);
-      return;
-    }
-    final message = failure?.message ??
-        'Analiz hizmeti kullanılamıyor. Manuel giriş yapabilirsiniz.';
-    ref.read(cameraStateProvider.notifier).setError(message);
-    await _tts.speakError(message);
-  }
-
-  /// Cihaz üstü modeli çalıştırır ve sonucu erişilebilir biçimde duyurur.
-  ///
-  /// Model yalnız sınıf önerir; kalori söylenmez ve kayıt kullanıcı onayı
-  /// olmadan oluşmaz.
   Future<void> _runOnDeviceModel(
       Uint8List processedBytes, int generation) async {
     final outcome = await _offline.recognize(processedBytes);
@@ -387,54 +347,6 @@ class _CameraScreenState extends ConsumerState<CameraScreen>
     await _tts.speak(
       '${outcome.message} Besin adını söyleyerek de ekleyebilirsiniz.',
     );
-  }
-
-  Future<void> _presentAnalysis(FoodAnalysisResult result) async {
-    _stopAutoCapture();
-    final band = _policy.classify(result);
-    if (band == RecognitionBand.low) {
-      ref.read(cameraStateProvider.notifier).setRejected();
-      await _tts.speak(
-        'Yiyecek güvenilir biçimde tanınamadı. Kalori söylenmedi ve kayıt oluşturulmadı. Yeniden çekin veya manuel giriş kullanın.',
-      );
-      await AccessibilityUtils.errorHaptic();
-      return;
-    }
-    ref.read(cameraStateProvider.notifier).setAnalysis(
-          result,
-          medium: band == RecognitionBand.medium,
-        );
-    await AccessibilityUtils.mediumHaptic();
-    if (band == RecognitionBand.high) {
-      if (!mounted) return;
-      final action = await Navigator.of(context).push<String>(
-        MaterialPageRoute(
-          settings: const RouteSettings(name: '/nutrition-detail'),
-          builder: (_) => NutritionDetailScreen(
-            foodName: result.foodName,
-            foodNameTr: result.foodNameTr,
-            calories: result.totalCalories,
-            portionGrams: result.portionGrams,
-            confidence: result.confidence,
-            nutrients: result.nutrients,
-          ),
-        ),
-      );
-
-      if (action == 'saved') {
-        unawaited(_confirm());
-      } else {
-        _reset();
-      }
-    } else {
-      final names = _policy
-          .candidates(result)
-          .map((candidate) => candidate.foodNameTr)
-          .join(', ');
-      await _tts.speak(
-        'Sonuç kesin değil. Olası seçenekler: $names. Bir seçenek seçin, yeniden çekin veya manuel giriş kullanın.',
-      );
-    }
   }
 
   Future<void> _announceQualityWarning(ImageQualityCheck quality) async {

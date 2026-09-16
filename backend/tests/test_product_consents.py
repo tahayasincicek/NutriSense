@@ -146,17 +146,18 @@ def test_consents_are_scoped_to_the_owner(client):
 
 
 def test_analysis_is_blocked_without_cross_border_consent(client, monkeypatch):
-    """Rıza yoksa görüntü hiç işlenmez ve sağlayıcıya gitmez."""
+    """Yurt dışına aktaran sağlayıcıda rıza yoksa görüntü hiç işlenmez."""
     from app.routers import food_router
 
     calls = []
 
     class RecordingVision:
+        cross_border = True
+
         async def analyze_image(self, image_base64, **kwargs):
             calls.append(image_base64)
             raise AssertionError("rıza yokken sağlayıcı çağrılmamalı")
 
-    monkeypatch.setattr(food_router.settings, "vision_provider_mode", "gemini")
     monkeypatch.setattr(food_router, "vision_service", RecordingVision())
 
     user = _register(client, "analiz-rizasiz@example.com")
@@ -172,17 +173,11 @@ def test_analysis_is_blocked_without_cross_border_consent(client, monkeypatch):
     assert calls == [], "görüntü sağlayıcıya gönderilmiş"
 
 
-def test_analysis_is_not_blocked_when_provider_is_disabled(client, monkeypatch):
-    """Sağlayıcı kapalıyken yurtdışı aktarımı yoktur; rıza kapısı da işlemez."""
+def test_analysis_without_server_provider_never_processes_the_photo(client, monkeypatch):
+    """Sunucuda sağlayıcı yokken görüntü işlenmez; tanıma telefonda yapılır."""
     from app.routers import food_router
-    from app.services.google_vision_service import VisionAPIError
 
-    class UnavailableVision:
-        async def analyze_image(self, image_base64, **kwargs):
-            raise VisionAPIError("kapalı")
-
-    monkeypatch.setattr(food_router.settings, "vision_provider_mode", "disabled")
-    monkeypatch.setattr(food_router, "vision_service", UnavailableVision())
+    monkeypatch.setattr(food_router, "vision_service", None)
 
     user = _register(client, "analiz-kapali@example.com")
     response = client.post(
@@ -192,5 +187,5 @@ def test_analysis_is_not_blocked_when_provider_is_disabled(client, monkeypatch):
         data={"capture_id": "22222222-2222-4222-8222-222222222222",
               "meal_type": "ogle"},
     )
-    # 403 değil: rıza kapısı devreye girmez, sağlayıcı hatası döner.
     assert response.status_code == 503, response.text
+    assert "cihaz" in response.json()["error"]["message"]

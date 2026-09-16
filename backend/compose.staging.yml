@@ -37,7 +37,6 @@ x-backend-environment: &backend-environment
   TRUSTED_HOSTS: localhost,127.0.0.1,testserver
   CORS_ORIGINS: http://localhost:3000,http://localhost:8080
   CORS_ALLOW_CREDENTIALS: "false"
-  VISION_PROVIDER_MODE: disabled
   NUTRITION_PROVIDER_MODE: disabled
   NOTIFICATION_MODE: sandbox
   NOTIFICATION_SANDBOX_EMAIL_ALLOWLIST: sandbox-dietitian@nutrisense.invalid

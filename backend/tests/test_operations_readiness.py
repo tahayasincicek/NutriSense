@@ -45,8 +45,6 @@ def test_staging_rejects_real_research_and_production_notifications():
 
 
 def test_required_provider_modes_fail_closed_without_credentials():
-    with pytest.raises(RuntimeError, match="Google Vision"):
-        _staging_settings(vision_provider_mode="google").validate_security()
     with pytest.raises(RuntimeError, match="Nutritionix"):
         _staging_settings(
             nutrition_provider_mode="nutritionix",
@@ -55,7 +53,6 @@ def test_required_provider_modes_fail_closed_without_credentials():
 
 def test_public_capabilities_never_expose_credentials():
     settings = _staging_settings(
-        vision_provider_mode="disabled",
         nutrition_provider_mode="disabled",
     )
     payload = settings.public_capabilities

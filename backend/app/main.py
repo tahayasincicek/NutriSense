@@ -87,7 +87,7 @@ app = FastAPI(
     version=settings.app_version,
     description=(
         "Görme engelli bireyler için yapay zeka destekli besin tanıma "
-        "ve kalori takip API'si. Google Vision + Nutritionix entegrasyonu."
+        "ve kalori takip API'si. Besin tanıma uygulamadaki cihaz modeliyle yapılır."
     ),
     docs_url="/docs" if settings.api_docs_enabled else None,
     redoc_url="/redoc" if settings.api_docs_enabled else None,

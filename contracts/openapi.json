@@ -3870,7 +3870,7 @@
     }
   },
   "info": {
-    "description": "Görme engelli bireyler için yapay zeka destekli besin tanıma ve kalori takip API'si. Google Vision + Nutritionix entegrasyonu.",
+    "description": "Görme engelli bireyler için yapay zeka destekli besin tanıma ve kalori takip API'si. Besin tanıma uygulamadaki cihaz modeliyle yapılır.",
     "title": "NutriSense",
     "version": "1.0.0"
   },
@@ -3898,7 +3898,7 @@
     },
     "/api/v1/analyze-food": {
       "post": {
-        "description": "Multipart görüntüyü MIME/boyut doğrulaması ve EXIF temizliği sonrası yapılandırılan görüntü sağlayıcısı (Google Vision veya Gemini) ile analiz eder, besin adını tanır ve Nutritionix'ten kalori bilgisini çeker. Yemek günlüğü yalnız ayrı karar endpointinde kullanıcı onayıyla oluşur.",
+        "description": "Multipart görüntüyü MIME/boyut doğrulaması ve EXIF temizliği sonrası sunucuya bağlı görüntü tanıma sağlayıcısıyla analiz eder ve kalori bilgisini doğrulanmış katalogdan çeker. Sunucuda sağlayıcı yoksa görüntü işlenmeden 503 döner; uygulama tanımayı telefonda yapar. Yemek günlüğü yalnız ayrı karar endpointinde kullanıcı onayıyla oluşur.",
         "operationId": "analyze_food_api_v1_analyze_food_post",
         "requestBody": {
           "content": {

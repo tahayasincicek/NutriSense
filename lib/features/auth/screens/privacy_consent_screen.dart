@@ -13,8 +13,9 @@ import '../state/auth_controller.dart';
 /// okunur/dinlenir, rıza ise her amaç için ayrı bir anahtarla verilir. Tek
 /// kutucukta birleştirmek rızayı sakatlar.
 ///
-/// Fotoğrafın yurt dışındaki sağlayıcıya gönderilmesi isteğe bağlıdır;
-/// reddedilirse besin elle girilebilir, uygulama kullanılmaya devam eder.
+/// Besin tanıma telefonda yapılır. Fotoğrafın yurt dışındaki bir sağlayıcıya
+/// gönderilmesi için ayrı izin korunur; sunucuda böyle bir sağlayıcı açılırsa
+/// izin verilmeden fotoğraf gönderilmez.
 class PrivacyConsentScreen extends ConsumerStatefulWidget {
   const PrivacyConsentScreen({super.key, this.requiredForEntry = false});
 
@@ -187,12 +188,11 @@ class _PrivacyConsentScreenState extends ConsumerState<PrivacyConsentScreen> {
                   _ConsentSwitch(
                     title: 'Fotoğrafımın analiz için yurt dışına gönderilmesi',
                     description:
-                        'Besin tanıma, fotoğrafı yurt dışındaki bir yapay zekâ '
-                        'sağlayıcısına gönderir. Fotoğraf gönderilmeden önce '
-                        'küçültülür, konum ve cihaz bilgileri silinir; adınız, '
-                        'e-postanız veya hesap kimliğiniz eklenmez. İzin '
-                        'vermezseniz fotoğraf gönderilmez; besinleri elle '
-                        'girerek uygulamayı kullanmaya devam edebilirsiniz.',
+                        'Besin tanıma şu anda telefonunuzdaki modelle yapılır; '
+                        'fotoğrafınız telefondan çıkmaz. İleride yurt dışındaki '
+                        'bir yapay zekâ sağlayıcısıyla tanıma açılırsa fotoğraf '
+                        'yalnız bu izinle, küçültülmüş ve konum ile kimlik '
+                        'bilgilerinden arındırılmış olarak gönderilir.',
                     value: _imageTransfer,
                     enabled: !_saving,
                     onChanged: (value) =>
@@ -237,11 +237,8 @@ class PrivacyNoticeCard extends StatelessWidget {
       'onayladığınız besin adı, porsiyon, kalori ve zaman bilgisini işler. '
       'Kilo, uyku, su ve ruh hâli gibi takip verileri de hesabınıza bağlı '
       'olarak saklanır.\n\n'
-      'Besin tanıma sırasında fotoğraf geçici olarak işlenir ve '
-      'yapılandırılmışsa yurt dışındaki bir sağlayıcıya gönderilebilir. '
-      'Gönderilmeden önce küçültülür, konum ve cihaz bilgileri silinir ve '
-      'kimliğinizle ilişkilendirilmez. Fotoğraf cihazda veya sunucuda '
-      'saklanmaz.\n\n'
+      'Besin tanıma telefonunuzdaki modelle yapılır; fotoğraf telefondan '
+      'çıkmaz, cihazda veya sunucuda saklanmaz.\n\n'
       'Beslenme raporunuz yalnız siz her gönderim için ayrıca onay '
       'verdiğinizde atanmış diyetisyenin güvenli uygulama içi panelinde '
       'paylaşılır. E-posta veya SMS yalnız anonim danışan kodlu yeni rapor '
