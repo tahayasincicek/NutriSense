@@ -4,7 +4,8 @@
 from .database import (
     AuditEvent, AuthAuditLog, Base, ConsentRecord, Dietitian,
     DietitianAssignment, DietitianReport, FoodLog, NotificationDelivery,
-    NutritionSource, RecognitionAttempt, RefreshToken, SurveySubmission,
+    NutritionSource, PendingEmailChange, RateLimitBucket, RecognitionAttempt,
+    RefreshToken, SurveySubmission,
     SurveyVersion, UsabilitySession, UsabilityTask, User, get_db, utc_now,
 )
 from .schemas import (

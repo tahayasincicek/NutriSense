@@ -1280,6 +1280,41 @@
         "title": "DietitianReportRecord",
         "type": "object"
       },
+      "EmailChangeConfirm": {
+        "properties": {
+          "code": {
+            "pattern": "^\\d{8}$",
+            "title": "Code",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code"
+        ],
+        "title": "EmailChangeConfirm",
+        "type": "object"
+      },
+      "EmailChangeRequest": {
+        "properties": {
+          "new_email": {
+            "format": "email",
+            "title": "New Email",
+            "type": "string"
+          },
+          "password": {
+            "maxLength": 128,
+            "minLength": 1,
+            "title": "Password",
+            "type": "string"
+          }
+        },
+        "required": [
+          "new_email",
+          "password"
+        ],
+        "title": "EmailChangeRequest",
+        "type": "object"
+      },
       "ErrorDetail": {
         "properties": {
           "code": {
@@ -6615,6 +6650,100 @@
           }
         ],
         "summary": "Update Me",
+        "tags": [
+          "NutriSense API"
+        ]
+      }
+    },
+    "/api/v1/users/me/email-change": {
+      "post": {
+        "description": "Verify the password, then send a code only to the requested address.",
+        "operationId": "request_email_change_api_v1_users_me_email_change_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EmailChangeRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "202": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RegistrationPendingResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Request Email Change",
+        "tags": [
+          "NutriSense API"
+        ]
+      }
+    },
+    "/api/v1/users/me/email-change/confirm": {
+      "post": {
+        "description": "Apply a verified address and rotate all durable login sessions.",
+        "operationId": "confirm_email_change_api_v1_users_me_email_change_confirm_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EmailChangeConfirm"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TokenResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Confirm Email Change",
         "tags": [
           "NutriSense API"
         ]

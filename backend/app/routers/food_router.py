@@ -36,7 +36,8 @@ from ..models.database import (
     AuthAuditLog, ConsentRecord, Dietitian, DietitianAssignment,
     DietitianNote, DietitianReport, FoodLog, NotificationDelivery,
     NutritionSource,
-    HealthMetric, PasswordResetToken, PendingRegistration, RecognitionAttempt,
+    HealthMetric, PasswordResetToken, PendingEmailChange, PendingRegistration,
+    RecognitionAttempt,
     RefreshToken,
     User, WeightMeasurement, get_db, istanbul_date, utc_now,
 )
@@ -65,6 +66,7 @@ from ..models.schemas import (
     PasswordResetRequest, PasswordResetConfirm, PasswordResetResponse,
     RegistrationConfirm, RegistrationPendingResponse,
     DietitianAssignmentResponse, LogoutRequest, RefreshTokenRequest,
+    EmailChangeConfirm, EmailChangeRequest,
     UserCreate, UserLogin, UserProfileUpdate, UserResponse, TokenResponse,
     ErrorResponse,
 )
@@ -93,7 +95,11 @@ from ..services.vision_errors import FoodNotFoundError, VisionAPIError
 from ..services.nutritionix_service import NutritionixService
 from ..services.notification_service import (
     ChannelDeliveryError, NotificationService, build_password_reset_email,
+    build_email_change_code_email, build_email_change_unavailable_email,
     build_registration_code_email, build_registration_exists_email,
+)
+from ..security.rate_limiter import (
+    RateLimitExceeded, enforce_rate_limit, reset_rate_limit,
 )
 from ..config import get_settings
 
@@ -150,9 +156,6 @@ IMAGE_FORMAT_TO_MIME = {
 PROVIDER_IMAGE_MAX_SIDE = 1024
 LOGIN_WINDOW_SECONDS = 15 * 60
 LOGIN_MAX_FAILURES = 5
-_login_failures: dict[str, list[datetime]] = defaultdict(list)
-_analysis_requests: dict[str, list[datetime]] = defaultdict(list)
-_registration_requests: dict[str, list[datetime]] = defaultdict(list)
 
 
 def _audit_email_hash(email: str) -> str:
@@ -260,19 +263,23 @@ async def _sanitized_image_base64(upload: UploadFile) -> str:
     return base64.b64encode(sanitized.getvalue()).decode("ascii")
 
 
-def _enforce_analysis_rate_limit(request: Request, user_id: str) -> None:
-    now = utc_now()
-    cutoff = now - timedelta(minutes=1)
+def _enforce_analysis_rate_limit(
+    request: Request, user_id: str, db: Session,
+) -> None:
     ip = request.client.host if request.client else "unknown"
-    key = f"{user_id}:{ip}"
-    recent = [value for value in _analysis_requests[key] if value > cutoff]
-    if len(recent) >= settings.analysis_rate_limit_per_minute:
+    try:
+        enforce_rate_limit(
+            db,
+            action="food_analysis",
+            identity=f"{user_id}:{ip}",
+            limit=settings.analysis_rate_limit_per_minute,
+            window_seconds=60,
+        )
+    except RateLimitExceeded:
         raise HTTPException(
             status_code=status.HTTP_429_TOO_MANY_REQUESTS,
             detail="Çok fazla görüntü analizi istendi. Lütfen kısa süre bekleyin.",
-        )
-    recent.append(now)
-    _analysis_requests[key] = recent
+        ) from None
 
 
 def _nutrition_status(nutrition: dict) -> str:
@@ -444,7 +451,7 @@ async def analyze_food(
     if existing is not None and existing.analysis_payload:
         return FoodAnalysisResponse.model_validate(existing.analysis_payload)
 
-    _enforce_analysis_rate_limit(http_request, current_user.id)
+    _enforce_analysis_rate_limit(http_request, current_user.id, db)
     if vision_service is None:
         # Sunucuda tanıma sağlayıcısı yok; görüntü hiç işlenmez ve saklanmaz.
         raise HTTPException(
@@ -1864,10 +1871,16 @@ async def _process_report_outbox(
                     "sms_progress": report.payload_json.get("_sms_delivery"),
                     "sms_checkpoint": checkpoint_sms,
                 }
+            # The opaque report id lets the recipient match the notification
+            # with the authenticated panel entry without putting food or
+            # calorie data into email/SMS. Keep it outside the consent-hashed
+            # report snapshot.
+            delivery_payload = dict(report.payload_json)
+            delivery_payload["report_reference"] = str(report.id)
             result = await notification_service.send_channel(
                 channel=delivery.channel,
                 destination=destination,
-                report_data=report.payload_json,
+                report_data=delivery_payload,
                 **sms_options,
             )
         except ChannelDeliveryError as error:
@@ -2158,7 +2171,7 @@ async def register_dietitian(
             detail="Diyetisyen veri işleme sözleşmesi güncellendi; metni yeniden inceleyin.",
         )
     normalized_email = request.email.lower()
-    now = _enforce_registration_rate_limit(http_request, normalized_email)
+    now = _enforce_registration_rate_limit(db, http_request, normalized_email)
 
     # Parola özeti iki durumda da hesaplanır; yanıt süresi hesabın varlığını
     # ele vermez.
@@ -2212,20 +2225,25 @@ _REGISTRATION_GENERIC_MESSAGE = (
 )
 
 
-def _enforce_registration_rate_limit(http_request: Request, normalized_email: str) -> datetime:
-    """Aynı IP ve adres için kayıt isteğini sınırlar; isteğin zamanını döner."""
+def _enforce_registration_rate_limit(
+    db: Session, http_request: Request, normalized_email: str,
+) -> datetime:
+    """Aynı IP ve adres için paylaşılan kayıt sınırını uygular."""
     key, _ = _login_key(http_request, normalized_email)
     now = utc_now()
-    cutoff = now - timedelta(seconds=_REGISTRATION_WINDOW_SECONDS)
-    _registration_requests[key] = [
-        value for value in _registration_requests[key] if value > cutoff
-    ]
-    if len(_registration_requests[key]) >= _REGISTRATION_MAX_REQUESTS:
+    try:
+        enforce_rate_limit(
+            db,
+            action="registration",
+            identity=key,
+            limit=_REGISTRATION_MAX_REQUESTS,
+            window_seconds=_REGISTRATION_WINDOW_SECONDS,
+        )
+    except RateLimitExceeded:
         raise HTTPException(
             status_code=status.HTTP_429_TOO_MANY_REQUESTS,
             detail="Çok fazla kayıt denemesi yapıldı. Lütfen daha sonra tekrar deneyin.",
-        )
-    _registration_requests[key].append(now)
+        ) from None
     return now
 
 
@@ -2250,7 +2268,7 @@ async def register(
 ):
     """E-postaya doğrulama kodu gönderir; hesap kod doğrulanınca açılır."""
     normalized_email = request.email.lower()
-    now = _enforce_registration_rate_limit(http_request, normalized_email)
+    now = _enforce_registration_rate_limit(db, http_request, normalized_email)
 
     # Parola özeti iki durumda da hesaplanır; yanıt süresi hesabın varlığını
     # ele vermez.
@@ -2373,10 +2391,15 @@ async def login(
 ):
     """E-posta ve şifre ile giriş yapar, JWT token döner."""
     key, email_hash = _login_key(http_request, credentials.email)
-    now = utc_now()
-    cutoff = now - timedelta(seconds=LOGIN_WINDOW_SECONDS)
-    _login_failures[key] = [value for value in _login_failures[key] if value > cutoff]
-    if len(_login_failures[key]) >= LOGIN_MAX_FAILURES:
+    try:
+        enforce_rate_limit(
+            db,
+            action="login",
+            identity=key,
+            limit=LOGIN_MAX_FAILURES,
+            window_seconds=LOGIN_WINDOW_SECONDS,
+        )
+    except RateLimitExceeded:
         _audit_auth(
             db,
             event="login_rate_limited",
@@ -2388,7 +2411,7 @@ async def login(
         raise HTTPException(
             status_code=status.HTTP_429_TOO_MANY_REQUESTS,
             detail="Giriş şu anda tamamlanamıyor. Lütfen daha sonra tekrar deneyin.",
-        )
+        ) from None
 
     user = db.query(User).filter(
         func.lower(User.email) == credentials.email.lower()
@@ -2399,7 +2422,6 @@ async def login(
         and verify_password(credentials.password, user.hashed_password)
     )
     if not valid:
-        _login_failures[key].append(now)
         _audit_auth(
             db,
             event="login_failed",
@@ -2413,7 +2435,7 @@ async def login(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Giriş bilgileri doğrulanamadı.",
         )
-    _login_failures.pop(key, None)
+    reset_rate_limit(db, action="login", identity=key)
     _audit_auth(
         db,
         event="login_success",
@@ -3277,7 +3299,185 @@ async def update_me(
         preferred_language=current_user.preferred_language,
         tts_speed=current_user.tts_speed,
         high_contrast=current_user.high_contrast,
+        account_type=(
+            "dietitian"
+            if db.query(Dietitian.id).filter(
+                func.lower(Dietitian.email) == current_user.email.lower(),
+                Dietitian.is_active.is_(True),
+            ).first()
+            else "patient"
+        ),
     )
+
+
+_EMAIL_CHANGE_TTL = timedelta(minutes=30)
+_EMAIL_CHANGE_MAX_ATTEMPTS = 5
+_EMAIL_CHANGE_GENERIC_MESSAGE = (
+    "Yeni adres kullanılabiliyorsa doğrulama kodu e-posta adresine gönderildi. "
+    "Kodu girerek değişikliği tamamlayın."
+)
+
+
+@router.post(
+    "/users/me/email-change",
+    response_model=RegistrationPendingResponse,
+    status_code=status.HTTP_202_ACCEPTED,
+)
+async def request_email_change(
+    request: EmailChangeRequest,
+    http_request: Request,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """Verify the password, then send a code only to the requested address."""
+    if not verify_password(request.password, current_user.hashed_password):
+        _audit_auth(
+            db,
+            event="email_change_denied",
+            success=False,
+            user_id=current_user.id,
+            ip_address=http_request.client.host if http_request.client else None,
+            reason="invalid_password",
+        )
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Parola doğrulanamadı.",
+        )
+
+    normalized = request.new_email.lower()
+    if normalized == current_user.email.lower():
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Yeni e-posta mevcut e-posta ile aynı olamaz.",
+        )
+    ip = http_request.client.host if http_request.client else "unknown"
+    try:
+        enforce_rate_limit(
+            db,
+            action="email_change",
+            identity=f"{current_user.id}:{ip}",
+            limit=5,
+            window_seconds=15 * 60,
+        )
+    except RateLimitExceeded:
+        raise HTTPException(
+            status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+            detail="Çok fazla e-posta değişikliği istendi. Lütfen daha sonra deneyin.",
+        ) from None
+
+    existing = db.query(User.id).filter(func.lower(User.email) == normalized).first()
+    existing_dietitian = db.query(Dietitian.id).filter(
+        func.lower(Dietitian.email) == normalized
+    ).first()
+    code = f"{secrets.randbelow(100_000_000):08d}"
+    db.query(PendingEmailChange).filter(
+        PendingEmailChange.user_id == current_user.id
+    ).delete(synchronize_session=False)
+
+    if existing is None and existing_dietitian is None:
+        db.add(PendingEmailChange(
+            user_id=current_user.id,
+            new_email=normalized,
+            code_hash=_hash_reset_token(code),
+            expires_at=utc_now() + _EMAIL_CHANGE_TTL,
+        ))
+        message = build_email_change_code_email(
+            code=code, destination=normalized, settings=get_settings(),
+        )
+    else:
+        message = build_email_change_unavailable_email(
+            destination=normalized, settings=get_settings(),
+        )
+    db.commit()
+    await _send_registration_email(message, normalized)
+    _audit_auth(
+        db,
+        event="email_change_requested",
+        success=True,
+        email_hash=_audit_email_hash(normalized),
+        user_id=current_user.id,
+        ip_address=ip,
+        reason="verification_required",
+    )
+    return RegistrationPendingResponse(message=_EMAIL_CHANGE_GENERIC_MESSAGE)
+
+
+@router.post(
+    "/users/me/email-change/confirm",
+    response_model=TokenResponse,
+)
+async def confirm_email_change(
+    request: EmailChangeConfirm,
+    http_request: Request,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """Apply a verified address and rotate all durable login sessions."""
+    invalid = HTTPException(
+        status_code=status.HTTP_400_BAD_REQUEST,
+        detail="Kod geçersiz veya süresi dolmuş. Yeni bir kod isteyin.",
+    )
+    pending = db.query(PendingEmailChange).filter(
+        PendingEmailChange.user_id == current_user.id
+    ).with_for_update().first()
+    if pending is None:
+        raise invalid
+    expiry = pending.expires_at.replace(
+        tzinfo=pending.expires_at.tzinfo or timezone.utc
+    )
+    if expiry < utc_now() or pending.attempt_count >= _EMAIL_CHANGE_MAX_ATTEMPTS:
+        db.delete(pending)
+        db.commit()
+        raise invalid
+    if not hmac.compare_digest(pending.code_hash, _hash_reset_token(request.code)):
+        pending.attempt_count += 1
+        if pending.attempt_count >= _EMAIL_CHANGE_MAX_ATTEMPTS:
+            db.delete(pending)
+        db.commit()
+        raise invalid
+
+    collision = db.query(User.id).filter(
+        func.lower(User.email) == pending.new_email,
+        User.id != current_user.id,
+    ).first() or db.query(Dietitian.id).filter(
+        func.lower(Dietitian.email) == pending.new_email,
+    ).first()
+    if collision:
+        db.delete(pending)
+        db.commit()
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="E-posta değişikliği tamamlanamadı. Yeni bir adres deneyin.",
+        )
+
+    old_email = current_user.email
+    current_user.email = pending.new_email
+    current_user.updated_at = utc_now()
+    dietitian = db.query(Dietitian).filter(
+        func.lower(Dietitian.email) == old_email.lower()
+    ).first()
+    if dietitian is not None:
+        dietitian.email = pending.new_email
+        dietitian.email_verified = True
+        db.add(dietitian)
+    db.query(RefreshToken).filter(
+        RefreshToken.user_id == current_user.id,
+        RefreshToken.revoked_at.is_(None),
+    ).update({RefreshToken.revoked_at: utc_now()}, synchronize_session=False)
+    new_email_hash = _audit_email_hash(pending.new_email)
+    db.delete(pending)
+    db.add(current_user)
+    db.commit()
+    _audit_auth(
+        db,
+        event="email_changed",
+        success=True,
+        email_hash=new_email_hash,
+        user_id=current_user.id,
+        ip_address=http_request.client.host if http_request.client else None,
+        reason="new_address_verified",
+    )
+    return TokenResponse(**issue_token_pair(db, current_user))
 
 
 @router.get("/users/me/export")

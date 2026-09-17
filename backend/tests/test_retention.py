@@ -8,7 +8,9 @@ from app.domain.retention import PURGE_EVENT, purge_expired_personal_data
 from app.models.database import (
     AuditEvent,
     PasswordResetToken,
+    PendingEmailChange,
     PendingRegistration,
+    RateLimitBucket,
     RecognitionAttempt,
     RefreshToken,
     SessionLocal,
@@ -58,6 +60,12 @@ def test_purge_removes_expired_records_and_keeps_recent_ones():
             PendingRegistration(email="yeni@example.invalid", hashed_password="x",
                                 full_name="Sentetik", code_hash="e" * 64,
                                 expires_at=now + timedelta(minutes=20)),
+            PendingEmailChange(user_id=user.id, new_email="eski@example.invalid",
+                               code_hash="f" * 64,
+                               expires_at=now - timedelta(minutes=1)),
+            RateLimitBucket(key_hash="1" * 64, action="login",
+                            window_started_at=now - timedelta(days=30),
+                            request_count=1, updated_at=now - timedelta(days=30)),
         ])
         db.commit()
 
@@ -70,6 +78,8 @@ def test_purge_removes_expired_records_and_keeps_recent_ones():
             "password_reset_tokens_deleted": 1,
             "pending_recognitions_deleted": 1,
             "pending_registrations_deleted": 1,
+            "pending_email_changes_deleted": 1,
+            "rate_limit_buckets_deleted": 1,
         }
         assert db.query(PendingRegistration).one().email == "yeni@example.invalid"
         remaining_ips = sorted(

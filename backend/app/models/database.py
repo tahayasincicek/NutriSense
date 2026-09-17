@@ -533,6 +533,22 @@ class AuditEvent(Base):
     created_at = Column(UTCDateTime, default=utc_now, nullable=False, index=True)
 
 
+class RateLimitBucket(Base):
+    """Shared, privacy-preserving fixed-window request counter.
+
+    Only an HMAC of the limiter scope is stored. All API instances therefore
+    use the same database counter without persisting raw IP or e-mail values.
+    """
+
+    __tablename__ = "rate_limit_buckets"
+
+    key_hash = Column(String(64), primary_key=True)
+    action = Column(String(32), nullable=False, index=True)
+    window_started_at = Column(UTCDateTime, nullable=False, index=True)
+    request_count = Column(Integer, nullable=False, default=0)
+    updated_at = Column(UTCDateTime, default=utc_now, onupdate=utc_now, nullable=False)
+
+
 class PasswordResetToken(Base):
     """Tek kullanımlık, süreli parola sıfırlama jetonu.
 
@@ -576,6 +592,26 @@ class PendingRegistration(Base):
     account_type = Column(String(16), default="patient", nullable=False)
     specialization = Column(String(255), nullable=True)
     data_processing_agreement_version = Column(String(64), nullable=True)
+    code_hash = Column(String(64), nullable=False)
+    attempt_count = Column(Integer, default=0, nullable=False)
+    expires_at = Column(UTCDateTime, nullable=False, index=True)
+    created_at = Column(UTCDateTime, default=utc_now, nullable=False)
+
+
+class PendingEmailChange(Base):
+    """Verified account e-mail change waiting for the new address code."""
+
+    __tablename__ = "pending_email_changes"
+
+    id = Column(UUIDString, primary_key=True, default=lambda: str(uuid.uuid4()))
+    user_id = Column(
+        UUIDString,
+        ForeignKey("users.id", ondelete="CASCADE"),
+        unique=True,
+        nullable=False,
+        index=True,
+    )
+    new_email = Column(String(255), unique=True, nullable=False, index=True)
     code_hash = Column(String(64), nullable=False)
     attempt_count = Column(Integer, default=0, nullable=False)
     expires_at = Column(UTCDateTime, nullable=False, index=True)

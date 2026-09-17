@@ -13,7 +13,9 @@ from ..models.database import (
     AuditEvent,
     FoodLog,
     PasswordResetToken,
+    PendingEmailChange,
     PendingRegistration,
+    RateLimitBucket,
     RecognitionAttempt,
     RefreshToken,
     utc_now,
@@ -53,6 +55,12 @@ def purge_expired_personal_data(db, settings, now=None) -> dict[str, int]:
     ).delete(synchronize_session=False)
     counts["pending_registrations_deleted"] = db.query(PendingRegistration).filter(
         PendingRegistration.expires_at < now,
+    ).delete(synchronize_session=False)
+    counts["pending_email_changes_deleted"] = db.query(PendingEmailChange).filter(
+        PendingEmailChange.expires_at < now,
+    ).delete(synchronize_session=False)
+    counts["rate_limit_buckets_deleted"] = db.query(RateLimitBucket).filter(
+        RateLimitBucket.updated_at < stale_cutoff,
     ).delete(synchronize_session=False)
     # Karara bağlanmamış tanıma denemesi besin adı ve analiz sonucu taşır;
     # bir günlük kaydına bağlı olan deneme günlükle birlikte yaşar.

@@ -22,9 +22,12 @@ def build_report_sms(report: dict) -> str:
     bildirim gider. Besin, gram, saat ve kalori diyetisyen panelinde kalır.
     """
     patient = report.get("patient_code") or "Danışan"
+    reference = report.get("report_reference") or "paneldeki en yeni rapor"
     return (
         f"NutriSense: {patient} için yeni bir beslenme raporu hazır. "
-        "Sağlık verilerini güvenli diyetisyen panelinden görüntüleyin. "
+        f"Rapor referansı: {reference}. Besin adı, miktar, tarih-saat ve "
+        "kalori bilgilerini güvenli diyetisyen panelinden, Raporlar "
+        "bölümünden, giriş yaparak görüntüleyin. "
         "Bu bilgi tıbbi tavsiye değildir."
     )
 

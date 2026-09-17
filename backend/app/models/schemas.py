@@ -770,6 +770,15 @@ class UserProfileUpdate(BaseModel):
         return self
 
 
+class EmailChangeRequest(BaseModel):
+    new_email: EmailStr
+    password: str = Field(min_length=1, max_length=128)
+
+
+class EmailChangeConfirm(BaseModel):
+    code: str = Field(pattern=r"^\d{8}$")
+
+
 class AccountDeletionRequest(BaseModel):
     password: str
     confirmation: Literal["HESABIMI SIL"]

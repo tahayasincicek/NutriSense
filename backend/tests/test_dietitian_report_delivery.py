@@ -473,11 +473,14 @@ def test_external_channels_send_notification_only(client, monkeypatch, tmp_path,
         assert consent_context_hash(payload) == preview["consent_context_hash"]
     assert len(emails) == int("email" in channels)
     rows = [json.loads(line) for line in (tmp_path / "messages.jsonl").read_text(encoding="utf-8").splitlines()]
-    assert [row["body"] for row in rows] == build_sms_parts(payload)
+    delivered_payload = {**payload, "report_reference": report_id}
+    assert [row["body"] for row in rows] == build_sms_parts(delivered_payload)
     assert len({row["message_id"] for row in rows}) == len(rows)
     bodies = ["".join(row["body"] for row in rows)]
     if emails:
         bodies.extend(part.get_payload(decode=True).decode("utf-8") for part in emails[0].get_payload())
+    assert all(report_id in body for body in bodies)
+    assert all("rapor" in body.lower() and "panel" in body.lower() for body in bodies)
     for record in payload["records"]:
         for body in bodies:
             assert record["food_name_tr"] not in body

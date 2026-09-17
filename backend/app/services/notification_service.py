@@ -297,17 +297,21 @@ def build_report_email(report: dict, settings: Settings) -> MIMEMultipart:
     gider; ayrıntılar diyetisyen panelinde kalır.
     """
     patient_code = report.get("patient_code") or "Belirtilmedi"
+    report_reference = report.get("report_reference") or "paneldeki en yeni rapor"
     html = f"""<!doctype html><html lang="tr"><body><main>
 <h1>NutriSense — Yeni beslenme raporu</h1>
 <p><strong>Danışan kodu:</strong> {escape(patient_code)}</p>
-<p>Besin ve sağlık bilgilerini güvenli diyetisyen paneline giriş yaparak görüntüleyin.</p>
+<p><strong>Rapor referansı:</strong> {escape(str(report_reference))}</p>
+<p>Besin adı, miktar, tarih-saat ve kalori bilgilerini güvenli diyetisyen paneline giriş yapıp Raporlar bölümünden görüntüleyin.</p>
 <p>Bu e-posta sağlık verisi içermez ve tıbbi tavsiye değildir.</p>
 </main></body></html>"""
     plain = (
         "NutriSense — Yeni beslenme raporu\n"
         f"Danışan kodu: {patient_code}\n"
-        "Besin ve sağlık bilgilerini güvenli diyetisyen paneline giriş "
-        "yaparak görüntüleyin.\nBu e-posta sağlık verisi içermez ve "
+        f"Rapor referansı: {report_reference}\n"
+        "Besin adı, miktar, tarih-saat ve kalori bilgilerini güvenli "
+        "diyetisyen paneline giriş yapıp Raporlar bölümünden "
+        "görüntüleyin.\nBu e-posta sağlık verisi içermez ve "
         "tıbbi tavsiye değildir."
     )
     message = MIMEMultipart("alternative")
@@ -396,6 +400,40 @@ def build_registration_exists_email(*, destination: str, settings: Settings) -> 
         "\"Parolamı unuttum\" ile parolanızı sıfırlayabilirsiniz.\n\n"
         "Bu isteği siz yapmadıysanız bu iletiyi yok sayabilirsiniz; "
         "hesabınızda değişiklik yapılmadı.\n"
+    )
+    message.attach(MIMEText(body, "plain", "utf-8"))
+    return message
+
+
+def build_email_change_code_email(
+    *, code: str, destination: str, settings: Settings,
+) -> MIMEMultipart:
+    """Send the ownership code only to the requested new address."""
+    message = _transactional_message(
+        "NutriSense e-posta değişikliği doğrulama kodu", destination, settings,
+    )
+    body = (
+        "NutriSense hesabınızın e-posta adresini değiştirme isteği aldık.\n\n"
+        f"Doğrulama kodunuz: {code}\n\n"
+        "Bu kod 30 dakika boyunca ve yalnız bu hesap için geçerlidir.\n"
+        "Bu isteği siz yapmadıysanız iletiyi yok sayabilirsiniz; hesabın "
+        "e-posta adresi değişmez.\n"
+    )
+    message.attach(MIMEText(body, "plain", "utf-8"))
+    return message
+
+
+def build_email_change_unavailable_email(
+    *, destination: str, settings: Settings,
+) -> MIMEMultipart:
+    """Notify the address owner without revealing account existence in-app."""
+    message = _transactional_message(
+        "NutriSense e-posta değişikliği isteği", destination, settings,
+    )
+    body = (
+        "Bu adresi bir NutriSense hesabına bağlama isteği aldık.\n\n"
+        "Adres zaten kullanımda olduğu için hiçbir hesap değiştirilmedi. "
+        "Bu isteği siz yapmadıysanız başka bir işlem yapmanız gerekmez.\n"
     )
     message.attach(MIMEText(body, "plain", "utf-8"))
     return message

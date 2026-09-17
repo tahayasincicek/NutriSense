@@ -1,6 +1,6 @@
 # Güvenlik bulguları kaydı
 
-Durum tarihi: 2026-07-26
+Durum tarihi: 2026-09-17
 
 Terminler teknik hedef tarihlerdir; kurumun production veya gerçek katılımcı
 başlangıcı daha erkense ilgili madde başlangıçtan **önce** kapanmalıdır.
@@ -15,9 +15,9 @@ başlangıcı daha erkense ilgili madde başlangıçtan **önce** kapanmalıdır
 | SEC-006 | P1 | Dış sağlayıcı DPA/yurtdışı aktarım/hukuki sebep kararı yok | Açık | Üniversite veri sorumlusu + hukuk | 2026-08-09 veya production/katılımcı öncesi | İmzalı/onarılmış kayıt ve güncel aydınlatma |
 | SEC-007 | P1 | Gerçek cihaz secure storage/network/log sızıntı testi yok | Açık | Mobil QA | 2026-08-09 | Android cihaz kanıtı; iOS için Xcode build ve gerçek iPhone kanıtı yoksa blocker |
 | SEC-008 | P1 | Diyetisyen kimlik doğrulama otoritesi tanımlı değil | Açık | Ürün + kurum | 2026-08-09 veya gerçek rapor öncesi | Yetkili kayıt/doğrulama prosedürü ve kötüye kullanım testi |
-| SEC-009 | P2 | Rate limit süreç belleğinde; çok instance'ta aşılabilir | Açık | Backend/DevOps | 2026-08-16 | Redis/API gateway limiti, concurrency ve 429 testi |
+| SEC-009 | P2 | Rate limit süreç belleğinde; çok instance'ta aşılabilir | Kapalı | Backend | 2026-09-17 | HMAC anahtarlı ortak veritabanı sayaçları; login, kayıt ve analiz limitleri; 429 ve ham kimlik saklanmaması testleri (`backend/app/security/rate_limiter.py`, `backend/tests/test_email_change.py`) |
 | SEC-010 | P2 | Genel yönetici/diyetisyen kimlik sistemi yok; tam RBAC iddiası yapılamaz | Açık | Backend + ürün | 2026-08-23 | Rol matrisi, authn/authz, deny-by-default testleri |
-| SEC-011 | P2 | Profil e-posta değişimi ve reverification akışı yok | Açık | Backend + mobil | 2026-08-23 | Sahiplik, generic mesaj, token revocation ve test |
+| SEC-011 | P2 | Profil e-posta değişimi ve reverification akışı yok | Kapalı | Backend + mobil | 2026-09-17 | Mevcut parola + yeni adrese sekiz haneli kod; hesap varlığını açıklamayan yanıt; eski yenileme oturumlarının iptali; mobil akış ve regresyon testleri (`backend/tests/test_email_change.py`, `lib/features/auth/screens/email_change_screen.dart`) |
 | SEC-012 | P2 | Crashlytics kapalı; etkinleştirme için privacy/consent yok | Kabul edilmiş | Ürün + veri sorumlusu | Etkinleştirme talebinden önce | Kapalı kalır veya DPIA/onam/redaksiyon/retention kanıtı |
 | SEC-013 | P1 | Backup/provider kopyalarında hesap/araştırma silme prosedürü kanıtsız | Açık | Veri sorumlusu + DevOps | 2026-08-09 veya gerçek veri öncesi | Uçtan uca silme bileti, backup expiry ve provider sonucu |
 

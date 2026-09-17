@@ -10,6 +10,7 @@ import '../../auth/state/auth_controller.dart';
 import '../../history/state/daily_goal_provider.dart';
 import '../../onboarding/screens/onboarding_screen.dart';
 import '../../auth/screens/privacy_consent_screen.dart';
+import '../../auth/screens/email_change_screen.dart';
 import '../../../shared/services/api_service.dart';
 import '../../dietitian/screens/dietitian_dashboard_screen.dart';
 import '../../survey/screens/survey_screen.dart';
@@ -365,6 +366,15 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           const SizedBox(height: 24),
           _buildSectionTitle('Hesap Yönetimi'),
           _buildSettingCard([
+            _buildActionTile(
+              key: const Key('settings_change_email'),
+              title: 'E-postamı Değiştir',
+              icon: Icons.alternate_email_rounded,
+              color: AppTheme.primaryColor,
+              onTap: () => Navigator.of(context).push(
+                MaterialPageRoute(builder: (_) => const EmailChangeScreen()),
+              ),
+            ),
             _buildActionTile(
               title: 'Oturumu Kapat',
               icon: Icons.logout_rounded,

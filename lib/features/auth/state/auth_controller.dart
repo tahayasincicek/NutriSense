@@ -195,6 +195,17 @@ class AuthController extends StateNotifier<AuthState> {
     return true;
   }
 
+  Future<String?> confirmEmailChange(String code) async {
+    final result = await _api.confirmEmailChange(code: code);
+    if (!result.isSuccess) {
+      return result.errorMessage ?? 'E-posta değiştirilemedi.';
+    }
+    return _loadAuthenticatedProfile(
+      requiredAccountType:
+          state.user?.accountType == 'dietitian' ? 'dietitian' : null,
+    );
+  }
+
   Future<void> logout() async {
     state = const AuthState(AuthStatus.loading);
     await _api.logout();

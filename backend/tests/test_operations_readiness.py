@@ -79,7 +79,10 @@ def test_operations_metrics_are_closed_and_low_cardinality(client, monkeypatch):
     assert "queue_depth" in payload
     assert "db_pool" in payload
     serialized = str(payload).lower()
-    for forbidden in ("email", "phone", "food_name", "authorization"):
+    # Static route templates such as ``/users/me/email-change`` are bounded
+    # labels. Metrics must not contain actual addresses or user-controlled
+    # personal data.
+    for forbidden in ("@", "phone_number", "food_name", "authorization"):
         assert forbidden not in serialized
 
 

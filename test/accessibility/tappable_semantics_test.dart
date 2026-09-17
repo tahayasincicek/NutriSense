@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:nutrisense/core/theme/app_theme.dart';
 import 'package:nutrisense/features/auth/screens/login_screen.dart';
+import 'package:nutrisense/features/auth/screens/email_change_screen.dart';
 import 'package:nutrisense/features/auth/screens/password_reset_screen.dart';
 import 'package:nutrisense/features/auth/screens/privacy_consent_screen.dart';
 import 'package:nutrisense/features/auth/screens/register_screen.dart';
@@ -142,6 +143,12 @@ void main() {
   testWidgets('parola sıfırlama ekranındaki her dokunulabilir ögenin adı var',
       (tester) async {
     await expectAllTappablesNamed(tester, const PasswordResetScreen());
+  });
+
+  testWidgets(
+      'e-posta değişikliği ekranındaki her dokunulabilir ögenin adı var',
+      (tester) async {
+    await expectAllTappablesNamed(tester, const EmailChangeScreen());
   });
 
   testWidgets('rıza ekranındaki her dokunulabilir ögenin adı var',

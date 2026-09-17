@@ -509,6 +509,39 @@ class ApiService {
         return UserProfile.fromJson(response.data ?? const {});
       });
 
+  Future<ApiResult<String>> requestEmailChange({
+    required String newEmail,
+    required String password,
+    CancelToken? cancelToken,
+  }) =>
+      _safeCall(() async {
+        final response = await _dio.post<Map<String, dynamic>>(
+          '/users/me/email-change',
+          data: {
+            'new_email': newEmail.trim().toLowerCase(),
+            'password': password,
+          },
+          cancelToken: cancelToken,
+        );
+        return response.data?['message'] as String? ??
+            'Doğrulama kodu yeni e-posta adresinize gönderildi.';
+      });
+
+  Future<ApiResult<AuthTokenResult>> confirmEmailChange({
+    required String code,
+    CancelToken? cancelToken,
+  }) =>
+      _safeCall(() async {
+        final response = await _dio.post<Map<String, dynamic>>(
+          '/users/me/email-change/confirm',
+          data: {'code': code.trim()},
+          cancelToken: cancelToken,
+        );
+        final auth = AuthTokenResult.fromJson(response.data ?? const {});
+        await _saveAuth(auth);
+        return auth;
+      });
+
   Future<ApiResult<DietitianDashboardData>> getDietitianDashboard({
     CancelToken? cancelToken,
   }) =>

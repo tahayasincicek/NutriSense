@@ -15,16 +15,10 @@ from fastapi.testclient import TestClient
 from app.main import app
 from app.config import get_settings
 from app.models.database import Base, SessionLocal, SurveyVersion, engine
-from app.routers.food_router import (
-    _analysis_requests, _login_failures, _registration_requests,
-)
 
 
 @pytest.fixture(autouse=True)
 def reset_database():
-    _login_failures.clear()
-    _analysis_requests.clear()
-    _registration_requests.clear()
     settings = get_settings()
     settings.validate_security()
     assert settings.database_url == os.environ["DATABASE_URL"]
@@ -35,9 +29,6 @@ def reset_database():
     db.commit()
     db.close()
     yield
-    _login_failures.clear()
-    _analysis_requests.clear()
-    _registration_requests.clear()
 
 
 @pytest.fixture()
