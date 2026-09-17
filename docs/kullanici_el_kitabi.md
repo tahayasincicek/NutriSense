@@ -65,6 +65,8 @@ Uygulamayı elinizi ekrana sürmeden kullanabilirsiniz. Şu komutları söyleyin
 | **"Bugün ne yedim"** | Bugün yediğiniz yemeklerin özetini okur |
 | **"Geçmiş"** | Besin geçmişi ekranını açar |
 | **"Gönder"** | Diyetisyeninize rapor gönderir |
+| **"Bir", "iki", ... "beş"** | Anketlerde puan veya sıra seçer |
+| **Seçenek adı / "evet" / "hayır" / "belki"** | Anket yanıtını seçer |
 | **"Yardım"** | Kullanılabilir komutları listeler |
 | **"İptal"** | Şu anki işlemi iptal eder |
 | **"Evet"** | Onay sorusuna evet der |
@@ -92,11 +94,13 @@ Uygulamayı elinizi ekrana sürmeden kullanabilirsiniz. Şu komutları söyleyin
 
 ## 5. Diyetisyeninize Rapor Göndermek
 
-1. "Gönder" komutunu söyleyin veya menüden "Rapor Gönder" seçin
-2. Rapor türünü seçin: Günlük, Haftalık veya Aylık
-3. Uygulama raporun özetini sesli olarak okuyacak
-4. "Evet" diyerek gönderimi onaylayın
-5. Raporunuz diyetisyeninize e-posta ve mesajla iletilecek
+1. Diyetisyen Panelinde mikrofon düğmesine basıp diyetisyen e-posta adresini “nokta” ve “et” kelimeleriyle söyleyin
+2. Adres ekranda doğruysa tekrar mikrofona basıp "istek gönder" deyin
+3. Onay gerektiğinde "bağlantıyı onayla" deyin; bağlantı kurulduğunda "rapor gönder" komutuyla sihirbazı açın
+4. Rapor türünü seçin: Günlük, Haftalık veya Aylık
+5. Uygulama raporun özetini sesli olarak okuyacak
+6. "Evet" diyerek gönderimi onaylayın
+7. E-posta ve SMS bildirimi rapor referansını taşır. Besin adı, miktar, tarih-saat ve kalori bilgileri diyetisyenin kimlik doğrulamalı panelinde gösterilir.
 
 ---
 

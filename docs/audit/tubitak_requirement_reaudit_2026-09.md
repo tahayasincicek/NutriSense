@@ -94,6 +94,18 @@ kapatılamaz; her biri sende olmayan bir kaynağa veya senin bir kararına bağl
 
 ## Denetim sınırları
 
+### 17 Eylül 2026 yazılım kapanış eki
+
+- `AH-06`: Ankette Likert, yıldız, çoktan seçmeli, evet/hayır ve açık metin
+  soruları ile önceki/sonraki gezinme ham STT sonucuna bağlandı. Diyetisyen
+  ekranına e-posta diktesi, istek gönderme, bağlantı onayı ve rapor sihirbazını
+  açma komutları eklendi. Yazılım kapsamı tamamlandı; fiziksel cihaz ve görme
+  engelli kullanıcı doğrulaması gereksinimin saha kısmı olarak sürüyor.
+- `OZ-05` / `AH-05`: E-posta ve SMS bildirimi artık benzersiz rapor referansını
+  ve kimlik doğrulamalı panelde izlenecek yolu açıkça taşır. Besin adı, miktar,
+  tarih-saat ve kalori panelde iletilir; özel nitelikli sağlık verisi dış kanal
+  gövdesine yazılmaz. Canlı e-posta/SMS sağlayıcı teslim kanıtı hâlâ gereklidir.
+
 - Bu denetim yalnız depodaki koda, testlere ve CI çıktılarına dayanır.
 - Gerçek cihaz, gerçek kullanıcı ve gerçek sağlayıcı kanıtı üretilmemiştir.
 - "Tam" işaretlenen satırlar, gereksinimin **yazılım tarafının** kanıtlandığını

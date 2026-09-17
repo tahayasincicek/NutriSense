@@ -2,7 +2,7 @@
 
 ## Rapor durumu
 
-- Sürüm tarihi: 19 Temmuz 2026
+- Sürüm tarihi: 17 Eylül 2026
 - Kapsam: Flutter mobil istemci; kayıt/girişten tarama, geçmiş ve diyetisyen raporuna kadar ana görevler
 - Hedef: WCAG 2.1 AA ve mobil erişilebilirlik iyi uygulamaları
 - Mevcut beyan: **Kısmi uygunluk hedefleniyor. “WCAG 2.1 AA uyumlu” iddiası kullanılmamalıdır.**
@@ -63,10 +63,10 @@ Durumlar: **Uygulandı** kod ve otomatik kanıt var; **Kısmi** bazı yollar var
 | Geçmişi dinleme | Kayıt tek anlamlı cümle; günlük özet butonu | Kaynak hazır; liste gezinme ve custom actions NOT RUN | Global özet ve seçili kayıt için “kaydı dinle” bağlı | Loading/empty/offline/error açık durumları | Uygulandı; gerçek cihaz kanıtı bekliyor |
 | Kaydı düzeltme/öğün değiştirme | Gerçek kart eylemleri mevcut | Kaynak hazır; modal/picker VoiceOver NOT RUN | Seçili kayıtta kesin düzeltme/öğün/porsiyon komutları gerçek eyleme bağlı | Dokunma alternatifleri ve diyalog | Kısmi; fiziksel STT bekliyor |
 | Kaydı silme | Onay diyaloğu ve dokunma yolu mevcut | Kaynak hazır; kritik onay VoiceOver'da NOT RUN | Seçili kayıt + kesin komut + ayrı kesin “evet”; kısmi/fuzzy sonuç çalışmaz | Açık onaylı, geri alınabilir eylem | Kısmi; otomatik güvenlik testi geçti |
-| Diyetisyen atama | E-posta alanı, bulma/onay/iptal kontrolleri | Kaynak hazır; VoiceOver form sırası NOT RUN | Sesli atama yok | Kaydırılabilir kartlar | Kısmi; doğrulanmış sandbox verisi gerekir |
+| Diyetisyen atama | E-posta alanı, bulma/onay/iptal kontrolleri | Kaynak hazır; VoiceOver form sırası NOT RUN | E-posta diktesi, istek gönderme, bağlantı onayı ve rapor sihirbazını açma sesle yapılabilir | Kaydırılabilir kartlar | Kısmi; fiziksel STT ve doğrulanmış sandbox verisi gerekir |
 | Rapor önizleme | Alıcı, dönem, kayıt ve kanal özeti semantik | Kaynak hazır; önizleme okuma sırası NOT RUN | Kullanıcı “özeti dinle” ile TTS ister | Metin ve maskeli alıcı gösterilir | Uygulandı; gerçek cihaz bekliyor |
 | Rapor onayı/gönderme | Checkbox ve gönder butonu; live region sonucu | Kaynak hazır; live region ve modal odağı NOT RUN | Kesin komut + ikinci kesin onay; fuzzy reddedilir | 200% widget testi geçti | Kısmi; sandbox backend önkoşulu |
-| Anket | Soru grupları ve dokunma cevapları var | Kaynak hazır; form/picker VoiceOver NOT RUN | Açık metinde sesli giriş var; tüm soru tipleri sesle tamamlanmıyor | Reduce motion dikkate alınıyor | Kısmi |
+| Anket | Soru grupları ve dokunma cevapları var | Kaynak hazır; form/picker VoiceOver NOT RUN | Likert, yıldız, çoktan seçmeli, evet/hayır ve açık metin yanıtları; önceki/sonraki geçişi sesle yapılabilir | Reduce motion dikkate alınıyor | Kısmi; fiziksel STT bekliyor |
 | Ayarlar | Gruplar, switch/slider semantiği var | Kaynak hazır; switch/slider değerleri NOT RUN | Sesli “ayarlar” navigasyonu, görünür dinleme durumu ve iptal var | Yüksek kontrast/TTS/haptic tercihleri merkezi servise yazılır | Kısmi |
 | Çıkış | Dokunma yolu ve auth temizliği mevcut | Kaynak hazır; ikinci onay ve odak dönüşü NOT RUN | Ayarlar bağlamında kesin “çıkış yap” + ayrı kesin “evet” | Açık etiketli dokunma kontrolü korunur | Kısmi; otomatik kritik eylem testi geçti |
 
@@ -75,9 +75,9 @@ Durumlar: **Uygulandı** kod ve otomatik kanıt var; **Kısmi** bazı yollar var
 1. **Kayıt/giriş:** Gerçek ekran otomatik testli; TalkBack ve fiziksel klavye testi yapılmadı — kısmi.
 2. **Tara → sonucu dinle → aday/porsiyon onayı → kaydet:** Gerçek kamera ekranı ve güvenli komut parser'ı testli; fiziksel kamera/backend uçtan uca kanıtı yok — kısmi.
 3. **Geçmişi dinle → düzelt/sil:** Gerçek geçmiş ve seçili kayda bağlı sesli eylemler otomatik testli; fiziksel TalkBack/STT kanıtı yok — kısmi.
-4. **Diyetisyen ata:** Dokunma yolu var; doğrulanmış sandbox diyetisyen ve TalkBack kanıtı gerekiyor — kısmi.
+4. **Diyetisyen ata:** E-posta diktesi ve güvenli eylemler sesle yapılabilir; doğrulanmış sandbox diyetisyen ve fiziksel TalkBack/STT kanıtı gerekiyor — kısmi.
 5. **Raporu önizle → açık onay → gönder:** Gerçek wizard testli ve sesli kritik eylem çift onaylı; sandbox + ekran okuyucu uçtan uca koşusu gerekiyor — kısmi.
-6. **Anket → ayarlar → çıkış:** Ayarlar ve çift onaylı sesli çıkış testli; anketin tüm soru türleri yalnız STT ile tamamlanmıyor — kısmi.
+6. **Anket → ayarlar → çıkış:** Anketin tüm soru türleri ve gezinme komutları kod/test düzeyinde sesli tamamlanabilir; fiziksel STT, ayarlar ve çift onaylı çıkış cihaz kanıtı bekliyor — kısmi.
 
 Sonuç: Altı görevin hiçbiri bu rapor tarihinde “ekranı görmeden gerçek cihazda bağımsız tamamlandı” şeklinde raporlanmamalıdır. Kod tabanı bu doğrulamaya hazırlanmıştır; insan test kanıtı `docs/manual_screen_reader_test_plan.md` ile toplanmalıdır.
 
@@ -144,7 +144,7 @@ Otomatik testlerde sahte widget ağacı kurulmamıştır. Platform kamera, TTS, 
 - P0: Fiziksel Android cihazda TalkBack ile altı görev tamamlanmış değildir.
 - P0: iOS kaynakları ve izin açıklamaları hazırlanmıştır; ancak Xcode build/archive, VoiceOver, iOS mikrofon/kamera izinleri ve ses yönlendirmesi gerçek cihazda test edilmemiştir.
 - P0: Fiziksel kamera + kanonik backend + sandbox rapor gönderimi aynı senaryoda kanıtlanmamıştır.
-- P1: Diyetisyen atama sesli komutla tamamlanamaz; ekran okuyucu + dokunma yolu fiziksel cihazda doğrulanmalıdır.
+- P1: Diyetisyen atama ve anket sesli akışları fiziksel cihazda Türkçe STT ve ekran okuyucuyla doğrulanmalıdır.
 - P1: Tüm ekranların 200%, yatay, yüksek kontrast ve azaltılmış hareket matrisi tamamlanmamıştır.
 - P1: TalkBack açıkken çift konuşmayı bastırma `accessibleNavigation` göstergesine dayanır ve cihazlar arasında doğrulanmalıdır.
 - P1: Kısmi STT sonuçlarının eylem çalıştırmadığı otomatik testlidir; gerçek gürültü, Bluetooth kulaklık geçişi ve çağrı/medya kesintileri test edilmemiştir.

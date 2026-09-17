@@ -5,6 +5,8 @@ import '../../../core/utils/accessibility_utils.dart';
 import '../../../shared/models/auth_model.dart';
 import '../../../shared/services/accessibility_service.dart';
 import '../../../shared/services/api_service.dart';
+import '../../../shared/services/stt_service.dart';
+import '../../../shared/services/structured_voice_input.dart';
 import '../../../shared/widgets/accessible_button.dart';
 import 'send_report_wizard.dart';
 import '../models/shared_report_history.dart';
@@ -20,12 +22,14 @@ class DietitianScreen extends ConsumerStatefulWidget {
 class _DietitianScreenState extends ConsumerState<DietitianScreen> {
   final _email = TextEditingController();
   late final AccessibilityService _accessibility;
+  late final SttService _stt;
   DietitianAssignmentInfo? _assignment;
   List<SharedReportHistoryItem> _history = const [];
   bool _loading = true;
   bool _busy = false;
   bool _automaticShare = false;
   bool _automaticLoaded = false;
+  bool _voiceListening = false;
   String? _error;
 
   ApiService get _api => ref.read(apiServiceProvider);
@@ -34,6 +38,7 @@ class _DietitianScreenState extends ConsumerState<DietitianScreen> {
   void initState() {
     super.initState();
     _accessibility = ref.read(accessibilityServiceProvider);
+    _stt = ref.read(sttServiceProvider);
     _load();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _accessibility.speak(
@@ -46,6 +51,7 @@ class _DietitianScreenState extends ConsumerState<DietitianScreen> {
 
   @override
   void dispose() {
+    _stt.cancelListening();
     _email.dispose();
     super.dispose();
   }
@@ -90,6 +96,91 @@ class _DietitianScreenState extends ConsumerState<DietitianScreen> {
     }
     ScaffoldMessenger.of(context)
         .showSnackBar(SnackBar(content: Text(message)));
+  }
+
+  Future<void> _listenForDietitianVoice() async {
+    if (_busy || _voiceListening) return;
+    final assignment = _assignment;
+    final prompt = assignment == null
+        ? (_email.text.trim().isEmpty
+            ? 'Diyetisyen e-posta adresini söyleyin. Örneğin uzman nokta '
+                'beslenme et example nokta com.'
+            : 'Bağlantı isteğini göndermek için istek gönder deyin veya yeni '
+                'bir e-posta adresi söyleyin.')
+        : assignment.isApproved
+            ? 'Rapor sihirbazını açmak için rapor gönder deyin.'
+            : assignment.awaitingDietitian
+                ? 'Onayınız alındı. Diyetisyenin kabulü bekleniyor.'
+                : 'Bağlantıyı kabul etmek için bağlantıyı onayla deyin.';
+    await _accessibility.speak(prompt, priority: TtsPriority.high);
+    if (!mounted || (assignment?.awaitingDietitian ?? false)) return;
+
+    await _stt.startListening(
+      onListeningStarted: () {
+        if (mounted) setState(() => _voiceListening = true);
+      },
+      onListeningStopped: () {
+        if (mounted) setState(() => _voiceListening = false);
+      },
+      onError: (message) {
+        if (mounted) setState(() => _voiceListening = false);
+        _report(success: false, message: message);
+      },
+      onResult: (result) {
+        if (!result.isFinal) return;
+        if (mounted) setState(() => _voiceListening = false);
+        _applyDietitianVoice(result.text);
+      },
+    );
+  }
+
+  void _applyDietitianVoice(String spoken) {
+    final assignment = _assignment;
+    if (assignment == null) {
+      if (_email.text.trim().contains('@') &&
+          voiceContains(spoken, const [
+            'istek gonder',
+            'baglanti istegi gonder',
+            'onayla',
+          ])) {
+        _requestAssignment();
+        return;
+      }
+      final address = spokenEmailToAddress(spoken);
+      if (RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$').hasMatch(address)) {
+        setState(() => _email.text = address);
+        _accessibility.speak(
+          'E-posta adresi $address olarak yazıldı. Kontrol edin. Göndermek '
+          'için mikrofon düğmesine basıp istek gönder deyin.',
+          priority: TtsPriority.high,
+        );
+        return;
+      }
+      _report(
+        success: false,
+        message:
+            'E-posta adresi anlaşılamadı. Nokta ve et diyerek tekrar söyleyin.',
+      );
+      return;
+    }
+
+    if (assignment.isApproved &&
+        voiceContains(spoken, const ['rapor gonder', 'raporu gonder'])) {
+      _sendReport();
+      return;
+    }
+    if (!assignment.isApproved &&
+        !assignment.awaitingDietitian &&
+        voiceContains(spoken, const [
+          'baglantiyi onayla',
+          'baglanti onayla',
+          'onayla',
+        ])) {
+      _approveAssignment();
+      return;
+    }
+    _report(
+        success: false, message: 'Sesli komut anlaşılamadı. Tekrar deneyin.');
   }
 
   @override
@@ -239,6 +330,16 @@ class _DietitianScreenState extends ConsumerState<DietitianScreen> {
             ),
           ),
           const SizedBox(height: 20),
+          OutlinedButton.icon(
+            key: const Key('dietitian_voice_setup'),
+            onPressed:
+                _busy || _voiceListening ? null : _listenForDietitianVoice,
+            icon: Icon(
+                _voiceListening ? Icons.mic_rounded : Icons.mic_none_rounded),
+            label: Text(
+                _voiceListening ? 'Dinleniyor...' : 'E-postayı Sesle Söyle'),
+          ),
+          const SizedBox(height: 12),
           AccessibleButton(
             key: const Key('dietitian_request'),
             label: _busy ? 'Gönderiliyor...' : 'İstek Gönder',
@@ -371,6 +472,15 @@ class _DietitianScreenState extends ConsumerState<DietitianScreen> {
               icon: Icons.send_rounded,
               onPressed: _busy ? null : _sendReport,
             ),
+          const SizedBox(height: 12),
+          OutlinedButton.icon(
+            key: const Key('dietitian_voice_action'),
+            onPressed:
+                _busy || _voiceListening ? null : _listenForDietitianVoice,
+            icon: Icon(
+                _voiceListening ? Icons.mic_rounded : Icons.mic_none_rounded),
+            label: Text(_voiceListening ? 'Dinleniyor...' : 'Sesli Komut Ver'),
+          ),
           const SizedBox(height: 12),
           AccessibleButton(
             key: const Key('dietitian_cancel'),

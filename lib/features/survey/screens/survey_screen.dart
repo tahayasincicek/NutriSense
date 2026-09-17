@@ -13,7 +13,8 @@ import 'package:uuid/uuid.dart';
 
 import '../../../core/theme/app_theme.dart';
 import '../../../shared/services/accessibility_service.dart';
-import '../../../shared/services/voice_command_service.dart';
+import '../../../shared/services/stt_service.dart';
+import '../../../shared/services/structured_voice_input.dart';
 import '../models/survey_model.dart';
 import '../services/survey_service.dart';
 
@@ -27,7 +28,8 @@ class SurveyScreen extends ConsumerStatefulWidget {
 class _SurveyScreenState extends ConsumerState<SurveyScreen> {
   late AccessibilityService _accessibility;
   late SurveyService _surveyService;
-  late VoiceCommandService _voiceCmd;
+  late SttService _stt;
+  bool _voiceListening = false;
 
   // ── Anket durumu ──
   final _questions = nutrisenseSurveyQuestions;
@@ -45,7 +47,7 @@ class _SurveyScreenState extends ConsumerState<SurveyScreen> {
     super.initState();
     _accessibility = ref.read(accessibilityServiceProvider);
     _surveyService = ref.read(surveyServiceProvider);
-    _voiceCmd = ref.read(voiceCommandServiceProvider);
+    _stt = ref.read(sttServiceProvider);
     _startTime = DateTime.now();
 
     // Metin kontrolcülerini hazırla
@@ -67,6 +69,7 @@ class _SurveyScreenState extends ConsumerState<SurveyScreen> {
 
   @override
   void dispose() {
+    _stt.cancelListening();
     for (final c in _textControllers.values) {
       c.dispose();
     }
@@ -81,6 +84,12 @@ class _SurveyScreenState extends ConsumerState<SurveyScreen> {
       appBar: AppBar(
         title: const Text('Anket'),
         actions: [
+          IconButton(
+            key: const Key('survey_voice_answer'),
+            icon: Icon(_voiceListening ? Icons.mic : Icons.mic_none_rounded),
+            tooltip: _voiceListening ? 'Dinleniyor' : 'Cevabı sesle ver',
+            onPressed: _voiceListening ? null : _listenForSurveyVoice,
+          ),
           // Soruyu oku butonu
           // tooltip düğmenin kendi adıdır; yalnız dıştaki Semantics'e
           // yazılırsa ekran okuyucu düğmeye odaklandığında adsız kalır.
@@ -486,8 +495,7 @@ class _SurveyScreenState extends ConsumerState<SurveyScreen> {
                   'Sesli giriş aktif. Yanıtınızı söyleyin.',
                   priority: TtsPriority.normal,
                 );
-                // Sesli komutu dinle ve metin alanına yaz
-                await _voiceCmd.startListening();
+                await _listenForSurveyVoice();
               },
               icon: const Icon(Icons.mic, size: 22),
               label: const Text('Sesli Giriş', style: TextStyle(fontSize: 15)),
@@ -685,6 +693,74 @@ class _SurveyScreenState extends ConsumerState<SurveyScreen> {
     setState(() => _answers[qId] = value);
     _accessibility.speak(ttsLabel, priority: TtsPriority.normal);
     _accessibility.lightHaptic();
+  }
+
+  Future<void> _listenForSurveyVoice() async {
+    await _accessibility.speak(
+      'Cevabınızı söyleyin. Bir ile beş arasında sayı, seçenek adı, '
+      'evet, hayır, belki, sonraki veya önceki diyebilirsiniz.',
+      priority: TtsPriority.high,
+    );
+    await _stt.startListening(
+      listenFor: const Duration(seconds: 15),
+      onListeningStarted: () {
+        if (mounted) setState(() => _voiceListening = true);
+      },
+      onListeningStopped: () {
+        if (mounted) setState(() => _voiceListening = false);
+      },
+      onError: (message) {
+        if (!mounted) return;
+        setState(() => _voiceListening = false);
+        _accessibility.speakError(message);
+      },
+      onResult: (result) {
+        if (!result.isFinal || !mounted) return;
+        _applySurveyVoice(result.text);
+      },
+    );
+  }
+
+  void _applySurveyVoice(String raw) {
+    if (voiceContains(raw, const ['sonraki', 'ileri', 'devam'])) {
+      _goToNext();
+      return;
+    }
+    if (voiceContains(raw, const ['onceki', 'geri'])) {
+      _goToPrevious();
+      return;
+    }
+
+    final question = _questions[_currentIndex];
+    switch (question.type) {
+      case QuestionType.likert:
+      case QuestionType.starRating:
+        final value = spokenOneToFive(raw);
+        if (value != null) {
+          _setAnswer(question.id, value, '$value seçildi.');
+          return;
+        }
+        break;
+      case QuestionType.multiChoice:
+      case QuestionType.yesNo:
+        final option = matchSpokenOption(raw, question.options ?? const []);
+        if (option != null) {
+          _setAnswer(question.id, option, '$option seçildi.');
+          return;
+        }
+        break;
+      case QuestionType.openText:
+        final value = raw.trim();
+        if (value.isNotEmpty) {
+          _textControllers[question.id]!.text = value;
+          _setAnswer(question.id, value, 'Sesli yanıt kaydedildi.');
+          return;
+        }
+        break;
+    }
+    _accessibility.speakError(
+      'Cevap anlaşılamadı. Seçenek adını veya numarasını tekrar söyleyin.',
+    );
   }
 
   void _readCurrentQuestion() {
