@@ -58,7 +58,12 @@ python -m nutrisense_ml.train `
   --runs-dir runs
 ```
 
-Model `MobileNetV3Small(alpha=0.75)` kullanır. MobileNetV3Small, büyük varyanta göre mobilde daha küçük ve düşük gecikmeli bir başlangıç noktasıdır. ImageNet aktarımı, sınıf ağırlıkları, yalnız train augmentation, erken durdurma ve iki aşamalı fine-tuning yapılandırmada sürümlüdür. Mixed precision yalnız GPU bulunduğunda açılır.
+Mimari config dosyasından seçilir. Yukarıdaki `mvp_v1` örneği
+`MobileNetV3Small(alpha=0.75)` kullanır; uygulamaya dağıtılan
+`tr130_v1` modeli ise `MobileNetV3Large(alpha=1.0)` kullanır. ImageNet
+aktarımı, sınıf ağırlıkları, yalnız train augmentation, erken durdurma ve iki
+aşamalı fine-tuning yapılandırmada sürümlüdür. Mixed precision yalnız GPU
+bulunduğunda açılır.
 
 ## 3. Eşik seçimi ve mühürlü test
 

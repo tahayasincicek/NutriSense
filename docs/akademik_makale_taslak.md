@@ -72,7 +72,13 @@ Bigham et al. [4] developed VizWiz, a system that provides near real-time answer
 
 ### C. Accessible Nutrition Applications
 
-Limited research exists on nutrition-specific accessibility. Theodoridis et al. [7] explored accessible food logging interfaces but relied primarily on manual text entry. Our work differs by integrating automatic visual food recognition with comprehensive voice feedback, eliminating the need for text-based interaction.
+People with visual impairments report more accessibility barriers in popular
+weight-management applications than other disability groups [7]. A separate
+protocol study showed that visually impaired participants can capture usable
+food photographs when framing and capture instructions are designed for them
+[8]. These findings support NutriSense's spoken capture guidance, confirmation
+step and non-visual correction path; they do not establish the usability of
+NutriSense itself, which still requires the planned participant study.
 
 ---
 
@@ -190,7 +196,7 @@ impaired participants is the next step.
 
 | Figür No | Açıklama | Tip |
 |----------|----------|-----|
-| Fig. 1 | Sistem mimarisi (Flutter → FastAPI → Vision API → Nutritionix) | Blok diyagram |
+| Fig. 1 | Sistem mimarisi (Flutter cihaz üstü TFLite → kaynaklı yerel besin kataloğu → FastAPI güvenli kayıt/panel) | Blok diyagram |
 | Fig. 2 | MobileNetV3 model eğitim süreci (accuracy/loss eğrileri) | Grafik |
 | Fig. 3 | Uygulama ekran görüntüleri (kamera, sonuç, geçmiş) | Ekran görüntüsü |
 | Fig. 4 | Besin tanıma pipeline akışı | Akış diyagramı |
@@ -214,14 +220,16 @@ impaired participants is the next step.
 
 [6] Microsoft, "Seeing AI: A free app for people who are blind," 2024. [Online]. Available: https://www.microsoft.com/en-us/seeing-ai
 
-[7] M. Theodoridis, C. Agamanolis, and F. Muller, "Accessible nutrition: Designing mobile food logging for visually impaired users," in *Proc. ACM SIGACCESS Conf. Computers & Accessibility (ASSETS)*, 2022.
+[7] E. Radcliffe, B. Lippincott, R. Anderson, and M. Jones, "A Pilot Evaluation of mHealth App Accessibility for Three Top-Rated Weight Management Apps by People with Disabilities," *International Journal of Environmental Research and Public Health*, vol. 18, no. 7, 2021, doi: 10.3390/ijerph18073669.
 
-[8] W3C, "Web Content Accessibility Guidelines (WCAG) 2.1," World Wide Web Consortium, 2018. [Online]. Available: https://www.w3.org/TR/WCAG21/
+[8] "Development and validation of protocols for photographed food record by visually impaired people," 2021. [Online]. Available: https://pubmed.ncbi.nlm.nih.gov/33407985/
 
-[9] Google LLC, "LiteRT (TensorFlow Lite) Documentation," 2026. [Online]. Available: https://ai.google.dev/edge/litert
+[9] W3C, "Web Content Accessibility Guidelines (WCAG) 2.2," World Wide Web Consortium, 2023. [Online]. Available: https://www.w3.org/TR/WCAG22/
 
-[10] Nutritionix LLC, "Nutritionix API v2 Documentation," 2024. [Online]. Available: https://developer.nutritionix.com/
+[10] Google LLC, "LiteRT (TensorFlow Lite) Documentation," 2026. [Online]. Available: https://ai.google.dev/edge/litert
 
-[11] World Health Organization, "World report on vision," Geneva, 2019.
+[11] U.S. Department of Agriculture, Agricultural Research Service, "FoodData Central," [Online]. Available: https://fdc.nal.usda.gov/
 
-[12] J. Nielsen, "Usability Engineering," Morgan Kaufmann, 1993, pp. 115-148.
+[12] World Health Organization, "World report on vision," Geneva, 2019.
+
+[13] J. Nielsen, "Usability Engineering," Morgan Kaufmann, 1993, pp. 115-148.

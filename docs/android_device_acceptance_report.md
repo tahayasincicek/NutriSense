@@ -78,3 +78,28 @@ kanıt referansı yazılmalıdır.
 4. Gizlilik politikası/Data Safety üniversite hukuk/KVKK incelemesinden geçer.
 5. Gerçek offline model yayınlanacaksa model kartı, checksum, parity ve cihaz
    latency kanıtı vardır; yoksa offline AI iddiası release metninde bulunmaz.
+
+## 19 Eylül 2026 güncellemesi
+
+Temmuz tablosu tarihsel kabul kaydı olarak korunmuştur. O tarihten sonra cihaz
+üstü model ve emülatör yolculuk testi tamamlandı; fiziksel cihaz ve mağaza
+imzası kapıları ise hâlâ açıktır.
+
+| Kontrol | Güncel sonuç |
+|---|---|
+| Flutter analyze | GEÇTİ - hata/uyarı yok |
+| Flutter test | GEÇTİ - 314 test |
+| Backend test | GEÇTİ - 277 test, 1 atlandı |
+| ML doğrulama testleri | GEÇTİ - 8 test |
+| Android emülatör P0 E2E | GEÇTİ - tarama, onay, kayıt ve OOD reddi |
+| Cihaz üstü model | GEÇTİ - 130 sınıf, float16 TFLite, manifest/checksum mevcut |
+| Dev debug APK | GEÇTİ - 213.789.128 bayt |
+| Fiziksel Android/TalkBack kabulü | NOT RUN |
+| İmzalı production AAB | BLOKE - kurum application ID'si ve upload key gerekli |
+
+Güncel `app-dev-debug.apk` SHA-256:
+`E78359E03390B8FCAF9C70C169DE68C0DEE85D24581B147B2A58FD7DE903B073`.
+
+Bu güncelleme debug/emülatör kanıtını fiziksel cihaz veya mağaza kabulü olarak
+sunmaz. Teslim gösterimi için APK kullanılabilir; Play Store yayını için son
+iki satırın ayrıca kapatılması gerekir.

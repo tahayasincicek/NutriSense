@@ -185,5 +185,6 @@ Kendi dalınızda çalışıp pull request açın. `.env`, kişisel imzalama dos
 - [Erişilebilirlik doğrulama durumu](docs/accessibility_conformance_report.md)
 - [Android yayın rehberi](docs/android_release_runbook.md) · [iOS yayın rehberi](docs/ios_release_runbook.md)
 - [TÜBİTAK sonuç raporu](docs/tubitak_sonuc_raporu.md) · [Makale taslağı](docs/akademik_makale_taslak.md)
+- [22 doğrulanmış kaynaklı literatür taraması](docs/literatur_taramasi.md)
 
 Model eğitimindeki Food-101 ve Türk mutfağı veri kaynaklarının kullanım koşulları lisans belgesindedir. Besin kataloğu USDA FoodData Central verilerini ve tahmini olduğu belirtilen kayıtları içerir.

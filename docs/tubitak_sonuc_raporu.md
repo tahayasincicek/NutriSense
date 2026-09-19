@@ -83,12 +83,12 @@ Proje, Çevik (Agile) yazılım geliştirme metodolojisi kullanılarak yürütü
 
 | Katman | Teknoloji | Versiyon |
 |--------|-----------|----------|
-| Mobil Frontend | Flutter (Dart) | 3.22 |
-| Backend | Python FastAPI | 0.104 |
-| Veritabanı | MySQL + SQLAlchemy | 8.0 |
-| YZ Modeli | TensorFlow MobileNetV3 | 2.15 |
+| Mobil Frontend | Flutter / Dart | 3.41.4 / 3.11.1 |
+| Backend | Python FastAPI / SQLAlchemy | 0.135.1 / 2.0.48 |
+| Veritabanı | MySQL | 8.4 |
+| YZ Modeli | TensorFlow MobileNetV3 | 2.18.0 |
 | Besin Tanıma | Cihaz üstü NutriSense modeli (MobileNetV3Large, TensorFlow Lite float16) | 130 sınıf |
-| Kalori Veritabanı | Nutritionix API | v2 |
+| Besin değeri kaynağı | Kaynak ve sürüm bilgili yerel katalog | 556 kayıt |
 | TTS | flutter_tts (tr-TR) | 4.0 |
 | Sesli Komut | speech_to_text | 6.6 |
 | Bildirim | Twilio (SMS) + SMTP | — |
@@ -246,8 +246,8 @@ Her push'ta çalışan sürekli tümleştirme hattı 11 iş içerir. Ölçülen 
 
 | Kapı | Sonuç |
 |---|---|
-| Backend testleri | 240 test geçti, 1 atlandı |
-| Flutter testleri | 293 test geçti |
+| Backend testleri | 277 test geçti, 1 atlandı |
+| Flutter testleri | 314 test geçti |
 | Statik analiz (Dart) | Hata ve uyarı yok |
 | OpenAPI sözleşme sapması | Sapma yok |
 | ML yeniden üretilebilirlik kapıları | Geçti |
@@ -361,6 +361,11 @@ karşılayamadığı için dağıtılmamıştır.
 
 ## Bölüm 7: Kaynakça (IEEE Formatı)
 
+Bu kısa kaynakça sonuç raporunda doğrudan kullanılan temel eserleri içerir.
+İş paketi 1 kapsamında taranan 22 doğrulanmış kaynağın arama yöntemi,
+DOI/kurumsal bağlantıları ve ürün kararlarıyla eşlemesi
+`docs/literatur_taramasi.md` dosyasındadır.
+
 [1] World Health Organization, "World report on vision," Geneva, 2019.
 
 [2] A. Howard et al., "Searching for MobileNetV3," in Proc. IEEE/CVF Int. Conf. Computer Vision (ICCV), Seoul, 2019, pp. 1314-1324.
@@ -373,10 +378,10 @@ karşılayamadığı için dağıtılmamıştır.
 
 [6] J. P. Bigham et al., "VizWiz: Nearly real-time answers to visual questions," in Proc. 23rd Annual ACM Symp. User Interface Software and Technology, New York, 2010, pp. 333-342.
 
-[7] M. Theodoridis, C. Agamanolis, and F. Muller, "Accessible nutrition: designing mobile food logging for visually impaired users," in Proc. ACM SIGACCESS Conf. Computers & Accessibility (ASSETS), 2022.
+[7] E. Radcliffe, B. Lippincott, R. Anderson, and M. Jones, "A Pilot Evaluation of mHealth App Accessibility for Three Top-Rated Weight Management Apps by People with Disabilities," Int. J. Environ. Res. Public Health, vol. 18, no. 7, 2021, doi: 10.3390/ijerph18073669.
 
 [8] Google LLC, "LiteRT (TensorFlow Lite) Documentation," 2026. [Online]. Available: https://ai.google.dev/edge/litert
 
-[9] Nutritionix LLC, "Nutritionix API v2 Documentation," 2024. [Online]. Available: https://developer.nutritionix.com/
+[9] U.S. Department of Agriculture, Agricultural Research Service, "FoodData Central," [Online]. Available: https://fdc.nal.usda.gov/
 
 [10] N. Nielsen, "Usability Engineering," Morgan Kaufmann, 1993, pp. 115-148.

@@ -85,7 +85,7 @@ güvenliği veya tedavi kararı için kullanılamaz.
 
 ## Mimari ve giriş sözleşmesi
 
-ImageNet aktarım öğrenmeli `MobileNetV3Small`, `alpha=0.75`, 224×224 RGB.
+ImageNet aktarım öğrenmeli `MobileNetV3Large`, `alpha=1.0`, 224×224 RGB.
 `include_preprocessing=true` olduğu için Keras girişi float32 `[0,255]`;
 ilave `/255` normalizasyonu yapılmaz. Dağıtılan modelin sözleşmesi
 `assets/models/model_manifest.json` dosyasındadır.

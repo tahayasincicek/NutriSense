@@ -112,3 +112,18 @@ kapatılamaz; her biri sende olmayan bir kaynağa veya senin bir kararına bağl
 - "Tam" işaretlenen satırlar, gereksinimin **yazılım tarafının** kanıtlandığını
   gösterir; hiçbiri saha geçerliliği iddia etmez.
 - Sır değerleri okunmadı; `.env` yalnız yer tutucu/dolu olarak değerlendirildi.
+
+### 19 Eylül 2026 teslim kapanış eki
+
+- `KY-01` ve `IZ-01` yazılım deposundaki belge kanıtı bakımından kapatıldı:
+  `docs/literatur_taramasi.md` içinde tarama yöntemi, dahil/dışla ölçütleri ve
+  DOI veya birincil kurum bağlantısıyla doğrulanmış 22 kaynak bulunur.
+- Sonuç raporundaki eski Nutritionix mimari ifadesi kaynak ve sürüm bilgili
+  556 kayıtlık yerel katalogla değiştirildi. Araştırma raporundaki test
+  sayıları güncel koşumla backend `277 geçti / 1 atlandı`, Flutter `314 geçti`
+  olarak yenilendi.
+- Model kartındaki eski `MobileNetV3Small, alpha=0.75` satırı eğitim koşumunun
+  `config.json` kaydıyla uyumlu `MobileNetV3Large, alpha=1.0` olarak düzeltildi.
+- Gerçek SMTP/Twilio sağlayıcı kimliği ve doğrulanmış kişisel alıcı hâlâ dış
+  girdidir. Kod, sandbox izin listeli deneme ve üretim modlarını ayırır; canlı
+  teslim kanıtı üretilmeden `OZ-05/AH-05` saha tarafı Tam sayılmaz.
