@@ -160,3 +160,14 @@ Otomatik testlerde sahte widget ağacı kurulmamıştır. Platform kamera, TTS, 
 4. Otomatik testler CI'da geçer ve sonuç artefaktı saklanır.
 5. En az görme engelli katılımcılarla etik/onamlı kullanılabilirlik testi yapılır; ham veri olmadan başarı yüzdesi üretilmez.
 6. Bulguların P0/P1 olanları kapatılır ve kalan istisnalar sürüm notunda açıklanır.
+
+## 19 Eylül 2026 otomatik kanıt güncellemesi
+
+17 Eylül kapsam beyanı ve fiziksel cihaz sınırları değişmemiştir. Son CI
+koşumunda Flutter analiz, test, API sözleşmesi ve erişilebilirlik işleri geçti;
+tam Flutter paketi 314 teste ulaştı. Backend 277 test geçti, 1 test atlandı.
+Android P0 emülatör yolculuğu kamera fixture'ı, onay, kayıt ve kapsam dışı
+girdi reddini doğrular. Bu ek otomatik kanıt, gerçek TalkBack/VoiceOver ve
+görme engelli katılımcı kabulünün yerine geçmez.
+
+Güncel CI: https://github.com/tahayasincicek/NutriSense/actions/runs/35433857675
