@@ -186,8 +186,9 @@ class _SendReportWizardState extends ConsumerState<SendReportWizard> {
               : 'Telefon doğrulanmamış'),
         ),
         const Text(
-          'E-posta ve SMS yalnız yeni rapor bildirimi ile anonim danışan '
-          'kodunu içerir. Besin ve sağlık bilgileri yalnız güvenli '
+          'E-posta anonim danışan kodu ve rapor referansını içerir. SMS '
+          'yalnız yeni rapor hazır bildirimidir. Besin ve sağlık bilgileri '
+          'yalnız güvenli '
           'diyetisyen panelinde görüntülenir.',
         ),
         const SizedBox(height: 16),

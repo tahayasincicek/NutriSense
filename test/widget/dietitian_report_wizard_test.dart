@@ -34,8 +34,7 @@ void main() {
 
     expect(find.text('s****************@nutrisense.invalid'), findsOneWidget);
     expect(find.text('+*******0006'), findsOneWidget);
-    expect(find.textContaining('E-posta ve SMS yalnız yeni rapor'),
-        findsOneWidget);
+    expect(find.textContaining('SMS yalnız yeni rapor hazır'), findsOneWidget);
 
     await tester.tap(find.byKey(const Key('report_channel_sms')));
     await tester.pump();

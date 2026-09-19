@@ -44,7 +44,7 @@ Aydınlatma teyidi yalnız kaydın `policy_version` değeri sunucudaki güncel `
 |---|---|---|---|
 | Nutritionix | Normalize besin arama adı | Görüntü, hesap kimliği, iletişim | API şartları/attribution ve aktarım değerlendirmesi gerekir |
 | SMTP sağlayıcısı | Onaylı dönem raporu ve alıcı e-posta | Parola/token; onaysız kayıt | Production secret store, TLS ve sağlayıcı sözleşmesi gerekir |
-| Twilio | Yalnız `D-…` danışan kodlu yeni rapor bildirimi ve alıcı telefon | Besin adı, miktar, tarih-saat, kalori, görüntü, parola/token ve serbest not | Sağlık ayrıntıları yalnız yetkili uygulama içi panelde; production sağlayıcı/aktarım kararı yine gerekir |
+| Twilio | Yalnız genel yeni rapor bildirimi ve alıcı telefon | Danışan kodu, rapor referansı, besin adı, miktar, tarih-saat, kalori, görüntü, parola/token ve serbest not | Sağlık ayrıntıları yalnız yetkili uygulama içi panelde; production sağlayıcı/aktarım kararı yine gerekir |
 | Firebase Crashlytics | Hiçbir veri | Tüm veriler | Yapılandırılmamış ve kod kapısı nedeniyle devre dışı |
 
 Sağlayıcıların ülke/alt işleyen/retention bilgileri teknik depodan
@@ -72,7 +72,7 @@ sözleşme ve aktarım mekanizması kaydedilmelidir.
 2. Besin kaydı yalnız kullanıcı onayından sonra oluşur.
 3. Diyetisyen raporu yalnız onaylanmış kayıtlardan ve her gönderimde yeni açık
    onayla hazırlanır; alıcı önizlemede maskelenir.
-4. Yeni v4 e-posta/SMS iletileri yalnız yeni rapor bildirimi ve `D-…` danışan kodu içerir. Besin adı, miktar, tarih-saat, kalori ve kullanıcı notu yalnız atanmış diyetisyenin giriş yaptığı uygulama içi panelde gösterilir.
+4. Yeni v4 e-postası yalnız yeni rapor bildirimi, `D-…` danışan kodu ve rapor referansı içerir. SMS yalnız “Yeni rapor hazır, uygulamayı açın” metnini içerir. Besin adı, miktar, tarih-saat, kalori ve kullanıcı notu yalnız atanmış diyetisyenin giriş yaptığı uygulama içi panelde gösterilir.
 5. Araştırma pseudonym'i hesap UUID'si değildir; onam sonucu verisinden ayrıdır.
 6. Gerçek araştırma modu gerçek protocol/consent/approval alanları olmadan
    açılmaz; geliştirme sentetik fixture kullanır.

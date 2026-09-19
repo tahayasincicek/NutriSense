@@ -100,7 +100,7 @@ Uygulamayı elinizi ekrana sürmeden kullanabilirsiniz. Şu komutları söyleyin
 4. Rapor türünü seçin: Günlük, Haftalık veya Aylık
 5. Uygulama raporun özetini sesli olarak okuyacak
 6. "Evet" diyerek gönderimi onaylayın
-7. E-posta ve SMS bildirimi rapor referansını taşır. Besin adı, miktar, tarih-saat ve kalori bilgileri diyetisyenin kimlik doğrulamalı panelinde gösterilir.
+7. E-posta bildirimi anonim danışan kodu ve rapor referansını taşır. SMS yalnız “Yeni rapor hazır, uygulamayı açın” der. Besin adı, miktar, tarih-saat ve kalori bilgileri diyetisyenin kimlik doğrulamalı panelinde gösterilir.
 
 ---
 

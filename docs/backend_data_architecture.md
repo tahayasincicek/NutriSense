@@ -24,7 +24,7 @@ Aşağıdaki süreler teknik varsayılan politika önerisidir. Kurumun KVKK, eti
 | `survey_versions` | Araştırma yöneticisi | Araştırma paketiyle kalıcı sürüm kaydı | Kullanılmış sürüm silinmez; pasifleştirilir |
 | `survey_submissions` | Pseudonymous katılımcı; araştırma rolü | Etik kurulun belirlediği süre, örneğin proje + 5 yıl | Pseudonym üzerinden geri çekme/silme; hesap silmeyle otomatik ilişkilendirilmez |
 
-Diyetisyen raporunun `payload_json` kopyası ad, hesap UUID'si, diyetisyen UUID'si ve eşleşme UUID'sini tekrar saklamaz. Rapor satırındaki yetkili ilişki foreign key'leri erişim kontrolü için korunur; e-posta ve SMS içeriğinde ilişkiye özel, kararlı `D-…` danışan kodu kullanılır. Böylece diyetisyen aynı danışanın raporlarını eşleştirebilir, dış bildirim sağlayıcısı ise kişinin adını veya hesap kimliğini almaz.
+Diyetisyen raporunun `payload_json` kopyası ad, hesap UUID'si, diyetisyen UUID'si ve eşleşme UUID'sini tekrar saklamaz. Rapor satırındaki yetkili ilişki foreign key'leri erişim kontrolü için korunur. E-postada ilişkiye özel, kararlı `D-…` danışan kodu ve rapor referansı kullanılır; SMS yalnız genel yeni rapor bildirimidir. Böylece diyetisyen aynı danışanın raporlarını panelde eşleştirebilir, SMS sağlayıcısı ise danışan kodunu veya sağlık bilgisini almaz.
 | `usability_sessions` / `usability_tasks` | Pseudonymous katılımcı; araştırma rolü | Etik kurul kararı | Pseudonym üzerinden silme veya serbest metinleri anonimleştirme |
 | `refresh_tokens` | Hesap sahibi | Expiry + kısa güvenlik penceresi | Logout/rotation revoke; hesap silmede cascade |
 | `audit_events` | Güvenlik/denetim rolü | Öneri 1 yıl; mevzuata göre ayarlanır | Hesap silmede `user_id` kaldırılır; e-posta yerine geri döndürülemez hash kalır |

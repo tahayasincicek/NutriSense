@@ -10,7 +10,7 @@ bir hukukçu verir.
 
 | Engel | Uygulanan önlem | Kanıt |
 |---|---|---|
-| Sağlık verisinin sıradan SMS ve e-posta gövdesinde taşınması | Rapor şeması v4: SMS ve e-posta yalnız yeni rapor bildirimi ile ilişkiye özel `D-…` danışan kodunu içerir. Besin, gram, saat ve kalori yalnız giriş yapılmış diyetisyen panelinde açılır. | `backend/app/domain/report_messages.py`, `backend/tests/test_dietitian_report_delivery.py` |
+| Sağlık verisinin sıradan SMS ve e-posta gövdesinde taşınması | Rapor şeması v4: e-posta yalnız yeni rapor bildirimi, ilişkiye özel `D-…` danışan kodu ve rapor referansını içerir; SMS yalnız genel yeni rapor bildirimidir. Besin, gram, saat ve kalori yalnız giriş yapılmış diyetisyen panelinde açılır. | `backend/app/domain/report_messages.py`, `backend/tests/test_dietitian_report_delivery.py` |
 | Aydınlatma ile açık rızanın ayrı düzenlenmesi (KVKK 2026/347 ilke kararı) | Aydınlatma teyidi ayrı kayıttır. Rızalar amaç bazlı ayrı anahtarlarla verilir, kapalı başlar. Güncel aydınlatma teyit edilmeden ana uygulama açılmaz. | `lib/features/auth/screens/privacy_consent_screen.dart`, `lib/features/auth/screens/auth_gate.dart`, `backend/tests/test_product_consents.py` |
 | Diyetisyenle rol ve gizlilik sözleşmesi | Diyetisyen hesabı, sürüm damgalı veri işleme sözleşmesi kabul edilmeden açılmaz. | `docs/dietitian_data_processing_agreement.md`, `backend/tests/test_dietitian_mutual_consent.py` |
 | Araştırma verisinde ürün kimliğinin ayrılması | Araştırma dışa aktarımı anahtarlı takma kimlik kullanır. Production ve onaylı araştırma modunda ayrı, güçlü `RESEARCH_PSEUDONYMIZATION_KEY` zorunludur. | `backend/app/config.py`, `backend/tests/test_research_ethics_gate.py` |

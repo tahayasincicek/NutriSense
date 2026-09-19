@@ -16,20 +16,12 @@ def report_number(value) -> str:
 
 
 def build_report_sms(report: dict) -> str:
-    """Rapor bildirimi; hiçbir şema sürümünde sağlık verisi SMS'e yazılmaz.
+    """Tek segmentlik rapor bildirimi; SMS'e sağlık verisi yazılmaz.
 
     Eski biçimde (v2/v3) kaydedilmiş bir rapor yeniden denendiğinde de yalnız
     bildirim gider. Besin, gram, saat ve kalori diyetisyen panelinde kalır.
     """
-    patient = report.get("patient_code") or "Danışan"
-    reference = report.get("report_reference") or "paneldeki en yeni rapor"
-    return (
-        f"NutriSense: {patient} için yeni bir beslenme raporu hazır. "
-        f"Rapor referansı: {reference}. Besin adı, miktar, tarih-saat ve "
-        "kalori bilgilerini güvenli diyetisyen panelinden, Raporlar "
-        "bölümünden, giriş yaparak görüntüleyin. "
-        "Bu bilgi tıbbi tavsiye değildir."
-    )
+    return "NutriSense: Yeni rapor hazır. Uygulamayı açın."
 
 
 def build_sms_parts(report: dict) -> list[str]:

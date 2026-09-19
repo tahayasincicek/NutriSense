@@ -39,3 +39,47 @@ def test_real_smoke_refuses_non_production_delivery():
 
 def test_real_smoke_accepts_complete_provider_configuration():
     validate_smoke_request(_settings(), CONFIRMATION)
+
+
+def test_trial_smoke_accepts_only_allowlisted_personal_recipients():
+    settings = _settings(
+        notification_mode="sandbox",
+        notification_sandbox_email_allowlist="owner@example.test",
+        notification_sandbox_phone_allowlist="+905551112233",
+    )
+
+    validate_smoke_request(
+        settings,
+        CONFIRMATION,
+        trial=True,
+        email="owner@example.test",
+        phone="+905551112233",
+    )
+
+
+@pytest.mark.parametrize(
+    ("email", "phone", "error"),
+    [
+        ("other@example.test", "+905551112233", "e-postası"),
+        ("owner@example.test", "+905559999999", "telefonu"),
+    ],
+)
+def test_trial_smoke_refuses_recipient_outside_allowlists(
+    email: str,
+    phone: str,
+    error: str,
+):
+    settings = _settings(
+        notification_mode="sandbox",
+        notification_sandbox_email_allowlist="owner@example.test",
+        notification_sandbox_phone_allowlist="+905551112233",
+    )
+
+    with pytest.raises(ValueError, match=error):
+        validate_smoke_request(
+            settings,
+            CONFIRMATION,
+            trial=True,
+            email=email,
+            phone=phone,
+        )

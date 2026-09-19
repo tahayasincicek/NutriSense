@@ -180,7 +180,7 @@ def accessibility_summary(payload: dict) -> str:
         else " Tüm porsiyonlar kullanıcı tarafından kesinleştirilmiştir."
     )
     sms_note = (
-        " SMS yalnız yeni rapor bildirimi ve danışan kodunu içerecek; "
+        " SMS yalnız 'Yeni rapor hazır, uygulamayı açın' bildirimini içerecek; "
         "besin ve sağlık bilgileri SMS'e yazılmayacak."
         if "sms" in payload["channels"] else ""
     )

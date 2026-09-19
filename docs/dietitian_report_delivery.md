@@ -60,9 +60,9 @@ Yeni `dietitian-report-v4` e-postası yalnız yeni rapor bildirimi ve ilişkiye 
 
 ### SMS
 
-Yeni `dietitian-report-v4` SMS'i yalnız yeni rapor bildirimi ve `D-…` danışan kodu içerir. Besin ve sağlık ayrıntıları operatör altyapısına verilmez.
+Yeni `dietitian-report-v4` SMS'i yalnız “Yeni rapor hazır, uygulamayı açın” bildirimini içerir. Danışan kodu, rapor referansı, besin ve sağlık ayrıntıları operatör altyapısına verilmez.
 
-Sunucu önizleme özeti e-posta/SMS'in yalnız bildirim ve anonim danışan kodu taşıdığını, sağlık ayrıntılarının panelde kalacağını söyler.
+Sunucu önizleme özeti e-postanın anonim danışan kodu ve rapor referansı; SMS'in yalnız genel bildirim taşıdığını, sağlık ayrıntılarının panelde kalacağını söyler.
 Mobil seçim ve açık onay metinleri panel paylaşımı ile bildirim kanallarını ayrı açıklar. Rıza sürümü
 `report-share-v4-notification-only` oldu; eski önizleme özetiyle yeni içerik gönderilemez.
 Kaydedilmiş v2 raporlarının yeniden denemesi yalnız eski kısa özeti gönderir;

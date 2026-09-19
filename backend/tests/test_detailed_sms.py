@@ -52,7 +52,9 @@ def test_no_schema_version_puts_health_details_into_sms(schema_version):
     assert "kcal" not in sms
     assert "125.5" not in sms
     assert "2026-09-07T12:35:01" not in sms
-    assert "güvenli diyetisyen panelinden" in sms
+    assert sms == "NutriSense: Yeni rapor hazır. Uygulamayı açın."
+    assert len(sms.encode("utf-16-le")) // 2 <= 70
+    assert "Danışan" not in sms and "Rapor referansı" not in sms
     assert build_sms_parts(payload) == [sms]
 
 

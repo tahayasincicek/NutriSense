@@ -30,9 +30,10 @@ Yurt dışına giden her istek, kişiyi tanıtan bilgiden arındırılır. Hiçb
   besin için yurt dışına istek gitmez. Katalogda olmayan besinde metinden
   bağlantı, e-posta ve telefon numarası silinir, izin verilmeyen karakterler
   atılır ve metin 80 karakterle sınırlanır.
-- **Rapor bildirimleri:** SMS ve e-posta yalnız yeni rapor bildirimi ile
-  geri çözülemeyen, ilişkiye özel `D-…` danışan kodunu taşır. Danışan adı,
-  besin, gram, saat ve kalori bu kanallara yazılmaz.
+- **Rapor bildirimleri:** E-posta yeni rapor bildirimi, geri çözülemeyen
+  ilişkiye özel `D-…` danışan kodu ve rapor referansını taşır. SMS yalnız genel
+  yeni rapor bildirimidir. Danışan adı, besin, gram, saat ve kalori bu
+  kanallara yazılmaz.
 - **Konuşma tanıma:** Android'de önce cihaz üstü tanıma istenir; ses telefondan
   çıkmaz. Türkçe dil paketi kurulu değilse sesli komut bozulmasın diye bir kez
   standart tanımaya dönülür.
@@ -51,7 +52,7 @@ olabilir. Bu yüzden rıza anahtarı, standart sözleşme ve
 | Sağlayıcı | Açan ayar | Gönderilen veri | Amaç | Ülke | Varsayılan | Güvence durumu |
 |---|---|---|---|---|---|---|
 | Nutritionix (Syndigo) | `NUTRITION_PROVIDER_MODE=nutritionix` veya `hybrid` | Kimliksizleştirilmiş besin arama metni; yerel katalogda bulunan besin için istek yok | Besin değeri arama | ABD | Kapalı; varsayılan yerel USDA kataloğu | İmzalı standart sözleşme yok; API lisansı ve atıf şartı ayrıca incelenmeli. |
-| Twilio | `SMS_PROVIDER_MODE=twilio` | Diyetisyen telefon numarası, içeriksiz rapor bildirimi, `D-…` danışan kodu | Rapor bildirimi | ABD (varsayılan bölge) | Kapalı | İmzalı standart sözleşme yok; Twilio DPA'sı KVKK standart sözleşmesinin yerine geçmez. |
+| Twilio | `SMS_PROVIDER_MODE=twilio` | Diyetisyen telefon numarası ve genel “Yeni rapor hazır” bildirimi | Rapor bildirimi | ABD (varsayılan bölge) | Kapalı | İmzalı standart sözleşme yok; Twilio DPA'sı KVKK standart sözleşmesinin yerine geçmez. |
 | SMTP e-posta sağlayıcısı | `NOTIFICATION_MODE=production` | Diyetisyen e-posta adresi, içeriksiz rapor bildirimi, `D-…` danışan kodu | Rapor bildirimi | Sağlayıcı seçilmedi | Kapalı; geliştirmede yerel Mailpit | Sağlayıcı ve ülke belirlenmedi. |
 | İşletim sistemi konuşma tanıma (Android: Google, iOS: Apple) | Kullanıcının sesli komut başlatması | Konuşma sesi ve tanınan metin | Sesli komut | Platform sağlayıcısına bağlı | Kullanıcı başlatınca | Android'de önce cihaz üstü tanıma kullanılır; Türkçe dil paketi yoksa ses platform sunucusunda işlenebilir. iOS'ta Apple tanıması kullanılır. Uygulama ses kaydetmez. |
 | İşletim sistemi metin okuma (Android: Google, iOS: Apple) | Uygulamanın sesli geri bildirimi | Okunan metin | Sesli geri bildirim | Cihaz | Açık | Android'de yerel Türkçe ses seçilir; yerel ses yoksa cihazın varsayılan sesi kullanılır. |

@@ -367,9 +367,9 @@ async def test_mail_sandbox_and_sms_both_contain_approved_food_details():
     assert "Bu ad dış kanala çıkmamalı" not in html
 
     sms = build_safe_sms(payload)
-    assert "D-4C3A2B1F0099" in sms
+    assert sms == "NutriSense: Yeni rapor hazır. Uygulamayı açın."
     assert "Bu ad dış kanala çıkmamalı" not in sms
-    assert "güvenli diyetisyen panelinden" in sms
+    assert "D-4C3A2B1F0099" not in sms
     assert "Elma" not in sms and "78 kcal" not in sms
     assert "150 g" not in plain
     assert "2026-07-18T10:30:00+00:00" not in plain
@@ -476,11 +476,15 @@ def test_external_channels_send_notification_only(client, monkeypatch, tmp_path,
     delivered_payload = {**payload, "report_reference": report_id}
     assert [row["body"] for row in rows] == build_sms_parts(delivered_payload)
     assert len({row["message_id"] for row in rows}) == len(rows)
-    bodies = ["".join(row["body"] for row in rows)]
+    sms_body = "".join(row["body"] for row in rows)
+    bodies = [sms_body]
     if emails:
         bodies.extend(part.get_payload(decode=True).decode("utf-8") for part in emails[0].get_payload())
-    assert all(report_id in body for body in bodies)
-    assert all("rapor" in body.lower() and "panel" in body.lower() for body in bodies)
+    assert report_id not in sms_body
+    assert sms_body == "NutriSense: Yeni rapor hazır. Uygulamayı açın."
+    if emails:
+        assert all(report_id in body for body in bodies[1:])
+        assert all("panel" in body.lower() for body in bodies[1:])
     for record in payload["records"]:
         for body in bodies:
             assert record["food_name_tr"] not in body

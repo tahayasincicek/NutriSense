@@ -83,7 +83,7 @@ async def test_sms_body_contains_no_health_details(tmp_path):
     body = json.loads(
         (tmp_path / "sms_outbox.jsonl").read_text(encoding="utf-8").strip()
     )["body"]
-    assert "güvenli diyetisyen panelinden" in body
+    assert body == "NutriSense: Yeni rapor hazır. Uygulamayı açın."
     for detail in ("Mercimek", "150.5", "kcal", "2026-08-24T12:30", "Sentetik Hasta"):
         assert detail not in body
 

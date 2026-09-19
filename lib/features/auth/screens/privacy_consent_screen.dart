@@ -241,8 +241,9 @@ class PrivacyNoticeCard extends StatelessWidget {
       'çıkmaz, cihazda veya sunucuda saklanmaz.\n\n'
       'Beslenme raporunuz yalnız siz her gönderim için ayrıca onay '
       'verdiğinizde atanmış diyetisyenin güvenli uygulama içi panelinde '
-      'paylaşılır. E-posta veya SMS yalnız anonim danışan kodlu yeni rapor '
-      'bildirimi taşır; besin ve sağlık ayrıntılarını içermez.\n\n'
+      'paylaşılır. E-posta anonim danışan kodu ve rapor referansı taşır; SMS '
+      'yalnız yeni rapor bildirimi taşır. Besin ve sağlık ayrıntılarını '
+      'içermez.\n\n'
       'Verilerinizi görüntüleyebilir, düzeltebilir, dışa aktarabilir ve '
       'hesabınızı silerek tamamen kaldırabilirsiniz.';
 

@@ -94,7 +94,7 @@ OpenAPI snapshot değişikliği; backend testi, mobil fixture testi ve migration
 
 Survey/usability gönderimlerinde hesap `user_id` değeri kullanılmaz; yalnız ayrı UUID/pseudonym `participant_id` kabul edilir. Kayıtlar JSON dosyasına değil sürümlü veritabanı tablolarına transaction ile yazılır. İstatistik ve ham veri export yolları `X-Research-Export-Token` ile korunur ve başarılı export audit olayı üretir. Ham export, dahili katılımcı/form/oturum UUID'lerini vermez; `RESEARCH_PSEUDONYMIZATION_KEY` ile türetilmiş kararlı `P-`, `S-` ve `U-` kodları döndürür. Production saha dağıtımından önce etik onam, rate limit ve araştırmacı rol/yetki politikası ayrıca tamamlanmalıdır.
 
-Diyetisyen e-posta/SMS raporları `dietitian-report-v4` şemasında ilişkiye özel `D-…` danışan kodu taşır. Gönderim içeriğine danışan adı, e-posta, telefon, hesap UUID'si, diyetisyen UUID'si veya eşleşme UUID'si eklenmez. Uygulama içindeki onaylı diyetisyen paneli ilişki ve bakım işlevleri için danışanın adını göstermeye devam eder.
+Diyetisyen e-postası `dietitian-report-v4` şemasında ilişkiye özel `D-…` danışan kodu ve rapor referansını taşır. SMS yalnız “Yeni rapor hazır, uygulamayı açın” bildirimidir. Gönderim içeriğine danışan adı, e-posta, telefon, hesap UUID'si, diyetisyen UUID'si veya eşleşme UUID'si eklenmez. Uygulama içindeki onaylı diyetisyen paneli ilişki ve bakım işlevleri için danışanın adını göstermeye devam eder.
 
 ## 5. Besin analizi
 

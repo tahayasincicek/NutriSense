@@ -101,8 +101,9 @@ kapatılamaz; her biri sende olmayan bir kaynağa veya senin bir kararına bağl
   ekranına e-posta diktesi, istek gönderme, bağlantı onayı ve rapor sihirbazını
   açma komutları eklendi. Yazılım kapsamı tamamlandı; fiziksel cihaz ve görme
   engelli kullanıcı doğrulaması gereksinimin saha kısmı olarak sürüyor.
-- `OZ-05` / `AH-05`: E-posta ve SMS bildirimi artık benzersiz rapor referansını
-  ve kimlik doğrulamalı panelde izlenecek yolu açıkça taşır. Besin adı, miktar,
+- `OZ-05` / `AH-05`: E-posta bildirimi benzersiz rapor referansını ve kimlik
+  doğrulamalı panelde izlenecek yolu taşır; SMS yalnız kısa yeni rapor
+  bildirimidir. Besin adı, miktar,
   tarih-saat ve kalori panelde iletilir; özel nitelikli sağlık verisi dış kanal
   gövdesine yazılmaz. Canlı e-posta/SMS sağlayıcı teslim kanıtı hâlâ gereklidir.
 
