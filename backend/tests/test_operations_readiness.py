@@ -49,6 +49,33 @@ def test_required_provider_modes_fail_closed_without_credentials():
         _staging_settings(
             nutrition_provider_mode="nutritionix",
         ).validate_security()
+    with pytest.raises(RuntimeError, match="SMS_PROVIDER_MODE=twilio"):
+        _staging_settings(
+            notification_mode="production",
+            sms_provider_mode="disabled",
+        ).validate_security()
+
+
+def test_notification_readiness_exposes_only_channel_state(monkeypatch):
+    monkeypatch.setattr(main.settings, "notification_mode", "production")
+    monkeypatch.setattr(main.settings, "sms_provider_mode", "twilio")
+    monkeypatch.setattr(main.settings, "smtp_host", "smtp.example")
+    monkeypatch.setattr(main.settings, "smtp_from_email", "noreply@example.test")
+    monkeypatch.setattr(main.settings, "smtp_user", "configured")
+    monkeypatch.setattr(main.settings, "smtp_password", "configured")
+    monkeypatch.setattr(main.settings, "smtp_start_tls", True)
+    monkeypatch.setattr(main.settings, "twilio_account_sid", "AC" + "1" * 32)
+    monkeypatch.setattr(main.settings, "twilio_auth_token", "configured")
+    monkeypatch.setattr(main.settings, "twilio_phone_number", "+15551234567")
+
+    payload = main.notification_readiness()
+    assert payload == {
+        "mode": "production",
+        "email": True,
+        "sms": True,
+        "ready": True,
+    }
+    assert "configured" not in str(payload)
 
 
 def test_public_capabilities_never_expose_credentials():

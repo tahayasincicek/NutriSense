@@ -297,6 +297,35 @@ def database_readiness() -> dict:
     return result
 
 
+def notification_readiness() -> dict:
+    """Return credential-free channel readiness information."""
+    email_ready = bool(
+        settings.smtp_host
+        and settings.smtp_from_email
+        and (
+            settings.notification_mode != "production"
+            or (
+                settings.smtp_user
+                and settings.smtp_password
+                and (settings.smtp_use_tls or settings.smtp_start_tls)
+            )
+        )
+    )
+    sms_ready = bool(
+        settings.sms_provider_mode == "twilio"
+        and settings.twilio_account_sid
+        and settings.twilio_auth_token
+        and settings.twilio_phone_number.startswith("+")
+    )
+    production_requested = settings.notification_mode == "production"
+    return {
+        "mode": settings.notification_mode,
+        "email": email_ready,
+        "sms": sms_ready,
+        "ready": (email_ready and sms_ready) if production_requested else True,
+    }
+
+
 @app.get("/health/live", tags=["System"])
 async def liveness_check():
     return {
@@ -310,12 +339,16 @@ async def liveness_check():
 @app.get("/health/ready", tags=["System"])
 async def readiness_check():
     readiness = database_readiness()
+    notifications = notification_readiness()
+    ready = readiness["ready"] and notifications["ready"]
     return JSONResponse(
-        status_code=200 if readiness["ready"] else 503,
+        status_code=200 if ready else 503,
         content={
-            "status": "ready" if readiness["ready"] else "not_ready",
+            "status": "ready" if ready else "not_ready",
             **readiness,
-            "configuration": True,
+            "ready": ready,
+            "configuration": notifications["ready"],
+            "notifications": notifications,
         },
     )
 

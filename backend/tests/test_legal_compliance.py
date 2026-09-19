@@ -66,6 +66,10 @@ def test_production_requires_data_controller_identity(overrides):
             "smtp_user": "mailer",
             "smtp_password": "synthetic-smtp-password",
             "smtp_from_email": "bildirim@nutrisense.org.tr",
+            "sms_provider_mode": "twilio",
+            "twilio_account_sid": "AC" + "1" * 32,
+            "twilio_auth_token": "t" * 40,
+            "twilio_phone_number": "+15551234567",
         },
     ],
 )

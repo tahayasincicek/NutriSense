@@ -175,6 +175,8 @@ Kendi dalınızda çalışıp pull request açın. `.env`, kişisel imzalama dos
 
 ## Belgeler
 
+- [Gerçek e-posta ve SMS kurulumu](docs/gercek_eposta_sms_kurulumu.md)
+
 - [Android ve iOS geliştirici rehberi](docs/developer_setup.md)
 - [iOS devir notu](docs/ios_devir_notu.md)
 - [Kullanıcı el kitabı](docs/kullanici_el_kitabi.md)

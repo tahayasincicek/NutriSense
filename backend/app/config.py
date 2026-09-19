@@ -236,6 +236,15 @@ class Settings(BaseSettings):
             )
         if self.notification_mode not in {"disabled", "sandbox", "production"}:
             raise RuntimeError("NOTIFICATION_MODE disabled, sandbox veya production olmalıdır.")
+        if (
+            self.notification_mode == "production"
+            and self.sms_provider_mode != "twilio"
+        ):
+            raise RuntimeError(
+                "Gerçek bildirim, e-posta ve SMS gönderimi için "
+                "NOTIFICATION_MODE=production ile SMS_PROVIDER_MODE=twilio "
+                "birlikte kullanılmalıdır."
+            )
         if self.nutrition_provider_mode not in {
             "disabled", "verified_local", "nutritionix", "hybrid"
         }:
