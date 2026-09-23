@@ -62,8 +62,8 @@ Kapsamlı prova raporu ve çalışma kitabı:
 node analysis\tools\build_synthetic_workbook.mjs
 ```
 
-- `docs/sentetik_saha_calismasi_raporu.md`
-- `docs/NutriSense_Sentetik_Saha_Calismasi.xlsx`
+- `docs/saha_calismasi_simulasyon_raporu.md`
+- `docs/NutriSense_Saha_Calismasi_Simulasyonu.xlsx`
 
 Bu iki dosya da açıkça sentetik olarak işaretlidir. Gerçek kullanıcı bulgusu veya tamamlanmış saha çalışması kanıtı değildir.
 

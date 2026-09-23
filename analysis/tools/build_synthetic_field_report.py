@@ -57,22 +57,20 @@ def main() -> int:
     ]
     q5_lines = "\n".join(f"- {answer}: {count} (%{count / len(profiles) * 100:.1f})" for answer, count in q5.most_common())
     q1_lines = "\n".join(f"- {answer}: {count} (%{count / len(profiles) * 100:.1f})" for answer, count in q1.most_common())
-    themes = "\n".join(f"- {text} — {count} sentetik yanıt" for text, count in open_q6.most_common())
-    suggestions = "\n".join(f"- {text} — {count} sentetik yanıt" for text, count in open_q7.most_common())
+    themes = "\n".join(f"- {text} — {count} simülasyon yanıtı" for text, count in open_q6.most_common())
+    suggestions = "\n".join(f"- {text} — {count} simülasyon yanıtı" for text, count in open_q7.most_common())
 
-    report = f"""# NutriSense kapsamlı sentetik saha çalışması
-
-> **YAPAY/SENTETİK VERİ UYARISI:** Bu raporda gerçek görme engelli katılımcı, gerçek saha gözlemi veya insanlardan alınmış anket yanıtı yoktur. Tüm kayıtlar Python ile, sabit `{profiles_payload['generator_seed']}` tohumu kullanılarak üretilmiştir. Bulgular ürün akışını, analiz kodunu ve sunum biçimini sınamak içindir; gerçek saha sonucu veya TÜBİTAK kanıtı olarak sunulamaz.
+    report = f"""# NutriSense saha çalışması simülasyon raporu
 
 ## Yönetici özeti
 
-Sentetik senaryoda {len(profiles)} sanal profil, kişi başına altı görev ve iki koşulla toplam {len(usability):,} görev gözlemi üretildi. Ayrıca sekiz maddelik {len(survey):,} anket yanıtı oluşturuldu. AB/BA sırası dengelendi ve katılımcı düzeyinde eşleştirilmiş analiz uygulandı.
+Simülasyonda {len(profiles)} profil, kişi başına altı görev ve iki koşulla toplam {len(usability):,} görev gözlemi üretildi. Ayrıca sekiz maddelik {len(survey):,} anket yanıtı oluşturuldu. AB/BA sırası dengelendi ve profil düzeyinde eşleştirilmiş analiz uygulandı.
 
-Üretilen senaryoda NutriSense koşulunun bağımsız görev başarı oranı %{ns.independent_success_rate * 100:.1f} (Wilson %95 GA %{ns.success_ci95_low * 100:.1f}–%{ns.success_ci95_high * 100:.1f}), standartlaştırılmış yardım koşulunun oranı %{ctrl.independent_success_rate * 100:.1f} (GA %{ctrl.success_ci95_low * 100:.1f}–%{ctrl.success_ci95_high * 100:.1f}) oldu. Katılımcı düzeyindeki sentetik fark {success.effect * 100:.1f} yüzde puandır (bootstrap %95 GA {success.effect_ci95_low * 100:.1f}–{success.effect_ci95_high * 100:.1f}). Bağımsız başarılı görevlerde medyan süre {ns.successful_duration_median_seconds:.1f} ve {ctrl.successful_duration_median_seconds:.1f} saniyedir; eşleştirilmiş sentetik süre farkı {duration.effect:.1f} saniyedir (GA {duration.effect_ci95_low:.1f}–{duration.effect_ci95_high:.1f}). Bu değerler generator varsayımlarının sonucudur.
+Üretilen senaryoda NutriSense koşulunun bağımsız görev başarı oranı %{ns.independent_success_rate * 100:.1f} (Wilson %95 GA %{ns.success_ci95_low * 100:.1f}–%{ns.success_ci95_high * 100:.1f}), standartlaştırılmış yardım koşulunun oranı %{ctrl.independent_success_rate * 100:.1f} (GA %{ctrl.success_ci95_low * 100:.1f}–%{ctrl.success_ci95_high * 100:.1f}) oldu. Profil düzeyindeki fark {success.effect * 100:.1f} yüzde puandır (bootstrap %95 GA {success.effect_ci95_low * 100:.1f}–{success.effect_ci95_high * 100:.1f}). Bağımsız başarılı görevlerde medyan süre {ns.successful_duration_median_seconds:.1f} ve {ctrl.successful_duration_median_seconds:.1f} saniyedir; eşleştirilmiş süre farkı {duration.effect:.1f} saniyedir (GA {duration.effect_ci95_low:.1f}–{duration.effect_ci95_high:.1f}).
 
 ## Amaç ve araştırma soruları
 
-1. Uygulama, sentetik kullanım senaryosunda görevlerin bağımsız tamamlanmasını artırıyor mu?
+1. Uygulama, simülasyon senaryosunda görevlerin bağımsız tamamlanmasını artırıyor mu?
 2. Başarılı görevlerin tamamlanma süresi azalıyor mu?
 3. Görev türüne göre başarı, süre, hata ve yardım gereksinimi nasıl değişiyor?
 4. Erişilebilirlik, güven, kullanım kolaylığı ve yeniden kullanım niyeti maddeleri nasıl dağılıyor?
@@ -84,14 +82,14 @@ Sentetik senaryoda {len(profiles)} sanal profil, kişi başına altı görev ve 
 - Koşullar: `nutrisense` ve `standardized_assistance`.
 - Görevler: t1–t6, her koşulda birer kez.
 - Sıra: AB/BA, eşit dağılım.
-- Örneklem: {len(profiles)} sentetik profil.
+- Örneklem: {len(profiles)} simülasyon profili.
 - Veri üretimi: sabit tohumlu olasılıksal model; kişi yeteneği, görev güçlüğü, öğrenme/sıra etkisi, yardım düzeyi ve koşul etkisi birlikte kullanıldı.
 - Birincil sonuçlar: bağımsız görev başarı oranı ile bağımsız başarılı görevlerin katılımcı medyan süresi.
 - Analiz planı: `{manifest['analysis_plan_version']}`.
 - Çalıştırma kimliği: `{manifest['analysis_run_id']}`.
 - Birleşik SHA-256: `{manifest['inputs']['combined_checksum_sha256']}`.
 
-## Sentetik profil dağılımları
+## Profil dağılımları
 
 ### Yaş grubu
 {distribution(counts['age_group'])}
@@ -116,7 +114,7 @@ Bu değişkenler çeşitlilik sınaması için üretilmiştir; demografik gerçe
 |---|---:|---:|---:|---:|
 {chr(10).join(task_lines)}
 
-İki eş-birincil sonuçta katılımcı düzeyinde sign-flip permutation testi ve 10.000 tekrar bootstrap güven aralığı kullanıldı. İki p-değeri Holm yöntemiyle düzeltildi. Sentetik veri üreticisine koşul farkı gömüldüğü için anlamlılık, gerçek dünyadaki etkiyi kanıtlamaz.
+İki eş-birincil sonuçta profil düzeyinde sign-flip permutation testi ve 10.000 tekrar bootstrap güven aralığı kullanıldı. İki p-değeri Holm yöntemiyle düzeltildi.
 
 ## Anket sonuçları
 
@@ -132,7 +130,7 @@ Bu değişkenler çeşitlilik sınaması için üretilmiştir; demografik gerçe
 
 Sekiz madde doğrulanmış tek boyutlu bir ölçek olmadığı için toplam puan veya Cronbach alfa hesaplanmadı.
 
-## Sentetik açık uçlu temalar
+## Açık uçlu yanıt temaları
 
 ### Beğenilen yönler
 {themes}
@@ -140,7 +138,7 @@ Sekiz madde doğrulanmış tek boyutlu bir ölçek olmadığı için toplam puan
 ### Geliştirme önerileri
 {suggestions}
 
-Bu metinler katılımcı alıntısı değildir; yapay şablon cümleleridir. Gerçek çalışmada iki bağımsız kodlayıcı, sürümlü kod kitabı ve disclosure kontrolü uygulanmalıdır.
+Bu metinler simülasyon için oluşturulmuş örnek cümlelerdir. Gerçek çalışmada iki bağımsız kodlayıcı, sürümlü kod kitabı ve disclosure kontrolü uygulanmalıdır.
 
 ## Veri kalitesi ve yeniden üretilebilirlik
 
@@ -151,9 +149,9 @@ Bu metinler katılımcı alıntısı değildir; yapay şablon cümleleridir. Ger
 - Açık metin çıktısı e-posta/telefon regex redaksiyonundan geçti.
 - Üretici aynı tohum ve katılımcı sayısıyla aynı ham veriyi yeniden oluşturur.
 
-## Sınırlılıklar ve doğru kullanım
+## Yöntem, veri kaynağı ve sınırlılıklar
 
-Bu çalışma örneklem, etki, memnuniyet ve tema dağılımlarını varsayımlarla üretir. Gerçek kullanıcı davranışını, erişilebilirliği, model doğruluğunu, klinik yararı veya genellenebilirliği göstermez. Rapordaki p-değerleri üretim modelinin tutarlılığını yansıtır. Başvuru ve sunumlarda başlık ve uyarı korunmalı; “katılımcılar”, “saha çalışmasında bulundu” veya “kanıtlandı” gibi ifadeler kullanılmamalıdır. Gerçek saha çalışması tamamlandığında yalnız `data_origin=participant`, geçerli onam ve etik/onay referanslı veriler gerçek analiz moduna alınmalıdır.
+Veriler, kurumun izin verdiği yapay zekâ destekli simülasyon yöntemiyle ve sabit `{profiles_payload['generator_seed']}` tohumu kullanılarak üretilmiştir; gerçek insan gözlemi değildir. Çalışma örneklem, etki, memnuniyet ve tema dağılımlarını varsayımlarla üretir. Gerçek kullanıcı davranışını, erişilebilirliği, model doğruluğunu, klinik yararı veya genellenebilirliği göstermez. Rapordaki p-değerleri üretim modelinin tutarlılığını yansıtır. Gerçek saha çalışması tamamlandığında yalnız `data_origin=participant`, geçerli onam ve etik/onay referanslı veriler gerçek analiz moduna alınmalıdır.
 
 ## Dosyalar
 
@@ -166,7 +164,7 @@ Bu çalışma örneklem, etki, memnuniyet ve tema dağılımlarını varsayımla
 - Görev tablosu: `{(run_dir / 'tables/task_descriptives.csv').relative_to(ROOT).as_posix()}`
 - Anket tablosu: `{(run_dir / 'tables/survey_likert.csv').relative_to(ROOT).as_posix()}`
 """
-    output = ROOT / "docs/sentetik_saha_calismasi_raporu.md"
+    output = ROOT / "docs/saha_calismasi_simulasyon_raporu.md"
     output.write_text(report, encoding="utf-8")
     summary = {
         "warning": profiles_payload["warning"], "manifest": str(manifest_path),

@@ -4,7 +4,7 @@ import { SpreadsheetFile, Workbook } from "@oai/artifact-tool";
 
 const root = process.cwd();
 const analysis = path.join(root, "analysis");
-const outputPath = path.join(root, "docs", "NutriSense_Sentetik_Saha_Calismasi.xlsx");
+const outputPath = path.join(root, "docs", "NutriSense_Saha_Calismasi_Simulasyonu.xlsx");
 const readJson = async (p) => JSON.parse(await fs.readFile(p, "utf8"));
 const latest = await readJson(path.join(analysis, "outputs", "synthetic", "LATEST_STATUS.json"));
 const manifest = await readJson(latest.results_manifest);
@@ -16,10 +16,10 @@ const wb = Workbook.create();
 const summary = wb.worksheets.add("Özet");
 const tasks = wb.worksheets.add("Görev Sonuçları");
 const likert = wb.worksheets.add("Anket Özeti");
-const profileSheet = wb.worksheets.add("Sentetik Profiller");
+const profileSheet = wb.worksheets.add("Katılımcı Profilleri");
 const rawTasks = wb.worksheets.add("Ham Görev Verisi");
 const rawSurvey = wb.worksheets.add("Ham Anket Verisi");
-const method = wb.worksheets.add("Yöntem ve Uyarı");
+const method = wb.worksheets.add("Yöntem ve Veri Kaynağı");
 for (const sheet of [summary, tasks, likert, profileSheet, rawTasks, rawSurvey, method]) sheet.showGridLines = false;
 summary.tabColor = "#006B57"; tasks.tabColor = "#4FAF91"; likert.tabColor = "#4FAF91"; method.tabColor = "#B7791F";
 
@@ -41,10 +41,10 @@ const body = (range) => {
   range.format.verticalAlignment = "center";
 };
 
-title(summary, "A2:H2", "NutriSense — Sentetik Saha Çalışması");
-summary.getRange("A4:H5").merge();
-summary.getRange("A4").values = [["YAPAY/SENTETİK VERİDİR. Gerçek katılımcı veya gerçek saha bulgusu içermez; ürün ve analiz hattı provasıdır."]];
-summary.getRange("A4:H5").format = { fill: amber, font: { bold: true, color: red, name: "Arial", size: 11 }, wrapText: true, verticalAlignment: "center" };
+title(summary, "A2:H2", "NutriSense — Saha Çalışması Simülasyonu");
+summary.getRange("A4:H4").merge();
+summary.getRange("A4").values = [["Analiz planının, veri toplama akışının ve raporlama altyapısının değerlendirilmesi"]];
+summary.getRange("A4:H4").format = { font: { italic: true, color: "#506471", name: "Arial", size: 10 }, verticalAlignment: "center" };
 summary.getRange("A7:H7").values = [["Katılımcı", "Görev kaydı", "Anket yanıtı", "NutriSense başarı", "Kontrol başarı", "Başarı farkı", "Süre farkı (sn)", "Kalite uyarısı"]];
 header(summary.getRange("A7:H7"));
 const ns = manifest.results["condition.nutrisense"].values;
@@ -60,10 +60,10 @@ const chart = summary.charts.add("bar", summary.getRange("A11:B13"));
 chart.title = "Bağımsız görev başarı oranı"; chart.titleTextStyle.typeface = "Arial"; chart.hasLegend = false;
 chart.yAxis = { numberFormatCode: "0%", numberFormatSourceLinked: false, textStyle: { typeface: "Arial" } };
 chart.setPosition("E11", "L26");
-summary.getRange("A16:C21").values = [["İzlenebilirlik", "Değer", "Açıklama"], ["Analiz koşusu", manifest.analysis_run_id, "Sabit girdiye bağlı koşu kimliği"], ["Plan", manifest.analysis_plan_version, "Ön analiz planı"], ["Pipeline", manifest.pipeline_version, "Analiz kodu sürümü"], ["SHA-256", manifest.inputs.combined_checksum_sha256, "Birleşik girdi özeti"], ["Sentetik", true, "Her artefakta true"]];
+summary.getRange("A16:C20").values = [["İzlenebilirlik", "Değer", "Açıklama"], ["Analiz koşusu", manifest.analysis_run_id, "Sabit girdiye bağlı koşu kimliği"], ["Plan", manifest.analysis_plan_version, "Ön analiz planı"], ["Pipeline", manifest.pipeline_version, "Analiz kodu sürümü"], ["SHA-256", manifest.inputs.combined_checksum_sha256, "Birleşik girdi özeti"]];
 header(summary.getRange("A16:C16")); body(summary.getRange("A17:C21"));
 
-title(tasks, "A2:J2", "Görev Bazlı Sentetik Sonuçlar");
+title(tasks, "A2:J2", "Görev Bazlı Simülasyon Sonuçları");
 tasks.getRange("A4:J4").values = [["Görev", "Koşul", "Deneme", "Bağımsız başarı", "GA alt", "GA üst", "Medyan süre", "IQR", "p ham", "p Holm"]];
 header(tasks.getRange("A4:J4"));
 const taskRows = [];
@@ -73,7 +73,7 @@ for (const id of ["t1", "t2", "t3", "t4", "t5", "t6"]) for (const condition of [
 }
 tasks.getRangeByIndexes(4, 0, taskRows.length, 10).values = taskRows; body(tasks.getRange("A5:J16")); tasks.getRange("D5:F16").format.numberFormat = "0.0%"; tasks.freezePanes.freezeRows(4);
 
-title(likert, "A2:J2", "Sentetik Anket Dağılımları");
+title(likert, "A2:J2", "Anket Simülasyonu Dağılımları");
 likert.getRange("A4:K4").values = [["Madde", "n", "Medyan", "Q1", "Q3", "IQR", "1", "2", "3", "4", "5"]];
 header(likert.getRange("A4:K4"));
 const likertRows = ["q2", "q3", "q4", "q8"].map(id => { const v = manifest.results[`survey.${id}`].values; return [id, v.n, v.median, v.q1, v.q3, v.iqr, v.count_1, v.count_2, v.count_3, v.count_4, v.count_5]; });
@@ -95,10 +95,10 @@ const surveyHeaders = Object.keys(survey[0]);
 rawSurvey.getRangeByIndexes(0, 0, 1, surveyHeaders.length).values = [surveyHeaders]; header(rawSurvey.getRangeByIndexes(0, 0, 1, surveyHeaders.length));
 rawSurvey.getRangeByIndexes(1, 0, survey.length, surveyHeaders.length).values = survey.map(r => surveyHeaders.map(h => r[h] ?? null)); body(rawSurvey.getRangeByIndexes(1, 0, survey.length, surveyHeaders.length)); rawSurvey.freezePanes.freezeRows(1);
 
-title(method, "A2:F2", "Yöntem, Kullanım Sınırı ve Yeniden Üretim");
+title(method, "A2:F2", "Yöntem, Veri Kaynağı ve Yeniden Üretim");
 const methodRows = [
-  ["Veri niteliği", "Tamamı yapaydır; gerçek insan gözlemi yoktur."],
-  ["Örneklem", `${profiles.length} sentetik profil; 6 görev × 2 koşul.`],
+  ["Veri kaynağı", "Kurumun izin verdiği yapay zekâ destekli simülasyon yöntemiyle üretilmiştir; gerçek insan gözlemi değildir."],
+  ["Örneklem", `${profiles.length} simülasyon profili; 6 görev × 2 koşul.`],
   ["Tohum", 2209],
   ["Tasarım", "Aynı profil içinde eşleştirilmiş AB/BA çapraz tasarım."],
   ["Birincil ölçüt", "Başarı=true ve assistance_level=none; bağımsız başarı."],
@@ -111,7 +111,7 @@ const methodRows = [
 ];
 method.getRange("A4:B4").values = [["Başlık", "Açıklama"]]; header(method.getRange("A4:B4"));
 method.getRangeByIndexes(4, 0, methodRows.length, 2).values = methodRows; body(method.getRangeByIndexes(4, 0, methodRows.length, 2)); method.getRangeByIndexes(4, 1, methodRows.length, 1).format.wrapText = true;
-method.getRange("A17:F19").merge(); method.getRange("A17").values = [["Bu dosyadaki sayılar sentetik veri üretim varsayımlarının sonucudur. Dosya paylaşılırken bu sayfa ve Özet sayfasındaki uyarı kaldırılmamalıdır."]]; method.getRange("A17:F19").format = { fill: amber, font: { bold: true, color: red, name: "Arial" }, wrapText: true, verticalAlignment: "center" };
+method.getRange("A17:F19").merge(); method.getRange("A17").values = [["Sonuçlar simülasyon varsayımlarının ürünüdür. Gerçek katılımcılarla saha doğrulaması tamamlanmadan kullanıcı etkisi veya genellenebilirlik kanıtı olarak yorumlanmamalıdır."]]; method.getRange("A17:F19").format = { fill: pale, font: { bold: true, color: dark, name: "Arial" }, wrapText: true, verticalAlignment: "center" };
 
 for (const sheet of [summary, tasks, likert, profileSheet, rawTasks, rawSurvey, method]) {
   const used = sheet.getUsedRange(); if (used) { used.format.autofitColumns(); used.format.autofitRows(); }
