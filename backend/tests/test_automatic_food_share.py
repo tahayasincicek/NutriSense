@@ -13,6 +13,7 @@ class LocalNotification:
     def __init__(self):
         self.settings = Settings(
             app_environment="test", notification_mode="sandbox", smtp_host="mailpit",
+            smtp_from_email="noreply@nutrisense.invalid",
             sms_provider_mode="local_outbox",
         )
         self.calls = []
@@ -130,3 +131,24 @@ def test_manual_food_confirmation_also_sends_once(client, setup):
         response = client.post("/api/v1/food-log/manual", json=body, headers=headers)
         assert response.status_code == 200, response.text
     assert len(notification.calls) == 2
+
+
+def test_opt_in_allows_ready_external_sandbox_channels(client, setup):
+    headers, notification = setup
+    notification.settings.smtp_host = "smtp.gmail.com"
+    notification.settings.smtp_user = "sender@example.com"
+    notification.settings.smtp_password = "app-password-value"
+    notification.settings.smtp_from_email = "sender@example.com"
+    notification.settings.smtp_start_tls = True
+    notification.settings.sms_provider_mode = "twilio"
+    notification.settings.twilio_account_sid = "AC" + "1" * 32
+    notification.settings.twilio_auth_token = "token-value"
+    notification.settings.twilio_phone_number = "+15005550001"
+    notification.settings.notification_sandbox_email_allowlist = (
+        "sandbox-dietitian@nutrisense.invalid"
+    )
+    notification.settings.notification_sandbox_phone_allowlist = "+15005550006"
+
+    toggle(client, headers, True)
+    confirm(client, headers)
+    assert [channel for channel, _ in notification.calls] == ["email", "sms"]

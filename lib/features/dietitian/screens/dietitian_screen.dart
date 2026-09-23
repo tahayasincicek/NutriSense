@@ -498,11 +498,9 @@ class _DietitianScreenState extends ConsumerState<DietitianScreen> {
               key: const Key('automatic_food_share'),
               title: const Text('Onay sonrası otomatik paylaşım'),
               subtitle: const Text(
-                  'Yerel test: onayladığınız her besin için diyetisyenin '
-                  'e-posta ve SMS test kutularına yalnız "yeni rapor hazır" '
-                  'bildirimi ve danışan kodu gider. Besin ve kalori bilgileri '
-                  'yalnız diyetisyen panelinde görünür. Gerçek adrese veya '
-                  'telefona ulaşmaz.'),
+                  'Onayladığınız her yeni besinin adı, miktarı, tarih-saati '
+                  've kalorisi atanmış diyetisyenin doğrulanmış e-posta ve '
+                  'telefonuna otomatik gönderilir.'),
               value: _automaticShare,
               onChanged: _busy || !_automaticLoaded ? null : _setAutomaticShare,
             ),
@@ -526,9 +524,10 @@ class _DietitianScreenState extends ConsumerState<DietitianScreen> {
           content: Text(
               '${_assignment!.dietitianName} için bundan sonra onayladığınız '
               'her yeni besinin adı, miktarı, tarih-saati ve kalorisi hem e-posta '
-              'hem SMS yerel test kutusuna otomatik aktarılacak. Önceki kayıtlar '
-              'gönderilmez. Bu ayarı istediğiniz zaman kapatabilirsiniz. '
-              'Gerçek gönderim yapılmaz ve gönderim ücreti oluşmaz.'),
+              'hem SMS ile otomatik aktarılacak. Önceki kayıtlar gönderilmez. '
+              'E-posta/SMS sağlayıcıları alıcı iletişim bilgisini ve rapor '
+              'içeriğini işleyecek; SMS sağlayıcı kredisi tüketilebilir. Bu '
+              'ayarı istediğiniz zaman kapatabilirsiniz.'),
           actions: [
             TextButton(
                 onPressed: () => Navigator.pop(context, false),
@@ -552,7 +551,7 @@ class _DietitianScreenState extends ConsumerState<DietitianScreen> {
         success: result.isSuccess,
         message: result.isSuccess
             ? (enabled
-                ? 'Otomatik yerel paylaşım açıldı.'
+                ? 'Otomatik paylaşım açıldı.'
                 : 'Otomatik paylaşım kapatıldı.')
             : result.errorMessage ?? 'Paylaşım ayarı değiştirilemedi.');
   }

@@ -120,11 +120,11 @@ SMTP/Twilio gibi dış sistemlerde atomik “tam olarak bir kez” garantisi yok
 
 Rapor payload snapshot'ı yeniden denemelerde aynı içeriğin korunmasını sağlar. Production'a geçmeden önce rapor, teslimat ve audit kayıtlarının saklama/silme süreleri kurumun KVKK politikasıyla belirlenmeli; hesap silme, yedek silme ve sağlayıcı retention süreçleri birlikte test edilmelidir.
 
-## Onay sonrası otomatik yerel paylaşım
+## Onay sonrası otomatik paylaşım
 
 Diyetisyen panelindeki **Onay sonrası otomatik paylaşım** anahtarı başlangıçta
 kapalıdır. Kullanıcının açıklamayı onaylaması `PUT /api/v1/dietitian-auto-share`
-üzerinden ayrı bir `automatic_food_share_local` izin kaydı oluşturur. GET aynı
+üzerinden ayrı bir `automatic_food_share` izin kaydı oluşturur. GET aynı
 uçtan etkin durumu döndürür. İki alıcı kanalının da doğrulanmış olması gerekir.
 
 Yeni tarama onayı, düzelterek onaylama ve onaylı manuel giriş, yalnız yeni besin
@@ -133,14 +133,13 @@ alır. Besin kaydı kimliği gönderimin tekrarını engeller. Önceki kayıtlar
 reddedilen analizler ve sonradan geçmiş düzenlemeleri otomatik gönderilmez.
 Teslimat hatası kaydedilmiş besini geri almaz; durum rapor geçmişinde görünür.
 
-Bu izin **yalnız yerel test içindir**: dev/test ortamı, sandbox bildirim modu,
-yerel SMTP ve `local_outbox` birlikte gereklidir. Compose SMS sağlayıcısını
-`local_outbox` olarak sabitler. Mailpit e-postaları localhost:8025'te, SMS
-mesajları backend içindeki `/tmp/sms_outbox.jsonl` dosyasında görülür. Gerçek
-adrese veya telefona gönderim yapılmaz. Ortam harici sağlayıcıya çevrilirse
-otomatik gönderim ve bu raporların yeniden denenmesi engellenir; bu izin
-gerçek gönderim iznine dönüşmez. İzin kapatılması, diyetisyen ilişkisinin
-kaldırılması veya alıcı değişmesi eski izinle yeni teslimatı engeller.
+Yerel geliştirmede Mailpit ve `local_outbox`, gerçek gösterimde ise eksiksiz
+yapılandırılmış SMTP ile Twilio veya iletiMerkezi kullanılabilir. Sandbox
+ortamında iki doğrulanmış diyetisyen alıcısının da izin listesinde bulunması
+zorunludur. Kullanıcı onay metni besin adı, miktar, tarih, saat ve kalorinin
+iki dış kanala aktarılacağını açıkça söyler. İzin kapatılması, diyetisyen
+ilişkisinin kaldırılması, sağlayıcının hazır olmaması veya alıcının değişmesi
+eski izinle yeni teslimatı ve yeniden denemeyi engeller.
 
 Zamanlayıcı yoktur; tetikleyici yeni besin onayıdır. Doğrulama:
 `backend/tests/test_automatic_food_share.py` ve
@@ -148,7 +147,7 @@ Zamanlayıcı yoktur; tetikleyici yeni besin onayıdır. Doğrulama:
 
 ## Secret ve sandbox yapılandırması
 
-SMTP/Twilio değerleri yalnız backend environment veya secret store'dan okunur. Mobil binary'de bulunmaz. `.env.example` yalnız değişken adları/açıklamaları ve sentetik RFC-reserved örnek alıcıları içerir.
+SMTP/Twilio/iletiMerkezi değerleri yalnız backend environment veya secret store'dan okunur. Mobil binary'de bulunmaz. `.env.example` yalnız değişken adları/açıklamaları ve sentetik RFC-reserved örnek alıcıları içerir.
 
 Temel anahtarlar:
 

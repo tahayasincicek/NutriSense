@@ -80,7 +80,8 @@ from ..domain.report_delivery import (
     verified_recipients,
 )
 from ..domain.automatic_reports import (
-    PURPOSE, POLICY, active_consent, recipient_digest, local_delivery_only,
+    PURPOSE, POLICY, active_consent, automatic_delivery_available,
+    recipient_digest,
     queue_automatic_report, guard_automatic_delivery,
 )
 from ..domain.food_shortcuts import (
@@ -1778,7 +1779,7 @@ async def _deliver_food_share(db, automatic):
         await _process_report_outbox(db, *automatic)
     except Exception:
         db.rollback()
-        logger.exception("Besin kaydedildi; otomatik yerel rapor teslimatı tamamlanamadı.")
+        logger.exception("Besin kaydedildi; otomatik rapor teslimatı tamamlanamadı.")
 
 
 @router.get("/dietitian-auto-share", response_model=AutomaticShareSettings)
@@ -1786,7 +1787,9 @@ def get_automatic_share(db: Session = Depends(get_db), current_user: User = Depe
     try:
         dietitian, assignment = _approved_report_relationship(db, current_user)
         verified_recipients(dietitian, ["email", "sms"])
-        enabled = local_delivery_only(getattr(notification_service, "settings", settings)) and bool(
+        enabled = automatic_delivery_available(
+            getattr(notification_service, "settings", settings), dietitian,
+        ) and bool(
             active_consent(db, current_user, dietitian, assignment)
         )
     except (HTTPException, ReportDeliveryError):
@@ -1802,9 +1805,15 @@ def set_automatic_share(
     # Serialize preference changes with other changes for this user.
     db.query(User).filter(User.id == current_user.id).with_for_update().one()
     if request.enabled:
-        if not local_delivery_only(getattr(notification_service, "settings", settings)):
-            raise HTTPException(409, "Otomatik paylaşım yalnız ücretsiz yerel test ortamında açılabilir.")
         dietitian, assignment = _approved_report_relationship(db, current_user)
+        if not automatic_delivery_available(
+            getattr(notification_service, "settings", settings), dietitian,
+        ):
+            raise HTTPException(
+                409,
+                "Otomatik paylaşım için e-posta ve SMS kanalları hazır olmalı; "
+                "sandbox alıcıları izin listesinde bulunmalıdır.",
+            )
         try:
             recipients = verified_recipients(dietitian, ["email", "sms"])
         except ReportDeliveryError as exc:
