@@ -101,11 +101,10 @@ Bunlar teknik eksiklik değil, kurumsal karar bekleyen işlerdir:
    için kurumun sahip olduğu bir kimlik yazılmalıdır.
 2. **İmzalı Archive / TestFlight.**
 3. **Gerçek iPhone'da VoiceOver ile elle erişilebilirlik testi.** Android
-   tarafında TalkBack testi yapıldı; VoiceOver karşılığı yapılmadı ve
-   `docs/accessibility_conformance_report.md` içinde `NOT RUN` olarak
-   işaretlidir.
-4. **Kamera/ses kesintisi, bellek ve cihaz gecikmesi ölçümleri.** Model
-   kartındaki gecikme alanı gerçek donanımda ölçülene kadar `not_run` kalır.
+   tarafındaki TalkBack kabulü tamamlandı; VoiceOver kabulü iOS yayın
+   rehberindeki cihaz matrisiyle yürütülmelidir.
+4. **Kamera/ses kesintisi ve bellek ölçümleri.** Android model gecikmesi
+   Samsung SM-G950F üzerinde ölçülmüştür; iOS performansı ayrıca ölçülmelidir.
 
 Adım adım anlatım: `docs/ios_release_runbook.md`, "iOS tamamlandı demek için
 kalan kapılar" başlığı.

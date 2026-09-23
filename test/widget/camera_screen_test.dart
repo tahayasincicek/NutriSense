@@ -6,15 +6,22 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:nutrisense/features/food_scan/screens/camera_screen.dart';
 import 'package:nutrisense/features/food_scan/models/camera_state.dart';
+import 'package:nutrisense/shared/models/food_analysis_model.dart';
 import 'package:nutrisense/shared/services/accessibility_service.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
-  Widget buildRealCamera({double textScale = 1, ImagePicker? picker}) {
+  Widget buildRealCamera({
+    double textScale = 1,
+    ImagePicker? picker,
+    AccessibilityService? accessibility,
+  }) {
     return ProviderScope(
       overrides: [
-        accessibilityServiceProvider.overrideWithValue(_Silent()),
+        accessibilityServiceProvider.overrideWithValue(
+          accessibility ?? _Silent(),
+        ),
         if (picker != null)
           galleryImagePickerProvider.overrideWithValue(picker),
       ],
@@ -64,6 +71,72 @@ void main() {
 
     expect(tester.takeException(), isNull);
     expect(find.byType(CameraScreen), findsOneWidget);
+  });
+
+  testWidgets('manuel giriş önce besin adını sonra adet sayısını ister',
+      (tester) async {
+    await tester.pumpWidget(buildRealCamera());
+    await tester.pump();
+
+    await tester.tap(find.bySemanticsLabel('Besin adını elle gir'));
+    await tester.pump(const Duration(milliseconds: 500));
+    expect(find.text('Besin adını metin olarak girin'), findsOneWidget);
+
+    await tester.enterText(find.byType(TextField), 'lahmacun');
+    await tester.tap(find.text('Kaydet'));
+    await tester.pump(const Duration(milliseconds: 500));
+
+    expect(find.text('Kaç adet yediniz?'), findsOneWidget);
+    expect(find.text('Adet'), findsOneWidget);
+    expect(find.text('Gram'), findsOneWidget);
+    expect(find.text('Adet sayısını metin olarak girin'), findsOneWidget);
+    expect(find.byKey(const Key('manual_amount_input')), findsOneWidget);
+  });
+
+  testWidgets('ses sürerken manuel giriş tek dokunuşla ilerler',
+      (tester) async {
+    final delayedSpeech = _DelayedSpeech();
+    addTearDown(delayedSpeech.complete);
+    await tester.pumpWidget(
+      buildRealCamera(accessibility: delayedSpeech),
+    );
+    await tester.pump();
+
+    await tester.tap(find.bySemanticsLabel('Besin adını elle gir'));
+    await tester.pump();
+    expect(find.text('Besin adını metin olarak girin'), findsOneWidget);
+
+    await tester.enterText(find.byType(TextField), 'lahmacun');
+    await tester.tap(find.text('Kaydet'));
+    await tester.pump();
+
+    expect(find.text('Kaç adet yediniz?'), findsOneWidget);
+  });
+
+  testWidgets('çevrimdışı ilk üç aday dokunarak seçilebilir', (tester) async {
+    await tester.pumpWidget(buildRealCamera());
+    final container =
+        ProviderScope.containerOf(tester.element(find.byType(CameraScreen)));
+    container.read(cameraStateProvider.notifier).setOnDeviceSuggestion(
+      'Muz',
+      0.61,
+      tentative: true,
+      candidates: const [
+        FoodCandidate(foodName: 'muz', foodNameTr: 'Muz', confidence: 0.61),
+        FoodCandidate(foodName: 'misir', foodNameTr: 'Mısır', confidence: 0.21),
+        FoodCandidate(foodName: 'kavun', foodNameTr: 'Kavun', confidence: 0.10),
+      ],
+    );
+    await tester.pump();
+
+    expect(find.text('Muz'), findsOneWidget);
+    expect(find.text('Mısır'), findsOneWidget);
+    expect(find.text('Kavun'), findsOneWidget);
+    await tester.tap(find.text('Mısır'));
+    await tester.pump();
+
+    final field = tester.widget<TextField>(find.byType(TextField));
+    expect(field.controller?.text, 'Mısır');
   });
 
   testWidgets(
@@ -125,4 +198,23 @@ class _Silent extends AccessibilityService {
   Future<void> speak(String text,
       {TtsPriority priority = TtsPriority.normal,
       bool allowWhileScreenReaderActive = false}) async {}
+}
+
+class _DelayedSpeech extends AccessibilityService {
+  final List<Completer<void>> _pending = [];
+
+  @override
+  Future<void> speak(String text,
+      {TtsPriority priority = TtsPriority.normal,
+      bool allowWhileScreenReaderActive = false}) {
+    final completer = Completer<void>();
+    _pending.add(completer);
+    return completer.future;
+  }
+
+  void complete() {
+    for (final completer in _pending) {
+      if (!completer.isCompleted) completer.complete();
+    }
+  }
 }

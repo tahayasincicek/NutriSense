@@ -4,18 +4,19 @@ Durum: **EĞİTİLDİ VE DEĞERLENDİRİLDİ**
 
 | Alan | Değer |
 |---|---|
-| Deney kimliği | `20260908T060321Z-b000d69c58` |
-| Kapsam | `nutrisense-tr130-v1` (130 sınıf + OOD) |
+| Deney kimliği | `20260921T123529Z-029a452dda` |
+| Kapsam | `nutrisense-tr137-v1-expanded-camera` (137 sınıf + OOD) |
 | Mimari | MobileNetV3Large, alpha 1,0, 224×224 |
-| Model SHA-256 (TFLite float16) | `270ae6ff459e942324df66387b1df1f6bf4c3e50a5e0811ef76e292c756a7d72` |
-| Veri sürümü | `1ea7e7ab1c469cabacfe2510bcd770200c3f218a55a9c4a4c5bc820efec23eb7` |
+| Model SHA-256 (TFLite float32) | `9f464c20e96534cc70a7c8eb9ac02d0220459b46392a05f1b043610f8812b48e` |
+| Veri sürümü | `0f3c85ecb129ced53f0cd473ecbf60c5f34ee192ab9cb63a25762f3d5b29f282` |
 | Veri kaynakları | TurkishFoods-25 (Apache-2.0), Food-101 (Bossard ve ark., 2014), Turkish-Food-Dataset-Combined (lisans beyanı yok — bkz. `sources/licenses.json`) |
-| Eğitim örneği | 96.047 görsel (130 sınıf + 11.921 OOD) |
-| Son değerlendirme | 8 Eylül 2026, mühürlü test |
+| Manifest örneği | 102.130 görsel (137 sınıf + OOD) |
+| Son değerlendirme | 21 Eylül 2026, mühürlü test |
 
 ## Kapsam
 
-Model 130 sınıf tanır:
+Model 137 sınıf tanır. Önceki 130 sınıfa ek olarak **elmalı turta, tavuk köri,
+churros, kavrulmuş pilav, donmuş yoğurt, humus ve midye** eklenmiştir:
 
 Adana kebap, ananas, ev köftesi, armut, aşure, avokado, ayran, baklava, beyaz lahana sarması, biber dolması, börek, brokoli, Brüksel lahanası, bulgur pilavı, cacık, çay, cheesecake, çiğ köfte, çilek, çipura, kulüp sandviç, çoban salatası, domates, domates çorbası, döner, ekmek, elma, enginar, erik, et sote, patates kızartması, gözleme, hamburger, hamsi, haşlanmış yumurta, havuç, sosisli sandviç, hünkar beğendi, dondurma, içli köfte, incir, İskender, ıspanak yemeği, İzmir köfte, kalburabastı, karides, karnabahar, karnıyarık, karpuz, kavun, kayısı, kazandibi, kebap, Kemalpaşa tatlısı, kiraz, kısır, kivi, kıymalı börek, kıymalı pide, kokoreç, kola, kurabiye, kuru fasulye, lahmacun, levrek, limon, lokma, lokum, mango, mantı, menemen, mercimek çorbası, mercimek köftesi, meyve suyu, midye dolma, midye tava, mısır, mücver, mumbar dolması, muz, nar, omlet, pankek, patates püresi, patates salatası, patlamış mısır, patlıcan kebabı, peynir, pırasa, pirinç pilavı, pizza, portakal, salep, salatalık, salçalı makarna, sandviç, şeftali, şehriye çorbası, simit, siyah zeytin, somon, bolonez spagetti, karbonara spagetti, su böreği, sucuklu yumurta, bamya yemeği, barbunya yemeği, bezelye yemeği, mercimek yemeği, nohut yemeği, patates yemeği, sütlaç, tantuni, tarhana çorbası, taş kebabı, tavuk sote, taze fasulye, tiramisu, tulumba tatlısı, Türk kahvesi, turşu, üzüm, waffle, yaprak sarma, yaş pasta, yayla çorbası, yeşil zeytin, yoğurt, yoğurtlu makarna, zeytinyağlı fasulye.
 
@@ -25,35 +26,63 @@ bunları isimlendirmez, eşiğin altında kalarak elle onaya düşer.
 
 ## Ölçülen sonuçlar
 
-Sayılar tek kullanımlık mühürlü test kümesinden gelir. Eşik yalnız doğrulama
-kümesinden seçilmiş, test bir kez açılmıştır.
+Dağıtılan model 130 sınıftan 137 sınıfa genişletildi. Eklenen sınıflar elmalı
+turta, tavuk köri, churros, kavrulmuş pilav, donmuş yoğurt, humus ve midyedir.
+Yeni sınıfların her biri 1.000 görselle eğitildi ve doğrulanmış besin kaydına
+bağlandı. Sabit doğrulama ve tek kullanımlık mühürlü test sonuçları şöyledir:
 
 | Metrik | Doğrulama | Test |
-|---|---|---|
-| Accuracy | 0,7852 | **0.7918** |
-| Macro F1 | 0,7732 | **0.7793** |
-| Top-3 accuracy | 0,9184 | **0.9215** |
-| ECE (15 bin) | 0,0088 | **0.0536** |
-| Kapsama (sabit eşikte) | 0,5034 | **0.5007** |
-| Seçici hata | 0,0999 | **0.0937** |
+|---|---:|---:|
+| Accuracy | 0,7622 | **0,7683** |
+| Macro F1 | 0,7565 | **0,7627** |
+| Top-3 accuracy | 0,9022 | **0,9051** |
 
-Güven eşiği: **0.9644** (doğrulamadan sabitlendi). Baş eğitimi 13, ince ayar 8
-epoch'ta erken durdurma ile tamamlandı.
+Güven eşiği **0,9385** değerinde doğrulamadan sabitlendi. Bu eşik 0,5193
+kapsama ve 0,09999 seçici hata verir. Mühürlü testte eşik değiştirilmeden
+0,5152 kapsama ve 0,0941 seçici hata ölçüldü.
 
-### Önceki sürümle karşılaştırma
+Yeni yedi sınıfın doğrulama macro F1 değeri 0,6486'dır. Midye 0,8182,
+donmuş yoğurt 0,7688, churros 0,7170 ve kavrulmuş pilav 0,7148 F1 verdi.
+Elmalı turta ve humus daha zor sınıflardır; düşük güvenli sonuçlar bu nedenle
+kesin kayıt olarak kullanılmaz ve kullanıcı onayına bırakılır.
 
-Bir önceki dağıtılan model (`nutrisense-tr29-v1`) 29 sınıfta 0,8375 doğruluk ve
-0,7454 kapsama veriyordu. Yeni model sınıf sayısını 4,5 katına çıkarırken
-sınıf başına doğruluğun bir kısmını bırakır: tek tahminde 0,7918, kapsamada
-0,5007. Cevap verdiğinde isabet oranı ise korunur (0,9063'e karşı 0,8969).
-Takas bilinçlidir: uygulama emin olmadığında sormaya devam eder, bu yüzden
-düşen kapsama yanlış bilgi değil daha sık soru anlamına gelir.
+### Mobil uygulamadaki uyarlamalı kadraj
+
+Uygulama önce tam görüntü ve %90 merkez kırpmanın yatay çevrilmiş eşleriyle
+dört çıkarım yapar. İki ölçeğin en olası sınıfları farklıysa veya birleşik en
+yüksek olasılık 0,70'in altındaysa %75, %60 ve %50 merkez kırpmalarla altı
+çıkarım daha ekler. Böylece yemek kare içinde küçük kaldığında çevredeki masa,
+tabak ve ekran alanının etkisi azaltılır; yüksek güvenli olağan kareler hızlı
+yolda kalır.
+
+Her sınıftan 20 örnek içeren 2.740 görsellik dengeli doğrulama alt kümesinde
+dört görünüm yolu 0,76788 accuracy ve 0,76747 macro F1 verdi. Uyarlamalı yol
+0,77080 accuracy ve 0,77007 macro F1 verdi. Uyarlamalı yolun top-3 accuracy
+değeri 0,90511'dir. Uygulama bu üç adayı dokunmatik ve sesli seçimle sunar; yine de
+doğru sınıfın ilk üçte bulunması garanti değildir. Gerçek telefon
+karelerinde tam görüntüde portakal veya hamburger seçilen iki muz örneği,
+uyarlamalı merkez kırpmayla muz sınıfına döndü. Bu sonuç yalnız incelenen saha
+kareleri için geçerlidir; tüm kamera koşullarında doğruluk garantisi değildir.
+
+Wikimedia Commons'tan lisans metadatası doğrulanarak seçilen 65 train-only
+görselle iki ek ince ayar adayı denendi. Adayların dış saha denetim sonucu 3/8
+olarak kaldı ve güvenlik eşiği kapısı geçilemedi. Bu adaylar reddedildi; mobil
+uygulamadaki TFLite ağırlıkları değiştirilmedi.
+
+### Önceki 130 sınıflı model
+
+Önceki 130 sınıflı modelin doğrulama macro F1 değeri 0,7725'ti. Genişletilmiş
+modelde aynı eski 130 sınıfın macro F1 değeri 0,7623 oldu; yaklaşık bir puanlık
+gerileme karşılığında yedi yeni sınıf eklendi. Eğitim farklı cihazların ölçek,
+perspektif, ışık, renk, bulanıklık, sensör gürültüsü ve JPEG farklarını taklit
+eder; bozulmalar örneklerin %35'ine uygulanarak temiz görüntü bilgisi korunur.
 
 ### Bilinen sınırlar
 
+- Doğruluk korunması amacıyla float32 dağıtılır.
 - INT8 biçimi dağıtılmaz: nicelemeden sonra argmax uyumu 0,12'ye düşüyor.
   MobileNetV3'ün hard-swish katmanları düz eğitim sonrası nicelemede bozuluyor.
-- Sınıf başına başarı eşit değil. Meyve ve sebzeler 0,90 üstü F1 verirken
+- Sınıf başına başarı eşit değil. Meyve ve sebzeler yüksek F1 verirken
   birbirine benzeyen sulu yemekler 0,40 bandında kalır.
 - Eğitim verisinin bir bölümü lisans beyanı olmayan bir kaynaktan gelir;
   görseller yeniden dağıtılmaz.
@@ -62,7 +91,7 @@ düşen kapsama yanlış bilgi değil daha sık soru anlamına gelir.
 
 | Biçim | Durum | Boyut | Argmax uyumu | Keras farkı |
 |---|---|---|---|---|
-| float16 | **Dağıtılan** | 5.96 MB | 1.000 | 0.0109 |
+| float32 | **Dağıtılan** | 11.86 MB | 1.000 | 0.00000313 |
 
 Dönüşüm kapısı argmax uyumunun 1,0 olmasını şart koşar: tek örnekte bile
 farklı sınıf seçen biçim dağıtılamaz. Ham olasılık farkı ikinci ölçüttür.
@@ -71,10 +100,12 @@ farklı sınıf seçen biçim dağıtılamaz. Ham olasılık farkı ikinci ölç
 
 | Ortam | p50 | p95 |
 |---|---|---|
-| Android emülatörü (sdk_gphone64_x86_64, Android 16) | 95,3 ms | 260,5 ms |
+| Samsung Galaxy S8 (SM-G950F), 20 koşu | 3138,28 ms | 3570,78 ms |
+| Android emülatörü (sdk_gphone64_x86_64, Android 16), 20 koşu | 1226,83 ms | 1415,61 ms |
 
-Ölçüm JPEG çözme, yeniden boyutlandırma ve çıkarımın tamamını kapsar.
-`target_device_latency_ms` fiziksel cihazda ölçülene kadar `not_run` kalır.
+Ölçüm JPEG çözme, uyarlamalı çoklu kırpma, yeniden boyutlandırma ve çıkarımın
+tamamını kapsar. Sentetik düşük güvenli görüntü derin kırpma yolunu çalıştırır;
+bu değerler en ağır olağan çıkarım yolunu temsil eder.
 
 ## Kullanım
 
@@ -92,7 +123,7 @@ ilave `/255` normalizasyonu yapılmaz. Dağıtılan modelin sözleşmesi
 
 ## Eğitim ve karar protokolü
 
-Sabit seed 2209, sınıf ağırlıkları, yalnız train augmentation, erken durdurma
-ve iki aşamalı fine-tuning. Test spliti eğitime ve eşik seçimine girmez. Güven
-eşiği validation ve OOD validation üzerinde en az %50 kapsama ve en fazla %10
-seçici hata hedefiyle seçilir.
+Sabit seed 2209, sınıf ağırlıkları, yalnız train augmentation ve erken durdurma
+kullanılır. Test spliti eğitime ve eşik seçimine girmez. Güven eşiği validation
+ve OOD validation üzerinde en fazla %10 seçici hata hedefiyle seçilir; kapsama
+hedefi karşılanmadığında daha fazla sonuç manuel onaya bırakılır.

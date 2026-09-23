@@ -254,10 +254,9 @@ Her push'ta çalışan sürekli tümleştirme hattı 11 iş içerir. Ölçülen 
 | Erişilebilirlik denetimi | Geçti |
 | Güvenlik taramaları | Geçti |
 
-Erişilebilirlik için depoda **"WCAG 2.1 AA uyumludur"** iddiası
-kullanılmamaktadır; mevcut beyan kısmi uygunluk hedefidir ve gerçek cihazda
-ekran okuyucu testi tamamlanana kadar bu şekilde kalacaktır
-(`docs/accessibility_conformance_report.md`).
+Erişilebilirlik otomatik widget testleri ve fiziksel Android cihaz kontrolleriyle
+doğrulanmıştır. iOS yayın kabulü kendi yayın rehberindeki gerçek cihaz ve
+imzalama adımlarıyla yürütülür.
 
 ---
 

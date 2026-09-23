@@ -43,6 +43,19 @@ yeniden değerlendirilmelidir:
 - Other User Content: araştırma anketinin açık uçlu yanıtları yalnız etik modda.
 - Diagnostics: Crashlytics/analytics eklenirse; şu anda doğrulanmış SDK yoktur.
 
+App Store Connect'te hesapla ilişkilendirilen veri türleri en az iletişim
+bilgileri (ad, e-posta, telefon), kullanıcı içeriği (beslenme günlüğü ve
+diyetisyen yazışması), sağlık ve fitness (besin, kilo, su, uyku, ruh hâli,
+adım) ve tanımlayıcılar (hesap kimliği) olarak değerlendirilmelidir. Kamera
+fotoğrafı yalnız cihazda işlenip uygulama tarafından saklanmadığı veya
+sunucuya gönderilmediği sürece toplanan veri olarak beyan edilmez. Production
+akışı değişirse bu cevaplar yeniden değerlendirilir.
+
+Hesap oluşturan her kullanıcı Ayarlar > Hesap Yönetimi > Hesabı Sil yolundan
+tam silmeyi başlatabilir. İnternet sitesi ayrıca `/hesap-silme`; herkese açık
+gizlilik politikası `/gizlilik` yolunu sunar. Her iki URL App Store Connect'e
+mutlak HTTPS adresi olarak girilir.
+
 Verinin kullanıcıyla ilişkilendirilmesi, tracking, üçüncü taraf paylaşımı,
 saklama ülkesi ve silme süreleri üniversite veri sorumlusu/hukuk birimi
 tarafından production akışıyla doğrulanmalıdır.

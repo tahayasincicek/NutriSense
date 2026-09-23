@@ -14,6 +14,26 @@ abstract final class AppConfig {
     'API_BASE_URL',
   );
 
+  static const String privacyNoticeVersion = String.fromEnvironment(
+    'PRIVACY_NOTICE_VERSION',
+    defaultValue: 'taslak-yayinlanmadi',
+  );
+  static const String dataControllerName = String.fromEnvironment(
+    'DATA_CONTROLLER_NAME',
+  );
+  static const String dataControllerContactEmail = String.fromEnvironment(
+    'DATA_CONTROLLER_CONTACT_EMAIL',
+  );
+  static const String dataControllerPostalAddress = String.fromEnvironment(
+    'DATA_CONTROLLER_POSTAL_ADDRESS',
+  );
+  static const String privacyPolicyUrl = String.fromEnvironment(
+    'PRIVACY_POLICY_URL',
+  );
+  static const String accountDeletionUrl = String.fromEnvironment(
+    'ACCOUNT_DELETION_URL',
+  );
+
   /// Firebase packages and platform credentials are intentionally not bundled.
   /// Enabling this flag fails fast until the optional adapter is implemented.
   static const bool firebaseCrashlyticsRequested = bool.fromEnvironment(
@@ -80,6 +100,41 @@ abstract final class AppConfig {
 
   static void validate() {
     apiBaseUrl;
+    if (environment == AppEnvironment.prod) {
+      final requiredLegalValues = {
+        'PRIVACY_NOTICE_VERSION': privacyNoticeVersion,
+        'DATA_CONTROLLER_NAME': dataControllerName,
+        'DATA_CONTROLLER_CONTACT_EMAIL': dataControllerContactEmail,
+        'DATA_CONTROLLER_POSTAL_ADDRESS': dataControllerPostalAddress,
+        'PRIVACY_POLICY_URL': privacyPolicyUrl,
+        'ACCOUNT_DELETION_URL': accountDeletionUrl,
+      };
+      final missing = requiredLegalValues.entries
+          .where((entry) =>
+              entry.value.trim().isEmpty ||
+              entry.value.toLowerCase().contains('taslak') ||
+              entry.value.toUpperCase().contains('REPLACE'))
+          .map((entry) => entry.key)
+          .toList();
+      if (missing.isNotEmpty) {
+        throw StateError(
+          'Production legal configuration is incomplete: ${missing.join(', ')}',
+        );
+      }
+      if (!dataControllerContactEmail.contains('@')) {
+        throw StateError(
+            'DATA_CONTROLLER_CONTACT_EMAIL must be an email address.');
+      }
+      for (final entry in {
+        'PRIVACY_POLICY_URL': privacyPolicyUrl,
+        'ACCOUNT_DELETION_URL': accountDeletionUrl,
+      }.entries) {
+        final uri = Uri.tryParse(entry.value);
+        if (uri == null || uri.scheme != 'https' || !uri.hasAuthority) {
+          throw StateError('${entry.key} must be a public HTTPS URL.');
+        }
+      }
+    }
     if (firebaseCrashlyticsRequested) {
       throw StateError(
         'Firebase Crashlytics is disabled: platform credentials and the '

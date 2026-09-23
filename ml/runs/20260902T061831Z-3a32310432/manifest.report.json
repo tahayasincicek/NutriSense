@@ -1,6 +1,6 @@
 {
   "created_at": "2026-09-02T06:16:40.750242Z",
-  "data_root_hint": "C:/Users/TAHA/Desktop/2209/nutrisense/ml/data/raw",
+  "data_root_hint": "<local-data-root>",
   "dataset_version": "e0a618475df7d548ab13cef15999c7943da52fbb8af58f1eae0d3aa46a936642",
   "distribution": [
     {

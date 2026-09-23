@@ -3,16 +3,22 @@ import 'package:nutrisense/shared/services/on_device_voice_policy.dart';
 
 void main() {
   group('cihaz üstü konuşma tanıma', () {
-    test('dil paketi yoksa bir kez standart tanımaya dönülür', () {
+    test('desteklenen Android sürümlerinde cihaz üstü tanıma zorunludur', () {
+      expect(preferOnDeviceSpeechForAndroidSdk(28), isTrue);
+      expect(preferOnDeviceSpeechForAndroidSdk(30), isTrue);
+      expect(preferOnDeviceSpeechForAndroidSdk(31), isTrue);
+    });
+
+    test('dil paketi yoksa bulut tanımaya sessiz geçilmez', () {
       expect(
         shouldRetryWithoutOnDevice('error_language_unavailable',
             preferOnDevice: true),
-        isTrue,
+        isFalse,
       );
       expect(
         shouldRetryWithoutOnDevice('error_language_not_supported',
             preferOnDevice: true),
-        isTrue,
+        isFalse,
       );
     });
 

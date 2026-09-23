@@ -35,16 +35,18 @@ services:
       # /app salt okunurdur; yerel SMS kutusu yazılabilir dizine yazar.
       SMS_OUTBOX_PATH: /tmp/sms_outbox.jsonl
       SMS_PROVIDER_MODE: local_outbox
-      SMTP_HOST: mailpit
-      SMTP_PORT: 1025
-      SMTP_USE_TLS: "false"
-      SMTP_START_TLS: "false"
+      SMTP_HOST: ${SMTP_HOST:-mailpit}
+      SMTP_PORT: ${SMTP_PORT:-1025}
+      SMTP_USE_TLS: ${SMTP_USE_TLS:-false}
+      SMTP_START_TLS: ${SMTP_START_TLS:-false}
       # Mailpit kimlik doğrulaması istemez; .env'deki placeholder
       # değerler SMTP el sıkışmasını bozuyordu.
-      SMTP_USER: ""
-      SMTP_PASSWORD: ""
-      SMTP_FROM_EMAIL: no-reply@nutrisense.invalid
-      NOTIFICATION_MODE: sandbox
+      SMTP_USER: ${SMTP_USER:-}
+      SMTP_PASSWORD: ${SMTP_PASSWORD:-}
+      SMTP_FROM_NAME: ${SMTP_FROM_NAME:-NutriSense}
+      SMTP_FROM_EMAIL: ${SMTP_FROM_EMAIL:-no-reply@nutrisense.invalid}
+      NOTIFICATION_MODE: ${NOTIFICATION_MODE:-sandbox}
+      NOTIFICATION_SANDBOX_EMAIL_ALLOWLIST: ${NOTIFICATION_SANDBOX_EMAIL_ALLOWLIST:-}
       CALORIE_DB_PATH: /app/app/data/verified_nutrition.json
       # Sağlayıcı anahtarı .env dosyasından gelir. Anahtar yoksa mod
       # verified_local kalır ve uygulama yalnız USDA kataloğuyla çalışır;

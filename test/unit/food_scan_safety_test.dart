@@ -37,6 +37,26 @@ void main() {
       notifier.setSaved('9b661f6e-744f-40f2-9c47-9849349099d5');
       expect(notifier.state.status, CameraStatus.saved);
     });
+
+    test('çevrimdışı ilk üç aday onay durumunda korunur', () {
+      final notifier = CameraNotifier();
+      const candidates = [
+        FoodCandidate(foodName: 'muz', foodNameTr: 'Muz', confidence: 0.61),
+        FoodCandidate(foodName: 'misir', foodNameTr: 'Mısır', confidence: 0.21),
+        FoodCandidate(foodName: 'kavun', foodNameTr: 'Kavun', confidence: 0.10),
+      ];
+
+      notifier.setOnDeviceSuggestion(
+        'Muz',
+        0.61,
+        tentative: true,
+        candidates: candidates,
+      );
+
+      expect(notifier.state.status, CameraStatus.confirmationRequired);
+      expect(notifier.state.candidates, candidates);
+      expect(notifier.state.recognizedFood, 'Muz');
+    });
   });
 
   group('güvenli sonuç politikası', () {

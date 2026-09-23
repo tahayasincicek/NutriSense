@@ -4,6 +4,7 @@ import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/accessibility_utils.dart';
 import '../../../shared/widgets/accessible_button.dart';
 import '../../../shared/widgets/auth_mode_switch.dart';
+import '../../../shared/services/screen_voice_guide.dart';
 import '../state/auth_controller.dart';
 import 'password_reset_screen.dart';
 import 'register_screen.dart';
@@ -92,6 +93,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         if (!registering) return;
                         Navigator.of(context).push(
                           MaterialPageRoute(
+                            settings: const RouteSettings(
+                                name: VoiceGuideRoutes.register),
                             builder: (_) => const RegisterScreen(),
                           ),
                         );
@@ -163,6 +166,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                 key: const Key('forgot_password'),
                                 onPressed: () => Navigator.of(context).push(
                                   MaterialPageRoute(
+                                    settings: const RouteSettings(
+                                        name: VoiceGuideRoutes.passwordReset),
                                     builder: (_) => PasswordResetScreen(
                                       initialEmail:
                                           _emailController.text.trim(),
@@ -203,6 +208,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                               key: const Key('dietitian_login'),
                               onPressed: () => Navigator.of(context).push(
                                 MaterialPageRoute(
+                                  settings: const RouteSettings(
+                                      name: VoiceGuideRoutes.dietitianAccess),
                                   builder: (_) => const DietitianAccessScreen(),
                                 ),
                               ),

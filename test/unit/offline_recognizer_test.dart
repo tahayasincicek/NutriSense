@@ -2,6 +2,7 @@ import 'dart:typed_data';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:nutrisense/features/food_scan/services/offline_recognizer.dart';
+import 'package:nutrisense/shared/models/food_analysis_model.dart';
 
 /// Cihaz üstü tanıyıcının sözleşmesi.
 ///
@@ -43,6 +44,38 @@ void main() {
     expect(outcome.status, OfflineRecognitionStatus.success);
     expect(outcome.foodNameTr, 'baklava');
     expect(outcome.confidence, greaterThan(0.9));
+  });
+
+  test('düşük kesinlikli öneri adı ve güveni kullanıcı onayına taşır', () {
+    const outcome = OfflineRecognitionOutcome(
+      OfflineRecognitionStatus.suggestion,
+      'Olası tahmin baklava.',
+      foodNameTr: 'baklava',
+      confidence: 0.61,
+    );
+
+    expect(outcome.status, OfflineRecognitionStatus.suggestion);
+    expect(outcome.foodNameTr, 'baklava');
+    expect(outcome.confidence, 0.61);
+  });
+
+  test('düşük kesinlikli öneri ilk üç seçeneği kullanıcıya taşır', () {
+    const candidates = [
+      FoodCandidate(foodName: 'muz', foodNameTr: 'Muz', confidence: 0.61),
+      FoodCandidate(foodName: 'misir', foodNameTr: 'Mısır', confidence: 0.21),
+      FoodCandidate(foodName: 'kavun', foodNameTr: 'Kavun', confidence: 0.10),
+    ];
+    const outcome = OfflineRecognitionOutcome(
+      OfflineRecognitionStatus.suggestion,
+      'Olası tahmin Muz.',
+      foodNameTr: 'Muz',
+      confidence: 0.61,
+      candidates: candidates,
+    );
+
+    expect(outcome.candidates, hasLength(3));
+    expect(outcome.candidates.first.foodName, 'muz');
+    expect(outcome.candidates[1].foodNameTr, 'Mısır');
   });
 
   test('asset bulunamazsa tanıyıcı hata fırlatmaz, kapalı kalır', () async {

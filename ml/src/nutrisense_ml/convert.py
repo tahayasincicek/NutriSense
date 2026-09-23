@@ -6,6 +6,7 @@ import shutil
 import time
 from pathlib import Path
 
+from . import augmentation as _augmentation  # Register serialized custom layers.
 from .common import load_json, sha256_file, utc_now, write_json
 from .data import center_crop_resize, read_manifest
 

@@ -84,4 +84,4 @@ Sınırlar:
 - Gerçek katılımcı toplama yalnız gerçek etik onay alanlarıyla başlar.
 
 Bu varsayımlardan biri sağlanmıyorsa ilgili production kapısı kapanmış sayılır.
-Risk sahipleri ve terminler `docs/security_findings_register.md` içindedir.
+Yayın kapıları `SECURITY.md` ve platform yayın rehberlerinde tanımlanır.

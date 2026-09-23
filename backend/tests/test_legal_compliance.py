@@ -30,6 +30,7 @@ def _production(**overrides) -> Settings:
         ml_artifact_enabled=False,
         data_controller_name="NutriSense Proje Ekibi",
         data_controller_contact_email="kvkk@nutrisense.org.tr",
+        data_controller_postal_address="Üniversite Yerleşkesi, 34000 İstanbul",
     )
     values.update(overrides)
     return Settings(**values)
@@ -45,6 +46,7 @@ def test_configured_production_passes_legal_gates():
         {"data_controller_name": ""},
         {"data_controller_contact_email": ""},
         {"data_controller_contact_email": "kvkk-birimi"},
+        {"data_controller_postal_address": ""},
         {"data_controller_name": "REPLACE_WITH_CONTROLLER"},
     ],
 )
@@ -99,6 +101,18 @@ def test_data_subject_request_page_lists_rights_and_deadlines(client):
     assert "60 gün" in response.text
 
 
+@pytest.mark.parametrize("path", ["/gizlilik", "/privacy-policy"])
+def test_public_privacy_policy_discloses_processing_and_user_controls(client, path):
+    response = client.get(path)
+    assert response.status_code == 200
+    assert response.headers["content-type"].startswith("text/html")
+    assert "İşlenen veriler ve amaçlar" in response.text
+    assert "Saklama ve silme" in response.text
+    assert "/hesap-silme" in response.text
+    assert "/kvkk-basvuru" in response.text
+    assert "<form" not in response.text
+
+
 def test_legal_pages_escape_configured_contact(client, monkeypatch):
     settings = get_settings()
     monkeypatch.setattr(settings, "data_controller_name", "<script>x</script>")
@@ -111,4 +125,7 @@ def test_legal_pages_escape_configured_contact(client, monkeypatch):
 
 def test_legal_pages_stay_out_of_api_contract(client):
     paths = client.get("/openapi.json").json()["paths"]
-    assert not {"/hesap-silme", "/account-deletion", "/kvkk-basvuru"} & set(paths)
+    assert not {
+        "/hesap-silme", "/account-deletion", "/kvkk-basvuru",
+        "/gizlilik", "/privacy-policy",
+    } & set(paths)

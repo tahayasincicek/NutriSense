@@ -43,6 +43,7 @@ def _valid_production_settings(**overrides) -> Settings:
         "notification_mode": "disabled",
         "data_controller_name": "NutriSense Proje Ekibi",
         "data_controller_contact_email": "kvkk@nutrisense.org.tr",
+        "data_controller_postal_address": "Üniversite Yerleşkesi, 34000 İstanbul",
     }
     values.update(overrides)
     return Settings(**values)

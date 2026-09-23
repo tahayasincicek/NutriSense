@@ -149,7 +149,7 @@ class VoiceCommandService {
   bool _continuousMode = false;
   // Önce cihaz üstü tanıma denenir; ses cihazdan çıkmaz. Dil paketi yoksa
   // bir kez standart tanımaya dönülür.
-  bool _preferOnDevice = preferOnDeviceSpeechByDefault();
+  bool _preferOnDevice = false;
 
   VoiceCommandService({required AccessibilityService accessibility})
       : _accessibility = accessibility;
@@ -193,6 +193,7 @@ class VoiceCommandService {
       );
 
       if (_isInitialized) {
+        _preferOnDevice = await resolveOnDeviceSpeechPreference();
         // Türkçe locale kontrol
         final locales = await _speech.locales();
         _turkishLocaleId = selectTurkishSpeechLocale(
@@ -248,6 +249,10 @@ class VoiceCommandService {
     }
 
     await _accessibility.prepareForSpeechInput();
+    // Bazı eski Android cihazlarda TTS ses oturumu mikrofon açıldıktan sonra
+    // birkaç yüz milisaniye daha yankılanır. Kısa bekleme, ilk hecenin ve TTS
+    // kuyruğunun tanımaya karışmasını önler.
+    await Future<void>.delayed(const Duration(milliseconds: 250));
     _setListeningState(ListeningState.listening);
     await _accessibility.lightHaptic();
 
@@ -259,9 +264,9 @@ class VoiceCommandService {
       onResult: _onResult,
       listenOptions: stt.SpeechListenOptions(
         listenFor: _listenTimeout,
-        pauseFor: const Duration(seconds: 3),
+        pauseFor: const Duration(seconds: 4),
         localeId: _turkishLocaleId,
-        listenMode: stt.ListenMode.confirmation,
+        listenMode: stt.ListenMode.dictation,
         cancelOnError: false,
         partialResults: true,
         onDevice: _preferOnDevice,

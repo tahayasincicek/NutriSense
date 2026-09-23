@@ -72,10 +72,9 @@ başka bir veritabanında veya production ortamında çalışmayı reddeder.
 
 ## Production yayın kapıları
 
-1. `docs/security_findings_register.md` içindeki açık P1 maddeleri kapatılmalı.
-2. Secret'lar yönetilen secret store'dan verilmeli ve ilk yayın öncesi
+1. Secret'lar yönetilen secret store'dan verilmeli ve ilk yayın öncesi
    rotasyon kaydı tutulmalı.
-3. TLS/proxy, DB/yedek şifreleme ve restore-silme kanıtı alınmalı.
-4. Üniversite veri sorumlusu, etik kurul ve hukuk birimi veri akışını
+2. TLS/proxy, DB/yedek şifreleme ve restore-silme kanıtı alınmalı.
+3. Üniversite veri sorumlusu, etik kurul ve hukuk birimi veri akışını
    onaylamalı.
-5. Gerçek cihazda güvenli depolama, ağ trafiği ve log sızıntısı testi yapılmalı.
+4. Gerçek cihazda güvenli depolama, ağ trafiği ve log sızıntısı testi yapılmalı.

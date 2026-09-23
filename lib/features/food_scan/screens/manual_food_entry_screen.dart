@@ -18,7 +18,9 @@ import '../../../core/utils/accessibility_utils.dart';
 import '../../../shared/models/food_analysis_model.dart';
 import '../../../shared/services/accessibility_service.dart';
 import '../../../shared/services/api_service.dart';
+import '../../../shared/services/screen_voice_guide.dart';
 import '../../../shared/services/stt_service.dart';
+import '../../../shared/services/voice_command_service.dart';
 import '../../../shared/widgets/accessible_button.dart';
 import '../../../shared/widgets/accessible_card.dart';
 import '../../history/state/history_controller.dart';
@@ -291,6 +293,24 @@ class _ManualFoodEntryScreenState extends ConsumerState<ManualFoodEntryScreen> {
         title: const Text('Manuel Besin Girişi'),
         backgroundColor: Colors.transparent,
         elevation: 0,
+        actions: [
+          Semantics(
+            button: true,
+            label: 'Sesli komut mikrofonu',
+            hint: 'Uzun basınca bu ekranın rehberini yeniden okur',
+            excludeSemantics: true,
+            child: GestureDetector(
+              onLongPress: () =>
+                  ref.read(screenVoiceGuideControllerProvider).repeat(),
+              child: IconButton(
+                tooltip: 'Sesli komut; uzun basınca ekran rehberi',
+                onPressed:
+                    ref.read(voiceCommandServiceProvider).toggleListening,
+                icon: const Icon(Icons.mic_none_rounded),
+              ),
+            ),
+          ),
+        ],
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(20),

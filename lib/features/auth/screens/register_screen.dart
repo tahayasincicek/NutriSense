@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../shared/widgets/accessible_button.dart';
 import '../../../shared/widgets/auth_mode_switch.dart';
+import '../../../shared/services/screen_voice_guide.dart';
 import '../state/auth_controller.dart';
 import 'privacy_consent_screen.dart';
 import 'registration_verification_screen.dart';
@@ -273,6 +274,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     // Hesap, e-postaya gelen kod doğrulanınca açılır.
     final verified = await Navigator.of(context).push<bool>(
       MaterialPageRoute(
+        settings: const RouteSettings(name: VoiceGuideRoutes.verification),
         builder: (_) => RegistrationVerificationScreen(
           email: _email.text.trim(),
           onResend: _startRegistration,

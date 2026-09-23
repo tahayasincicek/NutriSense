@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../settings/screens/settings_screen.dart';
 import '../../../shared/services/api_service.dart';
+import '../../../shared/services/screen_voice_guide.dart';
 import '../../../shared/widgets/accessible_button.dart';
 import '../models/dietitian_dashboard_models.dart';
 import 'dietitian_report_detail_screen.dart';
@@ -334,7 +335,10 @@ class _DietitianDashboardScreenState
           IconButton(
             tooltip: 'Ayarlar',
             onPressed: () => Navigator.of(context).push(
-              MaterialPageRoute(builder: (_) => const SettingsScreen()),
+              MaterialPageRoute(
+                settings: const RouteSettings(name: VoiceGuideRoutes.settings),
+                builder: (_) => const SettingsScreen(),
+              ),
             ),
             icon: const Icon(Icons.settings_rounded),
           ),
@@ -520,6 +524,8 @@ class _DietitianDashboardScreenState
                   report: report,
                   onTap: () => Navigator.of(context).push(
                     MaterialPageRoute(
+                      settings: const RouteSettings(
+                          name: VoiceGuideRoutes.reportDetail),
                       builder: (_) => DietitianReportDetailScreen(
                         reportId: report.reportId,
                         patientName: report.patientName,
@@ -567,6 +573,8 @@ class _DietitianDashboardScreenState
                   onEnd: () => _endAssignment(patient),
                   onTap: () => Navigator.of(context).push(
                     MaterialPageRoute(
+                      settings: const RouteSettings(
+                          name: VoiceGuideRoutes.patientDetail),
                       builder: (_) => DietitianPatientDetailScreen(
                         patient: patient,
                         reports: dashboard.recentReports
@@ -1753,6 +1761,8 @@ class _DietitianPatientDetailScreenState
                   report: report,
                   onTap: () => Navigator.of(context).push(
                     MaterialPageRoute(
+                      settings: const RouteSettings(
+                          name: VoiceGuideRoutes.reportDetail),
                       builder: (_) => DietitianReportDetailScreen(
                         reportId: report.reportId,
                         patientName: report.patientName,

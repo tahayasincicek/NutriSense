@@ -1,0 +1,43 @@
+{
+  "converted_at": "2026-09-21T12:49:53.163002Z",
+  "experiment_id": "20260921T123529Z-029a452dda",
+  "formats": {
+    "float32": {
+      "argmax_match_rate": 1.0,
+      "bytes": 12438216,
+      "desktop_median_inference_ms": 10.37426199991387,
+      "equivalence_samples": 50,
+      "held_out_test_accuracy_delta": null,
+      "held_out_test_accuracy_delta_status": "not_run; evaluate a predeclared deployment candidate without tuning on test",
+      "input_dtype": "<class 'numpy.float32'>",
+      "input_quantization": [
+        0.0,
+        0
+      ],
+      "input_shape": [
+        1,
+        224,
+        224,
+        3
+      ],
+      "max_abs_difference": 3.129243850708008e-06,
+      "output_dtype": "<class 'numpy.float32'>",
+      "output_quantization": [
+        0.0,
+        0
+      ],
+      "path": "/home/taha/ml/exports_tr137/nutrisense_float32.tflite",
+      "sha256": "9f464c20e96534cc70a7c8eb9ac02d0220459b46392a05f1b043610f8812b48e",
+      "tolerance": 0.0001,
+      "validation_subset_accuracy_delta": 0.0,
+      "validation_subset_keras_accuracy": 0.68,
+      "validation_subset_tflite_accuracy": 0.68
+    }
+  },
+  "keras_sha256": "01fdef9db92b2d5b6628d814015c9973d90ac7f61b9b65c6f84871ea5aea4cca",
+  "labels_sha256": "1550145a6bb55e1a1d42f2187008b5c350300be3fa2700bd7b6604c91009f70d",
+  "preprocessing_sha256": "5f213967a546691fa37945d6d3365eea6c7f4503f114b905aa6c8fa9ee38030e",
+  "schema_version": 1,
+  "status": "converted",
+  "warning": "Desktop timing is not target-device latency evidence."
+}

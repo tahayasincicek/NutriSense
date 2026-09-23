@@ -14,6 +14,7 @@ import 'core/theme/app_theme.dart';
 import 'core/theme/theme_controller.dart';
 import 'shared/services/accessibility_service.dart';
 import 'shared/services/speech_route_observer.dart';
+import 'shared/services/screen_voice_guide.dart';
 import 'app.dart';
 import 'features/auth/screens/auth_gate.dart';
 
@@ -124,6 +125,9 @@ class _NutriSenseAppState extends ConsumerState<NutriSenseApp> {
       // Ekran değişince önceki ekranın sesli anlatımı susar.
       navigatorObservers: [
         SpeechRouteObserver(ref.read(accessibilityServiceProvider)),
+        ScreenVoiceGuideObserver(
+          ref.read(screenVoiceGuideControllerProvider),
+        ),
       ],
 
       // --- Yeni Premium Tema ---
@@ -156,7 +160,9 @@ class _NutriSenseAppState extends ConsumerState<NutriSenseApp> {
 
         return MediaQuery(
           data: mediaQuery.copyWith(textScaler: customScaler),
-          child: child ?? const SizedBox.shrink(),
+          child: GlobalVoiceGuideOverlay(
+            child: child ?? const SizedBox.shrink(),
+          ),
         );
       },
     );

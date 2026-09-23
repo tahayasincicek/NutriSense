@@ -2,11 +2,16 @@
 
 ## Mevcut doğrulama durumu
 
-Bu depo **eğitilmiş bir besin tanıma modeli içermez**. Veri seti, checkpoint, gerçek `metrics.json`, TFLite modeli ve hedef cihaz gecikme ölçümü yoktur. Bu nedenle model doğruluğu hakkında nicel başarı iddiası kurulamaz. Makine tarafından okunabilir güvenli başlangıç kaydı `runs/NOT_RUN/metrics.json` dosyasındadır.
+Uygulamada `20260921T123529Z-029a452dda` deneyinden üretilen 137 sınıflı
+MobileNetV3Large float32 TFLite modeli bulunur. Mühürlü test sonuçları accuracy
+0,7683, macro F1 0,7627 ve top-3 accuracy 0,9051'dir. Model, etiketler ve karar
+sözleşmesi `assets/models/` altında uygulamayla paketlenir; ayrıntılar
+`MODEL_CARD.md` ve model manifestindedir.
 
-Güncel kapsam `configs/tr222_v1.json` içinde **221 sınıf** olarak dondurulmuştur (`scope_id: nutrisense-tr222-v1`); yaklaşık 90'ı Türk mutfağıdır. Kapsamı değiştirmek yeni `scope_id`, veri kartı revizyonu ve önceden belirlenmiş değerlendirme planı gerektirir; mevcut test sonucuna bakarak sınıf eklenemez/çıkarılamaz.
-
-Bu turda ayrı bir `__ood__` negatif sınıfı **yoktur**. Kapsam dışı fotoğraflar eğitilmiş bir negatif sınıfla değil, validation üzerinde seçilen güven eşiğiyle reddedilir. Sınırı açıkça yazmak gerekirse: negatif örnek görmeden eğitilen model kapsam dışı girdide fazla özgüvenli olabilir, bu yüzden reddetme yükünün tamamı eşiğin üzerindedir ve OOD yanlış kabul oranı bu turda ölçülemez.
+Hedef cihaz testi Samsung SM-G950F üzerinde 20 ölçümle tamamlandı. Uyarlamalı
+çoklu görünümün düşük güvenli tam yolu p50 3138,28 ms ve p95 3570,78 ms verdi.
+Kapsam veya model değişikliği yeni deney kimliği, veri kartı revizyonu ve
+önceden belirlenmiş değerlendirme planı gerektirir.
 
 ## Tasarım ilkeleri
 

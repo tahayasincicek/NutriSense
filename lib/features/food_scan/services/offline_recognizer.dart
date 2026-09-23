@@ -1,28 +1,43 @@
 import 'dart:convert';
 import 'dart:typed_data';
 
+import 'package:flutter/foundation.dart' show debugPrint;
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image/image.dart' as img;
 import 'package:tflite_flutter/tflite_flutter.dart';
 
-enum OfflineRecognitionStatus { success, unavailable, rejected, error }
+import '../../../shared/models/food_analysis_model.dart';
+
+enum OfflineRecognitionStatus {
+  success,
+  suggestion,
+  unavailable,
+  rejected,
+  error,
+}
 
 class OfflineRecognitionOutcome {
   final OfflineRecognitionStatus status;
   final String message;
 
-  /// Model kapsamındaki sınıfın Türkçe adı. Yalnız [status] success ise dolu.
+  /// Model kapsamındaki sınıfın Türkçe adı. Başarı veya kullanıcı onayı
+  /// gerektiren öneri durumunda doludur.
   final String? foodNameTr;
 
-  /// Softmax güveni. Yalnız [status] success ise dolu.
+  /// Softmax güveni. Başarı veya öneri durumunda doludur.
   final double? confidence;
+
+  /// En yüksek olasılıklı seçenekler. Kullanıcı özellikle düşük güvenli
+  /// sonuçlarda doğru besini ilk üç aday arasından seçebilir.
+  final List<FoodCandidate> candidates;
 
   const OfflineRecognitionOutcome(
     this.status,
     this.message, {
     this.foodNameTr,
     this.confidence,
+    this.candidates = const [],
   });
 }
 
@@ -70,6 +85,11 @@ class TfliteFoodRecognizer implements OfflineFoodRecognizer {
 
   static const _inputSize = 224;
 
+  // Manifest eşiği yüksek kesinlikte otomatik öneri içindir. Bu daha düşük
+  // eşik, tahmini açıkça "olası" olarak sunup kullanıcı onayı istemek için
+  // kullanılır; tanımayı tamamen işlevsiz bırakacak kadar yükseltilmemelidir.
+  static const _suggestionThreshold = 0.20;
+
   Interpreter? _interpreter;
   List<String> _labels = const [];
   Map<String, String> _turkishNames = const {};
@@ -112,9 +132,15 @@ class TfliteFoodRecognizer implements OfflineFoodRecognizer {
         );
       }
       _interpreter = interpreter;
-    } on Object {
+      debugPrint(
+        'NutriSense model loaded: labels=${_labels.length}, '
+        'acceptThreshold=${_threshold.toStringAsFixed(4)}, '
+        'suggestionThreshold=$_suggestionThreshold',
+      );
+    } on Object catch (error, stackTrace) {
       // Yükleme başarısızsa kapalı kalınır; yanlış sonuç üretmektense
       // manuel girişe yönlendirmek doğrudur.
+      debugPrint('NutriSense model load failed: $error\n$stackTrace');
       _loadFailed = true;
     }
   }
@@ -123,7 +149,7 @@ class TfliteFoodRecognizer implements OfflineFoodRecognizer {
   ///
   /// Model `include_preprocessing` ile eğitildiği için ayrıca /255
   /// normalizasyonu yapılmaz.
-  List<List<List<List<double>>>>? _prepare(Uint8List jpegBytes) {
+  List<List<img.Image>>? _prepareViewGroups(Uint8List jpegBytes) {
     final decoded = img.decodeImage(jpegBytes);
     if (decoded == null) return null;
     final square = decoded.width == decoded.height
@@ -138,11 +164,56 @@ class TfliteFoodRecognizer implements OfflineFoodRecognizer {
             interpolation: img.Interpolation.linear,
           );
 
+    img.Image crop(double fraction) {
+      if (fraction == 1) return resized;
+      final cropSize = (_inputSize * fraction).round();
+      final cropInset = ((_inputSize - cropSize) / 2).round();
+      return img.copyResize(
+        img.copyCrop(
+          resized,
+          x: cropInset,
+          y: cropInset,
+          width: cropSize,
+          height: cropSize,
+        ),
+        width: _inputSize,
+        height: _inputSize,
+        interpolation: img.Interpolation.linear,
+      );
+    }
+
+    // İlk iki ölçek mevcut hızlı yol. Bu iki ölçek farklı sınıflar önerirse
+    // veya birleşik güven düşük kalırsa nesne kadrajda küçük ya da çevresi
+    // dikkat dağıtıcı olabilir; daha yakın üç merkez görünümü çalıştırılır.
+    return [1.0, 0.9, 0.75, 0.6, 0.5].map((fraction) {
+      final view = crop(fraction);
+      return [view, img.flipHorizontal(view)];
+    }).toList(growable: false);
+  }
+
+  int _argMax(List<double> values) {
+    var best = 0;
+    for (var index = 1; index < values.length; index++) {
+      if (values[index] > values[best]) best = index;
+    }
+    return best;
+  }
+
+  double _maxAveragedConfidence(List<double> first, List<double> second) {
+    var best = 0.0;
+    for (var index = 0; index < first.length; index++) {
+      final value = (first[index] + second[index]) / 2;
+      if (value > best) best = value;
+    }
+    return best;
+  }
+
+  List<List<List<List<double>>>> _toTensor(img.Image image) {
     return [
       List.generate(
         _inputSize,
         (y) => List.generate(_inputSize, (x) {
-          final pixel = resized.getPixel(x, y);
+          final pixel = image.getPixel(x, y);
           return [
             pixel.r.toDouble(),
             pixel.g.toDouble(),
@@ -164,31 +235,89 @@ class TfliteFoodRecognizer implements OfflineFoodRecognizer {
       );
     }
 
-    final input = _prepare(rgbJpegBytes);
-    if (input == null) {
+    final viewGroups = _prepareViewGroups(rgbJpegBytes);
+    if (viewGroups == null) {
       return const OfflineRecognitionOutcome(
         OfflineRecognitionStatus.error,
         'Görüntü çözülemedi. Lütfen yeniden çekin.',
       );
     }
 
-    final output = [List<double>.filled(_labels.length, 0)];
+    final scaleProbabilities = <List<double>>[];
+    var usedDeepCrops = false;
     try {
-      interpreter.run(input, output);
-    } on Object {
+      List<double> evaluateScale(List<img.Image> views) {
+        final scale = List<double>.filled(_labels.length, 0);
+        for (final image in views) {
+          final output = [List<double>.filled(_labels.length, 0)];
+          interpreter.run(_toTensor(image), output);
+          for (var index = 0; index < scale.length; index++) {
+            scale[index] += output.first[index] / views.length;
+          }
+        }
+        return scale;
+      }
+
+      // Tam ve %90 merkez görünümü aynı sınıfta yüksek güvenle uzlaşırsa dört
+      // çıkarımlı hızlı yol korunur. Uyuşmazlıkta veya düşük güvende
+      // %75/%60/%50 görünüm eklenir.
+      scaleProbabilities
+        ..add(evaluateScale(viewGroups[0]))
+        ..add(evaluateScale(viewGroups[1]));
+      final initialViewsDisagree =
+          _argMax(scaleProbabilities[0]) != _argMax(scaleProbabilities[1]);
+      final initialConfidence = _maxAveragedConfidence(
+        scaleProbabilities[0],
+        scaleProbabilities[1],
+      );
+      if (initialViewsDisagree || initialConfidence < 0.70) {
+        usedDeepCrops = true;
+        for (final group in viewGroups.skip(2)) {
+          scaleProbabilities.add(evaluateScale(group));
+        }
+      }
+    } on Object catch (error, stackTrace) {
+      debugPrint('NutriSense inference failed: $error\n$stackTrace');
       return const OfflineRecognitionOutcome(
         OfflineRecognitionStatus.error,
         'Cihaz üstü tanıma çalıştırılamadı. Manuel giriş kullanın.',
       );
     }
 
-    final probabilities = output.first;
-    var bestIndex = 0;
-    for (var index = 1; index < probabilities.length; index++) {
-      if (probabilities[index] > probabilities[bestIndex]) bestIndex = index;
+    final probabilities = List<double>.filled(_labels.length, 0);
+    for (final scale in scaleProbabilities) {
+      for (var index = 0; index < probabilities.length; index++) {
+        probabilities[index] += scale[index] / scaleProbabilities.length;
+      }
     }
+
+    final rankedIndexes = List<int>.generate(probabilities.length, (i) => i)
+      ..sort((a, b) => probabilities[b].compareTo(probabilities[a]));
+    final rawBestIndex = rankedIndexes.first;
+    final bestIndex = rawBestIndex;
     final confidence = probabilities[bestIndex];
-    if (confidence < _threshold) {
+    final rawBestConfidence = probabilities[rawBestIndex];
+    final label = _labels[bestIndex];
+    final turkish = _turkishNames[label] ?? label;
+    final candidates = rankedIndexes.take(3).map((index) {
+      final candidateLabel = _labels[index];
+      return FoodCandidate(
+        foodName: candidateLabel,
+        foodNameTr: _turkishNames[candidateLabel] ?? candidateLabel,
+        confidence: probabilities[index],
+      );
+    }).toList(growable: false);
+    final topScores = rankedIndexes.take(3).map((index) {
+      return '${_labels[index]}=${probabilities[index].toStringAsFixed(4)}';
+    }).join(', ');
+    debugPrint(
+      'NutriSense inference: top3=[$topScores], '
+      'selected=$label(${confidence.toStringAsFixed(4)}), '
+      'deepCrops=$usedDeepCrops, '
+      'acceptThreshold=${_threshold.toStringAsFixed(4)}',
+    );
+
+    if (rawBestConfidence < _suggestionThreshold) {
       return const OfflineRecognitionOutcome(
         OfflineRecognitionStatus.rejected,
         'Yiyecek güvenilir biçimde tanınamadı. Yeniden çekin veya manuel '
@@ -196,13 +325,23 @@ class TfliteFoodRecognizer implements OfflineFoodRecognizer {
       );
     }
 
-    final label = _labels[bestIndex];
-    final turkish = _turkishNames[label] ?? label;
+    if (confidence < _threshold) {
+      return OfflineRecognitionOutcome(
+        OfflineRecognitionStatus.suggestion,
+        'Olası tahmin $turkish. Güven yüzde '
+        '${(confidence * 100).round()}; kaydetmeden önce kontrol edin.',
+        foodNameTr: turkish,
+        confidence: confidence,
+        candidates: candidates,
+      );
+    }
+
     return OfflineRecognitionOutcome(
       OfflineRecognitionStatus.success,
       '$turkish olarak tanındı.',
       foodNameTr: turkish,
       confidence: confidence,
+      candidates: candidates,
     );
   }
 

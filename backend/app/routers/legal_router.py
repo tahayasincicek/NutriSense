@@ -46,6 +46,59 @@ def _page(title: str, body: str) -> HTMLResponse:
     )
 
 
+@router.get("/gizlilik", response_class=HTMLResponse)
+@router.get("/privacy-policy", response_class=HTMLResponse)
+async def privacy_policy_page():
+    """Public, stable HTML privacy policy required by both app stores."""
+    settings = get_settings()
+    version = escape(settings.privacy_notice_version)
+    return _page(
+        "NutriSense gizlilik ve KVKK aydınlatma metni",
+        f"<p><strong>Metin sürümü:</strong> {version}</p>"
+        f"{_contact_section()}"
+        "<h2>İşlenen veriler ve amaçlar</h2>"
+        "<ul>"
+        "<li>Ad, e-posta, telefon ve parola özeti: hesap, oturum ve güvenlik.</li>"
+        "<li>Besin, porsiyon, kalori, zaman, kilo, su, uyku, ruh hâli ve adım "
+        "verileri: kullanıcının beslenme ve yaşam takibi.</li>"
+        "<li>Diyetisyen bağlantısı, rapor ve cevapları: kullanıcının her "
+        "gönderimde verdiği onayla beslenme danışmanlığı.</li>"
+        "<li>Kamera ve mikrofon: yalnız kullanıcının başlattığı besin tanıma "
+        "ve sesli komut işlevleri.</li>"
+        "</ul>"
+        "<h2>Fotoğraf, ses ve cihaz içi işleme</h2>"
+        "<p>Besin fotoğrafı uygulamayla gelen modelle cihazda işlenir; "
+        "sunucuya gönderilmez ve NutriSense tarafından saklanmaz. Sesli komut "
+        "kaydedilmez. İşletim sisteminin konuşma tanıma hizmeti, cihaz ve dil "
+        "paketi durumuna göre Google veya Apple sunucularını kullanabilir. "
+        "Sesli komut zorunlu değildir.</p>"
+        "<h2>Paylaşım ve yurt dışı aktarım</h2>"
+        "<p>Sağlık ayrıntıları yalnız kullanıcının onayladığı atanmış "
+        "diyetisyenin giriş yaptığı panelde gösterilir. E-posta yalnız takma "
+        "danışan kodu ve rapor referansı; SMS yalnız yeni rapor bildirimi "
+        "taşır. Etkin sağlayıcıların ülkesi, alt işleyenleri ve KVKK m.9 "
+        "aktarım mekanizması yayın öncesinde veri sorumlusu tarafından "
+        "belirlenir ve bu metne eklenir.</p>"
+        "<h2>Saklama ve silme</h2>"
+        "<p>Hesap verileri hesap etkin olduğu sürece veya kullanıcı silene "
+        "kadar tutulur. Bekleyen kayıtlar 30 dakika, IP güvenlik kayıtları "
+        "en fazla 90 gün, diğer güvenlik olayları en fazla 365 gün tutulur. "
+        "Hesap silindiğinde hesaba bağlı ürün verileri silinir; güvenlik "
+        "kayıtlarının kullanıcı bağlantısı kaldırılır. Yedekler onaylı yedek "
+        "saklama süresi sonunda imha edilir.</p>"
+        "<h2>Haklar ve seçimler</h2>"
+        "<p>Kullanıcı verisini uygulamadan düzeltebilir, dışa aktarabilir, "
+        "amaç bazlı rızasını geri alabilir ve hesabını silebilir. KVKK m.11 "
+        "hakları ve başvuru yöntemi için <a href=\"/kvkk-basvuru\">başvuru "
+        "sayfasına</a>; hesap silme için <a href=\"/hesap-silme\">hesap "
+        "silme sayfasına</a> bakın.</p>"
+        "<h2>Sağlık hizmeti sınırı</h2>"
+        "<p>NutriSense tıbbi teşhis veya tedavi sunmaz. Besin tanıma ve "
+        "porsiyon sonuçları tahmindir; kullanıcı kaydetmeden önce sonucu "
+        "kontrol eder.</p>",
+    )
+
+
 @router.get("/hesap-silme", response_class=HTMLResponse)
 @router.get("/account-deletion", response_class=HTMLResponse)
 async def account_deletion_page():

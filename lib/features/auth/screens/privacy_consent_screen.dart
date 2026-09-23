@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../core/config/app_config.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/theme/app_theme.dart';
@@ -29,7 +30,6 @@ class PrivacyConsentScreen extends ConsumerStatefulWidget {
 class _PrivacyConsentScreenState extends ConsumerState<PrivacyConsentScreen> {
   bool _noticeAcknowledged = false;
   bool _healthData = false;
-  bool _imageTransfer = false;
   bool _saving = false;
   bool _loading = true;
 
@@ -49,7 +49,6 @@ class _PrivacyConsentScreenState extends ConsumerState<PrivacyConsentScreen> {
         _noticeAcknowledged =
             data['privacy_notice_acknowledgement'] as bool? ?? false;
         _healthData = data['health_data_processing'] as bool? ?? false;
-        _imageTransfer = data['image_cross_border_transfer'] as bool? ?? false;
       }
     });
   }
@@ -77,14 +76,10 @@ class _PrivacyConsentScreenState extends ConsumerState<PrivacyConsentScreen> {
       consentType: 'health_data_processing',
       granted: _healthData,
     );
-    final image = await api.updateConsent(
-      consentType: 'image_cross_border_transfer',
-      granted: _imageTransfer,
-    );
     if (!mounted) return;
     setState(() => _saving = false);
 
-    final failed = !notice.isSuccess || !health.isSuccess || !image.isSuccess;
+    final failed = !notice.isSuccess || !health.isSuccess;
     final message = failed
         ? 'Tercihleriniz kaydedilemedi. Lütfen tekrar deneyin.'
         : 'Tercihleriniz kaydedildi.';
@@ -184,20 +179,6 @@ class _PrivacyConsentScreenState extends ConsumerState<PrivacyConsentScreen> {
                     enabled: !_saving,
                     onChanged: (value) => setState(() => _healthData = value),
                   ),
-                  const SizedBox(height: 12),
-                  _ConsentSwitch(
-                    title: 'Fotoğrafımın analiz için yurt dışına gönderilmesi',
-                    description:
-                        'Besin tanıma şu anda telefonunuzdaki modelle yapılır; '
-                        'fotoğrafınız telefondan çıkmaz. İleride yurt dışındaki '
-                        'bir yapay zekâ sağlayıcısıyla tanıma açılırsa fotoğraf '
-                        'yalnız bu izinle, küçültülmüş ve konum ile kimlik '
-                        'bilgilerinden arındırılmış olarak gönderilir.',
-                    value: _imageTransfer,
-                    enabled: !_saving,
-                    onChanged: (value) =>
-                        setState(() => _imageTransfer = value),
-                  ),
                   const SizedBox(height: 28),
                   AccessibleButton(
                     label: 'Tercihlerimi Kaydet',
@@ -290,9 +271,14 @@ class PrivacyNoticeCard extends StatelessWidget {
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Text(
-                  'Bu sürüm taslaktır. Veri sorumlusu, saklama süreleri, '
-                  'başvuru kanalı ve yurt dışı aktarım mekanizması kurum '
-                  'tarafından tamamlanmadan yayına alınmamalıdır.',
+                  AppConfig.environment == AppEnvironment.prod
+                      ? 'Veri sorumlusu: ${AppConfig.dataControllerName}\n'
+                          'Başvuru: ${AppConfig.dataControllerContactEmail}\n'
+                          'Adres: ${AppConfig.dataControllerPostalAddress}\n'
+                          'Metin sürümü: ${AppConfig.privacyNoticeVersion}'
+                      : 'Bu sürüm taslaktır. Veri sorumlusu, saklama süreleri, '
+                          'başvuru kanalı ve yurt dışı aktarım mekanizması kurum '
+                          'tarafından tamamlanmadan yayına alınmamalıdır.',
                   style: theme.textTheme.bodySmall,
                 ),
               ),

@@ -22,6 +22,7 @@ import '../../../shared/widgets/accessible_button.dart';
 import '../../../shared/widgets/accessible_number_dialog.dart';
 import '../../history/state/history_controller.dart';
 import '../models/camera_state.dart';
+import '../services/food_correction_sample_store.dart';
 import '../services/image_preprocessing.dart';
 import '../services/offline_recognizer.dart';
 import '../services/recognition_policy.dart';
@@ -75,6 +76,9 @@ class _CameraScreenState extends ConsumerState<CameraScreen>
   String? _voiceStatus;
   bool _voiceListening = false;
   bool _pickingGallery = false;
+  Uint8List? _correctionSampleBytes;
+  String? _correctionPredictedName;
+  double? _correctionPredictedConfidence;
 
   @override
   void initState() {
@@ -284,6 +288,11 @@ class _CameraScreenState extends ConsumerState<CameraScreen>
         );
         return;
       }
+      // Düzeltme örneği için yalnız modelin gördüğü yeniden boyutlandırılmış,
+      // yeniden kodlanmış JPEG tutulur. Orijinal fotoğraf/EXIF saklanmaz.
+      _correctionSampleBytes = Uint8List.fromList(processed.processedBytes);
+      _correctionPredictedName = null;
+      _correctionPredictedConfidence = null;
       // Fotoğraf telefondan çıkmaz: tanımayı telefondaki NutriSense modeli
       // yapar. Kalori, kullanıcı onayından sonra doğrulanmış katalogdan gelir.
       notifier.setOfflineInference();
@@ -322,16 +331,33 @@ class _CameraScreenState extends ConsumerState<CameraScreen>
     final outcome = await _offline.recognize(processedBytes);
     if (!_isCurrent(generation)) return;
 
-    if (outcome.status == OfflineRecognitionStatus.success) {
+    if ({
+      OfflineRecognitionStatus.success,
+      OfflineRecognitionStatus.suggestion,
+    }.contains(outcome.status)) {
       final name = outcome.foodNameTr!;
       final percent = (outcome.confidence! * 100).round();
-      ref
-          .read(cameraStateProvider.notifier)
-          .setOnDeviceSuggestion(name, outcome.confidence!);
+      final tentative = outcome.status == OfflineRecognitionStatus.suggestion;
+      _correctionPredictedName = name;
+      _correctionPredictedConfidence = outcome.confidence!;
+      ref.read(cameraStateProvider.notifier).setOnDeviceSuggestion(
+            name,
+            outcome.confidence!,
+            tentative: tentative,
+            candidates: outcome.candidates,
+          );
+      final alternatives = outcome.candidates.skip(1).map((candidate) {
+        return candidate.foodNameTr;
+      }).join(' ve ');
       await _tts.speak(
-        'Cihaz üstü model bunu $name olarak tanıdı. Güven yüzde $percent. '
-        'Kalori için bağlantı gerekiyor; onaylayabilir veya manuel giriş '
-        'yapabilirsiniz.',
+        tentative
+            ? 'Olası tahmin $name. Güven yüzde $percent. Kaydetmeden önce '
+                'kontrol edin. Diğer seçenekler $alternatives. Birinci, ikinci '
+                'veya üçüncü seçenek diyebilirsiniz.'
+            : 'Cihaz üstü model bunu $name olarak tanıdı. Güven yüzde '
+                '$percent. '
+                'Kalori için bağlantı gerekiyor; onaylayabilir veya manuel giriş '
+                'yapabilirsiniz.',
       );
       return;
     }
@@ -408,6 +434,40 @@ class _CameraScreenState extends ConsumerState<CameraScreen>
     }
   }
 
+  Future<void> _saveCorrectionSample(String correctName) async {
+    final bytes = _correctionSampleBytes;
+    final predictedName = _correctionPredictedName;
+    final confidence = _correctionPredictedConfidence;
+    final captureId = _captureId;
+    if (bytes == null ||
+        predictedName == null ||
+        confidence == null ||
+        captureId == null ||
+        _normalizedFoodName(predictedName) ==
+            _normalizedFoodName(correctName)) {
+      return;
+    }
+    try {
+      await ref.read(foodCorrectionSampleStoreProvider).save(
+            processedJpeg: bytes,
+            correctFoodName: correctName,
+            predictedFoodName: predictedName,
+            confidence: confidence,
+            captureId: captureId,
+          );
+      _correctionSampleBytes = null;
+      await _tts.speak(
+        'Yanlış tahmin düzeltmesi cihazda kaydedildi. Bu fotoğraf '
+        'gelecekteki model iyileştirmesinde kullanılabilir.',
+      );
+    } on Object {
+      // Besin kaydı başarılıysa yerel eğitim örneği hatası ana akışı bozmaz.
+    }
+  }
+
+  String _normalizedFoodName(String value) =>
+      value.trim().toLowerCase().replaceAll(RegExp(r'[ _-]+'), '');
+
   Future<void> _updatePortion(
     double value,
     String unit, {
@@ -445,14 +505,15 @@ class _CameraScreenState extends ConsumerState<CameraScreen>
     // Ortak erişilebilir diyalog: sesle söyleme, artır/azalt ve klavye.
     final grams = await showAccessibleNumberDialog(
       context: context,
-      title: 'Porsiyon',
-      fieldLabel: 'Porsiyon',
+      title: 'Gram miktarı',
+      fieldLabel: 'Gram miktarını metin olarak girin',
       suffix: 'g',
       spokenUnit: 'gram',
       min: 1,
       max: 2000,
       step: 10,
       initialValue: initialGrams,
+      helper: 'Yediğiniz miktarı gram cinsinden metin olarak girin.',
       fieldKey: const Key('portion_input'),
     );
     if (grams == null) return null;
@@ -526,20 +587,44 @@ class _CameraScreenState extends ConsumerState<CameraScreen>
   }
 
   Future<void> _showManualEntry({FoodCandidate? candidate}) async {
-    final value = await showDialog<String>(
+    if (!mounted) return;
+    final nameDialog = showDialog<String>(
       context: context,
       builder: (_) => _ManualEntryDialog(initialText: candidate?.foodNameTr),
     );
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      unawaited(_tts.speak(
+        'Besin adını metin olarak girin. Örneğin simit veya lahmacun.',
+        priority: TtsPriority.high,
+      ));
+    });
+    final value = await nameDialog;
     if (value == null || value.length < 2 || !mounted) return;
     final analysis = ref.read(cameraStateProvider).analysis;
     if (analysis != null) {
+      // Eğitim örneği, ağdaki besin kaydı başarısız olsa da kaybolmamalıdır.
+      // Kullanıcının doğru adı göndermesi açık düzeltme eylemidir.
+      await _saveCorrectionSample(value);
       await _confirm(
         correctedName: value.toLowerCase().replaceAll(' ', '_'),
         correctedNameTr: value,
       );
       return;
     }
-    final portion = await _showPortionDialog(initialGrams: 100);
+    if (!mounted) return;
+    final amountDialog = showDialog<PortionInput>(
+      context: context,
+      builder: (_) => const _ManualAmountDialog(),
+    );
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      unawaited(_tts.speak(
+        'Kaç adet yediğinizi metin olarak girin. İsterseniz gram seçeneğine geçebilirsiniz.',
+        priority: TtsPriority.high,
+      ));
+    });
+    final portion = await amountDialog;
     if (portion == null || !mounted) return;
     _captureId ??= _uuid.v4();
     final result = await ref.read(apiServiceProvider).createManualFoodLog(
@@ -547,6 +632,7 @@ class _CameraScreenState extends ConsumerState<CameraScreen>
           foodName: value.toLowerCase().replaceAll(' ', '_'),
           foodNameTr: value,
           portionValue: portion.value,
+          portionUnit: portion.unit,
           portionMethod: 'user_selected',
           cancelToken: _requestCancelToken,
         );
@@ -610,18 +696,22 @@ class _CameraScreenState extends ConsumerState<CameraScreen>
           case ContextualVoiceAction.firstOption:
           case ContextualVoiceAction.secondOption:
           case ContextualVoiceAction.thirdOption:
-            final candidates =
-                ref.read(cameraStateProvider).analysis?.candidates ?? [];
+            final state = ref.read(cameraStateProvider);
+            final candidates = state.analysis?.candidates ?? state.candidates;
             final index = switch (intent.action!) {
               ContextualVoiceAction.firstOption => 0,
               ContextualVoiceAction.secondOption => 1,
               _ => 2,
             };
             if (index < candidates.length) {
-              unawaited(_confirm(
-                correctedName: candidates[index].foodName,
-                correctedNameTr: candidates[index].foodNameTr,
-              ));
+              if (state.analysis != null) {
+                unawaited(_confirm(
+                  correctedName: candidates[index].foodName,
+                  correctedNameTr: candidates[index].foodNameTr,
+                ));
+              } else {
+                unawaited(_showManualEntry(candidate: candidates[index]));
+              }
             }
             break;
           case ContextualVoiceAction.setPortion:
@@ -667,6 +757,9 @@ class _CameraScreenState extends ConsumerState<CameraScreen>
     _requestCancelToken = null;
     _captureId = null;
     _singleFlight = false;
+    _correctionSampleBytes = null;
+    _correctionPredictedName = null;
+    _correctionPredictedConfidence = null;
     ref.read(cameraStateProvider.notifier).reset();
     if (_initialized) {
       _startAutoCapture();
@@ -850,7 +943,7 @@ class _CameraScreenState extends ConsumerState<CameraScreen>
   Widget _bottomPanel(CameraState state) {
     final analysis = state.analysis;
     final candidates =
-        analysis == null ? <FoodCandidate>[] : _policy.candidates(analysis);
+        analysis == null ? state.candidates : _policy.candidates(analysis);
     return Container(
       color: const Color(0xEE000000),
       padding: const EdgeInsets.all(16),
@@ -889,15 +982,19 @@ class _CameraScreenState extends ConsumerState<CameraScreen>
             ],
             if (state.status == CameraStatus.confirmationRequired)
               Wrap(
+                alignment: WrapAlignment.center,
                 spacing: 8,
+                runSpacing: 8,
                 children: [
                   for (final candidate in candidates)
                     ActionChip(
                       label: Text(candidate.foodNameTr),
-                      onPressed: () => _confirm(
-                        correctedName: candidate.foodName,
-                        correctedNameTr: candidate.foodNameTr,
-                      ),
+                      onPressed: () => analysis == null
+                          ? _showManualEntry(candidate: candidate)
+                          : _confirm(
+                              correctedName: candidate.foodName,
+                              correctedNameTr: candidate.foodNameTr,
+                            ),
                     ),
                 ],
               ),
@@ -935,8 +1032,9 @@ class _CameraScreenState extends ConsumerState<CameraScreen>
                                 : null,
                   ),
                   AccessibleButton(
-                    label: 'Düzelt',
-                    semanticLabel: 'Besin adını düzelt',
+                    label: 'Yanlış Tahmini Düzelt',
+                    semanticLabel:
+                        'Yanlış tahmini düzelt ve doğru besin adını gir',
                     icon: Icons.edit,
                     onPressed: () => _showManualEntry(),
                   ),
@@ -1102,8 +1200,9 @@ class _ManualEntryDialogState extends State<_ManualEntryDialog> {
         textInputAction: TextInputAction.done,
         onSubmitted: (text) => Navigator.pop(context, text.trim()),
         decoration: const InputDecoration(
-          labelText: 'Besin adı',
+          labelText: 'Besin adını metin olarak girin',
           hintText: 'Örnek: simit',
+          helperText: 'Tanıyamadıysanız doğru besin adını buraya yazın.',
         ),
       ),
       actions: [
@@ -1113,6 +1212,102 @@ class _ManualEntryDialogState extends State<_ManualEntryDialog> {
         ),
         FilledButton(
           onPressed: () => Navigator.pop(context, _controller.text.trim()),
+          child: const Text('Kaydet'),
+        ),
+      ],
+    );
+  }
+}
+
+/// Manual scan fallback asks for a count first because foods such as lahmacun,
+/// simit and fruit are naturally entered as pieces. Gram remains available for
+/// foods that are not countable.
+class _ManualAmountDialog extends StatefulWidget {
+  const _ManualAmountDialog();
+
+  @override
+  State<_ManualAmountDialog> createState() => _ManualAmountDialogState();
+}
+
+class _ManualAmountDialogState extends State<_ManualAmountDialog> {
+  final _controller = TextEditingController(text: '1');
+  String _unit = 'adet';
+  String? _error;
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  void _save() {
+    final value = double.tryParse(_controller.text.trim().replaceAll(',', '.'));
+    final maximum = _unit == 'adet' ? 20 : 2000;
+    if (value == null || !value.isFinite || value <= 0 || value > maximum) {
+      setState(() => _error = _unit == 'adet'
+          ? 'Adet sayısı 0 ile 20 arasında olmalıdır.'
+          : 'Gram miktarı 0 ile 2000 arasında olmalıdır.');
+      return;
+    }
+    Navigator.pop(context, PortionInput(value: value, unit: _unit));
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final isCount = _unit == 'adet';
+    return AlertDialog(
+      title: Text(isCount ? 'Kaç adet yediniz?' : 'Kaç gram yediniz?'),
+      content: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            const Text(
+              'Önce adet sayısını girin. Besin adetle ölçülmüyorsa gramı seçin.',
+            ),
+            const SizedBox(height: 12),
+            SegmentedButton<String>(
+              segments: const [
+                ButtonSegment(value: 'adet', label: Text('Adet')),
+                ButtonSegment(value: 'gram', label: Text('Gram')),
+              ],
+              selected: {_unit},
+              onSelectionChanged: (selection) {
+                setState(() {
+                  _unit = selection.first;
+                  _controller.text = _unit == 'adet' ? '1' : '100';
+                  _error = null;
+                });
+              },
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              key: const Key('manual_amount_input'),
+              controller: _controller,
+              autofocus: true,
+              keyboardType:
+                  const TextInputType.numberWithOptions(decimal: true),
+              textInputAction: TextInputAction.done,
+              onSubmitted: (_) => _save(),
+              decoration: InputDecoration(
+                labelText: isCount
+                    ? 'Adet sayısını metin olarak girin'
+                    : 'Gram miktarını metin olarak girin',
+                suffixText: _unit,
+                errorText: _error,
+              ),
+            ),
+          ],
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: const Text('İptal'),
+        ),
+        FilledButton(
+          key: const Key('manual_amount_save'),
+          onPressed: _save,
           child: const Text('Kaydet'),
         ),
       ],

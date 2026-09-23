@@ -34,9 +34,9 @@ Yurt dışına giden her istek, kişiyi tanıtan bilgiden arındırılır. Hiçb
   ilişkiye özel `D-…` danışan kodu ve rapor referansını taşır. SMS yalnız genel
   yeni rapor bildirimidir. Danışan adı, besin, gram, saat ve kalori bu
   kanallara yazılmaz.
-- **Konuşma tanıma:** Android'de önce cihaz üstü tanıma istenir; ses telefondan
-  çıkmaz. Türkçe dil paketi kurulu değilse sesli komut bozulmasın diye bir kez
-  standart tanımaya dönülür.
+- **Konuşma tanıma:** Android ve iOS'ta yalnız cihaz üstü tanıma istenir.
+  Türkçe dil paketi veya cihaz üstü destek yoksa bulut tanımaya sessiz geçilmez;
+  kullanıcı dokunmatik veya klavyeyle devam eder.
 - **Metin okuma:** Android'de cihazda kurulu yerel Türkçe ses seçilir; okunan
   besin ve sağlık metni Google'ın ağ seslerine gönderilmez.
 - **Yazı tipi:** Plus Jakarta Sans uygulamayla gelir. Uygulama açılışta

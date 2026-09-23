@@ -7,6 +7,7 @@ import '../../../shared/services/accessibility_service.dart';
 import '../../../shared/services/api_service.dart';
 import '../../../shared/services/stt_service.dart';
 import '../../../shared/services/structured_voice_input.dart';
+import '../../../shared/services/screen_voice_guide.dart';
 import '../../../shared/widgets/accessible_button.dart';
 import 'send_report_wizard.dart';
 import '../models/shared_report_history.dart';
@@ -653,6 +654,7 @@ class _DietitianScreenState extends ConsumerState<DietitianScreen> {
 
   Future<void> _sendReport() async {
     await Navigator.of(context).push(MaterialPageRoute(
+        settings: const RouteSettings(name: VoiceGuideRoutes.sendReport),
         builder: (_) => SendReportWizard(assignment: _assignment!)));
   }
 }

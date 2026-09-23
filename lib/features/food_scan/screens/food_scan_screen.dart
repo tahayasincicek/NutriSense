@@ -4,6 +4,7 @@ import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/accessibility_utils.dart';
 import '../../../shared/services/accessibility_service.dart';
 import '../../../shared/services/meal_reminder_service.dart';
+import '../../../shared/services/screen_voice_guide.dart';
 import '../../settings/screens/settings_screen.dart';
 import '../../auth/state/auth_controller.dart';
 import '../../history/state/daily_goal_provider.dart';
@@ -107,7 +108,11 @@ class _FoodScanScreenState extends ConsumerState<FoodScanScreen> {
             onPressed: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => const SettingsScreen()),
+                MaterialPageRoute(
+                  settings:
+                      const RouteSettings(name: VoiceGuideRoutes.settings),
+                  builder: (context) => const SettingsScreen(),
+                ),
               );
             },
             icon: const Icon(Icons.settings_outlined),
@@ -133,6 +138,8 @@ class _FoodScanScreenState extends ConsumerState<FoodScanScreen> {
               onPressed: () {
                 Navigator.of(context).push(
                   MaterialPageRoute(
+                      settings: const RouteSettings(
+                          name: VoiceGuideRoutes.manualFood),
                       builder: (_) => const ManualFoodEntryScreen()),
                 );
               },
@@ -346,8 +353,10 @@ class _FoodScanScreenState extends ConsumerState<FoodScanScreen> {
   Future<void> _openCamera() async {
     await AccessibilityUtils.mediumHaptic();
     if (!mounted) return;
-    await Navigator.of(context)
-        .push(MaterialPageRoute(builder: (_) => const CameraScreen()));
+    await Navigator.of(context).push(MaterialPageRoute(
+      settings: const RouteSettings(name: VoiceGuideRoutes.camera),
+      builder: (_) => const CameraScreen(),
+    ));
   }
 }
 

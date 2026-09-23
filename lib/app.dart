@@ -13,6 +13,7 @@ import 'features/history/state/history_controller.dart';
 import 'shared/services/turkish_number_parser.dart';
 import 'shared/services/voice_command_service.dart';
 import 'shared/services/voice_help_service.dart';
+import 'shared/services/screen_voice_guide.dart';
 import 'features/food_scan/screens/food_scan_screen.dart';
 import 'features/history/screens/food_history_screen.dart';
 import 'features/history/screens/food_shortcuts_screen.dart';
@@ -97,7 +98,11 @@ class _AppShellState extends ConsumerState<AppShell>
             if (result.command == VoiceCommand.today) _onTabChanged(2);
             if (result.command == VoiceCommand.settings) {
               Navigator.of(context).push(
-                MaterialPageRoute(builder: (_) => const SettingsScreen()),
+                MaterialPageRoute(
+                  settings:
+                      const RouteSettings(name: VoiceGuideRoutes.settings),
+                  builder: (_) => const SettingsScreen(),
+                ),
               );
             }
             if (result.command == VoiceCommand.cancel) {
@@ -159,6 +164,8 @@ class _AppShellState extends ConsumerState<AppShell>
                 }.contains(result.command) &&
                 ModalRoute.of(context)?.isCurrent == true) {
               Navigator.of(context).push(MaterialPageRoute(
+                  settings:
+                      const RouteSettings(name: VoiceGuideRoutes.foodShortcuts),
                   builder: (_) => FoodShortcutsScreen(
                         openUndo: result.command == VoiceCommand.undoFood,
                         breakfast:
@@ -409,6 +416,11 @@ class _AppShellState extends ConsumerState<AppShell>
 
   /// Bulunulan sekmeye göre kullanılabilir sesli komutları okur.
   void _announceHelp() {
+    final routeGuide = ref.read(screenVoiceGuideControllerProvider);
+    if (routeGuide.guide != null) {
+      routeGuide.repeat();
+      return;
+    }
     final context = HelpContext.fromTabIndex(ref.read(currentTabProvider));
     ref.read(voiceHelpServiceProvider).announce(context);
   }
@@ -417,6 +429,9 @@ class _AppShellState extends ConsumerState<AppShell>
     if (index == ref.read(currentTabProvider)) return;
     AccessibilityUtils.lightHaptic();
     ref.read(currentTabProvider.notifier).state = index;
+    await ref
+        .read(screenVoiceGuideControllerProvider)
+        .showRoute(VoiceGuideRoutes.home, announce: false);
 
     // Sekme değişince önceki sekmenin kalan cümleleri susar. Aksi hâlde
     // kullanıcı artık ekranda olmayan bir içeriği dinlemeye devam eder.
@@ -483,6 +498,8 @@ class _AppShellState extends ConsumerState<AppShell>
                             Navigator.push(
                               context,
                               MaterialPageRoute(
+                                  settings: const RouteSettings(
+                                      name: VoiceGuideRoutes.settings),
                                   builder: (context) => const SettingsScreen()),
                             );
                           },

@@ -12,23 +12,23 @@ import 'package:flutter/foundation.dart';
 
 /// Konuşma tanımada önce cihaz üstü (internetsiz) tanıma istenir mi.
 ///
-/// Android eklentisi cihaz üstü tanıma varsa onu kullanır, yoksa standart
-/// tanımaya kendisi döner; tercih uygulamayı bozmaz. iOS eklentisi cihaz üstü
-/// destek yokken hem hata döndürüp hem dinlemeyi başlattığı için iOS'ta
-/// kapalı tutulur.
+/// Bulut tanımaya sessiz geçiş yapılmaz. Cihazda Türkçe paket yoksa kullanıcı
+/// dokunmatik veya klavye ile devam eder.
 bool preferOnDeviceSpeechByDefault() =>
     defaultTargetPlatform == TargetPlatform.android;
 
-/// Cihaz üstü tanıma, Türkçe dil paketi kurulu olmadığı için başarısız olduysa
-/// bir kez standart tanımayla yeniden denenir; sesli komut kullanılamaz hâle
-/// gelmez.
+/// Desteklenen Android sürümlerinde cihaz üstü istek zorunludur.
+bool preferOnDeviceSpeechForAndroidSdk(int sdkInt) => sdkInt >= 21;
+
+Future<bool> resolveOnDeviceSpeechPreference() async =>
+    preferOnDeviceSpeechByDefault();
+
+/// Cihaz üstü tanıma başarısız olursa bulut tanımaya yeniden denenmez.
 bool shouldRetryWithoutOnDevice(
   String errorMsg, {
   required bool preferOnDevice,
 }) =>
-    preferOnDevice &&
-    (errorMsg == 'error_language_unavailable' ||
-        errorMsg == 'error_language_not_supported');
+    false;
 
 /// Cihazda kurulu, internet gerektirmeyen bir Türkçe metin okuma sesi seçer.
 ///

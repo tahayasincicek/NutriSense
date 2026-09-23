@@ -16,6 +16,7 @@ import 'package:speech_to_text/speech_recognition_result.dart';
 import 'package:speech_to_text/speech_to_text.dart';
 import 'on_device_voice_policy.dart';
 import 'speech_locale_policy.dart';
+import 'accessibility_service.dart';
 
 /// STT dinleme durumu
 enum SttState { idle, listening, processing, error }
@@ -49,14 +50,18 @@ class SttResult {
 /// );
 /// ```
 class SttService {
+  SttService({AccessibilityService? accessibility})
+      : _accessibility = accessibility;
+
   final SpeechToText _stt = SpeechToText();
+  final AccessibilityService? _accessibility;
   SttState _state = SttState.idle;
   bool _isInitialized = false;
   String? _turkishLocaleId;
   String? _initializationError;
   // Önce cihaz üstü tanıma denenir; ses cihazdan çıkmaz. Dil paketi yoksa
   // bir kez standart tanımaya dönülür.
-  bool _preferOnDevice = preferOnDeviceSpeechByDefault();
+  bool _preferOnDevice = false;
   String? _activeLocale;
   Duration _activeListenFor = const Duration(seconds: 30);
 
@@ -103,6 +108,7 @@ class SttService {
       debugLogging: false,
     );
     if (_isInitialized) {
+      _preferOnDevice = await resolveOnDeviceSpeechPreference();
       final locales = await _stt.locales();
       _turkishLocaleId = selectTurkishSpeechLocale(
         locales.map((locale) => locale.localeId),
@@ -155,6 +161,8 @@ class SttService {
     }
 
     _state = SttState.listening;
+    await _accessibility?.prepareForSpeechInput();
+    await Future<void>.delayed(const Duration(milliseconds: 250));
     _onListeningStarted?.call();
 
     _activeLocale = requestedLocale;
@@ -168,8 +176,8 @@ class SttService {
       listenOptions: SpeechListenOptions(
         localeId: _activeLocale,
         listenFor: _activeListenFor,
-        pauseFor: const Duration(seconds: 3), // 3 saniye sessizlikte dur
-        listenMode: ListenMode.confirmation,
+        pauseFor: const Duration(seconds: 4),
+        listenMode: ListenMode.dictation,
         cancelOnError: false,
         partialResults: true,
         onDevice: _preferOnDevice,
@@ -180,6 +188,7 @@ class SttService {
   /// Dinlemeyi durdurur.
   Future<void> stopListening() async {
     await _stt.stop();
+    _accessibility?.finishSpeechInput();
     _state = SttState.idle;
     _onListeningStopped?.call();
   }
@@ -187,6 +196,7 @@ class SttService {
   /// Dinlemeyi iptal eder (sonuç vermeden).
   Future<void> cancelListening() async {
     await _stt.cancel();
+    _accessibility?.finishSpeechInput();
     _state = SttState.idle;
     _onListeningStopped?.call();
   }
@@ -215,6 +225,7 @@ class SttService {
 
     if (result.finalResult) {
       _state = SttState.idle;
+      _accessibility?.finishSpeechInput();
     }
 
     _onResult?.call(sttResult);
@@ -227,25 +238,20 @@ class SttService {
         break;
       case 'notListening':
         _state = SttState.idle;
+        _accessibility?.finishSpeechInput();
         _onListeningStopped?.call();
         break;
       case 'done':
         _state = SttState.idle;
+        _accessibility?.finishSpeechInput();
         _onListeningStopped?.call();
         break;
     }
   }
 
   void _handleError(SpeechRecognitionError error) {
-    if (shouldRetryWithoutOnDevice(
-      error.errorMsg,
-      preferOnDevice: _preferOnDevice,
-    )) {
-      _preferOnDevice = false;
-      unawaited(_listen());
-      return;
-    }
     _state = SttState.error;
+    _accessibility?.finishSpeechInput();
     final message = _errorToTurkish(error.errorMsg);
     _onError?.call(message);
   }
@@ -286,7 +292,9 @@ class SttService {
 
 /// STT servisi provider'ı — uygulama genelinde tek instance
 final sttServiceProvider = Provider<SttService>((ref) {
-  final service = SttService();
+  final service = SttService(
+    accessibility: ref.read(accessibilityServiceProvider),
+  );
   ref.onDispose(() => service.dispose());
   return service;
 });

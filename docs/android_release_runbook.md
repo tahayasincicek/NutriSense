@@ -40,7 +40,13 @@ flutter run --flavor staging `
 # Production; aşağıdaki kimlik ve imza kapıları tamamlanmadan başarısız olur
 flutter build appbundle --release --flavor prod `
   --dart-define=APP_ENV=prod `
-  --dart-define=API_BASE_URL=https://PRODUCTION_HOST/api/v1
+  --dart-define=API_BASE_URL=https://PRODUCTION_HOST/api/v1 `
+  --dart-define=PRIVACY_NOTICE_VERSION=KVKK-AYD-YYYY-NN `
+  --dart-define=DATA_CONTROLLER_NAME="GERÇEK VERİ SORUMLUSU" `
+  --dart-define=DATA_CONTROLLER_CONTACT_EMAIL=kvkk@PRODUCTION_HOST `
+  --dart-define=DATA_CONTROLLER_POSTAL_ADDRESS="GERÇEK POSTA ADRESİ" `
+  --dart-define=PRIVACY_POLICY_URL=https://PRODUCTION_HOST/gizlilik `
+  --dart-define=ACCOUNT_DELETION_URL=https://PRODUCTION_HOST/hesap-silme
 ```
 
 `devDebug` yalnız `10.0.2.2`, `127.0.0.1` ve `localhost` için cleartext tanır.
@@ -155,6 +161,12 @@ Release artefaktında ayrıca şunlar kontrol edilir:
 - [ ] Yavaş ağ/uçak modu/background-kill/kamera lifecycle geçti.
 - [ ] Release log/artefakt secret ve PII taraması geçti.
 - [ ] Gizlilik politikası ve Data Safety hukuk/KVKK onayı aldı.
+- [ ] `/gizlilik` ve `/hesap-silme` oturum açmadan, HTTPS üzerinden ve
+      coğrafi engel olmadan erişiliyor.
+- [ ] Play Console Health Apps beyanında “Nutrition and Weight Management” ve
+      adım özelliği dağıtılıyorsa “Activity and Fitness” seçildi.
+- [ ] App Store Connect App Privacy ile Play Data Safety cevapları production
+      veri akışı ve gizlilik metniyle aynı.
 - [ ] Mağaza metni yalnız kanıtlı özellikleri içeriyor.
 
 ## Rollback

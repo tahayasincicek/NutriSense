@@ -866,6 +866,7 @@ async def create_manual_food_log(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
+    _require_health_data_consent(db, current_user.id)
     capture_key = str(request.capture_id)
     db.query(User).filter(User.id == current_user.id).with_for_update().first()
     existing_attempt = db.query(RecognitionAttempt).filter(
@@ -1119,6 +1120,7 @@ async def get_food_history(
     current_user: User = Depends(get_current_user),
 ):
     """Kullanıcının yemek geçmişini tarih aralığıyla döner."""
+    _require_health_data_consent(db, current_user.id)
     # Yetki kontrolü
     if current_user.id != user_id:
         raise HTTPException(
@@ -1956,6 +1958,7 @@ async def preview_dietitian_report(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
+    _require_health_data_consent(db, current_user.id)
     dietitian, _assignment, payload = _report_payload(db, current_user, request)
     digest = consent_context_hash(payload)
     return DietitianReportPreviewResponse(
@@ -1988,6 +1991,7 @@ async def send_to_dietitian(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
+    _require_health_data_consent(db, current_user.id)
     dietitian, assignment, payload = _report_payload(db, current_user, request)
     digest = consent_context_hash(payload)
     if digest != request.consent_context_hash:
@@ -2951,6 +2955,7 @@ async def read_today_health_metrics(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
+    _require_health_data_consent(db, current_user.id)
     row = _health_metric_for(db, current_user.id, istanbul_date())
     db.commit()
     return _health_metric_response(row)
@@ -2967,6 +2972,7 @@ async def update_today_health_metrics(
     current_user: User = Depends(get_current_user),
 ):
     """Yalnız gönderilen alanlar değişir; gün başına tek satır tutulur."""
+    _require_health_data_consent(db, current_user.id)
     row = _health_metric_for(db, current_user.id, istanbul_date())
     if request.water_ml is not None:
         row.water_ml = request.water_ml
@@ -2991,6 +2997,7 @@ async def read_weight_history(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
+    _require_health_data_consent(db, current_user.id)
     return _weight_history_response(db, current_user.id, limit)
 
 
@@ -3026,6 +3033,7 @@ async def add_weight_measurement(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
+    _require_health_data_consent(db, current_user.id)
     db.add(WeightMeasurement(
         id=str(uuid.uuid4()),
         user_id=current_user.id,
@@ -3308,6 +3316,21 @@ async def update_me(
             else "patient"
         ),
     )
+
+
+def _require_health_data_consent(db: Session, user_id: str) -> None:
+    """Production sağlık verisi uçlarını güncel, amaç bazlı rızaya bağlar."""
+    if settings.app_environment.lower() != "prod":
+        return
+    if not _has_consent(db, user_id, "health_data_processing"):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail=(
+                "Sağlık verilerinin işlenmesine ilişkin tercihiniz etkin "
+                "değil. Ayarlar > Kişisel Verilerim ve İzinler bölümünden "
+                "tercihinizi yönetebilirsiniz."
+            ),
+        )
 
 
 _EMAIL_CHANGE_TTL = timedelta(minutes=30)

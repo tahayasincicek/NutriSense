@@ -8,6 +8,7 @@
 // =============================================================================
 
 import 'package:flutter/material.dart';
+import '../../../shared/services/screen_voice_guide.dart';
 
 import '../models/discover_content.dart';
 import '../screens/article_detail_screen.dart';
@@ -20,6 +21,7 @@ class ArticleCard extends StatelessWidget {
   void _open(BuildContext context) {
     Navigator.of(context).push(
       MaterialPageRoute(
+        settings: const RouteSettings(name: VoiceGuideRoutes.article),
         builder: (_) => ArticleDetailScreen(article: article),
       ),
     );

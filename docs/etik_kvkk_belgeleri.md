@@ -11,7 +11,6 @@ Bu dosya bir etik kurul kararı, hukuk görüşü veya tamamlanmış saha çalı
 - [Araştırmacı oturum scripti](research/researcher_session_script.md)
 - [Altı görev spesifikasyonu](research/usability_task_specification.md)
 - [Anket araç kaydı](research/survey_instrument_register.md)
-- [Hazırlık ve karar durumu](research/readiness_and_decisions.md)
 
 ## KVKK ve yayın belgeleri
 

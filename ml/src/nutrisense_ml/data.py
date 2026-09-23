@@ -91,6 +91,8 @@ def build_dataset(
     seed: int,
     allow_unknown_labels: bool = False,
     decoder: str = "pil",
+    sample_weight_by_source: dict[str, float] | None = None,
+    sample_weight_by_label: dict[str, float] | None = None,
 ):
     """Görselleri okuyan tf.data hattını kurar.
 
@@ -106,7 +108,16 @@ def build_dataset(
         indices = [label_to_index.get(row["label"], -1) for row in rows]
     else:
         indices = [label_to_index[row["label"]] for row in rows]
-    ds = tf.data.Dataset.from_tensor_slices((paths, indices))
+    sample_weights = None
+    if sample_weight_by_source or sample_weight_by_label:
+        sample_weights = [
+            float((sample_weight_by_source or {}).get(row.get("source_id", ""), 1.0))
+            * float((sample_weight_by_label or {}).get(row["label"], 1.0))
+            for row in rows
+        ]
+        ds = tf.data.Dataset.from_tensor_slices((paths, indices, sample_weights))
+    else:
+        ds = tf.data.Dataset.from_tensor_slices((paths, indices))
     if training:
         ds = ds.shuffle(len(rows), seed=seed, reshuffle_each_iteration=True)
 
@@ -118,10 +129,17 @@ def build_dataset(
     def load(path, label):
         return read_image(path, height, width), label
 
+    def load_weighted(path, label, sample_weight):
+        return read_image(path, height, width), label, sample_weight
+
     options = tf.data.Options()
     options.experimental_deterministic = True
     pipeline = (
-        ds.map(load, num_parallel_calls=tf.data.AUTOTUNE, deterministic=True)
+        ds.map(
+            load_weighted if sample_weights is not None else load,
+            num_parallel_calls=tf.data.AUTOTUNE,
+            deterministic=True,
+        )
         .batch(batch_size)
         .with_options(options)
     )

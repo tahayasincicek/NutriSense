@@ -1,0 +1,8 @@
+{
+  "coverage": 0.5192700729927008,
+  "experiment_id": "20260921T123529Z-029a452dda",
+  "ood_false_accepts": 467,
+  "selected_on": "validation",
+  "selective_error": 0.09998680912808337,
+  "threshold": 0.9384744167327881
+}

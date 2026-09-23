@@ -12,9 +12,9 @@ onaylanan besin adı, porsiyon, kalori/makro ve zamanı; kullanıcı seçerse
 diyetisyen iletişimi ve gönderim kayıtlarını işler. Besin fotoğrafı ya kameradan çekilir ya da kullanıcının galerisinden tek tek seçtiği dosyadan alınır; uygulama fotoğraf kütüphanesini taramaz, yalnız seçilen dosyayı okur. Kamera görüntüsü
 besin tanıma için yalnız telefonda, uygulamayla gelen NutriSense modeliyle
 işlenir; fotoğraf sunucuya veya yurt dışına gönderilmez, dosya, veritabanı
-veya logda saklanmaz. Fotoğrafın ileride yurt dışındaki bir sağlayıcıya
-gönderilebilmesi için ayrı açık rıza anahtarı korunur; böyle bir sağlayıcı
-bugün yoktur.
+veya logda saklanmaz. Sunucu tarafında görüntü sağlayıcısı yoktur ve production uygulaması
+fotoğraf aktarım rızası istemez. Böyle bir özellik ileride eklenecekse yeni veri
+akışı ayrıca değerlendirilmeden ve kullanıcıya sunulmadan etkinleştirilemez.
 
 Kullanıcı isterse su, adım, uyku, ruh hâli ve kilo ölçümlerini de kaydeder.
 Bunlar sağlık verisidir ve hesaba bağlı olarak saklanır; hesap silindiğinde
@@ -51,10 +51,9 @@ adresin sahibine e-postayla bildirilir.
 
 Sesli komutlar cihazın işletim sistemindeki konuşma tanıma servisiyle
 (Android'de Google, iOS'ta Apple) yazıya çevrilir. NutriSense sesi dosyaya,
-veritabanına veya loga yazmaz. Android'de önce cihaz üstü tanıma istenir ve ses
-telefondan çıkmaz. Telefonda Türkçe dil paketi yoksa sesli komut bozulmasın
-diye standart tanımaya dönülür; bu durumda ve iOS'ta ses işletim sistemi
-sağlayıcısının sunucularında işlenebilir. Bu servis
+veritabanına veya loga yazmaz. Android ve iOS'ta yalnız cihaz üstü tanıma istenir. Türkçe dil paketi veya
+cihaz üstü destek yoksa bulut tanımaya sessiz geçilmez; kullanıcı dokunmatik
+veya klavyeyle devam eder. NutriSense sesi sunucuya göndermez. Bu servis
 `docs/yurt_disi_aktarim_matrisi.md` içinde ayrı satırdır. Sesli komut
 kullanmadan dokunmatik ekran ve klavyeyle devam edilebilir.
 
@@ -79,12 +78,11 @@ okunur/dinlenir, izinler ise amaç bazlı ayrı anahtarlarla verilir. İzinler
 kapalı başlar; sessiz kabul yoktur ve her izin sonradan Ayarlar'dan geri
 alınabilir.
 
-Şu an iki amaç için ayrı rıza alınır: sağlık verilerinin işlenmesi ve
-fotoğrafın analiz için yurt dışındaki sağlayıcıya gönderilmesi.
+Sağlık verilerinin işlenmesi için ayrı, kapalı başlayan rıza alınır.
+Fotoğraf cihazda işlendiği ve dışarı aktarılmadığı için gerçekleşmeyen gelecekteki
+bir aktarım adına rıza istenmez.
 
-Yurt dışı aktarım rızası verilmezse fotoğraf hiç işlenmez ve sağlayıcıya
-gönderilmez; kullanıcı besinleri elle girerek uygulamayı kullanmaya devam
-eder. Rıza kayıtları politika sürümüyle damgalanır; geri çekme önceki kaydı
+Rıza kayıtları politika sürümüyle damgalanır; geri çekme önceki kaydı
 silmez, yeni kayıt yazar.
 
 ## Kullanıcı seçimleri

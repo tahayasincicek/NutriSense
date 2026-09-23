@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/theme/app_theme.dart';
+import '../../../shared/services/screen_voice_guide.dart';
 import '../models/discover_content.dart';
 import '../widgets/article_card.dart';
 import 'article_detail_screen.dart';
@@ -12,6 +13,7 @@ class DiscoverScreen extends StatelessWidget {
   void _openArticle(BuildContext context, DiscoverArticle article) {
     Navigator.of(context).push(
       MaterialPageRoute(
+        settings: const RouteSettings(name: VoiceGuideRoutes.article),
         builder: (_) => ArticleDetailScreen(article: article),
       ),
     );
@@ -19,7 +21,10 @@ class DiscoverScreen extends StatelessWidget {
 
   void _openCategory(BuildContext context, DiscoverCategory category) {
     Navigator.of(context).push(
-      MaterialPageRoute(builder: (_) => CategoryScreen(category: category)),
+      MaterialPageRoute(
+        settings: const RouteSettings(name: VoiceGuideRoutes.category),
+        builder: (_) => CategoryScreen(category: category),
+      ),
     );
   }
 

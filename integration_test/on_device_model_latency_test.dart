@@ -9,9 +9,8 @@ import 'package:nutrisense/features/food_scan/services/offline_recognizer.dart';
 
 /// Cihaz üstü modelin gerçek donanımdaki çıkarım süresini ölçer.
 ///
-/// Model kartındaki `target_device_latency_ms` alanı bu ölçüm olmadan
-/// `not_run` kalır. Ölçümün hangi donanımda yapıldığı raporlanmalıdır;
-/// emülatör ölçümü fiziksel telefon ölçümü yerine geçmez.
+/// Sonuç model kartına cihaz modeliyle birlikte yazılır. Emülatör ölçümü
+/// fiziksel telefon ölçümü yerine geçmez.
 void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 

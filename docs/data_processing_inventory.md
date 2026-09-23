@@ -61,7 +61,7 @@ sözleşme ve aktarım mekanizması kaydedilmelidir.
 | Günlük düzeltme/silme | `PATCH/DELETE /api/v1/food-logs/{id}` | Sahiplik ve audit; soft-delete/restore |
 | Hesap silme | `DELETE /api/v1/users/me` | Parola + kesin ifade; DB cascade; backup/provider silmesi dış prosedür |
 | Diyetisyen rızasını iptal | Assignment iptal endpointi | Yeni gönderimi engeller; önceden gönderilen kopya provider politikasına bağlı |
-| Rızayı geri çekme | `PUT /api/v1/consents` (`granted: false`) | Yurt dışı aktarım rızası geri alınınca fotoğraf analizi 403 döner; manuel giriş açık kalır |
+| Rızayı geri çekme | `PUT /api/v1/consents` (`granted: false`) | Sağlık verisi rızası geri alınınca production sağlık verisi okuma, yazma ve rapor paylaşım uçları 403 döner; hesap silme ve hak kullanımı açık kalır |
 | Rıza durumunu görme | `GET /api/v1/consents` | Yalnız token sahibi |
 | Araştırmadan çekilme | `POST /api/v1/research/withdraw` | Düz withdrawal code yalnız katılımcıda; server hash tutar |
 
@@ -80,9 +80,8 @@ sözleşme ve aktarım mekanizması kaydedilmelidir.
    mesajını redakte eder.
 8. Aydınlatma metni açık rızadan ayrı ekranda sunulur; rıza amaç bazlıdır ve
    kapalı başlar. Sessiz kabul yoktur.
-9. Yurt dışı aktarım rızası verilmediyse görüntü hiç işlenmez ve sağlayıcıya
-   gönderilmez; kullanıcı manuel girişle uygulamayı kullanmaya devam eder.
-   Rıza yalnız kayıt değil, koddaki bir kapıdır.
+9. Görüntü yalnız cihazda işlenir; production uygulamasında görüntüyü sunucuya
+   veya yurt dışındaki bir sağlayıcıya gönderen etkin akış yoktur.
 10. Rıza geri çekildiğinde önceki kayıt silinmez; yeni kayıt yazılır, böylece
     rızanın ne zaman verilip alındığı ispatlanabilir.
 

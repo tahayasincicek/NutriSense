@@ -7,6 +7,7 @@ import '../../../shared/models/food_analysis_model.dart';
 import '../../../shared/services/accessibility_service.dart';
 import '../../../shared/services/contextual_voice_command.dart';
 import '../../../shared/services/navigation_announcer.dart';
+import '../../../shared/services/screen_voice_guide.dart';
 import '../../../shared/services/stt_service.dart';
 import '../state/history_controller.dart';
 import 'nutrition_stats_screen.dart';
@@ -56,6 +57,8 @@ class _FoodHistoryScreenState extends ConsumerState<FoodHistoryScreen> {
           IconButton(
             icon: const Icon(Icons.bar_chart_rounded),
             onPressed: () => Navigator.of(context).push(MaterialPageRoute(
+                settings:
+                    const RouteSettings(name: VoiceGuideRoutes.nutritionStats),
                 builder: (_) => const NutritionStatsScreen())),
           ),
           IconButton(
@@ -68,8 +71,10 @@ class _FoodHistoryScreenState extends ConsumerState<FoodHistoryScreen> {
       body: Column(
         children: [
           TextButton.icon(
-            onPressed: () => Navigator.of(context).push(
-                MaterialPageRoute(builder: (_) => const FoodShortcutsScreen())),
+            onPressed: () => Navigator.of(context).push(MaterialPageRoute(
+                settings:
+                    const RouteSettings(name: VoiceGuideRoutes.foodShortcuts),
+                builder: (_) => const FoodShortcutsScreen())),
             icon: const Icon(Icons.history_rounded),
             label: const Text('Sık tüketilenler ve geri alma'),
           ),

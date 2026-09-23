@@ -1,11 +1,14 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:url_launcher/url_launcher.dart';
+import '../../../core/config/app_config.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/theme_controller.dart';
 import '../../../shared/services/accessibility_service.dart';
 import '../../../shared/services/contextual_voice_command.dart';
 import '../../../shared/services/stt_service.dart';
+import '../../../shared/services/screen_voice_guide.dart';
 import '../../auth/state/auth_controller.dart';
 import '../../history/state/daily_goal_provider.dart';
 import '../../onboarding/screens/onboarding_screen.dart';
@@ -321,6 +324,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 color: AppTheme.primaryColor,
                 onTap: () => Navigator.of(context).push(
                   MaterialPageRoute(
+                    settings:
+                        const RouteSettings(name: VoiceGuideRoutes.privacy),
                     builder: (_) => const PrivacyConsentScreen(),
                   ),
                 ),
@@ -331,7 +336,11 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 icon: Icons.assignment_outlined,
                 color: AppTheme.primaryColor,
                 onTap: () => Navigator.of(context).push(
-                  MaterialPageRoute(builder: (_) => const SurveyScreen()),
+                  MaterialPageRoute(
+                    settings:
+                        const RouteSettings(name: VoiceGuideRoutes.survey),
+                    builder: (_) => const SurveyScreen(),
+                  ),
                 ),
               ),
               _buildActionTile(
@@ -341,6 +350,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 color: AppTheme.primaryColor,
                 onTap: () => Navigator.of(context).push(
                   MaterialPageRoute(
+                      settings: const RouteSettings(
+                          name: VoiceGuideRoutes.usabilityTest),
                       builder: (_) => const UsabilityTestScreen()),
                 ),
               ),
@@ -350,6 +361,13 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           const SizedBox(height: 24),
           _buildSectionTitle('Yasal'),
           _buildSettingCard([
+            _buildActionTile(
+              key: const Key('settings_open_privacy_policy'),
+              title: 'Gizlilik ve KVKK Aydınlatması',
+              icon: Icons.privacy_tip_outlined,
+              color: AppTheme.primaryColor,
+              onTap: _openPrivacyPolicy,
+            ),
             _buildActionTile(
               key: const Key('settings_open_licenses'),
               title: 'Lisanslar ve Veri Kaynakları',
@@ -372,7 +390,11 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               icon: Icons.alternate_email_rounded,
               color: AppTheme.primaryColor,
               onTap: () => Navigator.of(context).push(
-                MaterialPageRoute(builder: (_) => const EmailChangeScreen()),
+                MaterialPageRoute(
+                  settings:
+                      const RouteSettings(name: VoiceGuideRoutes.emailChange),
+                  builder: (_) => const EmailChangeScreen(),
+                ),
               ),
             ),
             _buildActionTile(
@@ -401,6 +423,22 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         ],
       ),
     );
+  }
+
+  Future<void> _openPrivacyPolicy() async {
+    final configured = AppConfig.privacyPolicyUrl.trim();
+    final url = configured.isNotEmpty
+        ? configured
+        : AppConfig.apiBaseUrl.replaceFirst(RegExp(r'/api/v1$'), '/gizlilik');
+    final opened = await launchUrl(
+      Uri.parse(url),
+      mode: LaunchMode.externalApplication,
+    );
+    if (!opened && mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Gizlilik sayfası açılamadı.')),
+      );
+    }
   }
 
   Widget _buildProfileHeader(String profileName) {
@@ -634,6 +672,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   Future<void> _replayOnboarding() async {
     await Navigator.of(context).push(
       MaterialPageRoute(
+        settings: const RouteSettings(name: VoiceGuideRoutes.onboarding),
         builder: (context) => OnboardingScreen(
           isReplay: true,
           onComplete: () => Navigator.of(context).pop(),

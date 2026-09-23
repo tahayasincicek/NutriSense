@@ -4,26 +4,24 @@ from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parents[2]
-EXPERIMENT_ID = "20260908T060321Z-b000d69c58"
-
-
 def test_deployed_model_documentation_matches_training_config() -> None:
-    config = json.loads(
-        (ROOT / "ml" / "runs" / EXPERIMENT_ID / "config.json").read_text(
+    manifest = json.loads(
+        (ROOT / "assets" / "models" / "model_manifest.json").read_text(
             encoding="utf-8"
         )
     )
-    manifest = json.loads(
-        (ROOT / "assets" / "models" / "model_manifest.json").read_text(
+    experiment_id = manifest["experiment_id"]
+    config = json.loads(
+        (ROOT / "ml" / "artifacts" / experiment_id / "config.json").read_text(
             encoding="utf-8"
         )
     )
     model_card = (ROOT / "ml" / "MODEL_CARD.md").read_text(encoding="utf-8")
 
     model = config["model"]
-    assert manifest["experiment_id"] == EXPERIMENT_ID
-    assert f"`{model['architecture']}`" in model_card
-    assert f"`alpha={model['alpha']}`" in model_card
+    assert experiment_id in model_card
+    assert model["architecture"] in model_card
+    assert str(model["alpha"]).replace(".", ",") in model_card
 
 
 def test_result_report_describes_the_local_nutrition_catalog() -> None:

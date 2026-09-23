@@ -37,8 +37,8 @@ void main() {
 
     expect(find.text('Aydınlatma Metni'), findsOneWidget);
     expect(find.text('İzinleriniz'), findsOneWidget);
-    // Her amaç için ayrı anahtar; tek kutucukta birleştirilmez.
-    expect(find.byType(Switch), findsNWidgets(2));
+    // Yalnız gerçekten kullanılan sağlık verisi amacı için rıza alınır.
+    expect(find.byType(Switch), findsOneWidget);
   });
 
   testWidgets('izinler kapalı başlar ve sessiz kabul edilmez', (tester) async {
@@ -51,12 +51,12 @@ void main() {
     }
   });
 
-  testWidgets('her izin ayrı ayrı kaydedilir', (tester) async {
+  testWidgets('sağlık verisi izni ayrı kaydedilir', (tester) async {
     final adapter = _ConsentAdapter();
     await tester.pumpWidget(_app(adapter));
     await tester.pumpAndSettle();
 
-    // Yalnız yurt dışı aktarımına izin verilir.
+    // Aydınlatma teyidi ve sağlık verisi rızası ayrı işlemlerdir.
     await tester.tap(find.byKey(const Key('privacy_notice_acknowledgement')));
     await tester.pump();
     await tester.tap(find.byType(Switch).last);
@@ -65,8 +65,8 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(adapter.saved['privacy_notice_acknowledgement'], isTrue);
-    expect(adapter.saved['health_data_processing'], isFalse);
-    expect(adapter.saved['image_cross_border_transfer'], isTrue);
+    expect(adapter.saved['health_data_processing'], isTrue);
+    expect(adapter.saved.containsKey('image_cross_border_transfer'), isFalse);
   });
 
   testWidgets('aydınlatma teyidi olmadan tercihler kaydedilmez',

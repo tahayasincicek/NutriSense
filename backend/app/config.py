@@ -349,6 +349,7 @@ class Settings(BaseSettings):
             controller = {
                 "DATA_CONTROLLER_NAME": self.data_controller_name,
                 "DATA_CONTROLLER_CONTACT_EMAIL": self.data_controller_contact_email,
+                "DATA_CONTROLLER_POSTAL_ADDRESS": self.data_controller_postal_address,
             }
             missing = [
                 name for name, value in controller.items()

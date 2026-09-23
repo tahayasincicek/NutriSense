@@ -32,6 +32,7 @@ class CameraState {
   final String? recognizedFood;
   final double? calories;
   final double? confidence;
+  final List<FoodCandidate> candidates;
   final String? savedLogId;
   final bool permissionPermanentlyDenied;
 
@@ -47,6 +48,7 @@ class CameraState {
     this.recognizedFood,
     this.calories,
     this.confidence,
+    this.candidates = const [],
     this.savedLogId,
     this.permissionPermanentlyDenied = false,
   });
@@ -63,6 +65,7 @@ class CameraState {
     String? recognizedFood,
     double? calories,
     double? confidence,
+    List<FoodCandidate>? candidates,
     String? savedLogId,
     bool? permissionPermanentlyDenied,
     bool clearAnalysis = false,
@@ -80,6 +83,7 @@ class CameraState {
             clearAnalysis ? null : recognizedFood ?? this.recognizedFood,
         calories: clearAnalysis ? null : calories ?? this.calories,
         confidence: clearAnalysis ? null : confidence ?? this.confidence,
+        candidates: clearAnalysis ? const [] : candidates ?? this.candidates,
         savedLogId: clearAnalysis ? null : savedLogId ?? this.savedLogId,
         permissionPermanentlyDenied:
             permissionPermanentlyDenied ?? this.permissionPermanentlyDenied,
@@ -126,13 +130,21 @@ class CameraNotifier extends StateNotifier<CameraState> {
 
   /// Cihaz üstü modelin önerisi. Model yalnız sınıf üretir; kalori
   /// bilinmediği için [calories] doldurulmaz ve kullanıcı onayı zorunludur.
-  void setOnDeviceSuggestion(String foodNameTr, double confidence) =>
+  void setOnDeviceSuggestion(
+    String foodNameTr,
+    double confidence, {
+    bool tentative = false,
+    List<FoodCandidate> candidates = const [],
+  }) =>
       state = state.copyWith(
         status: CameraStatus.confirmationRequired,
-        statusMessage: 'Cihaz üstü model: $foodNameTr. Onaylayın veya '
-            'manuel giriş yapın.',
+        statusMessage: tentative
+            ? 'Olası tahmin: $foodNameTr. Kaydetmeden önce kontrol edin.'
+            : 'Cihaz üstü model: $foodNameTr. Onaylayın veya '
+                'manuel giriş yapın.',
         recognizedFood: foodNameTr,
         confidence: confidence,
+        candidates: candidates,
       );
 
   void setQualityWarning(String message, double brightness, bool blurry) =>
@@ -155,6 +167,7 @@ class CameraNotifier extends StateNotifier<CameraState> {
         recognizedFood: result.foodNameTr,
         calories: result.totalCalories,
         confidence: result.confidence,
+        candidates: result.candidates,
       );
 
   void setSaved(String logId, {bool corrected = false}) =>

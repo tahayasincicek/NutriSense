@@ -175,7 +175,6 @@ Kendi dalınızda çalışıp pull request açın. `.env`, kişisel imzalama dos
 
 ## Belgeler
 
-- [Teslim kontrol listesi](docs/teslim_kontrol_listesi.md)
 - [Gerçek e-posta ve SMS kurulumu](docs/gercek_eposta_sms_kurulumu.md)
 
 - [Android ve iOS geliştirici rehberi](docs/developer_setup.md)
@@ -183,7 +182,6 @@ Kendi dalınızda çalışıp pull request açın. `.env`, kişisel imzalama dos
 - [Kullanıcı el kitabı](docs/kullanici_el_kitabi.md)
 - [Besin değerlerinin kaynakları](docs/nutrition_data_methodology.md)
 - [Model kartı](ml/MODEL_CARD.md) · [Veri ve lisans bilgileri](ml/LICENSES.md)
-- [Erişilebilirlik doğrulama durumu](docs/accessibility_conformance_report.md)
 - [Android yayın rehberi](docs/android_release_runbook.md) · [iOS yayın rehberi](docs/ios_release_runbook.md)
 - [TÜBİTAK sonuç raporu](docs/tubitak_sonuc_raporu.md) · [Makale taslağı](docs/akademik_makale_taslak.md)
 - [22 doğrulanmış kaynaklı literatür taraması](docs/literatur_taramasi.md)

@@ -7,6 +7,7 @@ import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/accessibility_utils.dart';
 import '../../../shared/widgets/accessible_button.dart';
 import '../../../shared/widgets/auth_mode_switch.dart';
+import '../../../shared/services/screen_voice_guide.dart';
 import '../../auth/state/auth_controller.dart';
 import '../../auth/screens/registration_verification_screen.dart';
 
@@ -349,6 +350,7 @@ class _DietitianAccessScreenState extends ConsumerState<DietitianAccessScreen> {
       // adresin sistemde olup olmadığını ele vermez.
       final verified = await Navigator.of(context).push<bool>(
         MaterialPageRoute(
+          settings: const RouteSettings(name: VoiceGuideRoutes.verification),
           builder: (_) => RegistrationVerificationScreen(
             email: _emailController.text.trim(),
             onResend: _startDietitianRegistration,

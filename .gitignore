@@ -123,6 +123,37 @@ app.*.map.json
 /ml/runs_backup/
 /assets/models_backup/
 
+# Yerel cihaz kabul çıktıları ve ekran görüntüleri
+/s8_*.png
+/dev_found.xml
+/dev_target.xml
+/hw_found.xml
+/_step
+/wget-log
+/ml_target_classes.jpg
+
+# Yerel model araştırması, aday incelemeleri ve cihazdan alınan saha verisi
+/ml/analysis/
+/ml/field_data/
+/ml/src/*.egg-info/
+
+# Dağıtıma seçilmeyen yerel model adayları ve deney yapılandırmaları
+/ml/artifacts/20260921T060607Z-06b80d2a52/
+/ml/artifacts/20260921T071020Z-weightavg075/
+/ml/configs/tr130_v2.json
+/ml/configs/tr130_v3_curated.json
+/ml/configs/tr130_v4_general_mixed.json
+/ml/configs/tr130_v5_commons_field.json
+/ml/configs/tr130_v5b_commons_strong.json
+/ml/configs/tr137_v2_targeted_hardneg.json
+/ml/configs/tr137_v3_multisource.json
+/ml/configs/tr137_v5_efficientnetv2b0.json
+/ml/configs/tr137_v6_targeted_finetune.json
+/ml/configs/tr137_v7_targeted_open_data.json
+/ml/configs/tr137_v1b_finetune.json
+/ml/configs/tr137_v1c_overnight.json
+/ml/artifacts/20260921T123529Z-029a452dda/metrics_*.json
+
 # Yerel tasarim/calisma dosyalari; depoya girmez.
 /tmp/
 /android/.kotlin/

@@ -3,6 +3,7 @@ from __future__ import annotations
 import argparse
 from pathlib import Path
 
+from . import augmentation as _augmentation  # Register serialized custom layers.
 from .common import load_json, sha256_file, utc_now, write_json
 from .data import build_dataset, read_manifest
 
