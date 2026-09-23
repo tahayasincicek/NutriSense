@@ -108,6 +108,7 @@ app.*.map.json
 /analysis/data/synthetic/*.json
 /analysis/outputs/
 /analysis/.venv/
+/analysis/tools/node_modules/
 /research/data/raw/
 /research/exports/
 /docs/research/raw/

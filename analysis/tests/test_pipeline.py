@@ -5,7 +5,7 @@ import pandas as pd
 import pytest
 from PIL import Image
 
-from analysis.tools.generate_synthetic_fixture import write_fixture
+from analysis.tools.generate_synthetic_fixture import build_study, write_fixture
 from nutrisense_analysis.pipeline import (
     DataQualityError,
     _load_export,
@@ -63,6 +63,21 @@ def test_synthetic_run_is_watermarked_and_traceable(tmp_path: Path):
         "combined_checksum_sha256"
     ]
     assert not (tmp_path / "outputs" / "results_manifest.json").exists()
+
+
+def test_synthetic_field_study_is_deterministic_balanced_and_labeled():
+    first = build_study(participant_count=20, seed=2209)
+    second = build_study(participant_count=20, seed=2209)
+    assert first == second
+    usability, survey, profiles = first
+    assert usability["synthetic"] is True
+    assert usability["warning"].startswith("YAPAY VERİDİR")
+    assert len(usability["rows"]) == 20 * 6 * 2
+    assert len(survey["rows"]) == 20 * 8
+    assert len(profiles["rows"]) == 20
+    assert {row["data_origin"] for row in usability["rows"]} == {"synthetic"}
+    assert {row["counterbalance_sequence"] for row in profiles["rows"]} == {"AB", "BA"}
+    assert all(row["consent_status"] == "NOT_APPLICABLE_SYNTHETIC" for row in profiles["rows"])
 
 
 def test_real_mode_rejects_synthetic_export(tmp_path: Path):

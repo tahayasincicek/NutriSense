@@ -43,7 +43,10 @@ GET /api/v1/survey/export/tidy
 ## Sentetik pipeline testi
 
 ```powershell
-.\analysis\.venv\Scripts\python.exe analysis\tools\generate_synthetic_fixture.py --output analysis\data\synthetic
+.\analysis\.venv\Scripts\python.exe analysis\tools\generate_synthetic_fixture.py `
+  --output analysis\data\synthetic `
+  --participants 120 `
+  --seed 2209
 .\analysis\.venv\Scripts\python.exe analysis\run_analysis.py `
   --mode synthetic `
   --usability analysis\data\synthetic\usability_tidy.synthetic.json `
@@ -51,6 +54,18 @@ GET /api/v1/survey/export/tidy
 ```
 
 Sentetik çıktı `analysis/outputs/synthetic/` altındadır, manifestte `synthetic=true` ve `SYNTHETIC_PIPELINE_TEST_ONLY` taşır. `docs/tubitak_sonuc_raporu.md` içine kopyalanamaz.
+
+Kapsamlı prova raporu ve çalışma kitabı:
+
+```powershell
+.\analysis\.venv\Scripts\python.exe analysis\tools\build_synthetic_field_report.py
+node analysis\tools\build_synthetic_workbook.mjs
+```
+
+- `docs/sentetik_saha_calismasi_raporu.md`
+- `docs/NutriSense_Sentetik_Saha_Calismasi.xlsx`
+
+Bu iki dosya da açıkça sentetik olarak işaretlidir. Gerçek kullanıcı bulgusu veya tamamlanmış saha çalışması kanıtı değildir.
 
 ## Test
 
