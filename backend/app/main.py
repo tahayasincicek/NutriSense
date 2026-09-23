@@ -31,6 +31,7 @@ from .config import get_settings
 from .models.database import engine
 from .operations.metrics import runtime_metrics
 from .security.logging import configure_secure_logging
+from .services.notification_service import email_transport_ready
 from .routers.food_router import router as food_router
 from .routers.legal_router import router as legal_router
 from .routers.survey_router import router as survey_router
@@ -299,18 +300,7 @@ def database_readiness() -> dict:
 
 def notification_readiness() -> dict:
     """Return credential-free channel readiness information."""
-    email_ready = bool(
-        settings.smtp_host
-        and settings.smtp_from_email
-        and (
-            settings.notification_mode != "production"
-            or (
-                settings.smtp_user
-                and settings.smtp_password
-                and (settings.smtp_use_tls or settings.smtp_start_tls)
-            )
-        )
-    )
+    email_ready = email_transport_ready(settings)
     sms_ready = bool(
         settings.sms_provider_mode == "twilio"
         and settings.twilio_account_sid

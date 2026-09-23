@@ -41,6 +41,30 @@ EmailTransport = Callable[[MIMEMultipart, str], Awaitable[dict]]
 SmsTransport = Callable[[str, str], dict | Awaitable[dict]]
 
 
+def email_transport_ready(settings: Settings) -> bool:
+    """Return whether the configured SMTP transport can accept a message.
+
+    Local development sinks intentionally work without credentials. External
+    SMTP servers require authentication and encrypted transport in every mode,
+    including sandbox, so readiness cannot report a half-configured Gmail
+    account as usable.
+    """
+    host = settings.smtp_host.strip().lower()
+    if not host or not settings.smtp_from_email.strip():
+        return False
+    local_sink = (
+        settings.app_environment.lower() in {"local", "dev", "test"}
+        and host in {"mailpit", "localhost", "127.0.0.1"}
+    )
+    if local_sink:
+        return True
+    return bool(
+        settings.smtp_user.strip()
+        and settings.smtp_password
+        and (settings.smtp_use_tls or settings.smtp_start_tls)
+    )
+
+
 class NotificationService:
     def __init__(
         self,
@@ -203,7 +227,7 @@ class NotificationService:
                 raise ChannelDeliveryError("RECIPIENT_NOT_ALLOWLISTED", retryable=False)
 
     async def _smtp_send(self, message: MIMEMultipart, destination: str) -> dict:
-        if not self.settings.smtp_host or not self.settings.smtp_from_email:
+        if not email_transport_ready(self.settings):
             raise ChannelDeliveryError("EMAIL_NOT_CONFIGURED", retryable=False)
         kwargs = {
             "hostname": self.settings.smtp_host,

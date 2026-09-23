@@ -78,6 +78,31 @@ def test_notification_readiness_exposes_only_channel_state(monkeypatch):
     assert "configured" not in str(payload)
 
 
+def test_external_sandbox_smtp_is_not_ready_without_password(monkeypatch):
+    monkeypatch.setattr(main.settings, "app_environment", "dev")
+    monkeypatch.setattr(main.settings, "notification_mode", "sandbox")
+    monkeypatch.setattr(main.settings, "smtp_host", "smtp.gmail.com")
+    monkeypatch.setattr(main.settings, "smtp_from_email", "noreply@example.test")
+    monkeypatch.setattr(main.settings, "smtp_user", "noreply@example.test")
+    monkeypatch.setattr(main.settings, "smtp_password", "")
+    monkeypatch.setattr(main.settings, "smtp_start_tls", True)
+
+    payload = main.notification_readiness()
+    assert payload["email"] is False
+
+
+def test_local_mail_sink_is_ready_without_credentials(monkeypatch):
+    monkeypatch.setattr(main.settings, "app_environment", "dev")
+    monkeypatch.setattr(main.settings, "notification_mode", "sandbox")
+    monkeypatch.setattr(main.settings, "smtp_host", "mailpit")
+    monkeypatch.setattr(main.settings, "smtp_from_email", "noreply@nutrisense.local")
+    monkeypatch.setattr(main.settings, "smtp_user", "")
+    monkeypatch.setattr(main.settings, "smtp_password", "")
+
+    payload = main.notification_readiness()
+    assert payload["email"] is True
+
+
 def test_public_capabilities_never_expose_credentials():
     settings = _staging_settings(
         nutrition_provider_mode="disabled",
