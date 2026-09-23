@@ -25,7 +25,12 @@ from twilio.rest import Client as TwilioClient
 from ..config import Settings, get_settings
 from ..models.database import utc_now
 from ..operations.metrics import runtime_metrics
-from ..domain.report_messages import build_report_sms, build_sms_parts
+from ..domain.report_messages import (
+    REPORT_SCHEMA_VERSION,
+    build_report_sms,
+    build_sms_parts,
+    report_record_lines,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -315,27 +320,55 @@ class NotificationService:
 
 
 def build_report_email(report: dict, settings: Settings) -> MIMEMultipart:
-    """Rapor bildirimi; hiçbir şema sürümünde sağlık verisi e-postaya yazılmaz.
-
-    Eski biçimde kaydedilmiş raporlar yeniden denendiğinde de yalnız bildirim
-    gider; ayrıntılar diyetisyen panelinde kalır.
-    """
+    """Build the explicitly approved detailed dietitian report email."""
     patient_code = report.get("patient_code") or "Belirtilmedi"
     report_reference = report.get("report_reference") or "paneldeki en yeni rapor"
+    if report.get("schema_version") != REPORT_SCHEMA_VERSION:
+        html = f"""<!doctype html><html lang="tr"><body><main>
+<h1>NutriSense — Yeni beslenme raporu</h1>
+<p><strong>Danışan kodu:</strong> {escape(patient_code)}</p>
+<p><strong>Rapor referansı:</strong> {escape(str(report_reference))}</p>
+<p>Eski onay kapsamındaki raporun ayrıntılarını güvenli diyetisyen panelinden görüntüleyin.</p>
+<p>Bu e-posta sağlık verisi içermez ve tıbbi tavsiye değildir.</p>
+</main></body></html>"""
+        plain = (
+            "NutriSense — Yeni beslenme raporu\n"
+            f"Danışan kodu: {patient_code}\n"
+            f"Rapor referansı: {report_reference}\n"
+            "Eski onay kapsamındaki raporun ayrıntılarını güvenli diyetisyen "
+            "panelinden görüntüleyin.\nBu e-posta sağlık verisi içermez ve "
+            "tıbbi tavsiye değildir."
+        )
+        message = MIMEMultipart("alternative")
+        message["From"] = f"{settings.smtp_from_name} <{settings.smtp_from_email}>"
+        message["Subject"] = "NutriSense — Yeni beslenme raporu"
+        message["Message-ID"] = make_msgid(domain="nutrisense.invalid")
+        message.attach(MIMEText(plain, "plain", "utf-8"))
+        message.attach(MIMEText(html, "html", "utf-8"))
+        return message
+    record_lines = report_record_lines(report)
+    html_records = "".join(
+        f"<li>{escape(line)}</li>" for line in record_lines
+    ) or "<li>Gönderilecek onaylı besin kaydı bulunamadı.</li>"
+    plain_records = "\n".join(f"- {line}" for line in record_lines)
+    if not plain_records:
+        plain_records = "- Gönderilecek onaylı besin kaydı bulunamadı."
     html = f"""<!doctype html><html lang="tr"><body><main>
 <h1>NutriSense — Yeni beslenme raporu</h1>
 <p><strong>Danışan kodu:</strong> {escape(patient_code)}</p>
 <p><strong>Rapor referansı:</strong> {escape(str(report_reference))}</p>
-<p>Besin adı, miktar, tarih-saat ve kalori bilgilerini güvenli diyetisyen paneline giriş yapıp Raporlar bölümünden görüntüleyin.</p>
-<p>Bu e-posta sağlık verisi içermez ve tıbbi tavsiye değildir.</p>
+<h2>Onaylanan besin kayıtları</h2><ul>{html_records}</ul>
+<p>Her satır sırasıyla besin adı, miktar, tarih, saat ve kalori değerini gösterir.</p>
+<p>Bu rapor tahmini beslenme bilgisi içerir; tıbbi tavsiye değildir.</p>
 </main></body></html>"""
     plain = (
         "NutriSense — Yeni beslenme raporu\n"
         f"Danışan kodu: {patient_code}\n"
         f"Rapor referansı: {report_reference}\n"
-        "Besin adı, miktar, tarih-saat ve kalori bilgilerini güvenli "
-        "diyetisyen paneline giriş yapıp Raporlar bölümünden "
-        "görüntüleyin.\nBu e-posta sağlık verisi içermez ve "
+        "Onaylanan besin kayıtları:\n"
+        f"{plain_records}\n"
+        "Her satır sırasıyla besin adı, miktar, tarih, saat ve kalori "
+        "değerini gösterir.\nBu rapor tahmini beslenme bilgisi içerir; "
         "tıbbi tavsiye değildir."
     )
     message = MIMEMultipart("alternative")

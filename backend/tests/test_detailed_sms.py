@@ -58,6 +58,16 @@ def test_no_schema_version_puts_health_details_into_sms(schema_version):
     assert build_sms_parts(payload) == [sms]
 
 
+def test_current_schema_puts_every_approved_field_into_sms():
+    payload = report(1, report_messages.REPORT_SCHEMA_VERSION)
+    sms = build_report_sms(payload)
+    assert "Öğün 0 Çiğ köfte" in sms
+    assert "125.5 g" in sms
+    assert "07.09.2026" in sms
+    assert "12:35" in sms
+    assert "214.75 kcal" in sms
+
+
 def test_long_unicode_body_is_complete_and_every_part_fits(long_sms):
     payload = {**report(), "body": long_body(120) + "\n" + "Çığ🥗" * 400}
     parts = build_sms_parts(payload)

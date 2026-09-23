@@ -152,7 +152,7 @@ def build_report_payload(
 def consent_context_hash(payload: dict) -> str:
     identity_fields = (
         ("patient_code",)
-        if payload.get("schema_version") == "dietitian-report-v4"
+        if payload.get("schema_version") in {"dietitian-report-v4", "dietitian-report-v5"}
         else ("user_id", "dietitian_id", "assignment_id")
     )
     consent_fields = {
@@ -180,19 +180,19 @@ def accessibility_summary(payload: dict) -> str:
         else " Tüm porsiyonlar kullanıcı tarafından kesinleştirilmiştir."
     )
     sms_note = (
-        " SMS yalnız 'Yeni rapor hazır, uygulamayı açın' bildirimini içerecek; "
-        "besin ve sağlık bilgileri SMS'e yazılmayacak."
+        " SMS; onaylanan besin adı, miktar, tarih, saat ve kalori "
+        "bilgilerini içerecek."
         if "sms" in payload["channels"] else ""
     )
     email_note = (
-        " E-posta yalnız yeni rapor bildirimi ve danışan kodunu içerecek; "
-        "besin ve sağlık bilgileri e-postaya yazılmayacak."
+        " E-posta; onaylanan besin adı, miktar, tarih, saat ve kalori "
+        "bilgilerini içerecek."
         if "email" in payload["channels"] else ""
     )
     return (
         f"{payload['from_date']} ile {payload['to_date']} arasındaki "
         f"{payload['record_count']} onaylı kayıt, {payload['dietitian_name']} adlı "
         f"diyetisyene {', '.join(channel_labels)} kanallarıyla gönderilecek."
-        f"{estimate_note}{email_note}{sms_note} Ayrıntılar yalnız giriş yapılmış "
-        "diyetisyen panelinde açılabilir. Bu rapor tıbbi tavsiye değildir."
+        f"{estimate_note}{email_note}{sms_note} Aynı ayrıntılar giriş yapılmış "
+        "diyetisyen panelinde de görüntülenebilir. Bu rapor tıbbi tavsiye değildir."
     )

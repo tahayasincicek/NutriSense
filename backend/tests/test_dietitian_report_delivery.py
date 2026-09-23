@@ -326,7 +326,7 @@ async def test_mail_sandbox_and_sms_both_contain_approved_food_details():
         email_transport=capture_email,
     )
     payload = {
-        "schema_version": "dietitian-report-v4",
+        "schema_version": "dietitian-report-v5",
         "patient_code": "D-4C3A2B1F0099",
         "patient_name": "Bu ad dış kanala çıkmamalı",
         "report_type": "daily",
@@ -360,19 +360,19 @@ async def test_mail_sandbox_and_sms_both_contain_approved_food_details():
     plain = message.get_payload()[0].get_payload(decode=True).decode("utf-8")
     html = message.get_payload()[1].get_payload(decode=True).decode("utf-8")
     assert "tıbbi tavsiye değildir" in plain
-    assert "güvenli diyetisyen paneline" in html
-    assert "Elma" not in plain and "Elma" not in html
+    assert "Onaylanan besin kayıtları" in html
+    assert "Elma" in plain and "Elma" in html
     assert "D-4C3A2B1F0099" in plain and "D-4C3A2B1F0099" in html
     assert "Bu ad dış kanala çıkmamalı" not in plain
     assert "Bu ad dış kanala çıkmamalı" not in html
 
     sms = build_safe_sms(payload)
-    assert sms == "NutriSense: Yeni rapor hazır. Uygulamayı açın."
+    assert "Elma" in sms and "150 g" in sms and "78 kcal" in sms
+    assert "18.07.2026" in sms and "10:30" in sms
     assert "Bu ad dış kanala çıkmamalı" not in sms
     assert "D-4C3A2B1F0099" not in sms
-    assert "Elma" not in sms and "78 kcal" not in sms
-    assert "150 g" not in plain
-    assert "2026-07-18T10:30:00+00:00" not in plain
+    assert "150 g" in plain and "78 kcal" in plain
+    assert "18.07.2026" in plain and "10:30" in plain
 
     external_sandbox = NotificationService(settings_override=Settings(
         app_environment="test", notification_mode="sandbox",
@@ -421,14 +421,14 @@ async def test_local_mailpit_accepts_app_recipient_without_allowlist():
 
 
 @pytest.mark.parametrize("channels", [["email", "sms"], ["sms"]])
-def test_external_channels_send_notification_only(client, monkeypatch, tmp_path, channels):
+def test_external_channels_send_approved_details(client, monkeypatch, tmp_path, channels):
     tokens = _register(client, "multipart-owner@example.com")
     _relationship(tokens["user_id"])
     for _ in range(12):
         _food_log(tokens["user_id"])
     _food_log(tokens["user_id"], confirmed=False)
     preview = _preview(client, tokens, channels).json()
-    assert "besin ve sağlık bilgileri SMS'e yazılmayacak" in preview["accessibility_summary"]
+    assert "besin adı, miktar, tarih, saat ve kalori" in preview["accessibility_summary"]
     settings = Settings(
         notification_mode="sandbox", sms_provider_mode="local_outbox",
         notification_sandbox_email_allowlist="sandbox-dietitian@nutrisense.invalid",
@@ -481,15 +481,13 @@ def test_external_channels_send_notification_only(client, monkeypatch, tmp_path,
     if emails:
         bodies.extend(part.get_payload(decode=True).decode("utf-8") for part in emails[0].get_payload())
     assert report_id not in sms_body
-    assert sms_body == "NutriSense: Yeni rapor hazır. Uygulamayı açın."
     if emails:
         assert all(report_id in body for body in bodies[1:])
-        assert all("panel" in body.lower() for body in bodies[1:])
+        assert all("onaylanan besin kayıtları" in body.lower() for body in bodies[1:])
     for record in payload["records"]:
         for body in bodies:
-            assert record["food_name_tr"] not in body
-            assert record["logged_at"] not in body
-    assert all("78 kcal" not in body for body in bodies)
+            assert record["food_name_tr"] in body
+    assert all("78 kcal" in body for body in bodies)
     assert payload["record_count"] == 12
     duplicate = client.post("/api/v1/send-to-dietitian", headers=headers, json=request)
     assert duplicate.json()["duplicate"] is True

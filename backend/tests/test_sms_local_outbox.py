@@ -10,6 +10,7 @@ import json
 import pytest
 
 from app.config import Settings
+from app.domain.report_messages import REPORT_SCHEMA_VERSION
 from app.services.notification_service import (
     ChannelDeliveryError,
     NotificationService,
@@ -32,6 +33,7 @@ def _settings(tmp_path, **overrides) -> Settings:
 
 def _report() -> dict:
     return {
+        "schema_version": REPORT_SCHEMA_VERSION,
         "patient_name": "Sentetik Hasta",
         "report_type": "weekly",
         "from_date": "2026-08-24",
@@ -70,8 +72,7 @@ async def test_sms_reaches_the_outbox_with_a_message_id(tmp_path):
 
 
 @pytest.mark.asyncio
-async def test_sms_body_contains_no_health_details(tmp_path):
-    """SMS yalnız bildirimdir; besin, gram, kalori, saat ve ad dışarı çıkmaz."""
+async def test_sms_body_contains_every_approved_project_field(tmp_path):
     settings = _settings(tmp_path)
     service = NotificationService(settings_override=settings)
 
@@ -83,9 +84,9 @@ async def test_sms_body_contains_no_health_details(tmp_path):
     body = json.loads(
         (tmp_path / "sms_outbox.jsonl").read_text(encoding="utf-8").strip()
     )["body"]
-    assert body == "NutriSense: Yeni rapor hazır. Uygulamayı açın."
-    for detail in ("Mercimek", "150.5", "kcal", "2026-08-24T12:30", "Sentetik Hasta"):
-        assert detail not in body
+    for detail in ("Mercimek Çorbası", "150.5 g", "24.08.2026", "12:30", "78.25 kcal"):
+        assert detail in body
+    assert "Sentetik Hasta" not in body
 
 
 @pytest.mark.asyncio

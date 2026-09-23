@@ -1873,10 +1873,9 @@ async def _process_report_outbox(
                     "sms_progress": report.payload_json.get("_sms_delivery"),
                     "sms_checkpoint": checkpoint_sms,
                 }
-            # The opaque report id lets the recipient match the notification
-            # with the authenticated panel entry without putting food or
-            # calorie data into email/SMS. Keep it outside the consent-hashed
-            # report snapshot.
+            # Keep the provider-facing reference outside the consent-hashed
+            # report snapshot. The approved records in the snapshot are sent
+            # through each selected channel.
             delivery_payload = dict(report.payload_json)
             delivery_payload["report_reference"] = str(report.id)
             result = await notification_service.send_channel(
@@ -2030,7 +2029,7 @@ async def send_to_dietitian(
         user_id=current_user.id,
         assignment_id=assignment.id,
         consent_type="dietitian_report_share",
-        policy_version="report-share-v4-notification-only",
+        policy_version="report-share-v5-detailed-channels",
         granted=True,
         context_hash=digest,
         channels_json=payload["channels"],

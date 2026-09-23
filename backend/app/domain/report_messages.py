@@ -1,9 +1,10 @@
-"""Deterministic SMS content; no providers, credentials or database access."""
+"""Deterministic report content; no providers, credentials or database access."""
 
+from datetime import datetime
 from decimal import Decimal
 
 
-REPORT_SCHEMA_VERSION = "dietitian-report-v4"
+REPORT_SCHEMA_VERSION = "dietitian-report-v5"
 # Below Twilio's 1600-character limit, including supplementary Unicode units.
 SMS_BODY_LIMIT = 600
 
@@ -15,13 +16,39 @@ def report_number(value) -> str:
     return format(number.normalize(), "f")
 
 
-def build_report_sms(report: dict) -> str:
-    """Tek segmentlik rapor bildirimi; SMS'e sağlık verisi yazılmaz.
+def report_record_lines(report: dict) -> list[str]:
+    """Render the user-approved fields required by the project proposal."""
+    # Legacy reports were approved under a notification-only disclosure. They
+    # must be previewed and approved again before health details leave the app.
+    if report.get("schema_version") != REPORT_SCHEMA_VERSION:
+        return []
+    lines = []
+    for record in report.get("records") or []:
+        logged_at = str(record.get("logged_at") or "Belirtilmedi")
+        try:
+            moment = datetime.fromisoformat(logged_at.replace("Z", "+00:00"))
+            date_text = moment.strftime("%d.%m.%Y")
+            time_text = moment.strftime("%H:%M")
+        except ValueError:
+            date_text, time_text = logged_at, "Belirtilmedi"
+        lines.append(
+            f"{record.get('food_name_tr') or 'Belirtilmedi'} | "
+            f"{report_number(record.get('portion_grams', 0))} g | "
+            f"{date_text} | {time_text} | "
+            f"{report_number(record.get('total_calories', 0))} kcal"
+        )
+    return lines
 
-    Eski biçimde (v2/v3) kaydedilmiş bir rapor yeniden denendiğinde de yalnız
-    bildirim gider. Besin, gram, saat ve kalori diyetisyen panelinde kalır.
-    """
-    return "NutriSense: Yeni rapor hazır. Uygulamayı açın."
+
+def build_report_sms(report: dict) -> str:
+    """Send approved food, amount, date, time and calorie data by SMS."""
+    if report.get("schema_version") != REPORT_SCHEMA_VERSION:
+        return "NutriSense: Yeni rapor hazır. Uygulamayı açın."
+    lines = report_record_lines(report)
+    header = "NutriSense beslenme raporu"
+    if not lines:
+        return f"{header}\nGönderilecek onaylı besin kaydı bulunamadı."
+    return "\n".join([header, *lines])
 
 
 def build_sms_parts(report: dict) -> list[str]:
