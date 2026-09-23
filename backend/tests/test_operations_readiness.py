@@ -49,7 +49,7 @@ def test_required_provider_modes_fail_closed_without_credentials():
         _staging_settings(
             nutrition_provider_mode="nutritionix",
         ).validate_security()
-    with pytest.raises(RuntimeError, match="SMS_PROVIDER_MODE=twilio"):
+    with pytest.raises(RuntimeError, match="gerçek bir SMS sağlayıcısı"):
         _staging_settings(
             notification_mode="production",
             sms_provider_mode="disabled",

@@ -302,10 +302,18 @@ def notification_readiness() -> dict:
     """Return credential-free channel readiness information."""
     email_ready = email_transport_ready(settings)
     sms_ready = bool(
-        settings.sms_provider_mode == "twilio"
-        and settings.twilio_account_sid
-        and settings.twilio_auth_token
-        and settings.twilio_phone_number.startswith("+")
+        (
+            settings.sms_provider_mode == "twilio"
+            and settings.twilio_account_sid
+            and settings.twilio_auth_token
+            and settings.twilio_phone_number.startswith("+")
+        )
+        or (
+            settings.sms_provider_mode == "iletimerkezi"
+            and settings.iletimerkezi_api_key
+            and settings.iletimerkezi_api_hash
+            and settings.iletimerkezi_sender
+        )
     )
     production_requested = settings.notification_mode == "production"
     return {

@@ -20,6 +20,7 @@ from html import escape
 from typing import Awaitable, Callable
 
 import aiosmtplib
+import httpx
 from twilio.rest import Client as TwilioClient
 
 from ..config import Settings, get_settings
@@ -254,6 +255,8 @@ class NotificationService:
         """Yapılandırmaya göre SMS taşıyıcısını seçer."""
         if self.settings.sms_provider_mode == "local_outbox":
             return self._local_outbox_send
+        if self.settings.sms_provider_mode == "iletimerkezi":
+            return self._iletimerkezi_send
         return self._twilio_send
 
     def _local_outbox_send(self, body: str, destination: str) -> dict:
@@ -316,6 +319,47 @@ class NotificationService:
         return {
             "provider_message_id": message.sid,
             "provider_status": getattr(message, "status", "accepted"),
+        }
+
+    def _iletimerkezi_send(self, body: str, destination: str) -> dict:
+        """Send a transactional SMS through the domestic iletiMerkezi API."""
+        if not (
+            self.settings.iletimerkezi_api_key
+            and self.settings.iletimerkezi_api_hash
+            and self.settings.iletimerkezi_sender
+        ):
+            raise ChannelDeliveryError("SMS_NOT_CONFIGURED", retryable=False)
+        response = httpx.post(
+            "https://api.iletimerkezi.com/v1/send-sms/json",
+            json={
+                "request": {
+                    "authentication": {
+                        "key": self.settings.iletimerkezi_api_key,
+                        "hash": self.settings.iletimerkezi_api_hash,
+                    },
+                    "order": {
+                        "sender": self.settings.iletimerkezi_sender,
+                        "iys": "0",
+                        "message": {
+                            "text": body,
+                            "receipents": {
+                                "number": [destination.lstrip("+")],
+                            },
+                        },
+                    },
+                },
+            },
+            timeout=15.0,
+        )
+        response.raise_for_status()
+        payload = response.json().get("response", {})
+        status = payload.get("status", {})
+        order_id = payload.get("order", {}).get("id")
+        if int(status.get("code", 0)) != 200 or not order_id:
+            raise ChannelDeliveryError("PROVIDER_REJECTED", retryable=False)
+        return {
+            "provider_message_id": str(order_id),
+            "provider_status": "accepted",
         }
 
 

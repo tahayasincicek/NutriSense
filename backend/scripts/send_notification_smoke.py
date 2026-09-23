@@ -7,6 +7,7 @@ import asyncio
 import uuid
 
 from app.config import Settings
+from app.domain.report_messages import REPORT_SCHEMA_VERSION
 from app.services.notification_service import NotificationService
 
 CONFIRMATION = "SEND_REAL_NOTIFICATIONS"
@@ -30,8 +31,10 @@ def validate_smoke_request(
         raise ValueError(
             f"NOTIFICATION_MODE={expected_mode} olmalıdır."
         )
-    if settings.sms_provider_mode != "twilio":
-        raise ValueError("SMS_PROVIDER_MODE=twilio olmalıdır.")
+    if settings.sms_provider_mode not in {"twilio", "iletimerkezi"}:
+        raise ValueError(
+            "SMS_PROVIDER_MODE twilio veya iletimerkezi olmalıdır."
+        )
     if trial:
         if email is None or email.lower() not in settings.sandbox_email_allowlist:
             raise ValueError(
@@ -78,11 +81,16 @@ async def send_smoke(
     service = NotificationService(settings_override=settings)
     reference = f"SMOKE-{uuid.uuid4().hex[:12].upper()}"
     payload = {
-        "schema_version": "notification-smoke-v1",
+        "schema_version": REPORT_SCHEMA_VERSION,
         "patient_code": "KANAL-TESTI",
         "report_reference": reference,
-        "records": [],
-        "record_count": 0,
+        "records": [{
+            "food_name_tr": "Test besini",
+            "portion_grams": 100,
+            "logged_at": "2026-09-23T12:00:00+03:00",
+            "total_calories": 100,
+        }],
+        "record_count": 1,
     }
     email_result = await service.send_channel(
         channel="email", destination=email, report_data=payload

@@ -1,7 +1,8 @@
 # Gerçek e-posta ve SMS kurulumu
 
-NutriSense gerçek e-postayı standart SMTP, gerçek SMS'i Twilio üzerinden
-gönderir. Kimlik bilgileri kaynak koda veya Git deposuna yazılmaz.
+NutriSense gerçek e-postayı standart SMTP, gerçek SMS'i Türkiye için
+iletiMerkezi veya alternatif olarak Twilio üzerinden gönderir. Kimlik
+bilgileri kaynak koda veya Git deposuna yazılmaz.
 
 ## Gerekli üretim değişkenleri
 
@@ -9,7 +10,7 @@ Secret store veya sunucu ortamında aşağıdaki değerleri tanımlayın:
 
 ```dotenv
 NOTIFICATION_MODE=production
-SMS_PROVIDER_MODE=twilio
+SMS_PROVIDER_MODE=iletimerkezi
 
 SMTP_HOST=smtp.saglayiciniz.example
 SMTP_PORT=587
@@ -20,14 +21,16 @@ SMTP_FROM_EMAIL=dogrulanmis-adres@example.com
 SMTP_USE_TLS=false
 SMTP_START_TLS=true
 
-TWILIO_ACCOUNT_SID=...
-TWILIO_AUTH_TOKEN=...
-TWILIO_PHONE_NUMBER=+1...
+ILETIMERKEZI_API_KEY=...
+ILETIMERKEZI_API_HASH=...
+ILETIMERKEZI_SENDER=APITEST
 ```
 
-Gönderici e-posta adresi SMTP sağlayıcısında, telefon numarası da Twilio
-hesabında doğrulanmış olmalıdır. Türkiye'ye gönderimde sağlayıcının ülke,
-başlık ve mesajlaşma mevzuatı kısıtlarını ayrıca tamamlayın.
+Gönderici e-posta adresi SMTP sağlayıcısında doğrulanmış olmalıdır.
+iletiMerkezi ücretsiz geliştirici hesabında 100 deneme SMS kredisi sunar.
+Başlık onayı tamamlanana kadar `APITEST` kullanılabilir; bu başlık gönderilen
+metni sağlayıcının sabit deneme metniyle değiştirir. Gerçek rapor metni için
+onaylı gönderici başlığı gerekir.
 
 ## Hazırlık kontrolü
 
@@ -49,11 +52,11 @@ izin listelerini kullanın:
 
 ```dotenv
 NOTIFICATION_MODE=sandbox
-SMS_PROVIDER_MODE=twilio
+SMS_PROVIDER_MODE=iletimerkezi
 NOTIFICATION_SANDBOX_EMAIL_ALLOWLIST=kendi-adresiniz@example.com
 NOTIFICATION_SANDBOX_PHONE_ALLOWLIST=+905xxxxxxxxx
 
-# Yukarıdaki gerçek SMTP ve Twilio değerlerini de doldurun.
+# Yukarıdaki gerçek SMTP ve iletiMerkezi değerlerini de doldurun.
 ```
 
 Ardından sağlık verisi içermeyen deneme mesajını gönderin:
@@ -69,10 +72,9 @@ $env:PYTHONPATH='.'
 ```
 
 Komut, iki alıcının da sandbox izin listesinde olmasını gönderimden önce
-zorunlu tutar. Telefon ayrıca Twilio hesabında doğrulanmış olmalıdır. Twilio'nun
-güncel ücretsiz deneme hesaplarında özel SMS metni yerine önceden tanımlı deneme
-içeriği kullanılabilir; uygulamadaki tam “Yeni rapor hazır. Uygulamayı açın.”
-metnini gerçek numaraya göndermek için hesabı ücretli sürüme geçirmek gerekebilir.
+zorunlu tutar. `APITEST` ile gerçek telefona sağlayıcının sabit deneme mesajı
+ulaşır ve ücretsiz krediden düşer. Onaylı başlık sonrasında uygulamanın besin
+adı, miktar, tarih, saat ve kalori içeren gerçek rapor metni gönderilir.
 
 ## Açık onaylı canlı kanal testi
 
@@ -88,16 +90,14 @@ $env:PYTHONPATH='.'
   --confirm SEND_REAL_NOTIFICATIONS
 ```
 
-Komut yalnız sağlık verisi içermeyen bir kanal testi gönderir ve sağlayıcı
-mesaj kimliklerini verir. Sağlayıcının isteği kabul etmesi son teslim garantisi
-değildir; Twilio konsolundaki teslim durumu ve e-posta sağlayıcısının olay
+Komut sentetik bir kanal testi gönderir ve sağlayıcı mesaj kimliklerini verir.
+Sağlayıcının isteği kabul etmesi son teslim garantisi değildir; SMS sağlayıcı
+panelindeki teslim durumu ve e-posta sağlayıcısının olay
 kayıtları ayrıca kontrol edilmelidir.
 
 ## Gizlilik
 
-E-posta yalnız danışan kodu ile rapor referansını taşır. SMS yalnız “Yeni rapor
-hazır, uygulamayı açın” bildirimidir. Besin adı, miktar, tarih-saat ve kalori
-gibi sağlık verileri kimlik doğrulamalı diyetisyen
-panelinde kalır. Twilio veya yabancı SMTP sağlayıcısı kullanılıyorsa KVKK m.9
-değerlendirmesi ve uygulamadaki açık rıza metni gerçek sağlayıcı adıyla
-güncellenmelidir.
+Kullanıcının her rapor için ayrıca onayladığı besin adı, miktar, tarih, saat ve
+kalori bilgileri e-posta ve SMS'e yazılır. Aynı bilgiler kimlik doğrulamalı
+diyetisyen panelinde de bulunur. Kullanıcıya gösterilen alıcı ve kanal önizlemesi
+onaydan önce okunur; kimlik bilgileri yalnız backend secret ortamında tutulur.

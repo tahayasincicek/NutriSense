@@ -73,6 +73,9 @@ class Settings(BaseSettings):
     twilio_account_sid: str = ""
     twilio_auth_token: str = ""
     twilio_phone_number: str = ""
+    iletimerkezi_api_key: str = ""
+    iletimerkezi_api_hash: str = ""
+    iletimerkezi_sender: str = "APITEST"
     # SMS sağlayıcısı. local_outbox gerçek operatöre çıkmaz; mesajı dosyaya
     # yazar ve teslimat kaydı üretir. E-postadaki Mailpit'in karşılığıdır.
     sms_provider_mode: str = "disabled"
@@ -210,9 +213,12 @@ class Settings(BaseSettings):
             )
         if not 1 <= self.stale_record_retention_days <= 90:
             raise RuntimeError("STALE_RECORD_RETENTION_DAYS 1-90 gün olmalıdır.")
-        if self.sms_provider_mode not in {"disabled", "twilio", "local_outbox"}:
+        if self.sms_provider_mode not in {
+            "disabled", "twilio", "iletimerkezi", "local_outbox"
+        }:
             raise RuntimeError(
-                "SMS_PROVIDER_MODE disabled, twilio veya local_outbox olmalıdır."
+                "SMS_PROVIDER_MODE disabled, twilio, iletimerkezi veya "
+                "local_outbox olmalıdır."
             )
         if self.sms_provider_mode == "twilio":
             # Placeholder değerler kimlik sayılmaz; aksi hâlde "yapılandırıldı"
@@ -226,6 +232,17 @@ class Settings(BaseSettings):
                     "SMS_PROVIDER_MODE=twilio ise gerçek Twilio kimlik "
                     "bilgileri ve + ile başlayan gönderici numarası gereklidir."
                 )
+        if self.sms_provider_mode == "iletimerkezi":
+            if (
+                _unsafe_secret(self.iletimerkezi_api_key)
+                or _unsafe_secret(self.iletimerkezi_api_hash)
+                or not self.iletimerkezi_sender.strip()
+                or len(self.iletimerkezi_sender.strip()) > 11
+            ):
+                raise RuntimeError(
+                    "SMS_PROVIDER_MODE=iletimerkezi ise gerçek API key/hash ve "
+                    "en fazla 11 karakterlik gönderici başlığı gereklidir."
+                )
         if (
             self.app_environment.lower() in {"staging", "prod"}
             and self.sms_provider_mode == "local_outbox"
@@ -238,11 +255,11 @@ class Settings(BaseSettings):
             raise RuntimeError("NOTIFICATION_MODE disabled, sandbox veya production olmalıdır.")
         if (
             self.notification_mode == "production"
-            and self.sms_provider_mode != "twilio"
+            and self.sms_provider_mode not in {"twilio", "iletimerkezi"}
         ):
             raise RuntimeError(
                 "Gerçek bildirim, e-posta ve SMS gönderimi için "
-                "NOTIFICATION_MODE=production ile SMS_PROVIDER_MODE=twilio "
+                "NOTIFICATION_MODE=production ile gerçek bir SMS sağlayıcısı "
                 "birlikte kullanılmalıdır."
             )
         if self.nutrition_provider_mode not in {

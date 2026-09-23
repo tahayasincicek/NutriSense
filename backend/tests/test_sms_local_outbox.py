@@ -7,6 +7,7 @@ karşılığıdır. Rıza, rapor içeriği, kanal seçimi ve teslimat kaydı ger
 
 import json
 
+import httpx
 import pytest
 
 from app.config import Settings
@@ -160,6 +161,53 @@ def test_twilio_mode_requires_credentials(tmp_path):
     settings = _settings(tmp_path, sms_provider_mode="twilio")
     with pytest.raises(RuntimeError, match="Twilio"):
         settings.validate_security()
+
+
+def test_iletimerkezi_mode_requires_credentials(tmp_path):
+    settings = _settings(tmp_path, sms_provider_mode="iletimerkezi")
+    with pytest.raises(RuntimeError, match="iletimerkezi"):
+        settings.validate_security()
+
+
+def test_iletimerkezi_sends_transactional_sms(monkeypatch, tmp_path):
+    captured = {}
+
+    class Response:
+        def raise_for_status(self):
+            return None
+
+        def json(self):
+            return {
+                "response": {
+                    "status": {"code": 200, "message": "İşlem başarılı"},
+                    "order": {"id": "312891245"},
+                },
+            }
+
+    def fake_post(url, *, json, timeout):
+        captured.update(url=url, payload=json, timeout=timeout)
+        return Response()
+
+    monkeypatch.setattr(httpx, "post", fake_post)
+    settings = _settings(
+        tmp_path,
+        sms_provider_mode="iletimerkezi",
+        iletimerkezi_api_key="test-key-123456",
+        iletimerkezi_api_hash="test-hash-123456",
+        iletimerkezi_sender="APITEST",
+    )
+    result = NotificationService(settings_override=settings)._iletimerkezi_send(
+        "TEST NutriSense", "+905551112233",
+    )
+    order = captured["payload"]["request"]["order"]
+    assert captured["url"].endswith("/v1/send-sms/json")
+    assert order["iys"] == "0"
+    assert order["sender"] == "APITEST"
+    assert order["message"]["receipents"]["number"] == ["905551112233"]
+    assert result == {
+        "provider_message_id": "312891245",
+        "provider_status": "accepted",
+    }
 
 
 @pytest.mark.asyncio
