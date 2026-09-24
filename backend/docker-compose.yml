@@ -34,7 +34,8 @@ services:
       DATABASE_URL: mysql+pymysql://${DB_USER}:${DB_PASSWORD}@db:3306/${DB_NAME}?charset=utf8mb4
       # /app salt okunurdur; yerel SMS kutusu yazılabilir dizine yazar.
       SMS_OUTBOX_PATH: /tmp/sms_outbox.jsonl
-      SMS_PROVIDER_MODE: local_outbox
+      # .env içinde gerçek sağlayıcı seçildiyse ezme; varsayılan yerel kutudur.
+      SMS_PROVIDER_MODE: ${SMS_PROVIDER_MODE:-local_outbox}
       SMTP_HOST: ${SMTP_HOST:-mailpit}
       SMTP_PORT: ${SMTP_PORT:-1025}
       SMTP_USE_TLS: ${SMTP_USE_TLS:-false}

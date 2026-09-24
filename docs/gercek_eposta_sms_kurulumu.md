@@ -60,6 +60,19 @@ Proje gösteriminde üretim modunu açmadan gerçek sağlayıcıları denemek i�
 `backend/.env` içinde sandbox modu ve yalnız kendi e-posta/telefonunuzu içeren
 izin listelerini kullanın:
 
+Windows'ta sağlayıcı bilgilerini ekrana yazdırmadan `.env` dosyasına kaydeden
+yardımcıyı kullanabilirsiniz:
+
+```powershell
+.\scripts\configure_real_sms.ps1 -Provider twilio
+# veya
+.\scripts\configure_real_sms.ps1 -Provider iletimerkezi
+```
+
+Twilio'nun güncel denemesi süre, ülke, doğrulanmış alıcı ve hazır mesaj şablonu
+kısıtları uygulayabilir. Türkiye numarasına NutriSense'in özel bildirim metnini
+göndermek için canlı hesap ve ülke izni gerekebilir.
+
 ```dotenv
 NOTIFICATION_MODE=sandbox
 SMS_PROVIDER_MODE=iletimerkezi
@@ -69,22 +82,20 @@ NOTIFICATION_SANDBOX_PHONE_ALLOWLIST=+905xxxxxxxxx
 # Yukarıdaki gerçek SMTP ve iletiMerkezi değerlerini de doldurun.
 ```
 
-Ardından sağlık verisi içermeyen deneme mesajını gönderin:
+Ardından yalnız sağlık verisi içermeyen kısa SMS denemesini gönderin:
 
 ```powershell
 cd backend
 $env:PYTHONPATH='.'
-.\venv\Scripts\python.exe scripts\send_notification_smoke.py `
+.\venv\Scripts\python.exe scripts\send_sms_smoke.py `
   --trial `
-  --email 'kendi-adresiniz@example.com' `
   --phone '+905xxxxxxxxx' `
-  --confirm SEND_REAL_NOTIFICATIONS
+  --confirm SEND_REAL_SMS
 ```
 
-Komut, iki alıcının da sandbox izin listesinde olmasını gönderimden önce
-zorunlu tutar. `APITEST` ile gerçek telefona sağlayıcının sabit deneme mesajı
-ulaşır ve ücretsiz krediden düşer. Onaylı başlık sonrasında uygulamanın besin
-adı, miktar, tarih, saat ve kalori içeren gerçek rapor metni gönderilir.
+Komut telefonun sandbox izin listesinde olmasını zorunlu tutar. Sağlayıcının
+deneme başlığı veya şablonu mesaj metnini değiştirebilir. Canlı hesapta
+NutriSense yalnız “Yeni rapor hazır, uygulamayı açın” bildirimini gönderir.
 
 ## Açık onaylı canlı kanal testi
 
@@ -107,7 +118,8 @@ kayıtları ayrıca kontrol edilmelidir.
 
 ## Gizlilik
 
-Kullanıcının her rapor için ayrıca onayladığı besin adı, miktar, tarih, saat ve
-kalori bilgileri e-posta ve SMS'e yazılır. Aynı bilgiler kimlik doğrulamalı
-diyetisyen panelinde de bulunur. Kullanıcıya gösterilen alıcı ve kanal önizlemesi
-onaydan önce okunur; kimlik bilgileri yalnız backend secret ortamında tutulur.
+SMS yalnız “Yeni rapor hazır, uygulamayı açın” bildirimini içerir. Besin adı,
+miktar, tarih, saat ve kalori SMS sağlayıcısına gönderilmez; bu ayrıntılar
+yalnız kimlik doğrulamalı diyetisyen panelinde gösterilir. Kullanıcıya gösterilen
+alıcı ve kanal önizlemesi onaydan önce okunur; sağlayıcı kimlik bilgileri yalnız
+backend secret ortamında tutulur.
