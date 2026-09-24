@@ -3,7 +3,6 @@ from __future__ import annotations
 import argparse
 from pathlib import Path
 
-from . import augmentation as _augmentation  # Register serialized custom layers.
 from .common import load_json, sha256_file, utc_now, write_json
 from .data import build_dataset, read_manifest
 
@@ -78,6 +77,10 @@ def evaluate(run_dir: Path, data_root: Path, split: str) -> dict:
         except FileExistsError as exc:
             raise RuntimeError("Held-out test was already opened for this experiment; create a new experiment rather than reusing test feedback") from exc
     try:
+        # The pure threshold helpers are intentionally usable without the
+        # heavyweight training runtime. Custom layers are registered only
+        # when a serialized Keras model will actually be loaded.
+        from . import augmentation as _augmentation  # noqa: F401
         import matplotlib.pyplot as plt
         import numpy as np
         import tensorflow as tf

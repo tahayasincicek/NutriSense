@@ -6,7 +6,6 @@ import shutil
 import time
 from pathlib import Path
 
-from . import augmentation as _augmentation  # Register serialized custom layers.
 from .common import load_json, sha256_file, utc_now, write_json
 from .data import center_crop_resize, read_manifest
 
@@ -52,6 +51,10 @@ def convert(run_dir: Path, data_root: Path, output_dir: Path, formats: list[str]
     _require(run_dir / "manifest.csv", "Training manifest is required")
     _require(run_dir / "labels.txt", "Label order is required")
     try:
+        # Register serialized custom layers only after the required model
+        # artifacts exist. Safety checks for a missing deployment candidate
+        # must remain runnable in lightweight CI without TensorFlow.
+        from . import augmentation as _augmentation  # noqa: F401
         import numpy as np
         import tensorflow as tf
     except ImportError as exc:

@@ -79,7 +79,13 @@ jobs:
             --dart-define=API_BASE_URL=https://staging.invalid/api/v1
           flutter test test/unit/app_config_test.dart \
             --dart-define=APP_ENV=prod \
-            --dart-define=API_BASE_URL=https://production.invalid/api/v1
+            --dart-define=API_BASE_URL=https://production.invalid/api/v1 \
+            --dart-define=PRIVACY_NOTICE_VERSION=CI-APPROVED-TEST \
+            --dart-define=DATA_CONTROLLER_NAME=NutriSense-CI \
+            --dart-define=DATA_CONTROLLER_CONTACT_EMAIL=privacy@production.invalid \
+            --dart-define=DATA_CONTROLLER_POSTAL_ADDRESS=CI-Test-Address \
+            --dart-define=PRIVACY_POLICY_URL=https://production.invalid/privacy \
+            --dart-define=ACCOUNT_DELETION_URL=https://production.invalid/account-deletion
 
       # ── Widget Testler ──
       - name: Widget testleri çalıştır
