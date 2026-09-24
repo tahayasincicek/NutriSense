@@ -112,6 +112,10 @@ app.*.map.json
 /research/data/raw/
 /research/exports/
 /docs/research/raw/
+# Completed participant/device/event evidence may contain personal data.
+/delivery_evidence/voiceover_acceptance.json
+/delivery_evidence/dissemination.json
+/delivery_evidence/files/
 *.keras
 *.h5
 *.tflite

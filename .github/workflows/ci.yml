@@ -469,7 +469,7 @@ jobs:
       - name: Analiz testlerini çalıştır
         env:
           PYTHONPATH: analysis/src
-        run: python -m pytest analysis/tests -q
+        run: python -m pytest analysis/tests scripts/qa/test_tubitak_delivery_gate.py -q
 
       - name: Gerçek veri yok kapısını doğrula
         run: |

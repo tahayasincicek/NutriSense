@@ -1,0 +1,12 @@
+{
+  "events": [
+    {
+      "title": "Sunum veya yayın başlığı",
+      "venue": "Etkinlik, konferans veya yayın adı",
+      "date": "YYYY-MM-DD",
+      "status": "planned",
+      "public_url": "",
+      "evidence_file": "delivery_evidence/files/event-proof.pdf"
+    }
+  ]
+}

@@ -1,0 +1,18 @@
+{
+  "device_model": "iPhone modelini yazın",
+  "ios_version": "iOS sürümünü yazın",
+  "app_revision": "Test edilen git commit SHA değerini yazın",
+  "tested_at": "YYYY-MM-DD",
+  "scenarios": [
+    {"id": "first_launch_consent", "result": "pending"},
+    {"id": "registration_login", "result": "pending"},
+    {"id": "camera_permission_denied", "result": "pending"},
+    {"id": "gallery_analysis", "result": "pending"},
+    {"id": "food_confirmation", "result": "pending"},
+    {"id": "history_and_undo", "result": "pending"},
+    {"id": "dietitian_sharing", "result": "pending"},
+    {"id": "tts_stt_interruption", "result": "pending"},
+    {"id": "large_text_dark_theme", "result": "pending"}
+  ],
+  "evidence_files": ["delivery_evidence/files/voiceover-session-note.pdf"]
+}

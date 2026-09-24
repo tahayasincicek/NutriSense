@@ -24,6 +24,24 @@ bağlar. Kanıtı olmayan bir madde tamamlandı olarak gösterilmez.
 | Sonuç raporu | Tamamlandı | `docs/tubitak_sonuc_raporu.md` |
 | Yaygınlaştırma içeriği | Tamamlandı | `docs/yayginlastirma_paketi.md` |
 
+## SMS hariç tek komut teslim kapısı
+
+Gerçek saha analizi, fiziksel iPhone/VoiceOver kabulü ve gerçekleşmiş
+yaygınlaştırma kanıtı birlikte şu komutla denetlenir:
+
+```powershell
+.\scripts\initialize_tubitak_evidence.ps1
+.\scripts\verify_tubitak_delivery.ps1
+```
+
+Tamamlanan dış kanıtlar kişisel veri içerebileceği için Git'e eklenmez.
+`delivery_evidence/*.example.json` dosyaları kopyalanıp `.example` bölümü
+kaldırılarak doldurulur. VoiceOver kaydındaki dokuz senaryonun tamamı `pass`
+olmalı ve en az bir yerel kanıt dosyası bulunmalıdır. Yaygınlaştırma kaydı ancak
+gerçekleşmiş bir sunum/yayın ve doğrulanabilir URL veya dosya içerirse geçer.
+Saha kapısı yalnız `synthetic=false` ve `REAL_DATA_ANALYZED` gerçek analiz
+manifestini kabul eder. Komut SMS'i denetlemez.
+
 ## Son doğrulama sonuçları
 
 - Temiz MySQL 8.4 backend koşusu: **286 passed, 1 skipped**.
