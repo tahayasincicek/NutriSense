@@ -187,6 +187,7 @@ Kendi dalınızda çalışıp pull request açın. `.env`, kişisel imzalama dos
 - [Teslim kanıt matrisi](docs/teslim_kanit_matrisi.md) · [Yaygınlaştırma paketi](docs/yayginlastirma_paketi.md)
 - [Erişilebilirlik cihaz kabul kaydı](docs/erisebilirlik_cihaz_kabul_kaydi.md)
 - SMS dışındaki saha, VoiceOver ve yaygınlaştırma kanıtlarını hazırlamak ve denetlemek için `.\scripts\initialize_tubitak_evidence.ps1`, ardından `.\scripts\verify_tubitak_delivery.ps1`
+- [Akşam teslim tamamlama rehberi](docs/aksam_teslim_rehberi.md)
 - [22 doğrulanmış kaynaklı literatür taraması](docs/literatur_taramasi.md)
 
 Model eğitimindeki Food-101 ve Türk mutfağı veri kaynaklarının kullanım koşulları lisans belgesindedir. Besin kataloğu USDA FoodData Central verilerini ve tahmini olduğu belirtilen kayıtları içerir.
