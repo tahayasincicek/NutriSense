@@ -4,6 +4,16 @@ NutriSense gerçek e-postayı standart SMTP, gerçek SMS'i Türkiye için
 iletiMerkezi veya alternatif olarak Twilio üzerinden gönderir. Kimlik
 bilgileri kaynak koda veya Git deposuna yazılmaz.
 
+## Doğrulanmış e-posta kanıtı
+
+24 Eylül 2026 tarihinde Gmail SMTP üzerinden, sandbox izin listesindeki proje
+sahibine ait maskeli test adresine sağlık verisi içermeyen iki sentetik kanal
+mesajı gönderilmiştir. Hem doğrudan SMTP denemesi hem uygulamanın mevcut
+sandbox/allowlist akışı sağlayıcı tarafından `accepted` sonucu ve Message-ID
+ile kabul edilmiştir. Bu kayıt sağlayıcı kabulünü kanıtlar; alıcının mesajı
+okuduğunu kanıtlamaz. Secret ve açık alıcı adresi belgeye veya Git'e
+yazılmamıştır.
+
 ## Gerekli üretim değişkenleri
 
 Secret store veya sunucu ortamında aşağıdaki değerleri tanımlayın:

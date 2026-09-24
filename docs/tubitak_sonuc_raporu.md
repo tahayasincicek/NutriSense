@@ -30,15 +30,16 @@ Bu proje, görme engelli bireylerin günlük beslenme takibini bağımsız olara
 
 Dünya Sağlık Örgütü verilerine göre dünyada yaklaşık 2,2 milyar kişi görme bozukluğu yaşamaktadır. Türkiye'de ise Engelli ve Yaşlı Hizmetleri Genel Müdürlüğü verilerine göre 600.000'den fazla görme engelli birey bulunmaktadır. Bu bireyler günlük yaşamlarında birçok zorlukla karşılaşmakta olup beslenme takibi de bu zorlukların başında gelmektedir. Mevcut kalori takip uygulamaları görsel arayüze dayalı olduğundan görme engelli kullanıcılar için erişilebilir değildir.
 
-NutriSense uygulamasının ortak Flutter kaynakları ve Android prototipi geliştirilmiştir. iOS platform kaynak hazırlığı eklenmiş olsa da macOS/Xcode derlemesi, signing, archive ve gerçek iPhone/VoiceOver testi henüz yapılmamıştır; bu nedenle iOS tamamlanmış kabul edilmemektedir. Backend ve dış sağlayıcı/model başarı iddiaları yalnız yapılandırma, ham veri ve yeniden üretilebilir test kanıtı bulunduğu ölçüde raporlanmalıdır.
+NutriSense uygulamasının ortak Flutter kaynakları ve Android prototipi geliştirilmiştir. iOS kaynak doğrulaması ve GitHub üzerindeki iOS derleme işi geçmiştir; imzalı Archive, TestFlight ve gerçek iPhone/VoiceOver kabulü ayrı yayın kanıtı olarak beklemektedir. Backend, MySQL 8.4 üzerinde temiz migration ve tam test koşusuyla doğrulanmıştır. Dış sağlayıcı ve model başarı iddiaları yalnız yapılandırma, ham veri ve yeniden üretilebilir test kanıtı bulunduğu ölçüde raporlanmıştır.
 
 Uygulamanın en kritik bileşeni erişilebilirlik sistemidir. Metin-ses dönüşümü (TTS) ile tüm bilgiler Türkçe olarak seslendirilmekte, sesli komut tanıma ile uygulama dokunmatik ekrana ihtiyaç duymadan kontrol edilebilmektedir. WCAG 2.1 AA standartlarına uyumluluk hedeflenmiştir.
 
-Projenin ölçülen çıktısı, 130 besin sınıfını tanıyan bir cihaz üstü görüntü
-tanıma modeli ve 556 kayıtlık kaynaklı bir besin değeri kataloğudur. Model,
-tek kullanımlık mühürlü test kümesinde %79,2 doğruluk ve %92,1 ilk-üç
-doğruluğu vermiştir. Sistem, güven eşiğinin altında kalan tahminleri
-kaydetmez; kabul ettiği tahminlerde ölçülen hata oranı %9,4'tür.
+Projenin ölçülen temel çıktısı, 130 besin sınıfı için mühürlü test protokolüyle
+değerlendirilen model ve 556 kayıtlık kaynaklı besin değeri kataloğudur. Bu
+temel deney %79,2 doğruluk ve %92,1 ilk-üç doğruluğu vermiştir. Dağıtılan son
+artefakt kapsamı 137 sınıfa genişletmiş; tek görünüm mühürlü testte %76,83
+doğruluk ve 0,7627 macro-F1 vermiştir. Sistem güven eşiğinin altındaki sonucu
+kesin kayıt olarak kullanmaz ve kullanıcı onayı ister.
 
 Kullanıcı performansına dair bir ölçüm bu raporda yer almamaktadır; insan
 denekli çalışma projenin bir sonraki aşamasıdır.
@@ -87,11 +88,11 @@ Proje, Çevik (Agile) yazılım geliştirme metodolojisi kullanılarak yürütü
 | Backend | Python FastAPI / SQLAlchemy | 0.135.1 / 2.0.48 |
 | Veritabanı | MySQL | 8.4 |
 | YZ Modeli | TensorFlow MobileNetV3 | 2.18.0 |
-| Besin Tanıma | Cihaz üstü NutriSense modeli (MobileNetV3Large, TensorFlow Lite float16) | 130 sınıf |
+| Besin Tanıma | Cihaz üstü NutriSense modeli (MobileNetV3Large, TensorFlow Lite float32) | 137 sınıf |
 | Besin değeri kaynağı | Kaynak ve sürüm bilgili yerel katalog | 556 kayıt |
 | TTS | flutter_tts (tr-TR) | 4.0 |
 | Sesli Komut | speech_to_text | 6.6 |
-| Bildirim | Twilio (SMS) + SMTP | — |
+| Bildirim | SMTP + yapılandırılabilir Twilio/iletiMerkezi SMS | SMTP gerçek kanal kabulü doğrulandı; SMS bu teslim kapsamı dışında |
 
 ### 3.3 Değerlendirme Tasarımı
 
@@ -219,18 +220,17 @@ düşük kalmaktadır.
 
 ### 4.5 Dağıtım Artefaktı
 
-Eğitilen Keras modeli TFLite'a dönüştürülmüş ve uygulamaya gömülmüştür.
+Son dağıtım adayı 137 sınıfa genişletilmiş, adaptif çoklu görünüm kullanan
+TFLite modelidir. Model manifesti, etiketler, eşik, katalog eşlemesi ve fiziksel
+cihaz ölçümüyle birlikte uygulamaya gömülmüştür.
 
 | Biçim | Durum | Boyut | Argmax uyumu | Keras'tan sapma |
 |---|---|---|---|---|
-| float16 | **Dağıtılan** | 5,96 MB | 1,000 | 0,0109 |
-| float32 | Doğrulandı | 11,9 MB | 1,000 | 0,000002 |
-| int8 | **Reddedildi** | — | 0,12 | — |
+| float32 | **Dağıtılan** | 12,44 MB | 1,000 | 0,00000313 |
 
-INT8 nicelemesi dağıtılmamıştır: nicelemeden sonra modelin verdiği karar
-örneklerin yalnız %12'sinde aynı kalmıştır. MobileNetV3'ün hard-swish
-aktivasyonları eğitim sonrası basit nicelemede bozulmaktadır. Dönüşüm kapısı
-bu biçimi otomatik olarak reddetmiştir.
+Samsung Galaxy S8 (SM-G950F) üzerinde adaptif derin kırpma yolunda 20 koşu
+yapılmıştır: p50 3138,28 ms, p95 3570,78 ms. Aynı artefakt için Android
+emülatöründe p50 1226,83 ms ve p95 1415,61 ms ölçülmüştür.
 
 ### 4.6 Uçtan Uca Doğrulama
 
@@ -246,8 +246,8 @@ Her push'ta çalışan sürekli tümleştirme hattı 11 iş içerir. Ölçülen 
 
 | Kapı | Sonuç |
 |---|---|
-| Backend testleri | 277 test geçti, 1 atlandı |
-| Flutter testleri | 314 test geçti |
+| Backend + temiz MySQL 8.4 | 286 test geçti, 1 atlandı |
+| Odaklı erişilebilirlik ve sesli akış testleri | 123 test geçti |
 | Statik analiz (Dart) | Hata ve uyarı yok |
 | OpenAPI sözleşme sapması | Sapma yok |
 | ML yeniden üretilebilirlik kapıları | Geçti |
@@ -265,8 +265,9 @@ imzalama adımlarıyla yürütülür.
 ### 5.1 Tartışma
 
 Araştırma sorularından üçüncüsü — sistemin Türk mutfağını yeterli doğrulukta
-tanıyıp tanıyamadığı — bu aşamada ölçülebilmiştir. Model 130 besini
-tanımakta, bunların yaklaşık 90'ı Türk mutfağına aittir: Adana kebap, döner,
+tanıyıp tanıyamadığı — bu aşamada ölçülebilmiştir. Mühürlü temel deney 130
+sınıfla yürütülmüş, dağıtılan son model 137 besine genişletilmiştir. Sınıfların
+yaklaşık 90'ı Türk mutfağına aittir: Adana kebap, döner,
 İskender, mantı, menemen, kokoreç, tantuni, karnıyarık, içli köfte, mercimek
 çorbası, sulu yemekler, zeytinyağlılar, hamur işleri ve geleneksel tatlılar.
 Mühürlü test doğruluğu %79,2, ilk-üç doğruluğu %92,1'dir.
@@ -288,16 +289,17 @@ raporda yanıtlanmamıştır.
    gerçek kullanım başarısı ölçülmemiştir. Bu raporda kullanıcı performansına
    dair hiçbir sayı bulunmamaktadır.
 
-2. **Cihaz gecikmesi ölçülmemiştir.** Masaüstünde 11,1 ms ölçülmüştür; hedef
-   telefon donanımındaki çıkarım süresi ölçülene kadar model kartındaki ilgili
-   alan `not_run` olarak kalmaktadır.
+2. **Cihaz çeşitliliği sınırlıdır.** Android fiziksel cihaz ölçümü Samsung
+   Galaxy S8 üzerinde 20 koşuyla yapılmıştır; farklı Android donanımları ve iOS
+   performansı ayrıca ölçülmelidir.
 
-3. **iOS tamamlanmamıştır.** Kaynak hazırlığı ve izin sınırları
-   doğrulanmıştır; Xcode derlemesi, imzalama ve gerçek iPhone üzerinde
-   VoiceOver testi yapılmamıştır.
+3. **iOS yayın kabulü tamamlanmamıştır.** Kaynak kapısı ve CI derleme işi
+   geçmiştir; imzalı Archive, TestFlight ve gerçek iPhone üzerinde VoiceOver
+   oturumu kaydedilmemiştir.
 
-4. **Erişilebilirlik uygunluğu kısmidir.** Otomatik denetimler geçmektedir;
-   gerçek ekran okuyucu ile elle test tamamlanmadığı için tam uygunluk iddia
+4. **Erişilebilirlik uygunluğu platforma göre kanıtlanır.** Android fiziksel
+   cihaz kabulü ve otomatik semantik/sesli akış testleri tamamlanmıştır.
+   VoiceOver için fiziksel iPhone kabul kaydı olmadan iOS tam uygunluğu iddia
    edilmemektedir.
 
 5. **Sınıf başarısı eşit değildir.** Görsel olarak benzeşen sulu yemeklerde
@@ -321,7 +323,7 @@ raporda yanıtlanmamıştır.
 
 Proje, görme engelli bireylerin beslenme takibi için tasarlanmış, cihaz üstü
 çalışabilen bir besin tanıma sistemi ve kaynağı belgelenmiş bir besin değeri
-kataloğu üretmiştir. Sistem 130 besini tanımakta, emin olmadığı durumlarda
+kataloğu üretmiştir. Sistem 137 besini tanımakta, emin olmadığı durumlarda
 kullanıcıya sormakta ve kalori değerini tahmin etmek yerine izlenebilir bir
 kaynaktan okumaktadır.
 
@@ -336,8 +338,8 @@ karşılayamadığı için dağıtılmamıştır.
 
 1. Etik onay alınarak görme engelli katılımcılarla kullanılabilirlik
    çalışmasının yürütülmesi; önceden kayıtlı analiz planının uygulanması.
-2. Hedef telefon donanımında çıkarım gecikmesinin ölçülmesi.
-3. iOS derlemesinin tamamlanması ve gerçek cihazda VoiceOver testi.
+2. Daha geniş Android cihaz matrisinde çıkarım gecikmesinin ölçülmesi.
+3. İmzalı iOS Archive/TestFlight ve gerçek cihazda VoiceOver testi.
 4. Düşük başarılı sınıflar için hedefli veri toplanması.
 5. Tahmini besin kayıtlarının uzman diyetisyen incelemesinden geçirilmesi.
 
@@ -345,16 +347,17 @@ karşılayamadığı için dağıtılmamıştır.
 
 | Çıktı | Durum |
 |-------|-------|
-| Besin tanıma modeli (130 sınıf, MobileNetV3Large) | Tamamlandı; mühürlü testte değerlendirildi |
-| TFLite dağıtım artefaktı (float16) | Tamamlandı; uygulamaya gömüldü |
+| Besin tanıma modeli (137 sınıf, MobileNetV3Large) | Tamamlandı; genişletilmiş model manifesti ve test metrikleri kayıtlı |
+| TFLite dağıtım artefaktı (float32) | Tamamlandı; uygulamaya gömüldü ve S8'de ölçüldü |
 | Besin değeri kataloğu (556 kayıt) | Tamamlandı; 488 doğrulanmış, 68 işaretli tahmin |
 | Python FastAPI backend | Tamamlandı |
-| NutriSense mobil uygulama — Android | Kaynak ve emülatör doğrulaması tamam; fiziksel cihaz kabulü bekliyor |
-| NutriSense mobil uygulama — iOS | Kaynak hazırlığı tamam; derleme ve cihaz testi bekliyor |
+| NutriSense mobil uygulama — Android | Kaynak, emülatör, fiziksel S8 ve erişilebilirlik kontrolleri tamamlandı |
+| NutriSense mobil uygulama — iOS | Kaynak ve CI derleme doğrulandı; imzalı dağıtım ve VoiceOver cihaz kabulü bekliyor |
 | Yeniden üretilebilir ML hattı ve kapıları | Tamamlandı |
 | Analiz hattı ve önceden kayıtlı analiz planı | Hazır; veri bekliyor |
 | Kullanılabilirlik çalışması | **Yapılmadı** |
-| Akademik makale taslağı | Hazırlanıyor |
+| Akademik makale taslağı | Hazır; yalnız gerçek saha bulguları bölümü veri bekliyor |
+| Yaygınlaştırma paketi | Özet, poster metni, sunum akışı ve demo senaryosu hazır |
 
 ---
 

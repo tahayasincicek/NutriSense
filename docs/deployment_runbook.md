@@ -11,6 +11,18 @@ staging-benzeri yerel sistemi kurar.
 **Gerçek domain, TLS, cloud kaynağı veya production deploy yoktur. Bu nedenle
 NutriSense production hazır değildir ve production'a dağıtılmamıştır.**
 
+### 24 Eylül 2026 temiz MySQL doğrulaması
+
+- Docker Desktop üzerinde MySQL 8.4 test veritabanı sıfırdan oluşturuldu.
+- Alembic zinciri boş veritabanından `f3c4d5e6f7a8` head revision'ına geçti.
+- Test konteynerinin özel komutu yok sayıp Uvicorn başlatmasına neden olan
+  entrypoint davranışı düzeltildi.
+- Test servisine geliştirici `.env` değerlerinin sızması engellendi; ortak
+  contract, ML ve güvenlik fixture'ları salt okunur bağlandı.
+- MySQL `DATETIME(6)` ile rıza ve kilo kayıtlarının aynı saniyedeki sırası
+  kararlı hale getirildi; uzun politika sürümleri için sütun genişletildi.
+- Sonuç: **286 passed, 1 skipped**.
+
 ### 27 Temmuz 2026 yerel doğrulama kaydı
 
 - Windows 11 + Docker Desktop'ta `staging_up.ps1`: **PASS**

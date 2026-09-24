@@ -20,6 +20,22 @@ Sistemde `py` yoksa kurulmuş Python 3.13 executable yolunu açıkça kullanın.
 
 ## Tek komut
 
+Backend çalışıyor ve yetkili export token yalnız ortam değişkeninde bulunuyorsa
+gerçek veriyi güvenli biçimde dışa aktarıp kalite kapısından geçirerek analiz
+etmek için depo kökünde:
+
+```powershell
+$env:RESEARCH_EXPORT_TOKEN = Read-Host -MaskInput "Araştırma export tokeni"
+.\scripts\run_real_field_analysis.ps1
+Remove-Item Env:RESEARCH_EXPORT_TOKEN
+```
+
+Betik anket veya kullanılabilirlik kaydı boşsa, ya da herhangi bir satır
+`data_origin=participant` değilse dosya üretmeden durur. Gerçek ham veri
+`analysis/data/real/` altında kalır ve Git tarafından dışlanır.
+
+### Dosyalar önceden dışa aktarılmışsa
+
 Gerçek export'lar varsayılan konumdaysa:
 
 ```powershell
