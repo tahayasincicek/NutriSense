@@ -351,7 +351,28 @@ class NotificationService:
             },
             timeout=15.0,
         )
-        response.raise_for_status()
+        try:
+            response.raise_for_status()
+        except httpx.HTTPStatusError as exc:
+            # iletiMerkezi provider rejections (for example 402: insufficient
+            # balance) are definitive failures. Treating them as an uncertain
+            # delivery would unnecessarily block a safe retry after the
+            # account issue is resolved.
+            try:
+                provider_code = int(
+                    exc.response.json()
+                    .get("response", {})
+                    .get("status", {})
+                    .get("code", 0)
+                )
+            except (TypeError, ValueError, AttributeError):
+                provider_code = 0
+            error_code = (
+                "SMS_INSUFFICIENT_CREDIT"
+                if provider_code == 402
+                else "PROVIDER_REJECTED"
+            )
+            raise ChannelDeliveryError(error_code, retryable=False) from None
         payload = response.json().get("response", {})
         status = payload.get("status", {})
         order_id = payload.get("order", {}).get("id")

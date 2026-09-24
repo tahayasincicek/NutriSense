@@ -210,6 +210,38 @@ def test_iletimerkezi_sends_transactional_sms(monkeypatch, tmp_path):
     }
 
 
+def test_iletimerkezi_maps_insufficient_credit_to_definitive_failure(
+    monkeypatch,
+    tmp_path,
+):
+    request = httpx.Request("POST", "https://api.iletimerkezi.com/v1/send-sms/json")
+    response = httpx.Response(
+        402,
+        request=request,
+        json={"response": {"status": {"code": 402, "message": "Bakiye yetersiz"}}},
+    )
+
+    def fake_post(*args, **kwargs):
+        return response
+
+    monkeypatch.setattr(httpx, "post", fake_post)
+    settings = _settings(
+        tmp_path,
+        sms_provider_mode="iletimerkezi",
+        iletimerkezi_api_key="test-key-123456",
+        iletimerkezi_api_hash="test-hash-123456",
+        iletimerkezi_sender="APITEST",
+    )
+
+    with pytest.raises(ChannelDeliveryError) as excinfo:
+        NotificationService(settings_override=settings)._iletimerkezi_send(
+            "TEST NutriSense", "+905551112233",
+        )
+
+    assert excinfo.value.args[0] == "SMS_INSUFFICIENT_CREDIT"
+    assert excinfo.value.retryable is False
+
+
 @pytest.mark.asyncio
 async def test_unwritable_outbox_reports_a_specific_error(tmp_path):
     """Salt okunur dizinde hata genel sağlayıcı hatası gibi görünmemeli."""
