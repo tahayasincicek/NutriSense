@@ -11,6 +11,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../shared/services/accessibility_service.dart';
+import '../../../shared/services/stt_service.dart';
 import '../models/discover_content.dart';
 import '../widgets/discover_background.dart';
 
@@ -26,11 +27,14 @@ class ArticleDetailScreen extends ConsumerStatefulWidget {
 
 class _ArticleDetailScreenState extends ConsumerState<ArticleDetailScreen> {
   late final AccessibilityService _accessibility;
+  late final SttService _stt;
+  bool _voiceListening = false;
 
   @override
   void initState() {
     super.initState();
     _accessibility = ref.read(accessibilityServiceProvider);
+    _stt = ref.read(sttServiceProvider);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _accessibility.speak(
         '${widget.article.title} açıldı. Tamamını dinlemek için '
@@ -47,6 +51,47 @@ class _ArticleDetailScreenState extends ConsumerState<ArticleDetailScreen> {
     );
   }
 
+  Future<void> _listenForArticleCommand() async {
+    if (_voiceListening) return;
+    await _accessibility.speak(
+      'Dinliyorum. Tamamını dinle, tekrar oku veya geri deyin.',
+      priority: TtsPriority.high,
+    );
+    await _stt.startListening(
+      listenFor: const Duration(seconds: 8),
+      onListeningStarted: () {
+        if (mounted) setState(() => _voiceListening = true);
+      },
+      onListeningStopped: () {
+        if (mounted) setState(() => _voiceListening = false);
+      },
+      onError: (message) {
+        if (mounted) setState(() => _voiceListening = false);
+        _accessibility.speakError(message);
+      },
+      onResult: (result) {
+        if (!result.isFinal || !mounted) return;
+        final command = result.text.toLowerCase().trim();
+        setState(() => _voiceListening = false);
+        if (command.contains('tamamını dinle') ||
+            command.contains('tamamini dinle') ||
+            command.contains('tekrar oku') ||
+            command == 'dinle') {
+          _speakAll();
+        } else if (command.contains('geri') ||
+            command.contains('kapat') ||
+            command.contains('çık')) {
+          Navigator.of(context).maybePop();
+        } else {
+          _accessibility.speak(
+            'Komut anlaşılamadı. Tamamını dinle veya geri deyin.',
+            priority: TtsPriority.high,
+          );
+        }
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -60,6 +105,14 @@ class _ArticleDetailScreenState extends ConsumerState<ArticleDetailScreen> {
         surfaceTintColor: Colors.transparent,
         title: Text(article.title, overflow: TextOverflow.ellipsis),
         actions: [
+          IconButton(
+            key: const Key('article_voice_command'),
+            icon: Icon(
+              _voiceListening ? Icons.mic_rounded : Icons.mic_none_rounded,
+            ),
+            tooltip: _voiceListening ? 'Dinleniyor' : 'Sesli komut ver',
+            onPressed: _voiceListening ? null : _listenForArticleCommand,
+          ),
           IconButton(
             key: const Key('article_listen'),
             icon: const Icon(Icons.volume_up_rounded),

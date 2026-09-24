@@ -62,6 +62,13 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
 
   Future<void> _voiceCommand() async {
     final pending = _pendingVoiceLogout;
+    if (!pending) {
+      await _accessibility.speak(
+        'Çıkış yap, geri veya yardım diyebilirsiniz.',
+        priority: TtsPriority.high,
+      );
+      if (!mounted) return;
+    }
     await _stt.startListening(
       onResult: (result) {
         if (!mounted) return;
@@ -93,6 +100,20 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           setState(() => _voiceStatus = 'Çıkışı onaylamak için evet deyin.');
           // Onay için mikrofon kendiliğinden yeniden açılır.
           unawaited(_confirmLogoutByVoice());
+          return;
+        }
+        if (intent.action == ContextualVoiceAction.back) {
+          Navigator.of(context).maybePop();
+          return;
+        }
+        final normalized = result.text.trim().toLowerCase();
+        if ({'yardım', 'yardim', 'ne diyebilirim', 'komutlar'}
+            .contains(normalized)) {
+          _accessibility.speak(
+            'Ayarlar ekranında çıkış yap, geri diyebilir; konuşma hızı ve kalori hedefi yanındaki mikrofonlarla sayısal değer söyleyebilirsiniz.',
+            priority: TtsPriority.high,
+          );
+          setState(() => _voiceStatus = 'Sesli yardım okundu.');
           return;
         }
         setState(

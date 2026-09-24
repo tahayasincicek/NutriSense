@@ -18,9 +18,9 @@ import '../../../core/utils/accessibility_utils.dart';
 import '../../../shared/models/food_analysis_model.dart';
 import '../../../shared/services/accessibility_service.dart';
 import '../../../shared/services/api_service.dart';
+import '../../../shared/services/contextual_voice_command.dart';
 import '../../../shared/services/screen_voice_guide.dart';
 import '../../../shared/services/stt_service.dart';
-import '../../../shared/services/voice_command_service.dart';
 import '../../../shared/widgets/accessible_button.dart';
 import '../../../shared/widgets/accessible_card.dart';
 import '../../history/state/history_controller.dart';
@@ -34,6 +34,7 @@ class ManualFoodEntryScreen extends ConsumerStatefulWidget {
 }
 
 class _ManualFoodEntryScreenState extends ConsumerState<ManualFoodEntryScreen> {
+  static const _voiceParser = ContextualVoiceCommandParser();
   static const _uuid = Uuid();
   final _searchController = TextEditingController();
   final _focusNode = FocusNode();
@@ -143,14 +144,7 @@ class _ManualFoodEntryScreenState extends ConsumerState<ManualFoodEntryScreen> {
         _isSearching = false;
         _results = [searchResult];
       });
-
-      final firstResult = searchResult;
-      _accessibility.speak(
-        '1 sonuç bulundu. '
-        'İlk sonuç: ${firstResult.displayName}, '
-        '100 gramda ${firstResult.caloriesPer100g.toStringAsFixed(0)} kalori.',
-        priority: TtsPriority.high,
-      );
+      _selectResult(searchResult);
     } else {
       setState(() {
         _isSearching = false;
@@ -284,6 +278,54 @@ class _ManualFoodEntryScreenState extends ConsumerState<ManualFoodEntryScreen> {
     }
   }
 
+  Future<void> _handleScreenVoiceCommand() async {
+    if (_selectedResult == null) {
+      await _startVoiceSearch();
+      return;
+    }
+    await _accessibility.speak(
+      'Kaydet, porsiyon yüz elli gram veya geri diyebilirsiniz.',
+      priority: TtsPriority.high,
+    );
+    await _stt.startListening(
+      onResult: (result) {
+        if (!result.isFinal || !mounted) return;
+        final intent = _voiceParser.parse(
+          result.text,
+          context: VoiceInteractionContext.manualFood,
+        );
+        switch (intent.action) {
+          case ContextualVoiceAction.save:
+            unawaited(_saveEntry());
+            return;
+          case ContextualVoiceAction.setPortion:
+            setState(() {
+              _portionUnit = 'gram';
+              _portionGrams = intent.portionGrams!;
+            });
+            _accessibility.speak(
+              'Porsiyon $_portionLabel olarak ayarlandı. Kaydet diyebilirsiniz.',
+              priority: TtsPriority.high,
+            );
+            return;
+          case ContextualVoiceAction.back:
+          case ContextualVoiceAction.cancel:
+            setState(() => _selectedResult = null);
+            _accessibility.speak('Besin seçimi iptal edildi.');
+            return;
+          default:
+            _accessibility.speakError(
+              'Komut anlaşılamadı. Kaydet, porsiyon yüz elli gram veya geri deyin.',
+            );
+            return;
+        }
+      },
+      onError: (_) => _accessibility.speakError(
+        'Ses tanıma kullanılamadı. Ekrandaki düğmelerle devam edebilirsiniz.',
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -304,8 +346,7 @@ class _ManualFoodEntryScreenState extends ConsumerState<ManualFoodEntryScreen> {
                   ref.read(screenVoiceGuideControllerProvider).repeat(),
               child: IconButton(
                 tooltip: 'Sesli komut; uzun basınca ekran rehberi',
-                onPressed:
-                    ref.read(voiceCommandServiceProvider).toggleListening,
+                onPressed: _handleScreenVoiceCommand,
                 icon: const Icon(Icons.mic_none_rounded),
               ),
             ),
@@ -423,7 +464,13 @@ class _ManualFoodEntryScreenState extends ConsumerState<ManualFoodEntryScreen> {
               Semantics(
                 liveRegion: true,
                 label: 'Besin aranıyor',
-                child: const Center(child: CircularProgressIndicator()),
+                child: Center(
+                  child: Semantics(
+                    liveRegion: true,
+                    label: 'Besin sonuçları yükleniyor',
+                    child: const CircularProgressIndicator(),
+                  ),
+                ),
               ),
             ],
 

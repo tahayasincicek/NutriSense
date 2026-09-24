@@ -23,6 +23,7 @@ from sqlalchemy import (
     event,
 )
 from sqlalchemy.orm import declarative_base, relationship, sessionmaker
+from sqlalchemy.dialects import mysql
 from sqlalchemy.pool import StaticPool
 from sqlalchemy.types import TypeDecorator
 
@@ -82,7 +83,11 @@ class UTCDateTime(TypeDecorator):
     cache_ok = True
 
     def load_dialect_impl(self, dialect):
-        return dialect.type_descriptor(DateTime(timezone=dialect.name != "mysql"))
+        if dialect.name == "mysql":
+            # MySQL DATETIME'nin varsayilan saniye hassasiyeti, ayni saniyede
+            # yazilan riza ve kilo kayitlarinin siralanmasini belirsiz yapar.
+            return dialect.type_descriptor(mysql.DATETIME(fsp=6))
+        return dialect.type_descriptor(DateTime(timezone=True))
 
     def process_bind_param(self, value, _dialect):
         if value is None:
@@ -169,7 +174,7 @@ class ConsentRecord(Base):
     user_id = Column(UUIDString, ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
     assignment_id = Column(UUIDString, ForeignKey("dietitian_assignments.id", ondelete="CASCADE"), nullable=True)
     consent_type = Column(String(64), nullable=False)
-    policy_version = Column(String(32), nullable=False)
+    policy_version = Column(String(128), nullable=False)
     granted = Column(Boolean, nullable=False)
     context_hash = Column(String(64), nullable=True, index=True)
     channels_json = Column(JSON, nullable=True)

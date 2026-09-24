@@ -196,7 +196,13 @@ class _DietitianScreenState extends ConsumerState<DietitianScreen> {
         title: const Text('Diyetisyen Paneli'),
       ),
       body: _loading
-          ? const Center(child: CircularProgressIndicator())
+          ? Center(
+              child: Semantics(
+                liveRegion: true,
+                label: 'Diyetisyen bağlantısı yükleniyor',
+                child: const CircularProgressIndicator(),
+              ),
+            )
           : RefreshIndicator(
               onRefresh: _load,
               child: ListView(

@@ -5,6 +5,7 @@ enum VoiceInteractionContext {
   globalNavigation,
   cameraReady,
   scanConfirmation,
+  manualFood,
   portionEditing,
   history,
   historyDeleteConfirmation,
@@ -163,6 +164,7 @@ class ContextualVoiceCommandParser {
         {
           VoiceInteractionContext.portionEditing,
           VoiceInteractionContext.scanConfirmation,
+          VoiceInteractionContext.manualFood,
           VoiceInteractionContext.history,
         }.contains(context)) {
       final grams = double.tryParse(portion.group(1)!.replaceAll(',', '.'));
@@ -177,7 +179,10 @@ class ContextualVoiceCommandParser {
       }
     }
     if (_isExact(value, const ['kaydet', 'sonucu kaydet']) &&
-        context == VoiceInteractionContext.scanConfirmation) {
+        {
+          VoiceInteractionContext.scanConfirmation,
+          VoiceInteractionContext.manualFood,
+        }.contains(context)) {
       return _exact(raw, ContextualVoiceAction.save);
     }
     if (_isExact(value, const ['bugun ne yedim', 'bugunku kayitlar']) &&

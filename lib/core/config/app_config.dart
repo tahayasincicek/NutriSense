@@ -16,7 +16,7 @@ abstract final class AppConfig {
 
   static const String privacyNoticeVersion = String.fromEnvironment(
     'PRIVACY_NOTICE_VERSION',
-    defaultValue: 'taslak-yayinlanmadi',
+    defaultValue: '2026-09',
   );
   static const String dataControllerName = String.fromEnvironment(
     'DATA_CONTROLLER_NAME',

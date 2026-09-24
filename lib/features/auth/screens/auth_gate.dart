@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../app.dart';
 import '../../../shared/widgets/accessible_button.dart';
+import '../../../shared/services/screen_voice_guide.dart';
 import '../state/auth_controller.dart';
 import '../../onboarding/screens/onboarding_screen.dart';
 import '../../dietitian/screens/dietitian_dashboard_screen.dart';
@@ -42,17 +43,26 @@ class AuthGate extends ConsumerWidget {
     });
 
     Widget currentWidget;
+    String? rootGuideRoute;
+    var announceRootGuide = true;
     switch (auth.status) {
       case AuthStatus.authenticated:
         currentWidget = auth.user?.accountType == 'dietitian'
             ? const DietitianDashboardScreen()
             : const _OnboardingGate();
+        if (auth.user?.accountType == 'dietitian') {
+          rootGuideRoute = VoiceGuideRoutes.dietitianDashboard;
+        }
         break;
       case AuthStatus.privacyNoticeRequired:
         currentWidget = const PrivacyConsentScreen(requiredForEntry: true);
+        rootGuideRoute = VoiceGuideRoutes.privacy;
+        // Gizlilik ekranı metni kendi yaşam döngüsünde ayrıntılı okur.
+        announceRootGuide = false;
         break;
       case AuthStatus.unauthenticated:
         currentWidget = const LoginScreen();
+        rootGuideRoute = VoiceGuideRoutes.login;
         break;
       case AuthStatus.locked:
         currentWidget = Scaffold(
@@ -86,6 +96,9 @@ class AuthGate extends ConsumerWidget {
             ),
           ),
         );
+        rootGuideRoute = VoiceGuideRoutes.locked;
+        // Kilit mesajı canlı bölge olarak ayrıca duyurulur.
+        announceRootGuide = false;
         break;
       case AuthStatus.unknown:
       case AuthStatus.loading:
@@ -99,6 +112,14 @@ class AuthGate extends ConsumerWidget {
           ),
         );
         break;
+    }
+
+    if (rootGuideRoute != null) {
+      currentWidget = RootScreenVoiceGuideOverlay(
+        routeName: rootGuideRoute,
+        announceOnOpen: announceRootGuide,
+        child: currentWidget,
+      );
     }
 
     return AnimatedSwitcher(
@@ -136,8 +157,14 @@ class _OnboardingGateState extends State<_OnboardingGate> {
   @override
   Widget build(BuildContext context) {
     if (_onboardingDone == null) {
-      return const Scaffold(
-        body: Center(child: CircularProgressIndicator()),
+      return Scaffold(
+        body: Center(
+          child: Semantics(
+            liveRegion: true,
+            label: 'Uygulama kurulumu kontrol ediliyor',
+            child: const CircularProgressIndicator(),
+          ),
+        ),
       );
     }
     if (_onboardingDone == false) {

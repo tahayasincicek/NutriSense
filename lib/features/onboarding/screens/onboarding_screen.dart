@@ -22,6 +22,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/accessibility_utils.dart';
 import '../../../shared/services/accessibility_service.dart';
+import '../../../shared/services/stt_service.dart';
 import '../../../shared/widgets/accessible_button.dart';
 import '../../history/state/daily_goal_provider.dart';
 
@@ -65,6 +66,8 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   double _selectedGoal = 2000;
 
   late final AccessibilityService _accessibility;
+  late final SttService _stt;
+  bool _voiceListening = false;
 
   static const _pages = [
     _OnboardingPage(
@@ -120,6 +123,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   void initState() {
     super.initState();
     _accessibility = ref.read(accessibilityServiceProvider);
+    _stt = ref.read(sttServiceProvider);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _announceCurrentPage();
     });
@@ -148,6 +152,59 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
         curve: Curves.easeInOut,
       );
     }
+  }
+
+  Future<void> _listenForNavigation() async {
+    if (_voiceListening) return;
+    await _accessibility.speak(
+      'Dinliyorum. Sonraki, önceki, tekrar oku veya tamamla deyin.',
+      priority: TtsPriority.high,
+    );
+    await _stt.startListening(
+      listenFor: const Duration(seconds: 8),
+      onListeningStarted: () {
+        if (mounted) setState(() => _voiceListening = true);
+      },
+      onListeningStopped: () {
+        if (mounted) setState(() => _voiceListening = false);
+      },
+      onError: (message) {
+        if (mounted) setState(() => _voiceListening = false);
+        _accessibility.speakError(message);
+      },
+      onResult: (result) {
+        if (!result.isFinal || !mounted) return;
+        final command = result.text.toLowerCase().trim();
+        setState(() => _voiceListening = false);
+        if (command.contains('tekrar') || command.contains('yeniden oku')) {
+          _announceCurrentPage();
+        } else if (command.contains('önceki') ||
+            command.contains('onceki') ||
+            command.contains('geri')) {
+          _previousPage();
+        } else if (command.contains('izin') && _currentPage == 2) {
+          _requestPermissions();
+        } else if (command.contains('tamamla') ||
+            command.contains('başla') ||
+            command.contains('basla')) {
+          if (_currentPage == _pages.length - 1) {
+            _completeOnboarding();
+          } else {
+            _accessibility.speak(
+              'Tamamla komutu son adımda kullanılabilir. Sonraki deyin.',
+              priority: TtsPriority.high,
+            );
+          }
+        } else if (command.contains('sonraki') || command.contains('devam')) {
+          _nextPage();
+        } else {
+          _accessibility.speak(
+            'Komut anlaşılamadı. Sonraki, önceki veya tekrar oku deyin.',
+            priority: TtsPriority.high,
+          );
+        }
+      },
+    );
   }
 
   Future<void> _requestPermissions() async {
@@ -231,6 +288,21 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                       ),
                     );
                   }),
+                ),
+              ),
+            ),
+
+            Align(
+              alignment: Alignment.centerRight,
+              child: Padding(
+                padding: const EdgeInsets.only(right: 24),
+                child: IconButton.filledTonal(
+                  key: const Key('onboarding_voice_command'),
+                  tooltip: _voiceListening ? 'Dinleniyor' : 'Sesli komut ver',
+                  onPressed: _voiceListening ? null : _listenForNavigation,
+                  icon: Icon(_voiceListening
+                      ? Icons.mic_rounded
+                      : Icons.mic_none_rounded),
                 ),
               ),
             ),

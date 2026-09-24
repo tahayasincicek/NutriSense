@@ -48,16 +48,37 @@ enum VoiceCommand {
     'tarama',
     'taramaya başla',
     'yiyecek tara',
-    'kamera'
+    'kamera',
+    'kamerayı aç',
+    'taramayı aç',
   ]),
-  history('Geçmiş',
-      ['geçmiş', 'geçmişimi göster', 'geçmişim', 'ne yedim', 'yemeklerim']),
+  history('Geçmiş', [
+    'geçmiş',
+    'geçmişimi göster',
+    'geçmişi aç',
+    'geçmişim',
+    'ne yedim',
+    'yemeklerim'
+  ]),
   today(
       'Bugün', ['bugün', 'bugün ne yedim', 'bugünkü', 'günlük özet', 'günlük']),
-  send('Gönder',
-      ['gönder', 'diyetisyene gönder', 'rapor gönder', 'raporla', 'paylaş']),
+  send('Gönder', [
+    'gönder',
+    'gönderir misin',
+    'diyetisyene gönder',
+    'rapor gönder',
+    'raporla',
+    'paylaş'
+  ]),
   cancel('İptal', ['iptal', 'iptal et', 'vazgeç', 'durdur', 'bırak']),
-  settings('Ayarlar', ['ayarlar', 'ayarları aç', 'tercihler', 'seçenekler']),
+  settings('Ayarlar',
+      ['ayarlar', 'ayarları aç', 'ayarlara git', 'tercihler', 'seçenekler']),
+  whereAmI('Neredeyim', [
+    'neredeyim',
+    'hangi ekrandayım',
+    'burası neresi',
+    'şu an neredeyim',
+  ]),
   help('Yardım', ['yardım', 'komutlar', 'ne yapabilirim', 'ne diyebilirim']),
   readNutrition('Besin bilgilerini oku', [
     'besin bilgilerini oku',
@@ -70,8 +91,14 @@ enum VoiceCommand {
 
   // Yeni Sağlık Takibi Komutları
   addWater('Su Ekle', ['su içtim', 'su ekle', 'bir bardak su', 'su kaydet']),
-  setMood('Duygu Durumu',
-      ['mutluyum', 'yorgunum', 'üzgünüm', 'enerjiğim', 'normal hissediyorum']),
+  setMood('Duygu Durumu', [
+    'mutluyum',
+    'yorgunum',
+    'üzgünüm',
+    'enerjiğim',
+    'enerjik hissediyorum',
+    'normal hissediyorum'
+  ]),
   logWeight('Kilo Kaydet', ['kilomu kaydet', 'kilo ekle', 'kilom']),
   logSleep('Uyku Kaydet', [
     'uyku kaydet',
@@ -264,9 +291,9 @@ class VoiceCommandService {
       onResult: _onResult,
       listenOptions: stt.SpeechListenOptions(
         listenFor: _listenTimeout,
-        pauseFor: const Duration(seconds: 4),
+        pauseFor: const Duration(seconds: 2),
         localeId: _turkishLocaleId,
-        listenMode: stt.ListenMode.dictation,
+        listenMode: stt.ListenMode.confirmation,
         cancelOnError: false,
         partialResults: true,
         onDevice: _preferOnDevice,
@@ -405,6 +432,17 @@ class VoiceCommandService {
           continue;
         }
 
+        final inputWords = normalized.split(' ').toSet();
+        final aliasWords = normalizedAlias.split(' ').toSet();
+        if (aliasWords.length > 1 && inputWords.containsAll(aliasWords)) {
+          const score = 0.92;
+          if (score > bestScore) {
+            bestScore = score;
+            bestCommand = command;
+          }
+          continue;
+        }
+
         // 3. Levenshtein mesafesi (fuzzy)
         final distance = _levenshteinDistance(normalized, normalizedAlias);
         final maxLen = max(normalized.length, normalizedAlias.length);
@@ -434,7 +472,16 @@ class VoiceCommandService {
   String _normalize(String text) {
     return text
         .toLowerCase()
-        .replaceAll(RegExp(r'[^\w\sçğıöşüâîû]'), '')
+        .replaceAll('ç', 'c')
+        .replaceAll('ğ', 'g')
+        .replaceAll('ı', 'i')
+        .replaceAll('ö', 'o')
+        .replaceAll('ş', 's')
+        .replaceAll('ü', 'u')
+        .replaceAll('â', 'a')
+        .replaceAll('î', 'i')
+        .replaceAll('û', 'u')
+        .replaceAll(RegExp(r'[^\w\s]'), ' ')
         .replaceAll(RegExp(r'\s+'), ' ')
         .trim();
   }

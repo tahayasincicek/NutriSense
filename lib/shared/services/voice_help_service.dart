@@ -46,6 +46,7 @@ const _globalCommands = <VoiceCommand>[
   VoiceCommand.history,
   VoiceCommand.today,
   VoiceCommand.settings,
+  VoiceCommand.whereAmI,
   VoiceCommand.cancel,
 ];
 

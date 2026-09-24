@@ -5,6 +5,20 @@ void main() {
   const parser = ContextualVoiceCommandParser();
 
   group('bağlama duyarlı sesli komut güvenliği', () {
+    test('manuel besin ekranı kaydet ve porsiyon komutlarını kabul eder', () {
+      final save = parser.parse(
+        'kaydet',
+        context: VoiceInteractionContext.manualFood,
+      );
+      final portion = parser.parse(
+        'porsiyon 175 gram',
+        context: VoiceInteractionContext.manualFood,
+      );
+
+      expect(save.action, ContextualVoiceAction.save);
+      expect(portion.action, ContextualVoiceAction.setPortion);
+      expect(portion.portionGrams, 175);
+    });
     test('evet global bağlamda hiçbir eylem tetiklemez', () {
       final result = parser.parse(
         'evet',

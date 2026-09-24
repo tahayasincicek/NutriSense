@@ -21,6 +21,7 @@ void main() {
         'uyku kaydı': VoiceCommand.logSleep,
         'kilo kaydı': VoiceCommand.logWeight,
         'geçmişi dinleme': VoiceCommand.history,
+        'bulunulan ekranı öğrenme': VoiceCommand.whereAmI,
         'yardım': VoiceCommand.help,
       };
 

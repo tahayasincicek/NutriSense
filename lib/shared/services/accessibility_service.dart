@@ -101,6 +101,8 @@ class AccessibilityService with WidgetsBindingObserver {
   final SplayTreeSet<_TtsMessage> _messageQueue = SplayTreeSet<_TtsMessage>();
   bool _isProcessingQueue = false;
   int _nextMessageSequence = 0;
+  int _speechEpoch = 0;
+  Future<void>? _activeStop;
 
   // ── Ayarlar (varsayılanlar) ──
   double _speechRate = 0.5;
@@ -272,9 +274,22 @@ class AccessibilityService with WidgetsBindingObserver {
     // işi anlatmaz. Bu yüzden yüksek ve kritik öncelik kuyruğu boşaltıp
     // hemen konuşur; sıralı bilgi mesajları (normal) kuyrukta kalır.
     if (priority == TtsPriority.critical || priority == TtsPriority.high) {
-      await stop();
+      // Önce başka bir ekran geçişinin hâlen süren stop çağrısını bekle.
+      // Ardından bu isteğe ait yeni bir kuşak aç. Bu bekleme sırasında daha
+      // yeni bir ekran geçişi olursa aşağıdaki kuşak kontrolü eski isteğin
+      // konuşmasını engeller.
+      final pendingStop = _activeStop;
+      if (pendingStop != null) await pendingStop;
+      final requestEpoch = ++_speechEpoch;
+      _messageQueue.clear();
+      _isSpeaking = false;
+      _isPaused = false;
+      _isProcessingQueue = false;
+      await _tts.stop();
+      if (requestEpoch != _speechEpoch || !_isAppInForeground) return;
       _isSpeaking = true;
       await _tts.speak(text);
+      if (requestEpoch != _speechEpoch) return;
       _isSpeaking = false;
       if (priority == TtsPriority.critical && _vibrationEnabled) {
         await heavyHaptic();
@@ -297,18 +312,27 @@ class AccessibilityService with WidgetsBindingObserver {
   /// Kuyruktaki mesajları sırayla çalar
   Future<void> _processQueue() async {
     if (_isProcessingQueue || _isSpeaking || _messageQueue.isEmpty) return;
+    final pendingStop = _activeStop;
+    if (pendingStop != null) {
+      await pendingStop;
+      if (_messageQueue.isEmpty) return;
+    }
+    final processorEpoch = _speechEpoch;
     _isProcessingQueue = true;
 
-    while (_messageQueue.isNotEmpty && _isAppInForeground) {
+    while (_messageQueue.isNotEmpty &&
+        _isAppInForeground &&
+        processorEpoch == _speechEpoch) {
       final message = _messageQueue.first;
       _messageQueue.remove(message);
 
       _isSpeaking = true;
       await _tts.speak(message.text);
+      if (processorEpoch != _speechEpoch) return;
       _isSpeaking = false;
     }
 
-    _isProcessingQueue = false;
+    if (processorEpoch == _speechEpoch) _isProcessingQueue = false;
   }
 
   /// Tüm konuşmayı durdurur ve kuyruğu temizler.
@@ -319,14 +343,20 @@ class AccessibilityService with WidgetsBindingObserver {
   /// göründüğü için kuyruk işletilmiyor; durdurma bitince bayrağı düşürüyor
   /// ama kimse kuyruğu yeniden tetiklemiyordu. Sonuç: eski ses devam ediyor,
   /// yeni ekranın cümlesi hiç okunmuyordu.
-  Future<void> stop() async {
+  Future<void> stop() {
+    ++_speechEpoch;
     _messageQueue.clear();
     _isSpeaking = false;
     _isPaused = false;
     _isProcessingQueue = false;
-    await _tts.stop();
-    // Durdurma sürerken yeni bir duyuru eklendiyse kuyrukta unutulmasın.
-    if (_messageQueue.isNotEmpty) unawaited(_processQueue());
+    final operation = _tts.stop();
+    _activeStop = operation;
+    return operation.whenComplete(() {
+      if (identical(_activeStop, operation)) _activeStop = null;
+      // Durdurma sürerken yeni ekranın duyurusu kuyruğa eklendiyse ancak
+      // motor kesin olarak sustuktan sonra çalıştırılır.
+      if (_messageQueue.isNotEmpty) unawaited(_processQueue());
+    });
   }
 
   /// Mesajı işletim sisteminin ekran okuyucusuna duyurur.
@@ -463,6 +493,8 @@ class AccessibilityService with WidgetsBindingObserver {
   /// Uygulama arka plana geçtiğinde çağrılır
   void onAppPaused() {
     _isAppInForeground = false;
+    ++_speechEpoch;
+    _messageQueue.clear();
     if (_isSpeaking) {
       _tts.stop();
       _isSpeaking = false;

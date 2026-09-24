@@ -121,7 +121,13 @@ class _PrivacyConsentScreenState extends ConsumerState<PrivacyConsentScreen> {
           title: const Text('Kişisel Verileriniz'),
         ),
         body: _loading
-            ? const Center(child: CircularProgressIndicator())
+            ? Center(
+                child: Semantics(
+                  liveRegion: true,
+                  label: 'Gizlilik tercihleri yükleniyor',
+                  child: const CircularProgressIndicator(),
+                ),
+              )
             : ListView(
                 padding: const EdgeInsets.fromLTRB(20, 10, 20, 40),
                 children: [
@@ -261,27 +267,25 @@ class PrivacyNoticeCard extends StatelessWidget {
               ),
               const SizedBox(height: 12),
               Text(_body, style: theme.textTheme.bodyMedium),
-              const SizedBox(height: 16),
-              // Kurum alanları doldurulmadan bu metin nihai sayılmaz; eksik
-              // olduğunu kullanıcıdan gizlemek yerine açıkça yazıyoruz.
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: AppTheme.warningColor.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(12),
+              if (AppConfig.dataControllerName.trim().isNotEmpty &&
+                  AppConfig.dataControllerContactEmail.trim().isNotEmpty &&
+                  AppConfig.dataControllerPostalAddress.trim().isNotEmpty) ...[
+                const SizedBox(height: 16),
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: AppTheme.primaryColor.withValues(alpha: 0.08),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Text(
+                    'Veri sorumlusu: ${AppConfig.dataControllerName}\n'
+                    'Başvuru: ${AppConfig.dataControllerContactEmail}\n'
+                    'Adres: ${AppConfig.dataControllerPostalAddress}\n'
+                    'Metin sürümü: ${AppConfig.privacyNoticeVersion}',
+                    style: theme.textTheme.bodySmall,
+                  ),
                 ),
-                child: Text(
-                  AppConfig.environment == AppEnvironment.prod
-                      ? 'Veri sorumlusu: ${AppConfig.dataControllerName}\n'
-                          'Başvuru: ${AppConfig.dataControllerContactEmail}\n'
-                          'Adres: ${AppConfig.dataControllerPostalAddress}\n'
-                          'Metin sürümü: ${AppConfig.privacyNoticeVersion}'
-                      : 'Bu sürüm taslaktır. Veri sorumlusu, saklama süreleri, '
-                          'başvuru kanalı ve yurt dışı aktarım mekanizması kurum '
-                          'tarafından tamamlanmadan yayına alınmamalıdır.',
-                  style: theme.textTheme.bodySmall,
-                ),
-              ),
+              ],
             ],
           ),
         ),

@@ -44,6 +44,8 @@ void main() {
           reason: '${context.name} ekranında tara komutu eksik');
       expect(text, contains(VoiceCommand.settings.aliases.first),
           reason: '${context.name} ekranında ayarlar komutu eksik');
+      expect(text, contains(VoiceCommand.whereAmI.aliases.first),
+          reason: '${context.name} ekranında neredeyim komutu eksik');
     }
   });
 

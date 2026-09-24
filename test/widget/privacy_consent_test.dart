@@ -94,12 +94,12 @@ void main() {
     expect(find.text('Kişisel Verileriniz'), findsOneWidget);
   });
 
-  testWidgets('taslak uyarısı kullanıcıdan gizlenmez', (tester) async {
+  testWidgets('geçici ürün uyarısı kullanıcıya gösterilmez', (tester) async {
     final adapter = _ConsentAdapter();
     await tester.pumpWidget(_app(adapter));
     await tester.pumpAndSettle();
 
-    expect(find.textContaining('Bu sürüm taslaktır'), findsOneWidget);
+    expect(find.textContaining('Bu sürüm taslaktır'), findsNothing);
   });
 }
 
@@ -162,7 +162,7 @@ class _ConsentAdapter implements HttpClientAdapter {
       saved[data['consent_type'] as String] = data['granted'] as bool;
     }
     return _json({
-      'policy_version': 'taslak-yayinlanmadi',
+      'policy_version': '2026-09',
       'consents': const [],
       'health_data_processing': saved['health_data_processing'] ?? false,
       'image_cross_border_transfer':

@@ -65,6 +65,12 @@ void main() {
         expect(result.command, VoiceCommand.help);
       });
 
+      test('"neredeyim" → VoiceCommand.whereAmI', () {
+        final result = service.matchCommand('neredeyim');
+        expect(result.recognized, true);
+        expect(result.command, VoiceCommand.whereAmI);
+      });
+
       test('"evet" → VoiceCommand.yes', () {
         final result = service.matchCommand('evet');
         expect(result.recognized, true);
@@ -124,6 +130,17 @@ void main() {
         expect(result.recognized, true);
         expect(result.command, VoiceCommand.cancel);
       });
+
+      test('konum sorularını → whereAmI', () {
+        expect(
+          service.matchCommand('hangi ekrandayım').command,
+          VoiceCommand.whereAmI,
+        );
+        expect(
+          service.matchCommand('burası neresi').command,
+          VoiceCommand.whereAmI,
+        );
+      });
     });
 
     // ═══════════════════════════════════════════════════════════════════════
@@ -148,6 +165,21 @@ void main() {
         final result = service.matchCommand('gonder');
         expect(result.recognized, true);
         expect(result.command, VoiceCommand.send);
+      });
+
+      test('Samsung Türkçe karakterleri düşürse de komut anlaşılır', () {
+        expect(
+            service.matchCommand('gecmisi ac').command, VoiceCommand.history);
+        expect(service.matchCommand('ayarlara git').command,
+            VoiceCommand.settings);
+        expect(service.matchCommand('raporu gonderir misin').command,
+            VoiceCommand.send);
+      });
+
+      test('nezaket sözcükleri içeren cümlede komut bulunur', () {
+        final result = service.matchCommand('lütfen besin tara artık');
+        expect(result.recognized, true);
+        expect(result.command, VoiceCommand.scan);
       });
     });
 

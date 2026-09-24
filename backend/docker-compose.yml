@@ -89,12 +89,20 @@ services:
       context: .
       target: test
     profiles: ["test"]
-    env_file: .env
+    # Test konteynerine gelistirici .env dosyasini aktarma. Aksi halde SMTP,
+    # bildirim modu ve startup ayarlari izole test davranisini degistirir.
+    entrypoint: []
     environment:
       APP_ENVIRONMENT: test
       DEBUG: "false"
       DATABASE_URL: mysql+pymysql://${DB_USER}:${DB_PASSWORD}@test-db:3306/${TEST_DB_NAME}?charset=utf8mb4
+      MIGRATION_STARTUP_MODE: verify
       MIGRATION_CHECK_ENABLED: "false"
+    volumes:
+      - ../contracts:/contracts:ro
+      - ../ml:/ml:ro
+      - ../scripts:/scripts:ro
+      - ../ai_model:/ai_model:ro
     command: ["sh", "-c", "alembic upgrade head && pytest -q"]
     depends_on:
       test-db:

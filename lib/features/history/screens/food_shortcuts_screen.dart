@@ -270,7 +270,13 @@ class _FoodShortcutsState extends ConsumerState<FoodShortcutsScreen> {
                   icon: const Icon(Icons.mic_none_rounded))
             ]),
         body: _loading
-            ? const Center(child: CircularProgressIndicator())
+            ? Center(
+                child: Semantics(
+                  liveRegion: true,
+                  label: 'Besin kısayolları yükleniyor',
+                  child: const CircularProgressIndicator(),
+                ),
+              )
             : ListView(
                 padding: EdgeInsets.fromLTRB(
                     20, 16, 20, 24 + MediaQuery.paddingOf(context).bottom),

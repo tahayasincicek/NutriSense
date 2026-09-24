@@ -130,7 +130,13 @@ class _DietitianReportDetailScreenState
   Widget _buildBody(BuildContext context) {
     final theme = Theme.of(context);
     if (_loading && _detail == null) {
-      return const Center(child: CircularProgressIndicator());
+      return Center(
+        child: Semantics(
+          liveRegion: true,
+          label: 'Rapor ayrıntıları yükleniyor',
+          child: const CircularProgressIndicator(),
+        ),
+      );
     }
     if (_detail == null) {
       return Center(

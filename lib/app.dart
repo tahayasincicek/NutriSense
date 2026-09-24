@@ -95,7 +95,21 @@ class _AppShellState extends ConsumerState<AppShell>
             if (result.command == VoiceCommand.help) {
               _announceHelp();
             }
+            if (result.command == VoiceCommand.whereAmI) {
+              final currentTab = ref.read(currentTabProvider);
+              ref.read(accessibilityServiceProvider).speak(
+                    _tabs[currentTab].ttsAnnouncement,
+                    priority: TtsPriority.high,
+                  );
+            }
             if (result.command == VoiceCommand.today) _onTabChanged(2);
+            if (result.command == VoiceCommand.send) {
+              _onTabChanged(4);
+              ref.read(accessibilityServiceProvider).speak(
+                    'Diyetisyen ekranı açıldı. Rapor göndermek için rapor gönder düğmesini kullanın.',
+                    priority: TtsPriority.high,
+                  );
+            }
             if (result.command == VoiceCommand.settings) {
               Navigator.of(context).push(
                 MaterialPageRoute(
@@ -106,9 +120,12 @@ class _AppShellState extends ConsumerState<AppShell>
               );
             }
             if (result.command == VoiceCommand.cancel) {
-              ref
-                  .read(accessibilityServiceProvider)
-                  .speak('İptal edildi.', priority: TtsPriority.high);
+              final navigator = Navigator.of(context);
+              if (navigator.canPop()) navigator.pop();
+              ref.read(accessibilityServiceProvider).speak(
+                    'İptal edildi.',
+                    priority: TtsPriority.high,
+                  );
             }
 
             // Yeni Sağlık Takibi Komutları

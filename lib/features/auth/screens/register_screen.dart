@@ -45,8 +45,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                 'kişiselleştirilmiş tedavi sunmaz. Hesabınızı ve giriş '
                 'bilgilerinizi koruyun. Diyetisyene rapor paylaşımı ayrıca '
                 'onayınıza bağlıdır. Verilerinizi Ayarlar bölümünden '
-                'görüntüleyebilir, dışa aktarabilir ve hesabınızı silebilirsiniz. '
-                'Bu kullanım koşulları yayın öncesi taslaktır.',
+                'görüntüleyebilir, dışa aktarabilir ve hesabınızı silebilirsiniz.',
               ),
               const SizedBox(height: 24),
               const PrivacyNoticeCard(),

@@ -1812,7 +1812,7 @@ def set_automatic_share(
             raise HTTPException(
                 409,
                 "Otomatik paylaşım için e-posta ve SMS kanalları hazır olmalı; "
-                "sandbox alıcıları izin listesinde bulunmalıdır.",
+                "alıcıların doğrulanmış ve gönderime yetkili olması gerekir.",
             )
         try:
             recipients = verified_recipients(dietitian, ["email", "sms"])

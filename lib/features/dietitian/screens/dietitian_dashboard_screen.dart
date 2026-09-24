@@ -362,7 +362,13 @@ class _DietitianDashboardScreenState
   Widget _buildBody(BuildContext context) {
     final theme = Theme.of(context);
     if (_loading && _dashboard == null) {
-      return const Center(child: CircularProgressIndicator());
+      return Center(
+        child: Semantics(
+          liveRegion: true,
+          label: 'Diyetisyen paneli yükleniyor',
+          child: const CircularProgressIndicator(),
+        ),
+      );
     }
     if (_error != null && _dashboard == null) {
       return _ErrorState(message: _error!, onRetry: _load);
@@ -1628,7 +1634,13 @@ class _DietitianPatientDetailScreenState
       ),
       body: _SoftBackground(
         child: _history == null && _error == null
-            ? const Center(child: CircularProgressIndicator())
+            ? Center(
+                child: Semantics(
+                  liveRegion: true,
+                  label: 'Danışan geçmişi yükleniyor',
+                  child: const CircularProgressIndicator(),
+                ),
+              )
             : _error != null && _history == null
                 ? _ErrorState(message: _error!, onRetry: _load)
                 : _buildHistory(context),
@@ -2518,7 +2530,13 @@ class _PatientNoteCardState extends ConsumerState<_PatientNoteCard> {
           ),
           const SizedBox(height: 14),
           if (_loading)
-            const Center(child: CircularProgressIndicator())
+            Center(
+              child: Semantics(
+                liveRegion: true,
+                label: 'Beslenme notları yükleniyor',
+                child: const CircularProgressIndicator(),
+              ),
+            )
           else ...[
             Semantics(
               textField: true,

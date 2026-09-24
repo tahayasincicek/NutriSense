@@ -55,6 +55,7 @@ class _FoodHistoryScreenState extends ConsumerState<FoodHistoryScreen> {
         title: const Text('Beslenme Günlüğü'),
         actions: [
           IconButton(
+            tooltip: 'Beslenme istatistiklerini aç',
             icon: const Icon(Icons.bar_chart_rounded),
             onPressed: () => Navigator.of(context).push(MaterialPageRoute(
                 settings:
@@ -62,6 +63,7 @@ class _FoodHistoryScreenState extends ConsumerState<FoodHistoryScreen> {
                 builder: (_) => const NutritionStatsScreen())),
           ),
           IconButton(
+            tooltip: 'Tarih seç',
             icon: const Icon(Icons.calendar_today_rounded, size: 20),
             onPressed: _pickDate,
           ),
@@ -113,7 +115,13 @@ class _FoodHistoryScreenState extends ConsumerState<FoodHistoryScreen> {
 
   Widget _buildContent(HistoryState state) {
     if (state.status == HistoryStatus.loading && !state.hasData) {
-      return const Center(child: CircularProgressIndicator());
+      return Center(
+        child: Semantics(
+          liveRegion: true,
+          label: 'Beslenme günlüğü yükleniyor',
+          child: const CircularProgressIndicator(),
+        ),
+      );
     }
     // Oturum yoksa hata değil, yönlendirici bir mesaj gösterilir.
     if (state.authRequired) return _buildAuthRequired(state);
@@ -582,26 +590,36 @@ class _PeriodSelector extends StatelessWidget {
           children: HistoryPeriod.values.map((period) {
             final isSelected = selected == period;
             return Expanded(
-              child: GestureDetector(
+              child: Semantics(
+                button: true,
+                selected: isSelected,
+                label: '${period.label} dönemini göster',
+                hint:
+                    isSelected ? 'Şu anda seçili' : 'Seçmek için çift dokunun',
                 onTap: () => onSelected(period),
-                child: AnimatedContainer(
-                  duration: const Duration(milliseconds: 200),
-                  padding: const EdgeInsets.symmetric(vertical: 10),
-                  decoration: BoxDecoration(
-                    color: isSelected
-                        ? theme.colorScheme.primary
-                        : Colors.transparent,
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Text(
-                    period.label,
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      color: isSelected
-                          ? Colors.white
-                          : theme.colorScheme.onSurfaceVariant,
-                      fontWeight:
-                          isSelected ? FontWeight.bold : FontWeight.normal,
+                child: ExcludeSemantics(
+                  child: GestureDetector(
+                    onTap: () => onSelected(period),
+                    child: AnimatedContainer(
+                      duration: const Duration(milliseconds: 200),
+                      padding: const EdgeInsets.symmetric(vertical: 10),
+                      decoration: BoxDecoration(
+                        color: isSelected
+                            ? theme.colorScheme.primary
+                            : Colors.transparent,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Text(
+                        period.label,
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          color: isSelected
+                              ? Colors.white
+                              : theme.colorScheme.onSurfaceVariant,
+                          fontWeight:
+                              isSelected ? FontWeight.bold : FontWeight.normal,
+                        ),
+                      ),
                     ),
                   ),
                 ),

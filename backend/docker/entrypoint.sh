@@ -29,6 +29,13 @@ case "$migration_mode" in
     ;;
 esac
 
+# Docker/Compose tarafindan acik bir komut verildiyse (ornegin izole MySQL
+# test servisindeki pytest komutu) sunucuyu zorla baslatmak yerine onu calistir.
+# Arguman verilmediginde production davranisi degismez ve Uvicorn baslar.
+if [ "$#" -gt 0 ]; then
+  exec "$@"
+fi
+
 exec uvicorn app.main:app \
   --host 0.0.0.0 \
   --port "${PORT:-8000}" \

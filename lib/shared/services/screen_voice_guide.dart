@@ -21,6 +21,9 @@ class ScreenVoiceGuide {
 /// microphone and voice-guide behaviour.
 abstract final class VoiceGuideRoutes {
   static const home = '/';
+  static const login = '/login';
+  static const locked = '/locked';
+  static const dietitianDashboard = '/dietitian-dashboard';
   static const settings = '/settings';
   static const manualFood = '/manual-food';
   static const camera = '/camera';
@@ -40,9 +43,23 @@ abstract final class VoiceGuideRoutes {
   static const patientDetail = '/patient-detail';
   static const nutritionStats = '/nutrition-stats';
   static const foodShortcuts = '/food-shortcuts';
+  static const accessibilitySettings = '/accessibility-settings';
+  static const nutritionDetail = '/nutrition-detail';
 }
 
 const _routeGuides = <String, ScreenVoiceGuide>{
+  VoiceGuideRoutes.login: ScreenVoiceGuide(
+    'Kullanıcı girişi',
+    'E-posta ve şifrenizi girip giriş yapabilir; hesap oluşturma, şifre yenileme veya diyetisyen girişini seçebilirsiniz.',
+  ),
+  VoiceGuideRoutes.locked: ScreenVoiceGuide(
+    'Kilitli oturum',
+    'Güvenliğiniz için oturum kilitlendi. Yeniden giriş yap seçeneğiyle giriş ekranına dönebilirsiniz.',
+  ),
+  VoiceGuideRoutes.dietitianDashboard: ScreenVoiceGuide(
+    'Diyetisyen paneli',
+    'Bekleyen danışan isteklerini, danışanları ve raporları inceleyebilir; arama alanlarıyla listeleri daraltabilirsiniz.',
+  ),
   VoiceGuideRoutes.settings: ScreenVoiceGuide(
     'Ayarlar',
     'Erişilebilirlik, hesap, gizlilik ve beslenme tercihlerini düzenleyebilirsiniz.',
@@ -119,6 +136,14 @@ const _routeGuides = <String, ScreenVoiceGuide>{
     'Besin kısayolları',
     'Sık tüketilenleri yeniden ekleyebilir veya son işlemi geri alabilirsiniz.',
   ),
+  VoiceGuideRoutes.accessibilitySettings: ScreenVoiceGuide(
+    'Erişilebilirlik ayarları',
+    'Konuşma hızı, ses perdesi, titreşim ve sallayarak komut seçeneklerini düzenleyebilirsiniz.',
+  ),
+  VoiceGuideRoutes.nutritionDetail: ScreenVoiceGuide(
+    'Besin ayrıntıları',
+    'Besin adı, miktar, kalori ve besin değerlerini dinleyebilir; kaydet veya tekrar çek diyebilirsiniz.',
+  ),
 };
 
 /// Exposed for route coverage tests and for screens that want to present the
@@ -145,10 +170,18 @@ class ScreenVoiceGuideController extends ChangeNotifier {
       _routeName != VoiceGuideRoutes.manualFood;
 
   Future<void> showRoute(String? routeName, {bool announce = true}) async {
-    _routeName = routeName ?? VoiceGuideRoutes.home;
-    _guide = voiceGuideForRoute(_routeName);
+    _routeName = routeName ?? '/unnamed';
+    final knownGuide = voiceGuideForRoute(_routeName);
+    // A few feature routes are intentionally created without a name. They
+    // still need the same microphone affordance so a screen is never a dead
+    // end for a screen-reader user.
+    _guide = knownGuide ??
+        const ScreenVoiceGuide(
+          'Bu ekran',
+          'Başlıklar, alanlar, durumlar ve düğmeler ekran okuyucu sırasıyla okunur. Genel komutları öğrenmek için ne diyebilirim deyin.',
+        );
     notifyListeners();
-    if (announce && _guide != null) {
+    if (announce) {
       await _accessibility.speak(
         _guide!.announcement,
         priority: TtsPriority.normal,
@@ -165,6 +198,87 @@ class ScreenVoiceGuideController extends ChangeNotifier {
         allowWhileScreenReaderActive: true,
       );
     }
+  }
+}
+
+/// Navigator kullanılmadan, AuthGate içinde doğrudan değişen kök ekranlara
+/// da aynı sesli rehber erişimini verir. Bu ekranlarda ortak rota gözlemcisi
+/// yeni bir rota göremediği için rehber düğmesi ayrıca sağlanır.
+class RootScreenVoiceGuideOverlay extends ConsumerStatefulWidget {
+  const RootScreenVoiceGuideOverlay({
+    super.key,
+    required this.routeName,
+    required this.child,
+    this.announceOnOpen = true,
+  });
+
+  final String routeName;
+  final Widget child;
+  final bool announceOnOpen;
+
+  @override
+  ConsumerState<RootScreenVoiceGuideOverlay> createState() =>
+      _RootScreenVoiceGuideOverlayState();
+}
+
+class _RootScreenVoiceGuideOverlayState
+    extends ConsumerState<RootScreenVoiceGuideOverlay> {
+  ScreenVoiceGuide? get _guide => voiceGuideForRoute(widget.routeName);
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.announceOnOpen) _announceAfterFrame();
+  }
+
+  @override
+  void didUpdateWidget(covariant RootScreenVoiceGuideOverlay oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.announceOnOpen && oldWidget.routeName != widget.routeName) {
+      _announceAfterFrame();
+    }
+  }
+
+  void _announceAfterFrame() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted || _guide == null) return;
+      unawaited(ref.read(accessibilityServiceProvider).speak(
+            '${_guide!.title} ekranı. ${_guide!.instructions}',
+            priority: TtsPriority.high,
+          ));
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final guide = _guide;
+    if (guide == null) return widget.child;
+    return Stack(
+      children: [
+        widget.child,
+        Positioned(
+          right: 16,
+          bottom: 20,
+          child: SafeArea(
+            child: Semantics(
+              button: true,
+              label: '${guide.title} sesli rehberini dinle',
+              hint: 'Bu ekrandaki alanları ve yapılabilecek işlemleri açıklar',
+              child: FloatingActionButton.small(
+                heroTag: 'root_voice_guide_${widget.routeName}',
+                onPressed: () => ref.read(accessibilityServiceProvider).speak(
+                      '${guide.title} ekranı. ${guide.instructions}',
+                      priority: TtsPriority.high,
+                      allowWhileScreenReaderActive: true,
+                    ),
+                tooltip: 'Ekran rehberini dinle',
+                child: const Icon(Icons.record_voice_over_rounded),
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
   }
 }
 

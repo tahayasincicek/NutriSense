@@ -80,4 +80,25 @@ void main() {
       reason: 'Yeni ekranın duyurusu kuyrukta unutuldu: $calls',
     );
   });
+
+  test('geciken eski yüksek öncelikli rehber yeni ekranda başlamaz', () async {
+    final service = AccessibilityService();
+    await service.initialize();
+
+    // Eski rehber, kendi kesme işleminin tamamlanmasını bekliyor.
+    unawaited(service.speak('eski yüksek rehber', priority: TtsPriority.high));
+    await settle();
+
+    // Kullanıcı rehber bitmeden başka ekrana ilerliyor.
+    unawaited(service.stop());
+    await settle();
+    stopGate.complete();
+    await settle();
+
+    expect(
+      calls.any((c) => c.contains('eski yüksek rehber')),
+      isFalse,
+      reason: 'Kapanan ekranın rehberi geç başlayarak konuştu: $calls',
+    );
+  });
 }

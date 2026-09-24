@@ -137,7 +137,15 @@ class _CameraScreenState extends ConsumerState<CameraScreen>
   Future<void> _initializeCamera() async {
     if (_disposed || _initialized) return;
     final notifier = ref.read(cameraStateProvider.notifier);
-    notifier.setPermissionRequesting();
+    final currentStatus = ref.read(cameraStateProvider).status;
+    final preserveResult = {
+      CameraStatus.resultReady,
+      CameraStatus.confirmationRequired,
+      CameraStatus.confirmed,
+      CameraStatus.corrected,
+      CameraStatus.saved,
+    }.contains(currentStatus);
+    if (!preserveResult) notifier.setPermissionRequesting();
     final permission = await Permission.camera.request();
     if (_disposed) return;
     if (!permission.isGranted) {
@@ -152,7 +160,7 @@ class _CameraScreenState extends ConsumerState<CameraScreen>
       await _tts.speak('Kamera izni verilmedi. Manuel giriş kullanılabilir.');
       return;
     }
-    notifier.setInitializing();
+    if (!preserveResult) notifier.setInitializing();
     try {
       final cameras = await availableCameras();
       if (cameras.isEmpty) throw StateError('Kullanılabilir kamera yok.');
@@ -176,7 +184,7 @@ class _CameraScreenState extends ConsumerState<CameraScreen>
       _controller = controller;
       _initialized = true;
       setState(() {});
-      notifier.setReady();
+      if (!preserveResult) notifier.setReady();
       await _tts.speak(
         'Kamera hazır. Telefonu besine doğru tutun ve tara deyin.',
       );
@@ -412,7 +420,7 @@ class _CameraScreenState extends ConsumerState<CameraScreen>
               ? (correctedWithPortion ? 'gram' : analysis.portionUnit)
               : null,
           portionMethod: hasUserPortion ? 'user_selected' : null,
-          cancelToken: _requestCancelToken,
+          cancelToken: _freshRequestCancelToken(),
         );
     _saving = false;
     if (!mounted) return;
@@ -429,8 +437,19 @@ class _CameraScreenState extends ConsumerState<CameraScreen>
       unawaited(ref.read(historyControllerProvider.notifier).refresh());
       await _tts.speak('Yemek geçmişine kaydedildi.');
       await AccessibilityUtils.successHaptic();
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Besin yemek geçmişine kaydedildi.')),
+        );
+      }
     } else {
       await _tts.speakError(result.errorMessage ?? 'Kayıt oluşturulamadı.');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+              content: Text(result.errorMessage ?? 'Kayıt oluşturulamadı.')),
+        );
+      }
     }
   }
 
@@ -615,7 +634,9 @@ class _CameraScreenState extends ConsumerState<CameraScreen>
     if (!mounted) return;
     final amountDialog = showDialog<PortionInput>(
       context: context,
-      builder: (_) => const _ManualAmountDialog(),
+      builder: (_) => _ManualAmountDialog(
+        initialUnit: _isNaturallyCountable(value) ? 'adet' : 'gram',
+      ),
     );
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
@@ -634,18 +655,57 @@ class _CameraScreenState extends ConsumerState<CameraScreen>
           portionValue: portion.value,
           portionUnit: portion.unit,
           portionMethod: 'user_selected',
-          cancelToken: _requestCancelToken,
+          cancelToken: _freshRequestCancelToken(),
         );
     if (!mounted) return;
     if (result.isSuccess && result.data?.logId != null) {
       ref.read(cameraStateProvider.notifier).setSaved(result.data!.logId!);
       unawaited(ref.read(historyControllerProvider.notifier).refresh());
       await _tts.speak('Manuel yemek geçmişine kaydedildi.');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Besin yemek geçmişine kaydedildi.')),
+        );
+      }
     } else {
-      await _tts.speakError(
-        result.errorMessage ?? 'Besin değeri bulunamadığı için kaydedilmedi.',
-      );
+      final message =
+          result.errorMessage ?? 'Besin değeri bulunamadığı için kaydedilmedi.';
+      await _tts.speakError(message);
+      if (mounted) {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(message)));
+      }
     }
+  }
+
+  CancelToken _freshRequestCancelToken() {
+    if (_requestCancelToken?.isCancelled ?? true) {
+      _requestCancelToken = CancelToken();
+    }
+    return _requestCancelToken!;
+  }
+
+  bool _isNaturallyCountable(String foodName) {
+    final normalized = foodName.trim().toLowerCase();
+    return <String>{
+      'lahmacun',
+      'simit',
+      'elma',
+      'muz',
+      'portakal',
+      'mandalina',
+      'yumurta',
+      'kofte',
+      'köfte',
+      'pide',
+      'dolma',
+      'biber',
+      'domates',
+      'şeftali',
+      'seftali',
+      'kayısı',
+      'kayisi',
+    }.contains(normalized);
   }
 
   Future<void> _listenForDecision() async {
@@ -1223,15 +1283,19 @@ class _ManualEntryDialogState extends State<_ManualEntryDialog> {
 /// simit and fruit are naturally entered as pieces. Gram remains available for
 /// foods that are not countable.
 class _ManualAmountDialog extends StatefulWidget {
-  const _ManualAmountDialog();
+  const _ManualAmountDialog({this.initialUnit = 'adet'});
+
+  final String initialUnit;
 
   @override
   State<_ManualAmountDialog> createState() => _ManualAmountDialogState();
 }
 
 class _ManualAmountDialogState extends State<_ManualAmountDialog> {
-  final _controller = TextEditingController(text: '1');
-  String _unit = 'adet';
+  late final TextEditingController _controller = TextEditingController(
+    text: widget.initialUnit == 'adet' ? '1' : '100',
+  );
+  late String _unit = widget.initialUnit;
   String? _error;
 
   @override
@@ -1263,7 +1327,7 @@ class _ManualAmountDialogState extends State<_ManualAmountDialog> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             const Text(
-              'Önce adet sayısını girin. Besin adetle ölçülmüyorsa gramı seçin.',
+              'Adetle ölçülen besinlerde adet sayısını girin. Diğer besinlerde gramı seçin.',
             ),
             const SizedBox(height: 12),
             SegmentedButton<String>(

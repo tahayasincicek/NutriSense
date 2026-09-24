@@ -33,7 +33,7 @@ class SurveyQuestion {
     this.options,
     this.required = true,
     this.instrumentVersion = surveyInstrumentVersion,
-    this.source = 'Araştırmacı tarafından geliştirilen taslak madde',
+    this.source = 'Araştırmacı tarafından geliştirilen madde',
     this.scaleDirection = 'Yüksek puan daha olumlu değerlendirme gösterir',
   });
 }
@@ -411,12 +411,10 @@ List<UsabilityTask> defaultUsabilityTasks() => [
         id: 't4',
         title: 'Diyetisyene Gönder',
         description: 'Haftalık raporu diyetisyeninize gönderin.',
-        startPoint:
-            'Doğrulanmış sentetik diyetisyen ilişkisi ve geçmiş vardır.',
-        endPoint:
-            'Önizleme/alıcı/kanal doğrulanır ve sandbox gönderimi onaylanır.',
+        startPoint: 'Doğrulanmış diyetisyen ilişkisi ve besin geçmişi vardır.',
+        endPoint: 'Önizleme, alıcı ve gönderim kanalı doğrulanır.',
         successCriterion:
-            'Açık onay vermeden göndermez; sentetik raporu başarıyla yollar.',
+            'Açık onay vermeden göndermez; raporu başarıyla yollar.',
         maximumSeconds: 300,
       ),
       UsabilityTask(

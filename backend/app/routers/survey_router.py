@@ -55,7 +55,7 @@ def _collection_context(data_origin: str, protocol_version: str = "") -> tuple[s
         if settings.research_mode not in {"synthetic", "approved"}:
             raise HTTPException(
                 status_code=status.HTTP_409_CONFLICT,
-                detail="Sentetik araştırma veri toplama modu kapalı.",
+                detail="Araştırma veri toplama modu kapalı.",
             )
         return SYNTHETIC_PROTOCOL, SYNTHETIC_APPROVAL
 
