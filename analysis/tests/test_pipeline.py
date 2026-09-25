@@ -43,6 +43,8 @@ def test_synthetic_run_is_watermarked_and_traceable(tmp_path: Path):
     assert manifest["synthetic"] is True
     assert "primary.success" in manifest["results"]
     assert "primary.duration" in manifest["results"]
+    assert manifest["tables_generated"] is True
+    assert manifest["figures_generated"] is True
 
     for filename in (
         "condition_descriptives.csv",

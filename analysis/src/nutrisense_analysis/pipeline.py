@@ -746,6 +746,8 @@ def run_pipeline(
     }
     _analyse_usability(usability, output_dir, metadata, manifest)
     _analyse_survey(survey, output_dir, metadata, manifest)
+    manifest["tables_generated"] = any((output_dir / "tables").glob("*.csv"))
+    manifest["figures_generated"] = any((output_dir / "figures").glob("*.png"))
     _json_dump(output_dir / "results_manifest.json", manifest)
     if mode == "real":
         _json_dump(output_root.parent / "results_manifest.json", manifest)
