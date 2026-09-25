@@ -27,6 +27,12 @@ def _settings(tmp_path, **overrides) -> Settings:
         notification_sandbox_phone_allowlist="+15005550006",
         sms_provider_mode="local_outbox",
         sms_outbox_path=str(tmp_path / "sms_outbox.jsonl"),
+        twilio_account_sid="",
+        twilio_auth_token="",
+        twilio_from_number="",
+        iletimerkezi_api_key="",
+        iletimerkezi_api_hash="",
+        iletimerkezi_sender="",
     )
     base.update(overrides)
     return Settings(**base)

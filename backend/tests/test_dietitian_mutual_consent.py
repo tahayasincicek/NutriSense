@@ -17,7 +17,14 @@ def _register_patient(client, email: str) -> dict:
         "full_name": "Sentetik Hasta",
     })
     assert response.status_code == 201
-    return response.json()
+    tokens = response.json()
+    consent = client.put(
+        "/api/v1/consents",
+        headers=_auth(tokens),
+        json={"consent_type": "health_data_processing", "granted": True},
+    )
+    assert consent.status_code == 200, consent.text
+    return tokens
 
 
 def _register_dietitian(client, email: str) -> dict:
@@ -485,6 +492,48 @@ def test_dashboard_patient_carries_daily_target(client):
     patients = dashboard.json()["patients"]
     assert len(patients) == 1
     assert patients[0]["daily_calorie_target"] == 2000.0
+
+
+def test_health_consent_revocation_closes_live_dietitian_access(client):
+    """Bağ sürse bile geri çekilen sağlık izni canlı veriyi kapatır."""
+    patient = _register_patient(client, "riza-kapatan-hasta@example.com")
+    dietitian = _register_dietitian(client, "riza-kapatan-diyet@example.com")
+    patient_headers = _auth(patient)
+    dietitian_headers = _auth(dietitian)
+    assignment_id = _request_link(
+        client, patient_headers, "riza-kapatan-diyet@example.com"
+    )
+    assert client.post(
+        f"/api/v1/dietitians/assignment/{assignment_id}/approve",
+        headers=patient_headers,
+    ).status_code == 200
+    assert client.post(
+        f"/api/v1/dietitian/assignments/{assignment_id}/accept",
+        headers=dietitian_headers,
+    ).status_code == 200
+
+    before = client.get(
+        "/api/v1/dietitian/dashboard", headers=dietitian_headers
+    )
+    assert len(before.json()["patients"]) == 1
+
+    revoked = client.put(
+        "/api/v1/consents",
+        headers=patient_headers,
+        json={"consent_type": "health_data_processing", "granted": False},
+    )
+    assert revoked.status_code == 200, revoked.text
+
+    after = client.get(
+        "/api/v1/dietitian/dashboard", headers=dietitian_headers
+    )
+    assert after.status_code == 200, after.text
+    assert after.json()["patients"] == []
+    hidden = client.get(
+        f"/api/v1/dietitian/patients/{patient['user_id']}/history",
+        headers=dietitian_headers,
+    )
+    assert hidden.status_code == 404
 
 
 def test_dietitian_reply_reaches_the_patient(client):

@@ -180,7 +180,9 @@ class _PrivacyConsentScreenState extends ConsumerState<PrivacyConsentScreen> {
                     description:
                         'Besin kayıtları, kalori, kilo, uyku, su ve ruh hâli '
                         'bilgileri hesabınıza bağlı olarak saklanır. Bu izin '
-                        'olmadan takip özellikleri çalışmaz.',
+                        'olmadan takip özellikleri ve diyetisyenin canlı '
+                        'günlük erişimi çalışmaz. İzni geri çekmek mevcut '
+                        'kayıtları silmez.',
                     value: _healthData,
                     enabled: !_saving,
                     onChanged: (value) => setState(() => _healthData = value),
@@ -238,6 +240,10 @@ class PrivacyNoticeCard extends StatelessWidget {
       'kullanılır. Uygulama dışındaki alıcılar ve yurt dışı aktarım koşulları '
       'yayımlanan gizlilik politikasında sağlayıcı bazında açıklanır.\n\n'
       'Verilerinizi görüntüleyebilir, düzeltebilir ve dışa aktarabilirsiniz. '
+      'Sağlık verisi iznini geri çektiğinizde yeni takip işlemleri ve '
+      'diyetisyenin canlı günlük erişimi durur; daha önce saklanan kayıtlar '
+      'kendiliğinden silinmez. Kayıtları tek tek veya hesabınızı silerek '
+      'kaldırabilirsiniz. '
       'Hesap silme işlemi hesabınıza bağlı aktif kayıtları kaldırır; yasal '
       'saklama zorunluluğu bulunan sınırlı güvenlik kayıtlarının süresi ve '
       'silme yöntemi yayımlanan saklama politikasında açıklanır.';

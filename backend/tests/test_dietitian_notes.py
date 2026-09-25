@@ -26,6 +26,12 @@ def _linked_pair(client, slug: str) -> tuple[dict, dict, str]:
     }).json()
     patient_headers = _auth(patient)
     dietitian_headers = _auth(dietitian)
+    consent = client.put(
+        "/api/v1/consents",
+        headers=patient_headers,
+        json={"consent_type": "health_data_processing", "granted": True},
+    )
+    assert consent.status_code == 200, consent.text
 
     assignment = client.post(
         "/api/v1/dietitians/assignment",

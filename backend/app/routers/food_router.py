@@ -1294,6 +1294,7 @@ async def update_food_log(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
+    _require_health_data_consent(db, str(current_user.id))
     log = _owned_food_log(db, current_user=current_user, log_id=log_id)
     previous = snapshot(log)
     changed_fields: list[str] = []
@@ -1427,6 +1428,7 @@ async def restore_food_log(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
+    _require_health_data_consent(db, str(current_user.id))
     log = _owned_food_log(
         db, current_user=current_user, log_id=log_id, include_deleted=True,
     )
@@ -1609,6 +1611,7 @@ async def approve_dietitian_assignment(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
+    _require_health_data_consent(db, str(current_user.id))
     assignment = db.query(DietitianAssignment).filter(
         DietitianAssignment.id == assignment_id,
         DietitianAssignment.user_id == current_user.id,
@@ -3185,6 +3188,10 @@ async def dietitian_dashboard(
         patient = db.query(User).filter(User.id == assignment.user_id).first()
         if patient is None or not patient.is_active:
             continue
+        # Sağlık verisi izni geri çekildiğinde daha önce kurulmuş bir ilişki,
+        # diyetisyene canlı günlük ve hedef erişimi vermeye devam etmemelidir.
+        if not _has_consent(db, str(patient.id), "health_data_processing"):
+            continue
         active_logs = db.query(FoodLog).filter(
             FoodLog.user_id == patient.id,
             FoodLog.deleted_at.is_(None),
@@ -3251,6 +3258,10 @@ async def dietitian_patient_history(
         User.is_active.is_(True),
     ).first()
     if patient is None:
+        raise HTTPException(status_code=404, detail="Danışan bulunamadı.")
+    if not _has_consent(db, str(patient.id), "health_data_processing"):
+        # Yetkisiz kişiye ilişkinin varlığını ve danışanın rıza durumunu
+        # açıklamamak için erişim yokken de aynı yanıt kullanılır.
         raise HTTPException(status_code=404, detail="Danışan bulunamadı.")
 
     date_to = istanbul_date()

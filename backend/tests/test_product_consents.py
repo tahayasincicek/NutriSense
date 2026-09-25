@@ -145,6 +145,29 @@ def test_consents_are_scoped_to_the_owner(client):
     assert other.json()["image_cross_border_transfer"] is False
 
 
+def test_revocation_blocks_further_health_record_mutation_in_production(
+    client, monkeypatch
+):
+    """Geri çekme sonrası eski kaydı düzenleme/geri yükleme yolu da kapanır."""
+    from app.routers import food_router
+
+    monkeypatch.setattr(food_router.settings, "app_environment", "prod")
+    user = _register(client, "riza-isleme-durur@example.com")
+    headers = _auth(user)
+
+    update = client.patch(
+        "/api/v1/food-logs/11111111-1111-4111-8111-111111111111",
+        headers=headers,
+        json={"food_name_tr": "Elma"},
+    )
+    restore = client.post(
+        "/api/v1/food-logs/11111111-1111-4111-8111-111111111111/restore",
+        headers=headers,
+    )
+    assert update.status_code == 403, update.text
+    assert restore.status_code == 403, restore.text
+
+
 def test_analysis_is_blocked_without_cross_border_consent(client, monkeypatch):
     """Yurt dışına aktaran sağlayıcıda rıza yoksa görüntü hiç işlenmez."""
     from app.routers import food_router
