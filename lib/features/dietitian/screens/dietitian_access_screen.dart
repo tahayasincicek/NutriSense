@@ -10,6 +10,7 @@ import '../../../shared/widgets/auth_mode_switch.dart';
 import '../../../shared/services/screen_voice_guide.dart';
 import '../../auth/state/auth_controller.dart';
 import '../../auth/screens/registration_verification_screen.dart';
+import '../../auth/screens/password_reset_screen.dart';
 
 class DietitianAccessScreen extends ConsumerStatefulWidget {
   const DietitianAccessScreen({super.key});
@@ -272,6 +273,32 @@ class _DietitianAccessScreenState extends ConsumerState<DietitianAccessScreen> {
                                 isLoading: _loading,
                                 onPressed: _submit,
                               ),
+                              if (!_registering) ...[
+                                const SizedBox(height: 10),
+                                TextButton.icon(
+                                  key: const Key(
+                                    'dietitian_forgot_password',
+                                  ),
+                                  onPressed: _loading
+                                      ? null
+                                      : () => Navigator.of(context).push(
+                                            MaterialPageRoute(
+                                              settings: const RouteSettings(
+                                                name: VoiceGuideRoutes
+                                                    .passwordReset,
+                                              ),
+                                              builder: (_) =>
+                                                  PasswordResetScreen(
+                                                initialEmail: _emailController
+                                                    .text
+                                                    .trim(),
+                                              ),
+                                            ),
+                                          ),
+                                  icon: const Icon(Icons.key_rounded),
+                                  label: const Text('Şifremi Unuttum'),
+                                ),
+                              ],
                               const SizedBox(height: 16),
                               AccessibleButton(
                                 label: 'Hasta Girişine Dön',

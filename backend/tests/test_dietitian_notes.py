@@ -115,3 +115,34 @@ def test_notes_are_closed_to_unassigned_dietitian(client):
         base, headers=_auth(stranger), json={"body": "Görmemeli."}
     )
     assert written.status_code == 404
+
+
+def test_notes_close_when_patient_revokes_health_consent(client):
+    patient_headers, dietitian_headers, user_id = _linked_pair(
+        client, "riza-kapali"
+    )
+    base = f"/api/v1/dietitian/patients/{user_id}/notes"
+    created = client.post(
+        base,
+        headers=dietitian_headers,
+        json={"body": "Yalnız etkin rızayla görülebilir."},
+    )
+    assert created.status_code == 201, created.text
+    note_id = created.json()["items"][0]["id"]
+
+    revoked = client.put(
+        "/api/v1/consents",
+        headers=patient_headers,
+        json={"consent_type": "health_data_processing", "granted": False},
+    )
+    assert revoked.status_code == 200, revoked.text
+
+    assert client.get(base, headers=dietitian_headers).status_code == 404
+    assert client.post(
+        base,
+        headers=dietitian_headers,
+        json={"body": "Rıza sonrası yazılmamalı."},
+    ).status_code == 404
+    assert client.delete(
+        f"{base}/{note_id}", headers=dietitian_headers
+    ).status_code == 404

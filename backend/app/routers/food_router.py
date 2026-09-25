@@ -2795,7 +2795,7 @@ async def reply_to_dietitian_report(
 
 
 def _assigned_patient_or_404(db: Session, dietitian_id: str, user_id: str) -> User:
-    """Diyetisyen yalnız kendisine onaylı biçimde bağlı danışanı görebilir."""
+    """Yalnız onaylı ve sağlık verisi izni etkin danışanı döndürür."""
     assignment = db.query(DietitianAssignment).filter(
         DietitianAssignment.dietitian_id == dietitian_id,
         DietitianAssignment.user_id == user_id,
@@ -2803,8 +2803,14 @@ def _assigned_patient_or_404(db: Session, dietitian_id: str, user_id: str) -> Us
     ).first()
     if assignment is None:
         raise HTTPException(status_code=404, detail="Danışan bulunamadı.")
-    patient = db.query(User).filter(User.id == user_id).first()
-    if patient is None:
+    patient = db.query(User).filter(
+        User.id == user_id,
+        User.is_active.is_(True),
+    ).first()
+    if patient is None or not _has_consent(
+        db, str(user_id), "health_data_processing"
+    ):
+        # İlişkinin veya rıza durumunun varlığını dışarı açıklama.
         raise HTTPException(status_code=404, detail="Danışan bulunamadı.")
     return patient
 

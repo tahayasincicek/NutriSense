@@ -255,45 +255,15 @@ class _DietitianDashboardScreenState
                             .textTheme
                             .titleMedium
                             ?.copyWith(fontWeight: FontWeight.bold)),
-                    // "Pro" ayrı bir rozet olarak durur: düz gri alt yazı
-                    // olarak yazıldığında portalın ayrı bir ürün olduğu
-                    // hiç belli olmuyordu.
-                    Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text('NutriSense',
-                            overflow: TextOverflow.ellipsis,
-                            style: Theme.of(context)
-                                .textTheme
-                                .labelSmall
-                                ?.copyWith(
-                                    letterSpacing: 0.4,
-                                    fontWeight: FontWeight.w700,
-                                    color: Theme.of(context)
-                                        .colorScheme
-                                        .onSurfaceVariant)),
-                        const SizedBox(width: 5),
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 5, vertical: 1),
-                          decoration: BoxDecoration(
+                    Text(
+                      'Diyetisyen paneli',
+                      overflow: TextOverflow.ellipsis,
+                      style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                            letterSpacing: 0.4,
+                            fontWeight: FontWeight.w700,
                             color:
-                                AppTheme.primaryColor.withValues(alpha: 0.12),
-                            borderRadius: BorderRadius.circular(4),
+                                Theme.of(context).colorScheme.onSurfaceVariant,
                           ),
-                          child: Text('PRO',
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .labelSmall
-                                  ?.copyWith(
-                                    fontSize: 9,
-                                    letterSpacing: 0.8,
-                                    fontWeight: FontWeight.w800,
-                                    color:
-                                        Theme.of(context).colorScheme.primary,
-                                  )),
-                        ),
-                      ],
                     ),
                   ],
                 ),

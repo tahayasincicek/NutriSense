@@ -37,6 +37,8 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Bekleyen eşleşme istekleri'), findsOneWidget);
+    expect(find.text('Diyetisyen paneli'), findsOneWidget);
+    expect(find.text('PRO'), findsNothing);
     // Aynı danışan hem bekleyen istekte hem gelen raporda görünebilir.
     expect(find.text('Ayşe Yılmaz'), findsWidgets);
     // Hasta e-postası yalnız maskeli görünür.
