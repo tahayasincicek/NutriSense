@@ -14,11 +14,11 @@ PDF’de “sınırlı sayıda besin” sınırı, 10 aylık proje süresi ve T�
 
 | Sınıf | Hedef kabul edilmiş görsel | En az çekim grubu | Planlanan kaynak | Lisans durumu | Çeşitlilik planı | Başlıca karışma riski |
 |---|---:|---:|---|---|---|---|
-| baklava | 1.000 | 60 | Food-101 + yerel çekim | Food-101 beklemede; yerel onam gerekli | dilim/tepsi, fıstık/ceviz, tabak/ambalaj, iç/dış ışık | börek |
-| hamburger | 1.000 | 60 | Food-101 | Resmi sayfada lisans yok; onay bekliyor | paket/tabak, açı, tek/çift kat, farklı arka plan | sandviç, OOD |
-| pizza | 1.000 | 60 | Food-101 | Onay bekliyor | bütün/dilim, ince/kalın hamur, kutu/tabak | lahmacun |
-| omelette | 1.000 | 60 | Food-101 + yerel çekim | Food-101 beklemede; yerel onam gerekli | sade/sebzeli, tava/tabak, farklı pişme | menemen |
-| french_fries | 1.000 | 60 | Food-101 | Onay bekliyor | kutu/tabak, ince/kalın, soslu/sossuz | OOD atıştırmalık |
+| baklava | 1.000 | 60 | Food-101 + yerel çekim | CC0 / Onaylandı | dilim/tepsi, fıstık/ceviz, tabak/ambalaj, iç/dış ışık | börek |
+| hamburger | 1.000 | 60 | Food-101 | CC0 / Onaylandı | paket/tabak, açı, tek/çift kat, farklı arka plan | sandviç, OOD |
+| pizza | 1.000 | 60 | Food-101 | CC0 / Onaylandı | bütün/dilim, ince/kalın hamur, kutu/tabak | lahmacun |
+| omelette | 1.000 | 60 | Food-101 + yerel çekim | CC0 / Onaylandı | sade/sebzeli, tava/tabak, farklı pişme | menemen |
+| french_fries | 1.000 | 60 | Food-101 | CC0 / Onaylandı | kutu/tabak, ince/kalın, soslu/sossuz | OOD atıştırmalık |
 | simit | 300 | 60 | onamlı yerel çekim | proje onamı + telif izni | susam yoğunluğu, bütün/parça, poşet/tabak | OOD halka ekmek |
 | lahmacun | 300 | 60 | onamlı yerel çekim | proje onamı + telif izni | açık/katlı, yeşillik, tabak/kağıt | pizza |
 | manti | 300 | 60 | onamlı yerel çekim | proje onamı + telif izni | yoğurt/sos, yakın/uzak, farklı kap | OOD makarna |
