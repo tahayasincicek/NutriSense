@@ -165,7 +165,6 @@ app.*.map.json
 
 # Kişisel ve hukuki çalışma belgeleri repoya girmez
 reports/
-docs/
 
 # Veri üretim scriptleri repoya girmez
 generate_study_data.py

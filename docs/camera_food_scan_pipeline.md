@@ -1,0 +1,107 @@
+﻿# Kamera ile güvenli besin tarama hattı
+
+**Durum:** Kod ve otomatik testler tamamlandı; gerçek fiziksel cihaz E2E ve latency kanıtı henüz çalıştırılmadı.
+
+## Ürün stratejisi
+
+Tanıma telefonda, uygulamayla gelen NutriSense modeliyle yapılır; fotoğraf sunucuya veya yurt dışına gönderilmez. Backend'deki `/analyze-food` ucu sağlayıcıdan bağımsız olarak durur; sunucuda görüntü tanıma sağlayıcısı yoktur ve bu durumda görüntüyü işlemeden 503 döner. Sahte başarı veya demo besin üretilmez.
+
+Cihaz üstü tanıma uygulanmıştır. Dağıtılan model, etiketler ve SHA-256 manifesti `assets/models/` altındadır. Kameradan çekilen ve galeriden seçilen fotoğraf aynı cihaz üstü akışı kullanır. Modelin tanıma sonucu kullanıcı onayı ister; besin değerleri ve kayıt işlemleri backend gerektirir. Güncel ölçümler için [model kartına](../ml/MODEL_CARD.md) bakın.
+
+## Kamera state machine
+
+```text
+permissionRequesting → initializing → ready → capturing → preprocessing
+    → uploading → resultReady/confirmationRequired
+    → confirmed/corrected/rejected → saved
+
+Her aktif aşama → qualityWarning | offlineInference | error
+```
+
+- Tek uçuş kilidi ve tek periyodik zamanlayıcı aynı anda birden fazla çekim/request oluşmasını engeller.
+- Ekrandan çıkışta timer, kamera, TTS/STT, aktif Dio `CancelToken` ve geçici çekim dosyası kapatılır/silinir.
+- EXIF yönü piksele uygulanır; görüntü merkezden kare kırpılır, 224×224 RGB JPEG olarak yeniden kodlanır.
+- Kalite kontrolü yalnız çekim için ön koşuldur; kalite geçince “yiyecek tespit edildi” denmez.
+- Kalite/TTS uyarıları cooldown ile sınırlandırılır; karanlık, uzak ve bulanık durumlar ayrı kısa mesaj üretir.
+
+## Güven ve kullanıcı kararı
+
+| Durum | UI/TTS davranışı | Kayıt |
+|---|---|---|
+| Yüksek güven | Adı ve kaloriyi okur; düzeltme ve onay sunar | Yalnız onaydan sonra |
+| Orta güven | En fazla üç adayı sunar; evet/hayır/bir-iki-üç komutlarını kabul eder | Seçim/onaydan sonra |
+| Düşük güven/OOD | Kesin ad veya kalori söylemez; yeniden çekim/manuel giriş sunar | Engellenir |
+| Nutrition bulunamadı veya 0 kalori | Model tanımış olsa bile beslenme sonucunu başarılı saymaz | Engellenir |
+
+`confidence` tanıma modeline aittir. `nutrition_status` ve `nutrition_source` beslenme verisinin ayrı köken/güven göstergesidir. Katalog kayıtlarının güvenilirlik ve kaynak bilgileri ayrı gösterilir; yerel olması tek başına doğrulanmamış olduğu anlamına gelmez. [Besin verisi yöntemi](nutrition_data_methodology.md).
+
+## Kalite yapılandırması
+
+Aşağıdaki `--dart-define` değerleri cihaz örnekleriyle kalibre edilebilen başlangıç değerleridir; bilimsel eşik olarak raporlanamaz:
+
+```text
+QUALITY_MIN_BRIGHTNESS
+QUALITY_MAX_BRIGHTNESS
+QUALITY_MIN_BLUR_SCORE
+QUALITY_MIN_SHORT_EDGE
+```
+
+Kalibrasyon kanıtı en az üç orta sınıf Android cihaz, farklı ışık/mesafe ve desteklenen sınıflardan örnekler içermelidir. False reject/accept dağılımları sürümlü bir rapora yazılmadan varsayılanlar “doğrulanmış” sayılmaz.
+
+## Backend korumaları
+
+- Zorunlu bearer auth ve kullanıcı başına/IP başına dakika limiti.
+- Maksimum encoded byte ve decoded pixel sınırı.
+- İzin verilen MIME ile magic/decode formatı birebir eşleştirme.
+- Pillow decompression-bomb ve decode hata reddi; EXIF transpose ve temiz JPEG yeniden kodlama.
+- Sağlayıcı timeout'u; Base64/görüntü içeriğini loglamama.
+- İşlenen görüntüyü varsayılan olarak saklamama.
+- Kısa ömürlü analiz kimliği, sahiplik kontrolü ve idempotent `capture_id`/karar.
+
+Mevcut rate limiter tek process belleğindedir. Çok instance production için Redis/gateway tabanlı paylaşılan limit zorunlu release kapısıdır.
+
+## TFLite doğrulama ve cihaz kabulü
+
+Model dağıtımı ve gerçek cihaz kabulünde aşağıdaki kanıtlar ayrı izlenir. Modelin depoda bulunması gerçek cihaz ölçümlerinin tamamlandığını göstermez:
+
+- gerçek `.tflite`, SHA-256 checksum ve sürümlü `labels.txt`;
+- input shape, RGB sırası, resize/crop, normalization, dtype;
+- quantized model ise input/output scale ve zero-point;
+- Keras–TFLite tolerans eşdeğerlik testi ve fixture tahminleri;
+- isolate/interpreter dispose testi;
+- hedef Android cihazda cold/warm P50/P95 latency, bellek ve model boyutu;
+- düşük güven/OOD eşiği için kalibrasyon verisi.
+
+Model veya manifest yüklenemediğinde sahte sonuç üretilmez; manuel giriş sunulur. Gerçek cihaz ölçümleri aşağıdaki tabloda ayrıca izlenir.
+
+## Otomatik doğrulama
+
+```powershell
+cd C:\projeler\NutriSense\backend
+.\venv\Scripts\python.exe -m pytest -q
+.\venv\Scripts\python.exe scripts\export_openapi.py --check
+
+cd C:\projeler\NutriSense
+flutter test
+flutter analyze
+flutter build apk --debug --flavor dev
+```
+
+Backend testleri yetkisiz/bozuk/büyük/MIME uyumsuz görüntü, timeout, düşük güven, onay öncesi kayıt yokluğu ve idempotent onayı kapsar. Flutter testleri state/policy, karanlık-kaliteli fixture ve offline fail-closed davranışını kapsar.
+
+## Fiziksel cihaz kanıt şablonu
+
+Bu bölüm gerçek cihaz çalıştırılmadan doldurulamaz ve kabul ölçütü tamamlandı denemez:
+
+| Kanıt | Sonuç |
+|---|---|
+| Cihaz marka/model, Android sürümü | **NOT RUN** |
+| Uygulamayı aç → giriş → tara → dinle → onayla/düzelt → geçmiş | **NOT RUN** |
+| Online cold/warm P50/P95 latency, en az 30 koşu | **NOT RUN** |
+| Offline TFLite cold/warm latency | **NOT RUN — gerçek cihaz gecikmesi ölçülmedi** |
+| İzin ret/kalıcı ret manuel kontrolü | **NOT RUN** |
+| Ağ kesintisi ve manuel giriş | **NOT RUN** |
+| Kişisel veri içermeyen ekran kaydı/log yolu | **NOT RUN** |
+
+Kanıt paketinde gerçek sağlık verisi, yüz, konum, token, görüntü byte'ı veya sağlayıcı secret'ı bulunmamalıdır.
+
