@@ -92,7 +92,7 @@ Proje, Çevik (Agile) yazılım geliştirme metodolojisi kullanılarak yürütü
 | Besin değeri kaynağı | Kaynak ve sürüm bilgili yerel katalog | 556 kayıt |
 | TTS | flutter_tts (tr-TR) | 4.0 |
 | Sesli Komut | speech_to_text | 6.6 |
-| Bildirim | SMTP + yapılandırılabilir Twilio/iletiMerkezi SMS | SMTP gerçek kanal kabulü doğrulandı; SMS bu teslim kapsamı dışında |
+| Bildirim | SMTP + yapılandırılabilir Twilio/iletiMerkezi SMS | SMTP gerçek kanal kabulü doğrulandı; İleti Merkezi SMS isteği 25 Eylül 2026 tarihinde `accepted` oldu ve kullanıcı telefon teslimini doğruladı |
 
 ### 3.3 Değerlendirme Tasarımı
 

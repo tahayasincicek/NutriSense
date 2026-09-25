@@ -49,28 +49,35 @@ class AuthController extends StateNotifier<AuthState> {
   Future<void> bootstrap() async {
     state = const AuthState(AuthStatus.loading);
     await _api.initialize();
+    if (!mounted) return;
     if (!_api.isAuthenticated) {
       await _clearLocalAccountData();
+      if (!mounted) return;
       state = const AuthState(AuthStatus.unauthenticated);
       return;
     }
 
     final profile = await _api.getCurrentUser();
+    if (!mounted) return;
     if (profile.isSuccess && profile.data?.isActive == true) {
       if (profile.data!.accountType != 'dietitian' &&
           !await _hasPrivacyNoticeAcknowledgement()) {
+        if (!mounted) return;
         state = AuthState(
           AuthStatus.privacyNoticeRequired,
           user: profile.data,
         );
         return;
       }
+      if (!mounted) return;
       state = AuthState(AuthStatus.authenticated, user: profile.data);
       return;
     }
 
     await _api.logout();
+    if (!mounted) return;
     await _clearLocalAccountData();
+    if (!mounted) return;
     state = const AuthState(
       AuthStatus.locked,
       message:

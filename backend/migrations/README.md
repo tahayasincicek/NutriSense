@@ -34,4 +34,4 @@ Uygulama artık `data/survey_responses.json` veya `data/usability_sessions.json`
 
 ## Araştırma etik kapısı migration'ı
 
-`f7a8b9c0d1e2_research_ethics_gate.py`; onamı sonuçlardan ayırır, geri çekilme kodu özetini, protokol/onay kaynağını, idempotency alanlarını ve görev audit alanlarını ekler. Upgrade öncesi backup/restore kanıtı alın. Gerçek katılımcı için kuruldan gelen protokol, onam ve approval reference değerleri server ortamında tanımlanmalıdır.
+`f7a8b9c0d1e2_research_ethics_gate.py`; onamı sonuçlardan ayırır, geri çekilme kodu özetini, protokol/onay kaynağını, idempotency alanlarını ve görev audit alanlarını ekler. Upgrade öncesi backup/restore kanıtı alın. Migration sonrası `RESEARCH_MODE=synthetic` yalnız fixture kabul eder; gerçek katılımcı için kuruldan gelen protokol, onam ve approval reference değerleri server ortamında tanımlanmalıdır. Örnek değerle kapı açılmaz.

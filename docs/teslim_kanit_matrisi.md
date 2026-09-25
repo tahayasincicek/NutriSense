@@ -16,15 +16,15 @@ bağlar. Kanıtı olmayan bir madde tamamlandı olarak gösterilmez.
 | iOS kaynak ve derleme kapısı | Tamamlandı | `IOS_SOURCE_CHECK=PASS`; GitHub iOS derleme işi 33510763349 |
 | Gerçek iPhone/VoiceOver kabulü | Dış cihaz tamamlandı | `docs/erisebilirlik_cihaz_kabul_kaydi.md` içindeki oturum formu |
 | Gerçek SMTP e-posta | Tamamlandı | 24 Eylül 2026 Gmail SMTP sağlayıcı kabulü; maskeli allowlist alıcısı |
-| Gerçek SMS | Bu çalışmanın dışında | Sağlayıcı hesabı/kimlik bilgisi tamamlandı |
+| Gerçek SMS | Tamamlandı | 25 Eylül 2026 İleti Merkezi `accepted`, mesaj kimliği `328492956`; kullanıcı telefon teslimini doğruladı; açık alıcı ve secret depoda yok |
 | MySQL 8.4 ve migration | Tamamlandı | Temiz DB upgrade; MySQL üzerinde 286 geçti, 1 atlandı |
 | Araştırma veri toplama altyapısı | Tamamlandı | Etik kapı, onam, pseudonym, survey/usability API ve tidy export |
-| Gerçek görme engelli katılımcı çalışması | Katılımcı tamamlandı | Gerçek DB'de katılımcı kaydı yok; gerçek veri gerçek diye kullanılamaz |
+| Gerçek görme engelli katılımcı çalışması | Altyapı tamamlandı; katılımcı kanıtı yok | Gerçek DB'de katılımcı kaydı yok; sentetik veri gerçek katılımcı sonucu sayılamaz |
 | İstatistiksel analiz hattı | Tamamlandı, veri tamamlandı | Ön analiz planı, veri sözlüğü, kalite kapısı, tablolar/grafikler ve testler |
 | Sonuç raporu | Tamamlandı | `docs/tubitak_sonuc_raporu.md` |
 | Yaygınlaştırma içeriği | Tamamlandı | `docs/yayginlastirma_paketi.md` |
 
-## SMS hariç tek komut teslim kapısı
+## Yerel teslim kapısı
 
 Gerçek saha analizi, fiziksel iPhone/VoiceOver kabulü ve gerçekleşmiş
 yaygınlaştırma kanıtı birlikte şu komutla denetlenir:

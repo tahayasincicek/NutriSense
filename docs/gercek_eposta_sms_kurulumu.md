@@ -14,6 +14,15 @@ ile kabul edilmiştir. Bu kayıt sağlayıcı kabulünü kanıtlar; alıcının 
 okuduğunu kanıtlamaz. Secret ve açık alıcı adresi belgeye veya Git'e
 yazılmamıştır.
 
+## Doğrulanmış SMS sağlayıcı kabulü
+
+25 Eylül 2026 tarihinde İleti Merkezi sandbox/allowlist akışıyla, proje
+sahibinin doğrulanmış ve belgede maskelenen numarasına sağlık verisi
+içermeyen tek kanal testi gönderilmiştir. Sağlayıcı isteği `accepted`
+durumuyla ve `328492956` mesaj kimliğiyle kabul etmiş, kullanıcı aynı gün
+mesajın telefona ulaştığını doğrulamıştır. API anahtarı, hash ve açık telefon
+numarası Git deposuna yazılmamıştır.
+
 ## Gerekli üretim değişkenleri
 
 Secret store veya sunucu ortamında aşağıdaki değerleri tanımlayın:
