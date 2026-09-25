@@ -16,6 +16,7 @@ import '../../auth/screens/privacy_consent_screen.dart';
 import '../../auth/screens/email_change_screen.dart';
 import '../../../shared/services/api_service.dart';
 import '../../dietitian/screens/dietitian_dashboard_screen.dart';
+import '../../food_scan/services/food_correction_sample_store.dart';
 import '../../survey/screens/survey_screen.dart';
 import '../../survey/screens/usability_test_screen.dart';
 import '../../../shared/widgets/accessible_number_dialog.dart';
@@ -390,6 +391,13 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               onTap: _openPrivacyPolicy,
             ),
             _buildActionTile(
+              key: const Key('settings_delete_local_correction_samples'),
+              title: 'Cihazdaki Model Fotoğraflarını Sil',
+              icon: Icons.no_photography_outlined,
+              color: AppTheme.primaryColor,
+              onTap: _clearLocalCorrectionSamples,
+            ),
+            _buildActionTile(
               key: const Key('settings_open_licenses'),
               title: 'Lisanslar ve Veri Kaynakları',
               icon: Icons.gavel_rounded,
@@ -459,6 +467,27 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Gizlilik sayfası açılamadı.')),
       );
+    }
+  }
+
+  Future<void> _clearLocalCorrectionSamples() async {
+    try {
+      await ref.read(foodCorrectionSampleStoreProvider).clearAll();
+      const message = 'Cihazdaki model geliştirme fotoğrafları silindi.';
+      _accessibility.speak(message, priority: TtsPriority.high);
+      if (mounted) {
+        ScaffoldMessenger.of(context)
+          ..hideCurrentSnackBar()
+          ..showSnackBar(const SnackBar(content: Text(message)));
+      }
+    } on Object {
+      const message = 'Yerel fotoğraflar silinemedi. Lütfen tekrar deneyin.';
+      _accessibility.speakError(message);
+      if (mounted) {
+        ScaffoldMessenger.of(context)
+          ..hideCurrentSnackBar()
+          ..showSnackBar(const SnackBar(content: Text(message)));
+      }
     }
   }
 

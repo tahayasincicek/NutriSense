@@ -26,6 +26,7 @@ class SecureHistoryCacheStore implements HistoryCacheStore {
   SecureHistoryCacheStore({
     FlutterSecureStorage? storage,
     AppClock clock = const SystemAppClock(),
+    this.maxAge = const Duration(days: 7),
   })  : _storage = storage ?? const FlutterSecureStorage(),
         _clock = clock;
 
@@ -33,6 +34,7 @@ class SecureHistoryCacheStore implements HistoryCacheStore {
   static const _schemaVersion = 1;
   final FlutterSecureStorage _storage;
   final AppClock _clock;
+  final Duration maxAge;
 
   String _key(String userId) => 'food_history_cache_v1_$userId';
 
@@ -48,11 +50,16 @@ class SecureHistoryCacheStore implements HistoryCacheStore {
         await clear(userId);
         return null;
       }
+      final cachedAt = DateTime.parse(payload['cached_at'] as String);
+      if (_clock.nowUtc().difference(cachedAt) > maxAge) {
+        await clear(userId);
+        return null;
+      }
       return HistoryCacheSnapshot(
         history: FoodHistoryResult.fromJson(
           Map<String, dynamic>.from(payload['history'] as Map),
         ),
-        cachedAt: DateTime.parse(payload['cached_at'] as String),
+        cachedAt: cachedAt,
       );
     } catch (_) {
       await clear(userId);

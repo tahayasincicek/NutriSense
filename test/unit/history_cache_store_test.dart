@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:nutrisense/core/time/app_clock.dart';
 import 'package:nutrisense/features/history/data/history_cache_store.dart';
 import 'package:nutrisense/shared/models/food_analysis_model.dart';
 
@@ -45,6 +46,23 @@ void main() {
     await store.clearAll();
 
     expect(await store.read(userId), isNull);
+  });
+
+  test('saklama süresi dolan sağlık geçmişi otomatik silinir', () async {
+    const userId = '9e4e5356-b491-4575-a9dd-c5abbc777fe9';
+    final writtenAt = DateTime.utc(2026, 9, 1, 12);
+    final writer = SecureHistoryCacheStore(
+      clock: FixedAppClock(writtenAt),
+      maxAge: const Duration(days: 7),
+    );
+    await writer.write(userId, _history());
+
+    final reader = SecureHistoryCacheStore(
+      clock: FixedAppClock(writtenAt.add(const Duration(days: 8))),
+      maxAge: const Duration(days: 7),
+    );
+
+    expect(await reader.read(userId), isNull);
   });
 }
 

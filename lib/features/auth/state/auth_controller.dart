@@ -4,6 +4,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../shared/models/auth_model.dart';
 import '../../../shared/services/api_service.dart';
+import '../../../shared/services/local_privacy_cleanup.dart';
+import '../../food_scan/services/food_correction_sample_store.dart';
 import '../../history/data/history_cache_store.dart';
 
 enum AuthStatus {
@@ -23,19 +25,32 @@ class AuthState {
   const AuthState(this.status, {this.user, this.message});
 }
 
+typedef LocalAccountDataCleanup = Future<void> Function();
+
 class AuthController extends StateNotifier<AuthState> {
-  AuthController(this._api, this._historyCache)
-      : super(const AuthState(AuthStatus.unknown)) {
+  AuthController(
+    this._api,
+    this._historyCache, {
+    LocalAccountDataCleanup? localAccountDataCleanup,
+  })  : _localAccountDataCleanup = localAccountDataCleanup,
+        super(const AuthState(AuthStatus.unknown)) {
     unawaited(bootstrap());
   }
 
   final ApiService _api;
   final HistoryCacheStore _historyCache;
+  final LocalAccountDataCleanup? _localAccountDataCleanup;
+
+  Future<void> _clearLocalAccountData() async {
+    await _historyCache.clearAll();
+    await _localAccountDataCleanup?.call();
+  }
 
   Future<void> bootstrap() async {
     state = const AuthState(AuthStatus.loading);
     await _api.initialize();
     if (!_api.isAuthenticated) {
+      await _clearLocalAccountData();
       state = const AuthState(AuthStatus.unauthenticated);
       return;
     }
@@ -54,6 +69,8 @@ class AuthController extends StateNotifier<AuthState> {
       return;
     }
 
+    await _api.logout();
+    await _clearLocalAccountData();
     state = const AuthState(
       AuthStatus.locked,
       message:
@@ -148,13 +165,14 @@ class AuthController extends StateNotifier<AuthState> {
     final profile = await _api.getCurrentUser();
     if (!profile.isSuccess || profile.data?.isActive != true) {
       await _api.logout();
-      await _historyCache.clearAll();
+      await _clearLocalAccountData();
       state = const AuthState(AuthStatus.unauthenticated);
       return profile.errorMessage ?? 'Kullanıcı profili doğrulanamadı.';
     }
     if (requiredAccountType != null &&
         profile.data!.accountType != requiredAccountType) {
       await _api.logout();
+      await _clearLocalAccountData();
       state = const AuthState(AuthStatus.unauthenticated);
       return 'Bu hesap bir diyetisyen hesabı değil.';
     }
@@ -209,7 +227,7 @@ class AuthController extends StateNotifier<AuthState> {
   Future<void> logout() async {
     state = const AuthState(AuthStatus.loading);
     await _api.logout();
-    await _historyCache.clearAll();
+    await _clearLocalAccountData();
     state = const AuthState(AuthStatus.unauthenticated);
   }
 
@@ -218,22 +236,26 @@ class AuthController extends StateNotifier<AuthState> {
     if (!result.isSuccess) {
       return result.errorMessage ?? 'Hesap silinemedi.';
     }
-    await _historyCache.clearAll();
+    await _clearLocalAccountData();
     state = const AuthState(AuthStatus.unauthenticated);
     return null;
   }
 
   Future<void> unlockToLogin() async {
     await _api.logout();
-    await _historyCache.clearAll();
+    await _clearLocalAccountData();
     state = const AuthState(AuthStatus.unauthenticated);
   }
 }
 
 final authControllerProvider =
     StateNotifierProvider<AuthController, AuthState>((ref) {
+  final privacyCleanup = LocalPrivacyCleanup(
+    correctionSamples: ref.read(foodCorrectionSampleStoreProvider),
+  );
   return AuthController(
     ref.read(apiServiceProvider),
     ref.read(historyCacheStoreProvider),
+    localAccountDataCleanup: privacyCleanup.clearAccountData,
   );
 });

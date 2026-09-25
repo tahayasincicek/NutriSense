@@ -15,6 +15,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../shared/services/api_service.dart';
+import '../../auth/state/auth_controller.dart';
 import '../services/step_counter_service.dart';
 
 const _kStateKey = 'activity_state_v1';
@@ -570,8 +571,12 @@ final stepCounterSourceProvider = Provider<StepCounterSource>(
 );
 
 final activityProvider = StateNotifierProvider<ActivityNotifier, ActivityState>(
-  (ref) => ActivityNotifier(
-    ref.read(apiServiceProvider),
-    ref.read(stepCounterSourceProvider),
-  ),
+  (ref) {
+    final auth = ref.watch(authControllerProvider);
+    final authenticated = auth.status == AuthStatus.authenticated;
+    return ActivityNotifier(
+      authenticated ? ref.read(apiServiceProvider) : null,
+      ref.read(stepCounterSourceProvider),
+    );
+  },
 );

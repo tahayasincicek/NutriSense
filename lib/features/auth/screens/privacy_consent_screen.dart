@@ -224,15 +224,23 @@ class PrivacyNoticeCard extends StatelessWidget {
       'onayladığınız besin adı, porsiyon, kalori ve zaman bilgisini işler. '
       'Kilo, uyku, su ve ruh hâli gibi takip verileri de hesabınıza bağlı '
       'olarak saklanır.\n\n'
-      'Besin tanıma telefonunuzdaki modelle yapılır; fotoğraf telefondan '
-      'çıkmaz, cihazda veya sunucuda saklanmaz.\n\n'
+      'Besin tanıma telefonunuzdaki modelle yapılır ve fotoğraf telefondan '
+      'çıkmaz. Yanlış tahmini düzelttiğinizde model geliştirme kopyası ancak '
+      'ayrıca izin verirseniz bu cihazda saklanır; izin vermezseniz silinir. '
+      'Bu yerel kopyalar çıkışta ve hesap silmede kaldırılır.\n\n'
       'Beslenme raporunuz yalnız siz her gönderim için ayrıca onay '
       'verdiğinizde atanmış diyetisyenin güvenli uygulama içi panelinde '
       'paylaşılır. E-posta anonim danışan kodu ve rapor referansı taşır; SMS '
       'yalnız yeni rapor bildirimi taşır. Besin ve sağlık ayrıntılarını '
       'içermez.\n\n'
-      'Verilerinizi görüntüleyebilir, düzeltebilir, dışa aktarabilir ve '
-      'hesabınızı silerek tamamen kaldırabilirsiniz.';
+      'Veriler; hesabı işletmek, beslenme günlüğünü oluşturmak, seçtiğiniz '
+      'takip özelliklerini sunmak ve onayladığınız raporu iletmek için '
+      'kullanılır. Uygulama dışındaki alıcılar ve yurt dışı aktarım koşulları '
+      'yayımlanan gizlilik politikasında sağlayıcı bazında açıklanır.\n\n'
+      'Verilerinizi görüntüleyebilir, düzeltebilir ve dışa aktarabilirsiniz. '
+      'Hesap silme işlemi hesabınıza bağlı aktif kayıtları kaldırır; yasal '
+      'saklama zorunluluğu bulunan sınırlı güvenlik kayıtlarının süresi ve '
+      'silme yöntemi yayımlanan saklama politikasında açıklanır.';
 
   @override
   Widget build(BuildContext context) {

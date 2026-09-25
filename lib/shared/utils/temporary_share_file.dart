@@ -4,6 +4,24 @@ import 'dart:io';
 import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
 
+/// Removes report/research exports left behind if the operating system killed
+/// the app while a previous share sheet was open.
+Future<void> purgeTemporaryShareFiles() async {
+  final directory = await getTemporaryDirectory();
+  if (!await directory.exists()) return;
+  await for (final entity in directory.list(followLinks: false)) {
+    if (entity is! File) continue;
+    final name = entity.uri.pathSegments.last.toLowerCase();
+    if (!name.startsWith('nutrisense_')) continue;
+    try {
+      await entity.delete();
+    } on FileSystemException {
+      // Another share operation may still own the file. Its finally block or
+      // the next cleanup attempt will remove it.
+    }
+  }
+}
+
 /// Kişisel veri içeren bir dosyayı geçici klasöre yazar, paylaşım penceresini
 /// açar ve paylaşım bitince dosyayı siler.
 ///
@@ -18,6 +36,7 @@ Future<ShareResult> shareTemporaryFile({
   String? subject,
   String? text,
 }) async {
+  await purgeTemporaryShareFiles();
   final directory = await getTemporaryDirectory();
   final file = File('${directory.path}/$fileName');
   try {

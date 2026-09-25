@@ -8,7 +8,9 @@ teknik mekanizmalar uygulanmıştır; süreler ayarlardan değiştirilebilir.
 | Hesap bilgileri (ad, e-posta, telefon, parola özeti, tercihler) | Hesap açık olduğu sürece | Silme | Uygulamada Hesabı Sil veya `/hesap-silme` başvurusu |
 | Besin kayıtları | Hesap açık olduğu sürece | Silme | Hesap silmede birlikte |
 | Su, adım, uyku, ruh hâli ve kilo ölçümleri | Hesap açık olduğu sürece | Silme | Hesap silmede birlikte |
-| İlaç ve takviye listesi | Yalnız cihazda; kullanıcı silene veya uygulama kaldırılana kadar | Silme | Cihazın şifreli deposu; sunucuya gönderilmez |
+| İlaç ve takviye listesi | Yalnız cihazda; kullanıcı silene, çıkış yapana veya hesabını silene kadar | Silme | Cihazın şifreli deposu; sunucuya gönderilmez |
+| Çevrim dışı beslenme geçmişi | Son yazımdan sonra 7 gün veya çıkış/hesap silmeye kadar | Silme | Cihazın şifreli deposunda süre denetimi ve oturum temizliği |
+| İzinli yanlış tahmin fotoğrafları | Kullanıcı Ayarlar'dan silene, çıkış yapana veya hesabını silene kadar | Silme | Yalnız küçültülmüş/EXIF'siz yerel kopya; sunucuya gönderilmez |
 | Diyetisyen raporları, diyetisyen notları, rıza kayıtları | Hesap açık olduğu sürece `[KURUM KARARI]` | Silme | Hesap silmede birlikte |
 | Doğrulanmamış kayıt başvuruları (e-posta, ad, parola özeti, kod özeti) | 30 dakika | Silme | Periyodik imha |
 | Karara bağlanmamış tanıma denemeleri | 7 gün | Silme | Periyodik imha |

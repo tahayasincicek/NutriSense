@@ -63,4 +63,22 @@ void main() {
       throwsArgumentError,
     );
   });
+
+  test('clearAll removes retained images and metadata', () async {
+    final store = FoodCorrectionSampleStore(
+      directoryProvider: () async => temporaryDirectory,
+    );
+    final sample = await store.save(
+      processedJpeg: Uint8List.fromList([0xff, 0xd8, 0xff, 0xd9]),
+      correctFoodName: 'Pirinç Pilavı',
+      predictedFoodName: 'Patlamış Mısır',
+      confidence: 0.62,
+      captureId: 'privacy-cleanup',
+    );
+
+    await store.clearAll();
+
+    expect(await sample.image.exists(), isFalse);
+    expect(await sample.metadata.exists(), isFalse);
+  });
 }

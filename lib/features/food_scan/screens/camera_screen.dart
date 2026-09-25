@@ -466,6 +466,11 @@ class _CameraScreenState extends ConsumerState<CameraScreen>
             _normalizedFoodName(correctName)) {
       return;
     }
+    final consented = await _requestCorrectionSampleConsent();
+    if (!consented) {
+      _correctionSampleBytes = null;
+      return;
+    }
     try {
       await ref.read(foodCorrectionSampleStoreProvider).save(
             processedJpeg: bytes,
@@ -482,6 +487,37 @@ class _CameraScreenState extends ConsumerState<CameraScreen>
     } on Object {
       // Besin kaydı başarılıysa yerel eğitim örneği hatası ana akışı bozmaz.
     }
+  }
+
+  Future<bool> _requestCorrectionSampleConsent() async {
+    if (!mounted) return false;
+    const message =
+        'Modeli geliştirmeye yardımcı olmak için bu küçültülmüş besin '
+        'fotoğrafı yalnız bu cihazda saklansın mı? Fotoğraf sunucuya '
+        'gönderilmez. İzin vermezseniz besin düzeltmeniz yine kaydedilir.';
+    unawaited(_tts.speak(message, priority: TtsPriority.high));
+    final result = await showDialog<bool>(
+      context: context,
+      barrierDismissible: false,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('Fotoğrafı cihazda sakla'),
+        content: const Text(message),
+        actions: [
+          TextButton(
+            key: const Key('correction_sample_decline'),
+            onPressed: () => Navigator.of(dialogContext).pop(false),
+            child: const Text('Saklama'),
+          ),
+          FilledButton(
+            key: const Key('correction_sample_accept'),
+            onPressed: () => Navigator.of(dialogContext).pop(true),
+            child: const Text('Bu fotoğrafı sakla'),
+          ),
+        ],
+      ),
+    );
+    await _tts.stop();
+    return result == true;
   }
 
   String _normalizedFoodName(String value) =>
@@ -622,8 +658,8 @@ class _CameraScreenState extends ConsumerState<CameraScreen>
     if (value == null || value.length < 2 || !mounted) return;
     final analysis = ref.read(cameraStateProvider).analysis;
     if (analysis != null) {
-      // Eğitim örneği, ağdaki besin kaydı başarısız olsa da kaybolmamalıdır.
-      // Kullanıcının doğru adı göndermesi açık düzeltme eylemidir.
+      // Besin düzeltmesi fotoğraf saklama izninden bağımsızdır. Görüntü ancak
+      // aşağıdaki ayrı ve açık seçim olumluysa cihazda tutulur.
       await _saveCorrectionSample(value);
       await _confirm(
         correctedName: value.toLowerCase().replaceAll(' ', '_'),

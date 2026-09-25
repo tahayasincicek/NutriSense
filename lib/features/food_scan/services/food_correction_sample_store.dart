@@ -22,6 +22,18 @@ class FoodCorrectionSampleStore {
 
   final CorrectionStorageDirectory _directoryProvider;
 
+  /// Removes every locally retained correction image and its anonymous
+  /// metadata. This is called when the user signs out or deletes the account.
+  Future<void> clearAll() async {
+    final root = await _directoryProvider();
+    final directory = Directory(
+      '${root.path}${Platform.pathSeparator}food_corrections',
+    );
+    if (await directory.exists()) {
+      await directory.delete(recursive: true);
+    }
+  }
+
   Future<FoodCorrectionSample> save({
     required Uint8List processedJpeg,
     required String correctFoodName,
