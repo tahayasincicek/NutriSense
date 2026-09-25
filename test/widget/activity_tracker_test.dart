@@ -7,7 +7,7 @@ import 'package:nutrisense/core/theme/app_theme.dart';
 import 'package:nutrisense/features/water_tracker/screens/water_tracker_screen.dart';
 import 'package:nutrisense/features/water_tracker/state/water_provider.dart';
 
-import '../support/platform_channel_mocks.dart';
+import '../support/platform_channel_stubs.dart';
 
 Widget _app(ProviderContainer container, {double textScale = 1}) {
   return UncontrolledProviderScope(

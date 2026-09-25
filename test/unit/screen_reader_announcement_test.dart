@@ -2,7 +2,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:nutrisense/shared/services/accessibility_service.dart';
 
-import '../support/platform_channel_mocks.dart';
+import '../support/platform_channel_stubs.dart';
 
 /// TalkBack açıkken mesajın kaybolmadığını doğrular.
 ///

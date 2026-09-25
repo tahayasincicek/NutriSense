@@ -73,7 +73,7 @@ docker compose up -d --build --wait
 Mailpit arayüzü `http://127.0.0.1:8025`, API readiness adresi `http://127.0.0.1:8000/health/ready` olur. Sentetik diyetisyen kaydı yalnız dev/test ortamında oluşturulabilir:
 
 ```powershell
-docker compose exec backend python -m scripts.seed_synthetic
+docker compose exec backend python -m scripts.seed_test_data
 ```
 
 Testcontainer benzeri izole MySQL çalışması:

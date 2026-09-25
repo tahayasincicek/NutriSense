@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'support/platform_channel_mocks.dart';
+import 'support/platform_channel_stubs.dart';
 import 'package:nutrisense/main.dart';
 
 void main() {

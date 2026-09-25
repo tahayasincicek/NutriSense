@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../support/platform_channel_mocks.dart';
+import '../support/platform_channel_stubs.dart';
 import 'package:nutrisense/app.dart';
 import 'package:nutrisense/core/theme/app_theme.dart';
 import 'package:nutrisense/features/food_scan/screens/food_scan_screen.dart';

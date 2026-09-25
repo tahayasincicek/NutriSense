@@ -5,7 +5,7 @@ import pandas as pd
 import pytest
 from PIL import Image
 
-from analysis.tools.generate_synthetic_fixture import build_study, write_fixture
+from analysis.tools.generate_fixture import build_study, write_fixture
 from nutrisense_analysis.pipeline import (
     DataQualityError,
     _load_export,

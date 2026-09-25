@@ -148,7 +148,7 @@ services:
   provider-mocks:
     profiles: ["mocks"]
     build:
-      context: provider_mocks
+      context: provider_stubs
     ports:
       - 127.0.0.1:8090:8090
     <<: *service-hardening

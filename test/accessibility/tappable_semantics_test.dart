@@ -21,7 +21,7 @@ import 'package:nutrisense/features/dietitian/screens/dietitian_screen.dart';
 import 'package:nutrisense/features/history/screens/nutrition_stats_screen.dart';
 import 'package:nutrisense/features/settings/screens/settings_screen.dart';
 
-import '../support/platform_channel_mocks.dart';
+import '../support/platform_channel_stubs.dart';
 
 /// Dokunulabilir her ögenin ekran okuyucuya söyleyecek bir adı olmalıdır.
 ///

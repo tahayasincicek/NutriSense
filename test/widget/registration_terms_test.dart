@@ -4,7 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:nutrisense/features/auth/screens/register_screen.dart';
 import 'package:nutrisense/shared/widgets/accessible_button.dart';
 
-import '../support/platform_channel_mocks.dart';
+import '../support/platform_channel_stubs.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();

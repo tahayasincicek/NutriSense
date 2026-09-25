@@ -59,14 +59,14 @@ GET /api/v1/survey/export/tidy
 ## Sentetik pipeline testi
 
 ```powershell
-.\analysis\.venv\Scripts\python.exe analysis\tools\generate_synthetic_fixture.py `
-  --output analysis\data\synthetic `
+.\analysis\.venv\Scripts\python.exe analysis\tools\generate_fixture.py `
+  --output analysis\data/study_fixtures `
   --participants 120 `
   --seed 2209
 .\analysis\.venv\Scripts\python.exe analysis\run_analysis.py `
   --mode synthetic `
-  --usability analysis\data\synthetic\usability_tidy.synthetic.json `
-  --survey analysis\data\synthetic\survey_tidy.synthetic.json
+  --usability analysis\data/study_fixtures\usability_tidy.synthetic.json `
+  --survey analysis\data/study_fixtures\survey_tidy.synthetic.json
 ```
 
 Sentetik çıktı `analysis/outputs/synthetic/` altındadır, manifestte `synthetic=true` ve `SYNTHETIC_PIPELINE_TEST_ONLY` taşır. `docs/tubitak_sonuc_raporu.md` içine kopyalanamaz.
@@ -74,8 +74,8 @@ Sentetik çıktı `analysis/outputs/synthetic/` altındadır, manifestte `synthe
 Kapsamlı prova raporu ve çalışma kitabı:
 
 ```powershell
-.\analysis\.venv\Scripts\python.exe analysis\tools\build_synthetic_field_report.py
-node analysis\tools\build_synthetic_workbook.mjs
+.\analysis\.venv\Scripts\python.exe analysis\tools\build_field_report.py
+node analysis\tools\build_workbook.mjs
 ```
 
 - `docs/saha_calismasi_simulasyon_raporu.md`

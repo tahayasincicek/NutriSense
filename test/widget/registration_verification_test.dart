@@ -5,7 +5,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:nutrisense/core/theme/app_theme.dart';
 import 'package:nutrisense/features/auth/screens/registration_verification_screen.dart';
 
-import '../support/platform_channel_mocks.dart';
+import '../support/platform_channel_stubs.dart';
 
 /// Hesap e-postaya gelen kodla açılır; kod eksikse istek gönderilmez ve
 /// yeniden gönderme aynı kayıt bilgileriyle yapılır.

@@ -106,7 +106,7 @@ const methodRows = [
   ["Kullanım", "Analiz hattı, demo, tablo ve sunum provası."],
   ["Yasak iddia", "Gerçek saha sonucu, kullanıcı kanıtı, klinik yarar veya genellenebilir etki olarak sunulamaz."],
   ["Gerçek çalışma", "Onamlı katılımcı verisi data_origin=participant ve geçerli onay referansı ile ayrıca toplanmalıdır."],
-  ["Üretim komutu", "python analysis/tools/generate_synthetic_fixture.py --output analysis/data/synthetic --participants 120 --seed 2209"],
+  ["Üretim komutu", "python analysis/tools/generate_fixture.py --output analysis/data/study_fixtures --participants 120 --seed 2209"],
   ["Analiz komutu", manifest.command],
 ];
 method.getRange("A4:B4").values = [["Başlık", "Açıklama"]]; header(method.getRange("A4:B4"));

@@ -5,7 +5,7 @@
 Sentetik fixture üretimi:
 
 ```powershell
-python analysis/tools/generate_synthetic_fixture.py --output analysis/data/synthetic
+python analysis/tools/generate_fixture.py --output analysis/data/study_fixtures
 ```
 
 Gerçek dosya adları:

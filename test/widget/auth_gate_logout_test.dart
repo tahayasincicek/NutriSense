@@ -8,7 +8,7 @@ import 'package:nutrisense/features/history/data/history_cache_store.dart';
 import 'package:nutrisense/shared/models/auth_model.dart';
 import 'package:nutrisense/shared/services/api_service.dart';
 
-import '../support/platform_channel_mocks.dart';
+import '../support/platform_channel_stubs.dart';
 
 /// Ayarlar gibi ekranlar AuthGate'in üstüne push edilir. Oturum kapanınca
 /// altta giriş ekranı kurulsa da bu sayfalar yığında kalırsa kullanıcı
