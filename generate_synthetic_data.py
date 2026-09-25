@@ -64,7 +64,7 @@ def build_study(participant_count: int = 30, seed: int = 42):
         sequence = "AB" if p % 2 == 0 else "BA"
         age, vision, experience, reader = (_choice(rng, x) for x in (AGE, VISION, EXPERIENCE, READERS))
         ability = rng.gauss(0, .62) + {"baslangic": -.48, "orta": 0, "ileri": .42}[experience]
-        
+
         profiles.append({
             "participant_code": f"P-{p + 1:03d}", "participant_id": participant_id,
             "data_origin": "synthetic", "age_group": age, "vision_profile": vision,
@@ -73,7 +73,7 @@ def build_study(participant_count: int = 30, seed: int = 42):
             "counterbalance_sequence": sequence, "consent_status": "APPROVED",
             "researcher_note": "Yalnız analiz hattı testi için sentetik veri",
         })
-        
+
         order = CONDITIONS if sequence == "AB" else tuple(reversed(CONDITIONS))
         for order_index, condition in enumerate(order):
             for task_index, task_id in enumerate(TASKS):
@@ -86,7 +86,7 @@ def build_study(participant_count: int = 30, seed: int = 42):
                     assistance = "prompt" if rng.random() < .78 else "partial"
                 elif not success:
                     assistance = "partial" if rng.random() < .62 else "full"
-                
+
                 duration = BASE_SECONDS[task_id] * (.72 if condition == "nutrisense" else 1)
                 duration *= 1 - min(ability, 1.4) * .08
                 duration *= .94 if order_index else 1
@@ -97,7 +97,7 @@ def build_study(participant_count: int = 30, seed: int = 42):
                 if not success:
                     errors = max(1, errors)
                 started = base + timedelta(days=p // 4, hours=(p % 4) * 2, minutes=order_index * 55 + task_index * 7)
-                
+
                 usability.append({
                     "session_id": session_id, "participant_id": participant_id, "schema_version": "1.0",
                     "protocol_version": "v1.0.0-final", "approval_reference": "2026-TUBITAK-001",
@@ -110,7 +110,7 @@ def build_study(participant_count: int = 30, seed: int = 42):
                     "manually_edited": False, "edit_reason": None,
                     "researcher_note": "",
                 })
-        
+
         submitted = base + timedelta(days=p // 4, hours=(p % 4) * 2 + 1, minutes=50)
         completion = int(round(_clip(rng.gauss(146, 31), 60, 300)))
         answers = {
@@ -127,7 +127,7 @@ def build_study(participant_count: int = 30, seed: int = 42):
                 "answer": answer, "answered_at": submitted.isoformat(), "completion_seconds": completion,
                 "submitted_at": submitted.isoformat(),
             })
-            
+
     meta = {
         "schema_version": "1.0", "synthetic": True, "data_origin": "synthetic",
         "participant_count": participant_count,
@@ -137,11 +137,11 @@ def build_study(participant_count: int = 30, seed: int = 42):
 if __name__ == "__main__":
     out_dir = Path(__file__).resolve().parent / "analysis" / "data" / "synthetic"
     out_dir.mkdir(parents=True, exist_ok=True)
-    
+
     usability, survey, profiles = build_study(30)
-    
+
     (out_dir / "usability_tidy.json").write_text(json.dumps(usability, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     (out_dir / "survey_tidy.json").write_text(json.dumps(survey, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     (out_dir / "participant_profiles.json").write_text(json.dumps(profiles, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
-    
+
     print(f"Sentetik analiz fixture verileri oluşturuldu: {out_dir}")
