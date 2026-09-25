@@ -123,7 +123,7 @@ edilebilir yapmaz; düşük güvenli sonuç kullanıcı onayı olmadan kaydedilm
   başlamaz.
 - Amaç bazlı hukuki sebep: `[HUKUK İNCELEMESİ]`
 - Saklama ve backup imha takvimi: `[KURUM KARARI]` — taslak süreler ve
-  uygulanan periyodik imha `docs/saklama_ve_imha_politikasi_taslak.md` içindedir.
+  uygulanan periyodik imha `docs/saklama_ve_imha_politikasi.md` içindedir.
 - Dış alıcılar, ülkeler ve aktarım mekanizması: `[HUKUK İNCELEMESİ]` — satırlar
   `docs/yurt_disi_aktarim_matrisi.md` içindedir; aktarım dosyasının kayıt
   numarası `CROSS_BORDER_TRANSFER_REFERENCE` ayarına yazılır.

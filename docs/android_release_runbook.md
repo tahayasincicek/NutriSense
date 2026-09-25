@@ -187,7 +187,7 @@ Kanıtsız “TÜBİTAK destekli”, “WCAG uyumlu”, “800.000 besin”, “
 tahmini, klinik karar vermeyen besin bilgisi sunar.
 
 Teknik Data Safety taslağı
-`docs/play_store_data_safety_draft.md` dosyasındadır. Gerçek gizlilik
+`docs/play_store_data_safety.md` dosyasındadır. Gerçek gizlilik
 politikası URL'si, veri sorumlusu, yurtdışı aktarım değerlendirmesi, retention
 ve production sağlayıcıları üniversite hukuk/KVKK birimince onaylanmadan mağaza
 yayını yapılamaz.

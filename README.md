@@ -183,7 +183,7 @@ Kendi dalınızda çalışıp pull request açın. `.env`, kişisel imzalama dos
 - [Besin değerlerinin kaynakları](docs/nutrition_data_methodology.md)
 - [Model kartı](ml/MODEL_CARD.md) · [Veri ve lisans bilgileri](ml/LICENSES.md)
 - [Android yayın rehberi](docs/android_release_runbook.md) · [iOS yayın rehberi](docs/ios_release_runbook.md)
-- [TÜBİTAK sonuç raporu](docs/tubitak_sonuc_raporu.md) · [Makale taslağı](docs/akademik_makale_taslak.md)
+- [TÜBİTAK sonuç raporu](docs/tubitak_sonuc_raporu.md) · [Makale taslağı](docs/akademik_makale.md)
 - [Teslim kanıt matrisi](docs/teslim_kanit_matrisi.md) · [Yaygınlaştırma paketi](docs/yayginlastirma_paketi.md)
 - [Erişilebilirlik cihaz kabul kaydı](docs/erisebilirlik_cihaz_kabul_kaydi.md)
 - SMS dışındaki saha, VoiceOver ve yaygınlaştırma kanıtlarını hazırlamak ve denetlemek için `.\scripts\initialize_tubitak_evidence.ps1`, ardından `.\scripts\verify_tubitak_delivery.ps1`

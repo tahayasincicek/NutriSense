@@ -62,7 +62,7 @@ sayısı, doğrulanmamış model veya sağlayıcı adı ve “KVKK uyum garantis
 | Gizlilik politikası URL'si | Hukuk/KVKK onaylı gerçek URL gerekli |
 | İçerik derecelendirmesi | Play Console anketiyle belirlenecek |
 | Hedef kitle | Araştırmacı ve kurum kararı gerekli |
-| Data Safety | `docs/play_store_data_safety_draft.md` üzerinden sonlandırılacak |
+| Data Safety | `docs/play_store_data_safety.md` üzerinden sonlandırılacak |
 | Sağlık uygulaması beyanları | Play politikası ve hukuk incelemesi gerekli |
 
 ## Ekran görüntüsü kapısı

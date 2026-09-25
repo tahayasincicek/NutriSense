@@ -15,8 +15,8 @@ Bu dosya bir etik kurul kararı, hukuk görüşü veya tamamlanmış saha çalı
 ## KVKK ve yayın belgeleri
 
 - [Hukuki uyum durumu](hukuki_uyum_durumu.md) — kodla kapatılan ve kurum kararı bekleyen maddeler
-- [Aydınlatma metni taslağı](privacy_notice_draft.md)
-- [Kullanım koşulları taslağı](kullanim_kosullari_taslak.md)
+- [Aydınlatma metni](privacy_notice.md)
+- [Kullanım koşulları](kullanim_kosullari.md)
 - [Yurt dışı aktarım matrisi](yurt_disi_aktarim_matrisi.md)
 - [Kişisel veri ihlali müdahale prosedürü](veri_ihlali_mudahale_proseduru.md)
 - [Diyetisyen veri işleme sözleşmesi](dietitian_data_processing_agreement.md)
