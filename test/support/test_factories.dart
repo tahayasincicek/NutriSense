@@ -2,7 +2,7 @@ import 'package:nutrisense/shared/models/auth_model.dart';
 import 'package:nutrisense/shared/models/food_analysis_model.dart';
 
 /// Yalnız testlerde kullanılan, gerçek kişi/sağlık verisi içermeyen fabrikalar.
-abstract final class SyntheticFactories {
+abstract final class TestFactories {
   static const userId = '9e4e5356-b491-4575-a9dd-c5abbc777fe9';
   static const logId = '550e8400-e29b-41d4-a716-446655440000';
 

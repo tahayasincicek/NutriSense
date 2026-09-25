@@ -19,7 +19,7 @@ import 'package:nutrisense/shared/models/food_analysis_model.dart';
 import 'package:nutrisense/shared/services/accessibility_service.dart';
 import 'package:nutrisense/shared/services/api_service.dart';
 
-import '../test/support/synthetic_factories.dart';
+import '../test/support/test_factories.dart';
 
 void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
@@ -57,7 +57,7 @@ void main() {
             cameraStateProvider.overrideWith((ref) {
               final notifier = CameraNotifier();
               notifier.setAnalysis(
-                SyntheticFactories.foodAnalysis(),
+                TestFactories.foodAnalysis(),
                 medium: false,
               );
               return notifier;
@@ -65,7 +65,7 @@ void main() {
             historyControllerProvider.overrideWith(
               (ref) => HistoryController(
                 repository,
-                SyntheticFactories.userId,
+                TestFactories.userId,
                 clock: ref.read(appClockProvider),
               ),
             ),
@@ -90,7 +90,7 @@ void main() {
           key: const ValueKey('history'),
           overrides: [
             historyRepositoryProvider.overrideWithValue(repository),
-            historyUserIdProvider.overrideWithValue(SyntheticFactories.userId),
+            historyUserIdProvider.overrideWithValue(TestFactories.userId),
             accessibilityServiceProvider.overrideWithValue(
               _SilentAccessibilityService(),
             ),
@@ -116,7 +116,7 @@ void main() {
           ],
           child: const MaterialApp(
             home: SendReportWizard(
-              assignment: SyntheticFactories.approvedDietitian,
+              assignment: TestFactories.approvedDietitian,
             ),
           ),
         ),
@@ -182,7 +182,7 @@ class _JourneyTransport implements HttpClientAdapter {
         'token_type': 'bearer',
         'expires_in': 3600,
         'refresh_expires_in': 86400,
-        'user_id': SyntheticFactories.userId,
+        'user_id': TestFactories.userId,
         'full_name': 'Sentetik Kullanıcı',
       });
     }
@@ -192,9 +192,9 @@ class _JourneyTransport implements HttpClientAdapter {
       // Alanlar FoodAnalysisDecisionResponse sözleşmesiyle birebir aynıdır;
       // 'message' zorunludur ve eksikliği istemci ayrıştırmasını düşürür.
       return _json({
-        'analysis_id': SyntheticFactories.logId,
+        'analysis_id': TestFactories.logId,
         'status': 'confirmed',
-        'log_id': SyntheticFactories.logId,
+        'log_id': TestFactories.logId,
         'message': 'Yemek geçmişine kaydedildi.',
       });
     }
@@ -237,7 +237,7 @@ class _JourneyTransport implements HttpClientAdapter {
 }
 
 class _JourneyHistoryRepository implements HistoryRepository {
-  final history = SyntheticFactories.foodHistory();
+  final history = TestFactories.foodHistory();
   HistoryCacheSnapshot? cache;
 
   @override
