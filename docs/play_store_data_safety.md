@@ -15,7 +15,7 @@ doğrulanmalıdır.
 | Kimlik doğrulama verisi | Oturum güvenliği | Parola özeti sunucuda; token cihaz güvenli deposunda | Logout ve token iptali |
 | Beslenme günlüğü | Geçmiş ve kullanıcı onaylı rapor | Backend veritabanında kullanıcı UUID'sine bağlı | Düzeltme/silme ve rapor onayı |
 | Galeri fotoğrafı (kullanıcının seçtiği) | Besin adayını analiz etme | Varsayılan kalıcı saklama yok; kamera görüntüsüyle aynı yolu izler | Seçim yapılmazsa özellik kullanılmaz; kamera veya manuel giriş açık |
-| Kamera görüntüsü | Besin adayını analiz etme | Varsayılan kalıcı saklama yok; yapılandırmaya göre işlem sağlayıcısına aktarılabilir | İzin reddi ve manuel giriş |
+| Kamera görüntüsü | Besin adayını analiz etme | Uygulamayla gelen cihaz üstü modelde işlenir; sunucuya/üçüncü tarafa aktarılmaz ve varsayılan olarak saklanmaz | İzin reddi ve manuel giriş |
 | Sağlık ve fitness verisi | Kullanıcının kendi takibi | Su, adım, uyku, ruh hâli ve kilo ölçümleri hesaba bağlı olarak sunucuda; ilaç ve takviye listesi yalnız cihazda, şifreli depoda | Amaç bazlı açık rıza; dışa aktarma ve hesap silmede tamamen silinir |
 | Diyetisyen iletişimi | Kullanıcı onaylı rapor gönderimi | Doğrulanmış alıcı ve kanal durumları sunucuda | Atama/iptal ve her gönderimde açık onay |
 | Araştırma yanıtı | Etik onaylı HCI araştırması | Ürün hesabından ayrı pseudonym; etik kapı olmadan gerçek veri yok | Onam geri çekme koduyla silme |

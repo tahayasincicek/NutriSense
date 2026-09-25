@@ -1,9 +1,9 @@
 # NutriSense aydınlatma/gizlilik metni — teknik
 
-**Bu doküman onaylanmıştır.** Veri sorumlusu, iletişim adresi, hukuki sebepler,
-saklama süreleri, alıcı ülkeler/aktarım mekanizması ve başvuru yöntemi
-üniversite/hukuk birimi tarafından doldurulup onaylanmadan kullanıcıya kesin
-gizlilik politikası olarak sunulamaz.
+**Durum: teknik taslak — hukuki/kurumsal onay bekliyor.** Veri sorumlusu,
+iletişim adresi, hukuki sebepler, saklama süreleri, alıcı ülkeler/aktarım
+mekanizması ve başvuru yöntemi üniversite/hukuk birimi tarafından doldurulup
+onaylanmadan kullanıcıya kesin gizlilik politikası olarak sunulamaz.
 
 ## Ne işler?
 
@@ -58,9 +58,12 @@ adresin sahibine e-postayla bildirilir.
 
 Sesli komutlar cihazın işletim sistemindeki konuşma tanıma servisiyle
 (Android'de Google, iOS'ta Apple) yazıya çevrilir. NutriSense sesi dosyaya,
-veritabanına veya loga yazmaz. Android ve iOS'ta yalnız cihaz üstü tanıma istenir. Türkçe dil paketi veya
-cihaz üstü destek yoksa bulut tanımaya sessiz geçilmez; kullanıcı dokunmatik
-veya klavyeyle devam eder. NutriSense sesi sunucuya göndermez. Bu servis
+veritabanına veya loga yazmaz. Android'de cihaz üstü tanıma zorunlu istenir;
+Türkçe dil paketi veya cihaz üstü destek yoksa bulut tanımaya sessiz geçilmez.
+iOS'ta tanımanın cihazda veya Apple sunucusunda yapılması cihaz, dil ve işletim
+sistemi desteğine bağlıdır; kullanıcı sesli komutu kendisi başlatır ve isterse
+dokunmatik veya klavyeyle devam eder. NutriSense sesi kendi sunucusuna
+göndermez. İşletim sistemi konuşma tanıma servisi
 `docs/yurt_disi_aktarim_matrisi.md` içinde ayrı satırdır. Sesli komut
 kullanmadan dokunmatik ekran ve klavyeyle devam edilebilir.
 

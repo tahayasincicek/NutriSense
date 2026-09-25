@@ -44,6 +44,7 @@ bir hukukçu verir.
 | Diyetisyen veri işleme sözleşmesi | `docs/dietitian_data_processing_agreement.md` | Hukukçu onayı |
 | Veri işleme envanteri | `docs/data_processing_inventory.md` | Hukuki sebep ve saklama süresi sütunları |
 | Etik kurul paketi | `docs/etik_kvkk_belgeleri.md` | Etik kurul kararı |
+| Özel nitelikli veri güvenliği politikası | `docs/ozel_nitelikli_veri_guvenligi_politikasi.md` | Veri sorumlusu onayı, sorumlu atamaları, eğitim ve MFA kanıtı |
 
 ## Kodla çözülemeyen, yayından önce zorunlu maddeler
 
@@ -67,13 +68,16 @@ bir hukukçu verir.
 9. Çocuk kullanıcılar: uygulamada yaş sınırı yoktur, çocuklar da kayıt
    olabilir. 18 yaşından küçük kullanıcıların sağlık verisi için veli onayı
    gerekip gerekmediği ve nasıl alınacağı hukukçuya danışılmalıdır.
+10. Kurulun 2018/10 sayılı kararı uyarınca sağlık verisine uzaktan erişen
+    diyetisyen/personel hesaplarında çok faktörlü kimlik doğrulama ve bunun
+    production kanıtı.
 
 ## Açık teknik işler
 
 - İşletim sistemi konuşma tanıma servisi: Android'de cihaz üstü tanıma
-  öncelikli, ama Türkçe dil paketi olmayan telefonlarda ve iOS'ta ses platform
-  sunucusunda işlenebilir. Bu nedenle servis aydınlatmada ve aktarım
-  matrisinde dış alıcı olarak açıklanır.
+  zorunludur ve destek yoksa buluta sessiz geçiş yapılmaz. iOS'ta ses Apple
+  sunucusunda işlenebilir. Bu nedenle servis aydınlatmada ve aktarım matrisinde
+  dış alıcı olarak açıklanır.
 
 ## Production için zorunlu ayarlar
 

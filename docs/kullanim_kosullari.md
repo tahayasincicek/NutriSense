@@ -1,7 +1,8 @@
 # NutriSense kullanım koşulları 
 
-**Bu doküman onaylanmıştır.** Hizmet sağlayıcının kimliği ve iletişim bilgileri
-belirlenip metin bir hukukçu tarafından onaylanmadan kullanıcıya sunulamaz.
+**Durum: teknik taslak — hukuki/kurumsal onay bekliyor.** Hizmet sağlayıcının
+kimliği ve iletişim bilgileri belirlenip metin bir hukukçu tarafından
+onaylanmadan kullanıcıya kesin koşullar olarak sunulamaz.
 Kişisel verilerin işlenmesi bu metinde değil, ayrı aydınlatma metninde
 (`docs/privacy_notice.md`) anlatılır; bu koşulları kabul etmek herhangi
 bir açık rıza anlamına gelmez.

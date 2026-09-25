@@ -107,7 +107,9 @@ class Settings(BaseSettings):
     research_consent_version: str = ""
     # Ürün tarafı aydınlatma metni sürümü. Rıza kayıtları bu sürümle
     # damgalanır; metin değişince yeni rıza istenebilmesi için gereklidir.
-    privacy_notice_version: str = "2026-09"
+    # Güvenli varsayılan kasıtlı olarak taslaktır. Production ancak kurum ve
+    # hukukçu tarafından onaylanan sürüm açıkça environment'tan verilirse açılır.
+    privacy_notice_version: str = "TASLAK-YAYINLANMADI"
     # KVKK aydınlatmasında adı geçen veri sorumlusu ve ilgili kişi başvuru
     # kanalı. Kurum kararı olmadan production başlatılmaz.
     data_controller_name: str = ""

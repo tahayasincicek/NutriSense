@@ -78,6 +78,14 @@ def test_production_rejects_unpublished_privacy_notice():
         ).validate_security()
 
 
+def test_production_rejects_default_privacy_notice_version():
+    default_version = Settings.model_fields["privacy_notice_version"].default
+    with pytest.raises(RuntimeError, match="PRIVACY_NOTICE_VERSION"):
+        _valid_production_settings(
+            privacy_notice_version=default_version
+        ).validate_security()
+
+
 def test_jwt_has_bound_issuer_audience_time_type_and_unique_identifier():
     subject = str(uuid.uuid4())
     token = create_access_token(subject)

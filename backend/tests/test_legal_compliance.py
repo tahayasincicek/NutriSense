@@ -110,6 +110,9 @@ def test_public_privacy_policy_discloses_processing_and_user_controls(client, pa
     assert "Saklama ve silme" in response.text
     assert "/hesap-silme" in response.text
     assert "/kvkk-basvuru" in response.text
+    assert "besin adı, miktar, tarih, saat ve kalori bu " in response.text
+    assert "kanallara gönderilmez" in response.text
+    assert "onaylanan rapor içeriğini işler" not in response.text
     assert "<form" not in response.text
 
 

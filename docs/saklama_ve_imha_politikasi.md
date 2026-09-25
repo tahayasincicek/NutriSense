@@ -1,7 +1,9 @@
 # Saklama ve imha politikası 
 
-**Bu doküman onaylanmıştır.** Süreler kurum ve hukukçu onayından geçmiştir. Tablodaki
-teknik mekanizmalar uygulanmıştır; süreler ayarlardan değiştirilebilir.
+**Durum: teknik taslak — hukuki/kurumsal onay bekliyor.** Tablodaki teknik
+mekanizmalar uygulanmıştır; süreler ayarlardan değiştirilebilir. Kurum ve
+hukukçu, özellikle yedekler ile sağlayıcı kopyalarının sürelerini yayın öncesi
+karara bağlamalıdır.
 
 | Veri | Saklama süresi | Süre sonunda | Mekanizma |
 |---|---|---|---|
