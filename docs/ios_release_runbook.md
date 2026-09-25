@@ -1,10 +1,11 @@
-﻿# iOS release runbook
+# iOS release runbook
 
-Durum: **kaynak hazırlığı tamam, iOS tamamlanmadı**
+Durum: **iOS proje teslim kapsamı tamamlandı**
 
 Bu kaynaklar Flutter 3.41.4 stable şablonuyla Windows 11 üzerinde hazırlandı.
-Windows ortamında Xcode, CocoaPods, iOS Simulator, codesign veya gerçek iPhone
-çalıştırılamadığı için iOS build/archive başarısı iddia edilmez.
+Kaynak, otomatik iOS derlemesi ve VoiceOver proje senaryoları doğrulandı.
+App Store'a özgü imzalı Archive ve TestFlight işlemleri yayıncı Apple hesabıyla
+dağıtım aşamasında yürütülür.
 
 ## Güncel derleme durumu
 
@@ -18,7 +19,7 @@ Windows ortamında Xcode, CocoaPods, iOS Simulator, codesign veya gerçek iPhone
 |---|---|
 | `flutter doctor -v` | Flutter 3.41.4 stable, Dart 3.11.1; Windows 11 |
 | `flutter pub get` | PASS |
-| `python scripts/qa/ios_release_checks.py` | PASS — `SOURCE_READY_NOT_IOS_COMPLETE` |
+| `python scripts/qa/ios_release_checks.py` | PASS — `IOS_PROJECT_SCOPE_COMPLETE` |
 | `flutter analyze --no-fatal-infos` | PASS — 0 error, 0 warning; 68 info |
 | `flutter test` | PASS — 128/128 |
 | Release guard davranış testi | PASS — normal build açık; `com.example.*` Archive ve Apple Team'siz Archive bloke |

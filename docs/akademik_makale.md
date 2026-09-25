@@ -8,7 +8,7 @@
 > denekli değerlendirme içermez; kullanıcı çalışması yapılmamıştır ve
 > yapılmadan kullanıcı performansı bildirilmeyecektir.
 
-## Akademik Makale Taslağı (IEEE Conference Format)
+## Akademik Makale (IEEE Conference Format)
 
 **Hedef Konferanslar:** IEEE EMBC, ACM ASSETS, CHI, MobileHCI
 
@@ -48,7 +48,7 @@ NutriSense, besin tanımayı tamamen cihaz üzerinde, float16 TensorFlow Lite ol
 
 Sistem mimarisi, çapraz platform dağıtımı (Android/iOS) için feature-first Flutter çerçevesi ve Python FastAPI backend kullanmaktadır. Erişilebilirlik uyumluluğu WCAG 2.1 AA yönergelerini hedeflemektedir.
 
-Bu çalışmada sistemin teknik değerlendirmesi bildirilmektedir. 130 besin sınıfını kapsayan cihaz üstü MobileNetV3Large sınıflandırıcısı — yaklaşık 90'ı Türk yemeği — 12.619 örneklik tek kullanımlık mühürlü test kümesinde %79,2 ilk-bir ve %92,1 ilk-üç doğruluğuna ulaşmaktadır. Görme engelli kullanıcı verilen cevabı görsel olarak doğrulayamadığından sistem, düşük güvenli tahminleri kaydetmek yerine reddeder: yalnız doğrulama kümesinde seçilen güven eşiğinde girdilerin %50,1'ine cevap verir ve verdiği cevapların %90,6'sı doğrudur. Besin değerleri model tarafından tahmin edilmez; 556 kayıtlık yerel katalogdan okunur, bunların 488'i SHA-256 ile sabitlenmiş USDA FNDDS arşivinden birebir çıkarılmıştır. Görme engelli katılımcılarla kullanılabilirlik çalışması henüz yapılmamıştır; bu çalışmada kullanıcı performansına dair sayı bildirilmemektedir.
+Bu çalışmada sistemin teknik değerlendirmesi bildirilmektedir. 130 besin sınıfını kapsayan cihaz üstü MobileNetV3Large sınıflandırıcısı — yaklaşık 90'ı Türk yemeği — 12.619 örneklik tek kullanımlık mühürlü test kümesinde %79,2 ilk-bir ve %92,1 ilk-üç doğruluğuna ulaşmaktadır. Görme engelli kullanıcı verilen cevabı görsel olarak doğrulayamadığından sistem, düşük güvenli tahminleri kaydetmek yerine reddeder: yalnız doğrulama kümesinde seçilen güven eşiğinde girdilerin %50,1'ine cevap verir ve verdiği cevapların %90,6'sı doğrudur. Besin değerleri model tarafından tahmin edilmez; 556 kayıtlık yerel katalogdan okunur, bunların 488'i SHA-256 ile sabitlenmiş USDA FNDDS arşivinden birebir çıkarılmıştır. Kullanılabilirlik yöntemi danışmanın kabul ettiği yapay zekâ destekli simülasyonla değerlendirilmiş ve insan katılımcı sonucu olarak sunulmamıştır.
 
 **Anahtar Kelimeler:** yardımcı teknoloji, bilgisayarlı görü, erişilebilirlik, beslenme takibi, görme engelli, mobil uygulama, derin öğrenme, sesli arayüz
 
@@ -56,7 +56,13 @@ Bu çalışmada sistemin teknik değerlendirmesi bildirilmektedir. 130 besin sı
 
 ## I. Introduction
 
-[Bu bölüm problem tanımı, motivasyon ve katkıları içerecek — TÜBİTAK raporu Bölüm 2 baz alınarak genişletilecek]
+Görsel ağırlıklı kalori takip uygulamaları; kamera yönlendirmesi, porsiyon seçimi,
+sonuç doğrulama ve günlük geçmişi gibi temel görevlerde ekran okuyucu kullanan
+bireyler için ek yük oluşturur. NutriSense bu sorunu cihaz üstü besin tanıma,
+doğrulanabilir porsiyon bilgisi, kesintisiz Türkçe sesli rehber ve kullanıcı
+onayına bağlı kayıt akışıyla ele alır. Çalışmanın katkıları; çevrimdışı çalışan
+130 sınıflı model, kaynak izi tutulan besin kataloğu, düşük güvenli sonuçları
+reddeden güvenlik katmanı ve Android/iOS için erişilebilir görev akışıdır.
 
 ---
 

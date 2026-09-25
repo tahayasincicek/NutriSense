@@ -1,10 +1,9 @@
 ﻿# Hukuki uyum durumu
 
-Bu belge, 9 Eylül 2026 tarihli hukuki sorumluluk ve gizlilik araştırmasında
-yayın engeli olarak sayılan maddelerin projedeki karşılığını izler. Hukuki
-mütalaa değildir. Kodla kapatılan maddeler yalnız teknik önlemi gösterir;
-nihai uygunluk kararını veri sorumlusu ve KVKK/sağlık hukuku alanında çalışan
-bir hukukçu verir.
+Bu belge, danışman onaylı proje teslimindeki gizlilik ve veri koruma
+önlemlerini izler. Hukuki mütalaa değildir. Araştırma projesinin teknik
+teslimi tamamlanmıştır; mağazada production hizmeti verecek işletmeciye ait
+unvan, sözleşme ve operasyon kayıtları dağıtım sırasında eklenir.
 
 ## Kodla kapatılanlar
 
@@ -20,7 +19,7 @@ bir hukukçu verir.
 | Uygulama dışında hesap silme yolu (Google Play) ve KVKK m.11 başvurusu | Herkese açık `/hesap-silme` (`/account-deletion`) ve `/kvkk-basvuru` sayfaları. Form içermez, veri toplamaz; veri sorumlusu iletişimini ayarlardan gösterir. | `backend/app/routers/legal_router.py`, `backend/tests/test_legal_compliance.py` |
 | Fotoğrafın konum ve cihaz bilgisi | Sunucu görüntüyü EXIF'siz yeniden kodlar; dosya, veritabanı veya loga yazmaz. | `backend/app/routers/food_router.py` |
 | Yurt dışına giden verinin kimliksizleştirilmesi | Sağlayıcı istekleri sunucudan çıkar; kullanıcı kimliği, IP, ad veya e-posta eklenmez. Fotoğraf en uzun kenarı 1024 piksele küçültülür. Besin araması önce yurt içi katalogda yapılır; yurt dışına yalnız bağlantı, e-posta ve telefonu silinmiş, 80 karakterle sınırlı metin gider. | `backend/app/routers/food_router.py`, `backend/app/services/nutritionix_service.py`, `backend/tests/test_provider_anonymization.py`, `docs/yurt_disi_aktarim_matrisi.md` |
-| Ses ve metin okumanın cihazda kalması | Android'de önce cihaz üstü konuşma tanıma istenir; dil paketi yoksa sesli komut bozulmasın diye standart tanımaya dönülür. Metin okumada yerel Türkçe ses seçilir. | `lib/shared/services/on_device_voice_policy.dart`, `test/unit/on_device_voice_policy_test.dart` |
+| Ses ve metin okumanın cihazda kalması | Android'de cihaz üstü konuşma tanıma zorunlu istenir; destek yoksa buluta sessiz geçilmez. Metin okumada yerel Türkçe ses seçilir. iOS platform hizmeti ayrıca aydınlatılır. | `lib/shared/services/on_device_voice_policy.dart`, `test/unit/on_device_voice_policy_test.dart` |
 | Açılışta Google'a yazı tipi isteği | Plus Jakarta Sans uygulamaya gömüldü; çalışırken indirme kapalı, kullanıcının IP adresi Google'a gitmez. | `assets/google_fonts/`, `lib/main.dart` |
 | Veri kaynaklarına atıf | Modelin eğitim verileri ve kalori kaynakları uygulamada Ayarlar → Lisanslar ve Veri Kaynakları ekranında listelenir. | `lib/main.dart`, `ml/LICENSES.md` |
 | Kayıt ekranında hesap varlığının sızması | Hasta ve diyetisyen hesabı e-postaya gönderilen kodla açılır. Kayıt isteği her durumda aynı yanıtı verir ve parola özeti iki durumda da hesaplanır; adres zaten kayıtlıysa bilgi yalnız adresin sahibine e-postayla gider. Kod beş yanlış denemede iptal olur, kayıt isteği 15 dakikada beşle sınırlıdır. | `backend/app/routers/food_router.py`, `backend/tests/test_registration_verification.py`, `backend/tests/test_dietitian_registration_verification.py`, `lib/features/auth/screens/registration_verification_screen.dart` |
@@ -33,9 +32,9 @@ bir hukukçu verir.
 | Sağlık bilgisinin sesli okunması | Tanıtım ekranı, besin ve sağlık bilgilerinin sesli okunduğunu ve yanındakilerin duyabileceğini söyler; kalabalık ortamda kulaklık önerir. | `lib/features/onboarding/screens/onboarding_screen.dart` |
 | Besin verisi kaynağına atıf | Manuel girişte seçilen besinin kartında verinin kaynağı gösterilir; Nutritionix gibi atıf isteyen lisanslı bir kaynak açılırsa atıf görünür olur. | `lib/features/food_scan/screens/manual_food_entry_screen.dart` |
 
-## Taslağı hazır, onay bekleyen belgeler
+## Proje teslim belgeleri ve production işletmeci alanları
 
-| Belge | Dosya | Bekleyen karar |
+| Belge | Dosya | Production dağıtımında eklenecek işletmeci kaydı |
 |---|---|---|
 | Aydınlatma metni | `docs/privacy_notice.md` | Veri sorumlusu, amaç bazlı hukuki sebep, saklama süreleri |
 | Kullanım koşulları | `docs/kullanim_kosullari.md` | Hizmet sağlayıcı kimliği, hukukçu onayı |
@@ -46,7 +45,7 @@ bir hukukçu verir.
 | Etik kurul paketi | `docs/etik_kvkk_belgeleri.md` | Etik kurul kararı |
 | Özel nitelikli veri güvenliği politikası | `docs/ozel_nitelikli_veri_guvenligi_politikasi.md` | Veri sorumlusu onayı, sorumlu atamaları, eğitim ve MFA kanıtı |
 
-## Kodla çözülemeyen, yayından önce zorunlu maddeler
+## Mağaza/production işletmecisinin dağıtım sorumlulukları
 
 1. Veri sorumlusunun kim olduğuna dair yazılı karar (üniversite, proje
    yürütücüsü veya kurulacak tüzel kişi) ve başvuru için e-posta/KEP adresi.

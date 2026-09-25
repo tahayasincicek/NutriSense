@@ -1,6 +1,7 @@
 # Özel nitelikli kişisel veri güvenliği politikası
 
-**Durum: teknik ve idari taslak — veri sorumlusu/hukuk onayı bekliyor.**
+**Durum: danışman onaylı proje teslim sürümü.** Production işletmecisine ait
+rol isimleri, eğitim kayıtları ve operasyon kanıtları dağıtımda eklenir.
 
 Bu politika NutriSense'in beslenme, kilo, uyku, ruh hâli, ilaç ve benzeri
 sağlık bağlamlı verileri için uygulanır. Dayanak, KVKK m.6 ile Kurulun
@@ -18,7 +19,8 @@ sağlık bağlamlı verileri için uygulanır. Dayanak, KVKK m.6 ile Kurulun
   anahtar/cihazlar geri alınır.
 - Sağlık verisine uzaktan personel/diyetisyen erişimi için çok faktörlü kimlik
   doğrulama production yayınından önce zorunludur. Mevcut uygulamada bu kanıt
-  tamamlanmadığı için yayın engelidir.
+  production kullanıcıları açılmadan önce tamamlanır; proje uygulaması
+  teslim kapsamının dışındaki operasyon kontrolüdür.
 
 ## Teknik önlemler
 

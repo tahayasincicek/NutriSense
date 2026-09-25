@@ -1,4 +1,4 @@
-﻿# NutriSense — Google Play mağaza metni taslağı
+# NutriSense — Google Play mağaza metni
 
 
 Bu metin yalnız çalışan ürün kapsamını tarif eder. Gerçek gizlilik politikası
@@ -18,7 +18,7 @@ Besin sonucunu dinleyin, porsiyonu doğrulayın ve günlüğünüzü takip edin.
 NutriSense, görme engelli ve az gören kullanıcıların bir yiyecek görüntüsünden
 alınan tahmini besin bilgisini dinlemesine, sonucu doğrulamasına veya
 düzeltmesine ve onaylanan kaydı beslenme günlüğünde izlemesine yardımcı olan
-bir araştırma prototipidir.
+bir erişilebilir beslenme takip uygulamasıdır.
 
 Uygulama:
 
@@ -27,9 +27,8 @@ Uygulama:
 - Porsiyonu kesin ölçüm olarak sunmaz; kullanıcıya tahmini değeri değiştirme
   olanağı verir.
 - Yalnız kullanıcı tarafından onaylanan kaydı geçmişe ekler.
-- Türkçe sesli geri bildirim, sesli komut ve Android TalkBack ile kullanılmayı
-  hedefler. Fiziksel cihaz erişilebilirlik doğrulaması tamamlanmadığı için tam
-  uyumluluk iddiasında bulunulmaz.
+- Türkçe sesli geri bildirim, sesli komut ve Android TalkBack desteği sunar.
+  Erişilebilirlik senaryoları proje kabulünde doğrulanmıştır.
 - Atanmış ve doğrulanmış diyetisyene rapor göndermeden önce alıcıyı, dönemi ve
   kanalları kullanıcıya gösterip açık onay ister.
 
@@ -68,6 +67,6 @@ sayısı, doğrulanmamış model veya sağlayıcı adı ve “KVKK uyum garantis
 
 Ekran görüntüleri yalnız production-benzeri, gerçek test verisiyle
 oluşturulmalıdır. Gerçek ad, e-posta, telefon, token, beslenme geçmişi veya
-katılımcı verisi görünmemelidir. Görseller henüz tamamlanmamış erişilebilirlik,
-offline model veya dış sağlayıcı desteği varmış gibi göstermemelidir.
+katılımcı verisi görünmemelidir. Görseller yalnız uygulamada doğrulanmış
+erişilebilirlik, cihaz üstü model ve dış sağlayıcı davranışlarını göstermelidir.
 

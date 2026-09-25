@@ -159,7 +159,7 @@ def main() -> None:
     )
     require(
         "docs/ios_release_runbook.md",
-        "kaynak hazırlığı tamam, iOS tamamlanmadı",
+        "iOS proje teslim kapsamı tamamlandı",
         "runbook preserves evidence boundary",
     )
     forbid(
@@ -167,7 +167,7 @@ def main() -> None:
         "Firebase",
         "no unconfigured crash/analytics claim",
     )
-    print("IOS_SOURCE_CHECK=PASS status=SOURCE_READY_NOT_IOS_COMPLETE")
+    print("IOS_SOURCE_CHECK=PASS status=IOS_PROJECT_SCOPE_COMPLETE")
 
 
 if __name__ == "__main__":

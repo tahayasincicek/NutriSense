@@ -79,11 +79,10 @@ def test_production_rejects_unpublished_privacy_notice():
 
 
 def test_production_rejects_default_privacy_notice_version():
-    default_version = Settings.model_fields["privacy_notice_version"].default
+    values = _valid_production_settings().model_dump()
+    values.pop("privacy_notice_version")
     with pytest.raises(RuntimeError, match="PRIVACY_NOTICE_VERSION"):
-        _valid_production_settings(
-            privacy_notice_version=default_version
-        ).validate_security()
+        Settings(_env_file=None, **values).validate_security()
 
 
 def test_jwt_has_bound_issuer_audience_time_type_and_unique_identifier():

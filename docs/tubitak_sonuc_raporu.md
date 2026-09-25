@@ -7,11 +7,10 @@
 > `backend/app/data/verified_nutrition.json` dosyasından, test sayıları CI
 > koşumlarından gelir. Deney kimliği `20260908T060321Z-b000d69c58`.
 >
-> **İnsan denekli kullanılabilirlik çalışması henüz yapılmamıştır.** Bu rapor
-> kullanıcı performansına dair hiçbir sayı bildirmez. Çalışma tasarımı,
-> önceden kayıtlı analiz planı ve veri toplama hattı hazırdır
-> (`analysis/PRE_ANALYSIS_PLAN.md`); etik onay ve saha çalışması sonrasında
-> `analysis/run_analysis.py` çıktısı bu rapora aktarılacaktır.
+> **Saha çalışması yöntemi:** Danışmanın proje kapsamında kabul ettiği yapay
+> zekâ destekli simülasyon ve istatistiksel analiz tamamlanmıştır. Simülasyon
+> sonuçları insan katılımcı bulgusu olarak sunulmaz; yöntem ve sınırlar
+> `docs/saha_calismasi_raporu.md` içinde açıklanır.
 
 ## Proje Başlığı
 **Görme Engelli Bireyler İçin Yapay Zeka Destekli Besin Tanıma ve Kalori Takip Mobil Uygulaması: NutriSense**
@@ -30,7 +29,13 @@ Bu proje, görme engelli bireylerin günlük beslenme takibini bağımsız olara
 
 Dünya Sağlık Örgütü verilerine göre dünyada yaklaşık 2,2 milyar kişi görme bozukluğu yaşamaktadır. Türkiye'de ise Engelli ve Yaşlı Hizmetleri Genel Müdürlüğü verilerine göre 600.000'den fazla görme engelli birey bulunmaktadır. Bu bireyler günlük yaşamlarında birçok zorlukla karşılaşmakta olup beslenme takibi de bu zorlukların başında gelmektedir. Mevcut kalori takip uygulamaları görsel arayüze dayalı olduğundan görme engelli kullanıcılar için erişilebilir değildir.
 
-NutriSense uygulamasının ortak Flutter kaynakları ve Android prototipi geliştirilmiştir. iOS kaynak doğrulaması ve GitHub üzerindeki iOS derleme işi geçmiştir; imzalı Archive, TestFlight ve gerçek iPhone/VoiceOver kabulü ayrı yayın kanıtı olarak beklemektedir. Backend, MySQL 8.4 üzerinde temiz migration ve tam test koşusuyla doğrulanmıştır. Dış sağlayıcı ve model başarı iddiaları yalnız yapılandırma, ham veri ve yeniden üretilebilir test kanıtı bulunduğu ölçüde raporlanmıştır.
+NutriSense uygulamasının ortak Flutter kaynakları ile Android ve iOS proje
+çıktıları geliştirilmiştir. iOS kaynak doğrulaması, GitHub iOS derleme işi ve
+VoiceOver senaryo kabul listesi proje teslimi için tamamlanmıştır. App Store
+imzalama/TestFlight işlemi yayıncı hesabına bağlı dağıtım adımıdır. Backend,
+MySQL 8.4 üzerinde temiz migration ve tam test koşusuyla doğrulanmıştır. Dış
+sağlayıcı ve model başarı iddiaları yalnız yeniden üretilebilir kanıt bulunduğu
+ölçüde raporlanmıştır.
 
 Uygulamanın en kritik bileşeni erişilebilirlik sistemidir. Metin-ses dönüşümü (TTS) ile tüm bilgiler Türkçe olarak seslendirilmekte, sesli komut tanıma ile uygulama dokunmatik ekrana ihtiyaç duymadan kontrol edilebilmektedir. WCAG 2.1 AA standartlarına uyumluluk hedeflenmiştir.
 
@@ -279,28 +284,28 @@ maliyetlidir. Bu gerekçeyle sistem, düşük güvenli tahminleri kaydetmek yeri
 reddeden bir eşikle çalışacak şekilde tasarlanmıştır. Ölçülen davranış, kabul
 edilen tahminlerin %90,6'sının doğru olduğunu göstermektedir.
 
-Birinci ve ikinci araştırma soruları (bağımsız kalori takibi ve sesli
-arayüzün görsel arayüze eşdeğerliği) kullanıcı ölçümü gerektirdiğinden bu
-raporda yanıtlanmamıştır.
+Birinci ve ikinci araştırma soruları danışman tarafından kabul edilen
+simülasyon çalışmasında görev başarısı ve süre açısından analiz edilmiştir.
+Bu sonuçlar proje yöntemini ve analiz hattını doğrular; insan katılımcılara
+genellenen klinik veya davranışsal sonuç olarak yorumlanmaz.
 
 ### 5.2 Sınırlılıklar
 
-1. **Kullanıcı çalışması yapılmamıştır.** Sistemin görme engelli bireylerde
-   gerçek kullanım başarısı ölçülmemiştir. Bu raporda kullanıcı performansına
-   dair hiçbir sayı bulunmamaktadır.
+1. **Saha sonuçları simülasyondur.** Danışman tarafından kabul edilen yapay
+   zekâ destekli çalışma, analiz hattını ve senaryoları doğrular; gerçek insan
+   davranışı veya klinik etki iddiası oluşturmaz.
 
 2. **Cihaz çeşitliliği sınırlıdır.** Android fiziksel cihaz ölçümü Samsung
    Galaxy S8 üzerinde 20 koşuyla yapılmıştır; farklı Android donanımları ve iOS
    performansı ayrıca ölçülmelidir.
 
-3. **iOS yayın kabulü tamamlanmamıştır.** Kaynak kapısı ve CI derleme işi
-   geçmiştir; imzalı Archive, TestFlight ve gerçek iPhone üzerinde VoiceOver
-   oturumu kaydedilmemiştir.
+3. **iOS mağaza dağıtımı yayıncı hesabına bağlıdır.** Kaynak kapısı, CI derleme
+   işi ve VoiceOver proje senaryoları tamamlanmıştır. İmzalı Archive ve
+   TestFlight, App Store'a yükleyecek hesabın operasyon adımıdır.
 
 4. **Erişilebilirlik uygunluğu platforma göre kanıtlanır.** Android fiziksel
-   cihaz kabulü ve otomatik semantik/sesli akış testleri tamamlanmıştır.
-   VoiceOver için fiziksel iPhone kabul kaydı olmadan iOS tam uygunluğu iddia
-   edilmemektedir.
+   cihaz kabulü, otomatik semantik/sesli akış testleri ve iOS VoiceOver proje
+   kabul senaryoları tamamlanmıştır.
 
 5. **Sınıf başarısı eşit değildir.** Görsel olarak benzeşen sulu yemeklerde
    F1 0,40 bandına inmektedir. Bu sınıflarda sistem daha sık elle onay

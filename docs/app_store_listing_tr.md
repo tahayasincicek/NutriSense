@@ -60,8 +60,8 @@ Verinin kullanıcıyla ilişkilendirilmesi, tracking, üçüncü taraf paylaşı
 saklama ülkesi ve silme süreleri üniversite veri sorumlusu/hukuk birimi
 tarafından production akışıyla doğrulanmalıdır.
 
-Gerçek support e-postası, support URL'si ve privacy URL'si henüz sağlanmamıştır;
-ONAYLANDI URL mağazaya girilemez.
+Support e-postası, support URL'si ve privacy URL'si yayıncıya ait işletim
+alanlarıdır; App Store Connect'e gönderimde ürün sahibi tarafından girilir.
 
 “TÜBİTAK destekli”, “WCAG uyumlu”, belirli besin sayısı, doğrulanmamış model
 başarısı veya “KVKK uyum garantisi” kanıt ve kurum onayı olmadan kullanılamaz.

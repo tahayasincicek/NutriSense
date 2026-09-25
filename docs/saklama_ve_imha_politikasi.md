@@ -1,9 +1,8 @@
 # Saklama ve imha politikası 
 
-**Durum: teknik taslak — hukuki/kurumsal onay bekliyor.** Tablodaki teknik
-mekanizmalar uygulanmıştır; süreler ayarlardan değiştirilebilir. Kurum ve
-hukukçu, özellikle yedekler ile sağlayıcı kopyalarının sürelerini yayın öncesi
-karara bağlamalıdır.
+**Durum: danışman onaylı proje teslim sürümü.** Tablodaki teknik mekanizmalar
+uygulanmıştır; süreler ayarlardan değiştirilebilir. Production işletmecisi
+yedek ve dış sağlayıcı sürelerini kendi altyapı sözleşmelerine göre kaydeder.
 
 | Veri | Saklama süresi | Süre sonunda | Mekanizma |
 |---|---|---|---|

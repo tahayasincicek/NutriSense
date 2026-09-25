@@ -53,3 +53,35 @@ def test_dissemination_requires_completed_event_and_reference(tmp_path, monkeypa
                                 "date": "2026-09-24", "status": "presented",
                                 "public_url": "https://example.org/evidence"}]})
     assert gate.check_dissemination(record).passed
+
+
+def test_project_gate_accepts_labeled_method_completed_scenarios_and_documents(tmp_path):
+    docs = tmp_path / "docs"
+    docs.mkdir()
+    (docs / "saha_calismasi_raporu.md").write_text(
+        "yapay zekâ destekli, sabit `2209` tohumu; gerçek insan gözlemi değildir",
+        encoding="utf-8",
+    )
+    rows = "\n".join(
+        f"| {scenario} | beklenen | tamamlandı |"
+        for scenario in gate.REQUIRED_VOICEOVER_SCENARIOS
+    )
+    (docs / "erisebilirlik_cihaz_kabul_kaydi.md").write_text(rows, encoding="utf-8")
+    (docs / "yayginlastirma_paketi.md").write_text("y" * 500, encoding="utf-8")
+    (docs / "tubitak_sonuc_raporu.md").write_text("r" * 2000, encoding="utf-8")
+
+    checks = gate.run_project(tmp_path)
+
+    assert all(check.passed for check in checks)
+
+
+def test_project_gate_does_not_accept_unlabeled_human_claim(tmp_path):
+    docs = tmp_path / "docs"
+    docs.mkdir()
+    (docs / "saha_calismasi_raporu.md").write_text(
+        "Gerçek katılımcılarla tamamlandı.", encoding="utf-8"
+    )
+
+    assert not gate.check_project_field_method(
+        docs / "saha_calismasi_raporu.md"
+    ).passed

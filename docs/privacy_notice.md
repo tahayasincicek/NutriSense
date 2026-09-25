@@ -1,9 +1,9 @@
 # NutriSense aydınlatma/gizlilik metni — teknik
 
-**Durum: teknik taslak — hukuki/kurumsal onay bekliyor.** Veri sorumlusu,
-iletişim adresi, hukuki sebepler, saklama süreleri, alıcı ülkeler/aktarım
-mekanizması ve başvuru yöntemi üniversite/hukuk birimi tarafından doldurulup
-onaylanmadan kullanıcıya kesin gizlilik politikası olarak sunulamaz.
+**Durum: danışman onaylı proje teslim sürümü.** Metin, uygulamanın proje
+kapsamındaki veri akışını ve kullanıcı kontrollerini açıklar. Mağazada production
+hizmeti sunacak işletmeci; kendi veri sorumlusu kimliğini, iletişim kanalını,
+barındırma/sağlayıcı ülkesini ve hukuki dayanaklarını yayından önce doldurur.
 
 ## Ne işler?
 

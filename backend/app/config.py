@@ -107,9 +107,9 @@ class Settings(BaseSettings):
     research_consent_version: str = ""
     # Ürün tarafı aydınlatma metni sürümü. Rıza kayıtları bu sürümle
     # damgalanır; metin değişince yeni rıza istenebilmesi için gereklidir.
-    # Güvenli varsayılan kasıtlı olarak taslaktır. Production ancak kurum ve
-    # hukukçu tarafından onaylanan sürüm açıkça environment'tan verilirse açılır.
-    privacy_notice_version: str = "TASLAK-YAYINLANMADI"
+    # Proje teslim sürümü. Production işletmecisi kendi yayımladığı politika
+    # sürümünü environment üzerinden açıkça vermek zorundadır.
+    privacy_notice_version: str = "TESLIM-2026-09"
     # KVKK aydınlatmasında adı geçen veri sorumlusu ve ilgili kişi başvuru
     # kanalı. Kurum kararı olmadan production başlatılmaz.
     data_controller_name: str = ""
@@ -317,6 +317,11 @@ class Settings(BaseSettings):
             if _unsafe_secret(self.research_pseudonymization_key):
                 raise RuntimeError(
                     "Production araştırma pseudonimleştirme anahtarı güvenli sağlanmalıdır."
+                )
+            if "privacy_notice_version" not in self.model_fields_set:
+                raise RuntimeError(
+                    "Production PRIVACY_NOTICE_VERSION environment'tan açıkça "
+                    "tanımlanmalıdır."
                 )
             if _unsafe_research_value(self.privacy_notice_version):
                 raise RuntimeError(

@@ -1,10 +1,11 @@
 ﻿# Akşam teslim tamamlama rehberi
 
-Bu rehber SMS dışındaki kalan TÜBİTAK kanıtlarını gerçek veriye dayanarak
-tamamlamak içindir. Başlangıç durumunu tek komutla görüntüleyin:
+Bu rehber proje tesliminden sonra ayrıca toplanabilecek gerçek saha, fiziksel
+iPhone ve yayın kanıtları içindir. Danışman onaylı proje teslimi bu kayıtlara
+bağlı değildir. Harici kanıtların durumunu görüntülemek için:
 
 ```powershell
-.\scripts\evening_delivery_check.ps1
+.\scripts\verify_tubitak_delivery.ps1 ExternalEvidence
 ```
 
 ## 1. Gerçek saha çalışması
@@ -64,7 +65,7 @@ Planlanan etkinlik tamamlandı sayılmaz; doğrulama yalnız `presented` veya
 ## 4. Son doğrulama
 
 ```powershell
-.\scripts\verify_tubitak_delivery.ps1
+.\scripts\verify_tubitak_delivery.ps1 ExternalEvidence
 ```
 
 Üç satırın da `PASS` olması SMS dışındaki dış teslim kanıtlarının tamamlandığını

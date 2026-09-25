@@ -1,4 +1,4 @@
-﻿# Google Play Data Safety teknik taslağı
+# Google Play Data Safety teknik envanteri
 
 Durum: **YAYIN BLOKER'I — Play Console'a doğrudan girilmez**
 

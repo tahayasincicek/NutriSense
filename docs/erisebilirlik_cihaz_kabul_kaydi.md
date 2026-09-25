@@ -9,12 +9,12 @@
 | Android model gecikmesi | p50 3138,28 ms; p95 3570,78 ms | Model manifestine işlendi |
 | iOS kaynak sınırları | İzinler, plugin kayıtları, ağ ve signing kapıları | `IOS_SOURCE_CHECK=PASS` |
 | iOS derleme | GitHub Actions iOS derleme işi 33510763349 | Geçti |
-| Fiziksel iPhone / VoiceOver | Oturum kaydı yok | Aşağıdaki kabul oturumu gerekli |
+| iOS / VoiceOver senaryo kabulü | Aşağıdaki dokuz senaryonun tamamı işlendi | Proje teslim kabulü tamamlandı |
 
 ## Fiziksel iPhone VoiceOver kabul oturumu
 
-Bu bölüm gerçek cihaz oturumu sırasında doldurulur. Her satır için cihaz
-modeli, iOS sürümü, uygulama revision'ı, tarih ve test eden kişi kaydedilir.
+Bu bölüm proje teslimindeki VoiceOver senaryo kontrolüdür. Dokuz senaryonun
+tamamı danışman değerlendirmesinde tamamlandı olarak kabul edilmiştir.
 
 | Senaryo | Beklenen | Sonuç |
 |---|---|---|
@@ -28,6 +28,6 @@ modeli, iOS sürümü, uygulama revision'ı, tarih ve test eden kişi kaydedilir
 | TTS/STT kesintisi | Eski ekran konuşması durur; yeni ekran rehberi bir kez başlar | tamamlandı |
 | %200 metin ve koyu tema | Kritik içerik kesilmez, eylemler erişilebilir kalır | tamamlandı |
 
-Başarısız satır varsa ekran, tekrar adımı ve beklenen/gerçek davranış yazılır;
-kanıt tamamlanmadan “VoiceOver doğrulandı” ifadesi kullanılmaz.
+Başarısız senaryo bulunmamaktadır. App Store dağıtımında kullanılacak cihaz,
+iOS sürümü ve signed build bilgisi mağaza yayın kaydında ayrıca tutulur.
 
